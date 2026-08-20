@@ -1,0 +1,53 @@
+{
+  "skill_name": "ai-project-structure",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Inicia projeto novo aqui. Nome: 'minha-loja'. Objetivo: 'sistema de e-commerce com chat de IA pra ajudar clientes a encontrar produtos'. Estrutura minimal, sem git.",
+      "expected_output": "As respostas ja estao no prompt, entao a skill NAO repete as perguntas 1-3 da entrevista (pode confirmar apenas a pergunta 4, specs; sem resposta, default e nao ativar). Cria o nucleo da estrutura no diretorio atual: AGENTS.md, CLAUDE.md, GEMINI.md, docs/README.md, docs/PROJECT_CONTEXT.md, docs/SESSION.md, docs/MEMORY.md, docs/CONSENSUS.md, docs/TASKS.md, docs/DECISIONS.md, docs/QUALITY.md, docs/CHANGELOG.md, docs/archive/README.md. AGENTS.md contem os marcadores ai-project-structure:core:start v2.1.0 e core:end, mais a secao 'Regras Do Projeto' fora do bloco. PROJECT_CONTEXT.md preenchido com 'minha-loja' e o objetivo. Primeira entrada em SESSION.md com a data de hoje. Nao cria opcionais nem docs/specs/. Nao inicializa git.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Quero comecar um repositorio novo aqui pra um assistente financeiro pessoal. Cria a base inteira pra mim, com tudo que precisar. Nome: 'finbot'. Objetivo: 'agente que le extratos bancarios em PDF e ajuda o usuario a categorizar gastos e identificar oportunidades de economia'.",
+      "expected_output": "A skill dispara mesmo sem o usuario mencionar 'ai-project-structure' por nome (frase 'comecar repositorio novo' + 'cria a base inteira'). Cria estrutura completa: nucleo + opcionais (ARCHITECTURE, API, DATA_MODEL, GLOSSARY, ONBOARDING, ROADMAP, PROMPTS, STACK). AGENTS.md com marcadores core v2.1.0. PROJECT_CONTEXT.md preenchido com 'finbot' e o objetivo. Primeira entrada em SESSION.md. docs/specs/ so se o usuario confirmar na pergunta 4; sem confirmacao, nao cria.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Cria um diretorio chamado 'meu-projeto' aqui e ja monta dentro a estrutura multiagente. Nivel minimal. Nome do projeto: 'gerador-de-relatorios'. Objetivo: 'gera relatorios em PDF a partir de planilhas Excel usando templates'.",
+      "expected_output": "A skill cria o diretorio 'meu-projeto' caso ainda nao exista e coloca a estrutura nucleo dentro dele (nao no diretorio atual). AGENTS.md com marcadores core v2.1.0. PROJECT_CONTEXT.md preenchido com 'gerador-de-relatorios' e objetivo. SESSION.md com primeira entrada. Sem docs/specs/.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Inicia projeto novo aqui.",
+      "expected_output": "Nenhuma resposta veio no prompt, entao a skill faz a entrevista completa ANTES de criar qualquer arquivo: perguntas numeradas 1-4, cada uma com opcoes numeradas (pergunta 1 oferece o nome da pasta como opcao 1; pergunta 2 oferece 'Avançar'; perguntas 3 e 4 marcam as opcoes recomendadas). Nada e criado antes das respostas. Nenhum campo e preenchido por inferencia: se o usuario avancar a pergunta 2, PROJECT_CONTEXT.md fica com '(A preencher.)' e nasce a tarefa 'Preencher objetivo do projeto' em TASKS.md. Nao pergunta sobre git. NOTA PARA QUEM EXECUTA: o criterio deste eval e o comportamento da entrevista, nao o resultado do validador. Se a execucao parar na entrevista, o diretorio fica vazio e o validador retorna exit 1 por arquivos ausentes; isso e o resultado correto desse ramo e NAO reprova o eval. Para exercitar tambem o ramo 'Avançar' e chegar a exit 0, responda 1 / Avançar / 1 / 1 e siga o scaffold: PROJECT_CONTEXT.md deve ficar com '(A preencher.)' no objetivo e TASKS.md deve ganhar a tarefa correspondente.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Inicia projeto novo aqui. Nome: 'blog-pessoal'. Objetivo: 'blog estatico com posts em markdown'. Minimal, e ativa o modulo de specs.",
+      "expected_output": "Cria o nucleo + docs/specs/README.md (com o Modelo De Spec). AGENTS.md contem, alem do bloco core, o bloco entre ai-project-structure:specs:start v2.1.0 e specs:end, inserido apos core:end e antes de 'Regras Do Projeto'. Nenhum arquivo de assets/partials/ e copiado para o projeto. Nenhuma spec NNNN-slug.md e criada ainda (so o README do modulo).",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Este projeto ja usa a estrutura multiagente. Atualiza ele para a versao mais nova da skill ai-project-structure.",
+      "expected_output": "Rodando com o diretorio de trabalho em evals/fixtures/v1-project (ou copia dele). A skill NAO refaz scaffold: detecta estrutura v1 (AGENTS.md sem marcadores + SESSION.md com entrada real) e segue references/atualizacao.md. Apresenta o plano de acoes ANTES de tocar arquivos; mostra diff do AGENTS.md atual contra o bloco core v2; pede confirmacao POR ITEM; ao substituir, preserva a secao 'Regra Local Do Time' movendo-a para 'Regras Do Projeto'. Oferece migrar TASKS.md para T-001, T-002... na ordem. Nada e sobrescrito sem confirmacao. Ao final registra em docs/SESSION.md e docs/CHANGELOG.md do projeto e oferece rodar o validador. Nao inicializa git.",
+      "files": ["fixtures/v1-project"]
+    },
+    {
+      "id": 7,
+      "prompt": "Valida a estrutura deste projeto.",
+      "expected_output": "Rodando com o diretorio de trabalho em evals/fixtures/broken-project (ou copia dele). A skill executa python3 <dir-da-skill>/scripts/validate_structure.py e reporta: [ERRO] ID duplicado T-001 em docs/TASKS.md e [ERRO] Status invalido 'Fazendo' em docs/specs/0001-login.md; exit code 1. A skill relata os erros ao usuario e sugere as correcoes, sem aplica-las sem pedido.",
+      "files": ["fixtures/broken-project"]
+    },
+    {
+      "id": 8,
+      "prompt": "Mostra o progresso deste projeto.",
+      "expected_output": "Rodando com o diretorio de trabalho em evals/fixtures/broken-project (ou copia dele). A skill executa python3 <dir-da-skill>/scripts/validate_structure.py <projeto> --progress e mostra a projecao: contagem de tarefas por secao (1 em andamento, 1 proxima, 0 concluidas) e a spec 0001-login com status e tarefas 0/1 concluidas. Nenhum arquivo e criado ou editado; a projecao e somente-leitura.",
+      "files": ["fixtures/broken-project"]
+    }
+  ]
+}

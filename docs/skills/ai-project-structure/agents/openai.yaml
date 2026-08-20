@@ -1,0 +1,13 @@
+# Metadado OPCIONAL do Codex CLI (parte do Agent Skills Open Standard).
+# A skill funciona sem este arquivo; ele so melhora a apresentacao na UI do Codex
+# e deixa explicita a politica de invocacao implicita.
+interface:
+  display_name: "AI Project Structure"
+  short_description: "Scaffold Markdown multiagente"
+  default_prompt: "Use $ai-project-structure para iniciar um projeto novo aqui com estrutura multiagente minimal."
+
+policy:
+  # true = o Codex pode acionar a skill automaticamente quando o pedido casar
+  # com a `description` do SKILL.md. A invocacao explicita ($ai-project-structure)
+  # funciona de qualquer forma.
+  allow_implicit_invocation: true

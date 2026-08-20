@@ -55,6 +55,7 @@ Sempre adicione a sessao mais recente no topo.
 - Skill reinstalada; paridade dos tres destinos conferida; bateria completa aprovada (scaffold completa com STACK exit 0, meta-projeto exit 0, fixtures conforme esperado, zero travessao).
 - Decisoes de escopo confirmadas com o usuario: pipeline SDD completo, coverage math, attestation e CLI continuam fora; validacao de stack (rodar testes por framework) fica fora, com comandos do projeto em `QUALITY.md`.
 - Projeto publicado no GitHub a pedido do usuario: repositorio publico `adejaimejr/ai-project-structure`, branch `main`, primeiro commit com o estado da skill 2.1.0; `.gitignore` criado (`.DS_Store`, `__pycache__/`).
+- Adicionados `README.md` e `LICENSE` (MIT) na raiz a pedido do usuario, com a excecao de raiz minima registrada em "Regras Do Projeto" do `AGENTS.md`.
 
 ### Arquivos Criados Ou Alterados
 

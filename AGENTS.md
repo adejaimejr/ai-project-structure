@@ -220,4 +220,4 @@ O modelo de spec esta em `docs/specs/README.md`.
 
 ## Regras Do Projeto
 
-(Adicione aqui regras especificas deste projeto. Esta secao nunca e tocada por atualizacoes da skill.)
+- Excecao a regra de raiz minima: `README.md`, `LICENSE` e `.gitignore` sao permitidos na raiz porque este repositorio e publicado no GitHub (`github.com/adejaimejr/ai-project-structure`). O `README.md` da raiz e apresentacao para visitantes; regras de agente continuam apenas neste arquivo.

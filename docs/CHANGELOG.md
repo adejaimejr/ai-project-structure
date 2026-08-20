@@ -5,6 +5,7 @@ Historico de mudancas relevantes.
 ## 2026-08-20 (publicacao no GitHub)
 
 - Repositorio git inicializado a pedido do usuario e publicado como publico em `github.com/adejaimejr/ai-project-structure` (branch `main`, estado da skill 2.1.0).
+- Adicionados `README.md` (apresentacao para visitantes) e `LICENSE` (MIT) na raiz, com excecao a regra de raiz minima registrada em "Regras Do Projeto" do `AGENTS.md`.
 
 ## 2026-08-20 (skill v2.1.0)
 

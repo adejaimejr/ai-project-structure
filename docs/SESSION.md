@@ -41,6 +41,40 @@ As entradas anteriores a 2026-08-20 foram rotacionadas para `docs/archive/SESSIO
 - Motivo: 
 ```
 
+## 2026-09-02 - Claude + Codex (evals 1, 2, 5, 6 e 9 no Codex CLI)
+
+### Objetivo
+
+- Rodar em outra ferramenta os cinco evals que dependem de julgamento de comportamento, para tirar do julgamento o modelo que escreveu os templates.
+
+### O Que Foi Feito
+
+- Codex CLI nao estava instalado nesta maquina. Instalado a pedido do usuario (`npm i -g @openai/codex`, versao 0.152.1, autenticado via ChatGPT). A skill 2.2.0 apareceu na lista de skills do Codex, vinda de `~/.agents/skills/`.
+- Cinco rodadas de `codex exec` em diretorios descartaveis fora do repositorio, com os prompts literais de `evals.json`. Conferencia feita por script proprio, lendo o diretorio produzido em vez do relato do agente.
+- 5 de 5 aprovados. Um modelo sem nenhum contexto desta implementacao preencheu a data de adocao com a data do dia nas tres estruturas novas, manteve a secao `Aguardando Usuario` e, no eval 6, afirmou espontaneamente que a tarefa historica concluida fica sem evidencia porque a regra nao e retroativa.
+- Isso valida na pratica o passo 5b do `SKILL.md` e o passo 7b de `references/atualizacao.md`, ambos escritos hoje, e a nao retroatividade de DEC-008 e DEC-011.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/TASKS.md`, `docs/SESSION.md`. Nenhum arquivo da skill precisou mudar.
+
+### Decisoes Tomadas
+
+- Nenhuma.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum promovido. A observacao do eval 2 (o modelo inverteu qual opcao de specs e a recomendada) e desvio de fidelidade de um modelo, nao regra do projeto, e nao esta entre os criterios que aquele eval cobra.
+
+### Pendencias
+
+- Nenhuma acionavel. Fora dos criterios cobrados, duas observacoes: no eval 2 o Codex marcou "Sim (recomendado)" para o modulo de specs, e o `SKILL.md` recomenda "Nao"; e a resposta de chat do eval 9 usou um travessao, caractere proibido nos textos do projeto, sendo que a fixture usa um `AGENTS.md` reduzido que nao carrega essa regra.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente.
+- Motivo: a spec 0003 esta fechada e agora tambem validada por ferramenta e modelo diferentes. O backlog volta ao normal.
+
 ## 2026-09-02 - Claude (T-014, criterios sem runner)
 
 ### Objetivo

@@ -2,6 +2,14 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-02 (skill v2.2.0)
+
+- Evidencia de fechamento obrigatoria em tarefa concluida, marcador `(verifica: <comando>)` opcional em tarefa aberta, secao `## Aguardando Usuario` em `TASKS.md` e campos declarativos (`Metodo`, `Exposicao previa a outras posicoes`, `Rodada`) em `CONSENSUS.md`. Bloco core e templates em v2.2.0.
+- A regra nao e retroativa: a data de adocao fica no marcador `(convencoes-2-2-0-desde:)` do proprio `TASKS.md`, e nada anterior a ela e cobrado.
+- `validate_structure.py` com os checks correspondentes; `evals/verify_repository.py` novo, provando a integridade do repositorio em um comando; fixture `aguardando-project` e eval 9.
+- Dogfood: `docs/TASKS.md` e `docs/CONSENSUS.md` adotaram as convencoes, os 4 headings ausentes de `SESSION.md` foram corrigidos e `SESSION.md`/`CONSENSUS.md` foram rotacionados para `docs/archive/`.
+- Comando de integridade registrado em `docs/QUALITY.md`, secao "Testes E Validacao".
+
 ## 2026-08-20 (publicacao no GitHub)
 
 - Repositorio git inicializado a pedido do usuario e publicado como publico em `github.com/adejaimejr/ai-project-structure` (branch `main`, estado da skill 2.1.0).

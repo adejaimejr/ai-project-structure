@@ -1,6 +1,6 @@
 ---
 name: ai-project-structure
-version: "2.1.0"
+version: "2.2.0"
 description: Use sempre que o usuario quiser iniciar um projeto novo de IA, criar a estrutura inicial de um repositorio multiagente, ou fazer scaffold de um projeto Markdown que sera tocado por varias IAs. Dispare mesmo que o usuario nao mencione a skill por nome - basta o pedido envolver frases como "inicia projeto novo", "cria projeto", "scaffold projeto", "estrutura inicial", "novo repo de IA", "inicia projeto de IA", "monta a base do projeto", "cria a pasta do projeto", ou qualquer pedido para preparar um diretorio com AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ (SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS, etc). Use tambem quando o usuario quiser converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ou ativar o modulo de specs (docs/specs/) em um projeto existente. Esta skill cria os arquivos de fato, nao apenas explica como criar.
 ---
 
@@ -13,6 +13,12 @@ A estrutura tem como nucleo:
 - memoria do projeto em `docs/` com `PROJECT_CONTEXT`, `SESSION`, `MEMORY`, `CONSENSUS`, `TASKS`, `DECISIONS`, `QUALITY`, `CHANGELOG` e `archive/`;
 - arquivos opcionais (`ARCHITECTURE`, `API`, `DATA_MODEL`, `GLOSSARY`, `ONBOARDING`, `ROADMAP`, `PROMPTS`, `STACK`);
 - modulo opcional de specs (`docs/specs/`) para trabalho tamanho-feature.
+
+A partir da versao 2.2.0 a estrutura tambem cobra que o trabalho seja verificavel:
+
+- toda tarefa concluida em `TASKS.md` carrega uma sub-linha `Evidencia:`, e a tarefa aberta pode declarar antes como sera verificada com `(verifica: <comando>)`;
+- tarefa travada por pergunta ao usuario vai para a secao `## Aguardando Usuario`, com a pergunta registrada e um campo para a resposta;
+- cada entrada de `CONSENSUS.md` declara `Metodo`, `Exposicao previa a outras posicoes` e `Rodada`, para que consenso fraco nao fique parecido com consenso forte.
 
 ## Fluxo
 
@@ -118,6 +124,10 @@ Mantenha as demais secoes como estao no template - elas serao preenchidas pelo u
 **Nome do projeto:** <nome informado>
 ```
 
+### 5b. Preencha a data de adocao em `docs/TASKS.md`
+
+No cabecalho de `docs/TASKS.md`, troque o placeholder do marcador `(convencoes-2-2-0-desde: AAAA-MM-DD)` pela data de hoje. E a data a partir da qual a evidencia de fechamento passa a ser cobrada nesse projeto. Sem ela, o validador nao cobra evidencia de nenhuma tarefa.
+
 ### 6. Adicione a primeira entrada em `docs/SESSION.md`
 
 Logo apos o bloco "Modelo Para Nova Sessao", insira:
@@ -166,7 +176,7 @@ No final, liste de forma curta:
 
 - caminho absoluto do destino;
 - nivel escolhido (completa ou minimal) e se o modulo de specs foi ativado;
-- versao da estrutura: 2.1.0;
+- versao da estrutura: 2.2.0;
 - arquivos criados (em arvore);
 - proximo passo sugerido: preencher os demais campos de `PROJECT_CONTEXT.md` e adicionar tarefas iniciais em `TASKS.md`;
 - oferta: "quer validar a estrutura? `python3 <dir-desta-skill>/scripts/validate_structure.py <destino>`".
@@ -249,4 +259,5 @@ Zero erros esperado em scaffold recem-criado. Se o Python nao estiver disponivel
 - `AGENTS.md` contem os marcadores `ai-project-structure:core:start`/`end` (e `specs`, se ativado);
 - nenhum arquivo existente foi sobrescrito sem permissao;
 - `docs/archive/` existe (mesmo que so com `README.md`);
+- `docs/TASKS.md` tem a secao `## Aguardando Usuario` e a data preenchida no marcador `(convencoes-2-2-0-desde:)`;
 - nenhum repositorio git foi inicializado (a menos que o usuario tenha pedido).

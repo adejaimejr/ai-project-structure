@@ -2,6 +2,20 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.2.0 - 2026-09-02
+
+Tarefa concluida deixa de ser afirmacao em prosa: passa a carregar evidencia. Espera por resposta do usuario ganha lugar proprio. Consenso passa a declarar como foi produzido. Ver a spec `docs/specs/0003-tasks-verificaveis.md` do repositorio-fonte.
+
+- **Evidencia de fechamento obrigatoria** em toda tarefa movida para "Concluidas", como sub-linha `Evidencia: tipo=; procedimento=; resultado=`. `tipo` aceita `comando`, `revisao-manual` ou `conferencia`, para que tarefa de conteudo ou de decisao nao precise inventar comando.
+- **Marcador `(verifica: <comando>)` opcional** em tarefa aberta. Declarado, vira contrato: concluir sem registrar o resultado daquele comando e ERRO no validador.
+- **Nao retroativo.** A data de adocao fica declarada no proprio `TASKS.md`, no marcador `(convencoes-2-2-0-desde: AAAA-MM-DD)`. Sem o marcador, nada e cobrado; linha concluida antes da data fica como esta. Projeto que atualiza nao tem historico transformado em alegacao sem evidencia.
+- **Secao `## Aguardando Usuario`** no template de `TASKS.md`, com `**Pergunta:**`, `**Resposta:**` e `(bloqueada: AAAA-MM-DD)`. A regra "Nunca Inferir" do bloco core agora aponta para ela: pergunta que trava a tarefa tem destino, em vez de virar inferencia. Sem rotacao; aviso quando passa de 30 dias.
+- **Consenso declarado**: `**Metodo:**`, `**Exposicao previa a outras posicoes:**` e `**Rodada:** N de 3` no template de `CONSENSUS.md` e no bloco core, com regra de rodada 1 cega e teto de 3 rodadas antes de escalar para o usuario. Os campos sao autodeclarados: o validador checa presenca e valor, nunca veracidade.
+- `validate_structure.py`: checks novos de evidencia, `(verifica:)` sem resultado, `Aguardando Usuario` sem pergunta, valor desconhecido em marcador conhecido, idade do bloqueio e campos de consenso. `--progress` passa a contar a secao nova.
+- `evals/verify_repository.py` (so no repositorio-fonte): prova em um comando a integridade do meta-projeto (raiz em `--strict`, fixtures, paridade dos blocos gerenciados e das pontes, convencoes nos templates e no dogfood, coerencia de versao, `evals.json`, ausencia de travessao e paridade dos tres destinos com `install.sh` em pasta temporaria).
+- Fixture nova `evals/fixtures/aguardando-project` (caso valido exit 0, caso invalido exit 1) e eval 9 correspondente.
+- Marcadores dos blocos gerenciados atualizados para v2.2.0.
+
 ## 2.1.0 - 2026-08-20
 
 - Novo template opcional `docs/STACK.md`: mapa de tecnologias, pacotes principais e links de documentacao oficial, com secao "Onde Consultar Primeiro" para o agente ir direto na fonte certa (inspirado no STACK.md/PACKAGES.md do specsfy).

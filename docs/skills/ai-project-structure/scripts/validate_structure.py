@@ -15,6 +15,7 @@ import argparse
 import re
 import sys
 import unicodedata
+from datetime import date
 from pathlib import Path
 
 CORE_FILES = [
@@ -45,6 +46,10 @@ SESSION_HEADINGS = [
 
 CONSENSUS_STATUSES = {"aberto", "resolvido", "arquivado"}
 SPEC_STATUSES = {"rascunho", "definida", "em andamento", "concluida", "cancelada"}
+PRIORITIES = {"alta", "media", "baixa"}
+EVIDENCE_TYPES = {"comando", "revisao-manual", "conferencia"}
+CONSENSUS_METHODS = {"pareceres-independentes", "debate-aberto"}
+CONSENSUS_EXPOSURE = {"sim", "nao"}
 
 MARKER_RE = re.compile(
     r"<!--\s*ai-project-structure:(core|specs):(start|end)(?:\s+v(\S+))?\s*-->"
@@ -53,8 +58,17 @@ ENTRY_RE = re.compile(r"^## \d{4}-\d{2}-\d{2}", re.MULTILINE)
 TASK_ID_RE = re.compile(r"\bT-(\d+)\b")
 SPEC_REF_RE = re.compile(r"\(spec:\s*([^)]+)\)")
 SPEC_NAME_RE = re.compile(r"^(\d{4})-[a-z0-9][a-z0-9-]*\.md$")
+PRIORITY_RE = re.compile(r"\(prioridade:\s*([^)]*)\)")
+VERIFICA_RE = re.compile(r"\(verifica:\s*([^)]*)\)")
+BLOCKED_RE = re.compile(r"\(bloqueada:\s*([^)]*)\)")
+ADOPTION_RE = re.compile(r"\(convencoes-2-2-0-desde:\s*([^)]*)\)")
+DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+DATE_PREFIX_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})\b")
+EVIDENCE_TYPE_RE = re.compile(r"\btipo\s*=\s*([^;]+)")
 ROTATION_MAX_ENTRIES = 20
 ROTATION_MAX_BYTES = 30 * 1024
+BLOCKED_MAX_DAYS = 30
+CONSENSUS_MAX_ROUNDS = 3
 
 
 def normalize(text):
@@ -221,13 +235,66 @@ def check_session(root, report):
     check_rotation(root / "docs" / "SESSION.md", len(entries), report)
 
 
-def check_consensus(root, report):
+def field_value(body, label):
+    """Valor de uma linha '**Rotulo:** valor', tolerante a acento e caixa."""
+    wanted = f"**{normalize(label)}:**"
+    for line in body.splitlines():
+        if normalize(line).startswith(wanted):
+            return line.split(":**", 1)[1].strip()
+    return None
+
+
+def check_consensus_declaration(title, body, report):
+    """Campos declarativos de independencia (Metodo, Exposicao previa, Rodada).
+
+    Checa presenca e valor permitido, nunca veracidade: nenhum script prova que
+    um modelo nao leu a posicao do outro."""
+    rel = "docs/CONSENSUS.md"
+    for label, allowed in (
+        ("Metodo", CONSENSUS_METHODS),
+        ("Exposicao previa a outras posicoes", CONSENSUS_EXPOSURE),
+    ):
+        value = field_value(body, label)
+        if value is None:
+            report.aviso(rel, f"Entrada '{title}' sem linha '**{label}:**'.")
+        elif normalize(value) not in allowed:
+            report.aviso(
+                rel,
+                f"Entrada '{title}' com '**{label}:** {value}' fora do conjunto "
+                f"({' | '.join(sorted(allowed))}).",
+            )
+    rodada = field_value(body, "Rodada")
+    if rodada is None:
+        return
+    m = re.match(r"(\d+)\s*de\s*(\d+)", normalize(rodada))
+    if not m:
+        report.aviso(
+            rel,
+            f"Entrada '{title}' com '**Rodada:** {rodada}' fora do formato "
+            f"'N de {CONSENSUS_MAX_ROUNDS}'.",
+        )
+    elif int(m.group(1)) > CONSENSUS_MAX_ROUNDS and not re.search(
+        r"\*\*Pr[oó]ximo passo:\*\*", body
+    ):
+        report.aviso(
+            rel,
+            f"Entrada '{title}' passou do teto de {CONSENSUS_MAX_ROUNDS} rodadas "
+            "sem '**Proximo passo:**' escalando para o usuario.",
+        )
+
+
+def check_consensus(root, report, adopted=None):
     text = read(root / "docs" / "CONSENSUS.md")
     if text is None:
         return
     clean = strip_fences(text)
     entries = split_entries(clean)
     for title, body in entries:
+        # A declaracao de independencia nao e retroativa: vale para entradas a
+        # partir da data de adocao declarada em TASKS.md.
+        entry_date = parse_date(title[:10])
+        if adopted is not None and entry_date is not None and entry_date >= adopted:
+            check_consensus_declaration(title, body, report)
         status_match = re.search(r"\*\*Status:\*\*\s*(.+)$", body, re.MULTILINE)
         if not status_match:
             report.aviso(
@@ -267,21 +334,38 @@ def check_rotation(path, entry_count, report):
 
 
 def collect_tasks(root):
-    """Retorna (ids_por_secao, linhas_sem_id_por_secao, refs_de_spec, todos_ids)."""
+    """Retorna {secao: [tarefa]}, com a secao normalizada.
+
+    Cada tarefa e um dict {"line": texto da linha, "sub": [sub-linhas]}. As
+    sub-linhas sao os itens indentados logo abaixo da tarefa (`Evidencia:`,
+    `**Pergunta:**`, `**Resposta:**`)."""
     text = read(root / "docs" / "TASKS.md")
     if text is None:
         return None
     clean = strip_fences(text)
     sections = {}
     current = None
+    task = None
     for line in clean.splitlines():
         m = re.match(r"^## (.+)$", line)
         if m:
             current = normalize(m.group(1))
             sections.setdefault(current, [])
+            task = None
             continue
-        if current is not None and line.startswith("- "):
-            sections[current].append(line[2:].strip())
+        if current is None:
+            continue
+        if line.startswith("- "):
+            task = {"line": line[2:].strip(), "sub": []}
+            sections[current].append(task)
+            continue
+        sub = re.match(r"^\s+[-*]\s+(.*)$", line)
+        if sub is not None:
+            if task is not None:
+                task["sub"].append(sub.group(1).strip())
+            continue
+        if line.strip():
+            task = None
     return sections
 
 
@@ -290,19 +374,52 @@ def is_placeholder(line):
     return content.startswith("(") or normalize(content).startswith("nenhuma tarefa")
 
 
+def squeeze(text):
+    """Espacos colapsados, para comparar comando declarado contra evidencia."""
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def parse_date(value):
+    """Converte 'AAAA-MM-DD' em date; None se nao for uma data valida."""
+    try:
+        year, month, day = (int(p) for p in value.strip().split("-"))
+        return date(year, month, day)
+    except (ValueError, AttributeError):
+        return None
+
+
+def adoption_date(root):
+    """Data em que o projeto adotou as convencoes 2.2.0, declarada em TASKS.md.
+
+    Retorna (data, marcador_presente). Sem marcador, as regras que dependem
+    dele ficam silenciosas: projeto anterior a 2.2.0 nao e cobrado (DEC-008)."""
+    text = read(root / "docs" / "TASKS.md")
+    if text is None:
+        return None, False
+    m = ADOPTION_RE.search(strip_fences(text))
+    if not m:
+        return None, False
+    return parse_date(m.group(1)), True
+
+
+def evidence_lines(task):
+    return [s for s in task["sub"] if normalize(s).startswith("evidencia:")]
+
+
 def check_tasks(root, report):
     sections = collect_tasks(root)
     if sections is None:
         return set(), set()
     # Linhas sem ID so sao cobradas nas secoes de trabalho aberto; entradas
     # historicas de "Concluidas" anteriores a v2 podem ficar sem ID.
-    open_sections = ["em andamento", "proximas tarefas"]
+    open_sections = ["em andamento", "proximas tarefas", "aguardando usuario"]
     all_ids = []
     ids_done = set()
     lines_without_id = []
     any_line = False
-    for sec, lines in sections.items():
-        for line in lines:
+    for sec, tasks in sections.items():
+        for task in tasks:
+            line = task["line"]
             if is_placeholder(line):
                 continue
             ids = TASK_ID_RE.findall(line)
@@ -335,8 +452,9 @@ def check_tasks(root, report):
             )
     # Check 9: refs de spec resolvem (so em linhas de tarefa; ignora o
     # placeholder NNNN usado na documentacao de formato do proprio template)
-    for lines in sections.values():
-        for line in lines:
+    for tasks in sections.values():
+        for task in tasks:
+            line = task["line"]
             if is_placeholder(line):
                 continue
             for ref in SPEC_REF_RE.findall(line):
@@ -348,7 +466,123 @@ def check_tasks(root, report):
                         "docs/TASKS.md",
                         f"Referencia '(spec: {ref})' nao resolve para docs/specs/{ref}.md.",
                     )
+    check_markers_values(sections, report)
+    check_waiting(sections, report)
+    check_evidence(root, sections, report)
     return seen, ids_done
+
+
+def task_label(line):
+    ids = TASK_ID_RE.findall(line)
+    return f"T-{ids[0]}" if ids else f'"{line[:60]}"'
+
+
+def check_markers_values(sections, report):
+    """Marcador conhecido com valor fora do conjunto esperado vira AVISO."""
+    today = date.today()
+    for sec, tasks in sections.items():
+        for task in tasks:
+            line = task["line"]
+            if is_placeholder(line):
+                continue
+            label = task_label(line)
+            m = PRIORITY_RE.search(line)
+            if m and normalize(m.group(1)) not in PRIORITIES:
+                report.aviso(
+                    "docs/TASKS.md",
+                    f"{label} com '(prioridade: {m.group(1).strip()})' fora do "
+                    "conjunto conhecido (alta | media | baixa).",
+                )
+            m = BLOCKED_RE.search(line)
+            if m:
+                blocked = parse_date(m.group(1))
+                if blocked is None:
+                    report.aviso(
+                        "docs/TASKS.md",
+                        f"{label} com '(bloqueada: {m.group(1).strip()})' fora do "
+                        "formato AAAA-MM-DD.",
+                    )
+                else:
+                    days = (today - blocked).days
+                    if days > BLOCKED_MAX_DAYS:
+                        report.aviso(
+                            "docs/TASKS.md",
+                            f"{label} bloqueada ha {days} dias (limite: "
+                            f"{BLOCKED_MAX_DAYS}). Cobre a resposta ou feche a tarefa.",
+                        )
+            for evidence in evidence_lines(task):
+                m = EVIDENCE_TYPE_RE.search(evidence)
+                if m and normalize(m.group(1)) not in EVIDENCE_TYPES:
+                    report.aviso(
+                        "docs/TASKS.md",
+                        f"{label} com 'tipo={m.group(1).strip()}' na evidencia, fora "
+                        "do conjunto conhecido (comando | revisao-manual | conferencia).",
+                    )
+
+
+def check_waiting(sections, report):
+    """Tarefa em 'Aguardando Usuario' precisa registrar a pergunta que a travou."""
+    for task in sections.get("aguardando usuario", []):
+        line = task["line"]
+        if is_placeholder(line):
+            continue
+        if not any(normalize(s).startswith("**pergunta:**") for s in task["sub"]):
+            report.erro(
+                "docs/TASKS.md",
+                f"{task_label(line)} esta em 'Aguardando Usuario' sem a sub-linha "
+                "'**Pergunta:**'. Sem a pergunta registrada, a espera nao e verificavel.",
+            )
+
+
+def check_evidence(root, sections, report):
+    """Evidencia de fechamento em 'Concluidas'.
+
+    `(verifica: <comando>)` declarado e contrato da propria tarefa: concluir sem
+    o resultado desse comando e ERRO, independente de data. A evidencia em si e
+    cobrada como AVISO, e so a partir da data declarada no marcador
+    `(convencoes-2-2-0-desde:)` em TASKS.md; sem marcador, nada e cobrado
+    (a regra nao e retroativa)."""
+    adopted, declared = adoption_date(root)
+    if declared and adopted is None:
+        report.info(
+            "docs/TASKS.md",
+            "Marcador '(convencoes-2-2-0-desde:)' sem data valida; preencha com a "
+            "data de adocao para que a evidencia de fechamento passe a ser cobrada.",
+        )
+    for task in sections.get("concluidas", []):
+        line = task["line"]
+        if is_placeholder(line):
+            continue
+        label = task_label(line)
+        evidences = evidence_lines(task)
+        declared_cmd = VERIFICA_RE.search(line)
+        if declared_cmd:
+            command = squeeze(declared_cmd.group(1))
+            joined = squeeze(" ".join(evidences))
+            if not evidences:
+                report.erro(
+                    "docs/TASKS.md",
+                    f"{label} declarou '(verifica: {command})' e foi concluida sem "
+                    "sub-linha 'Evidencia:' com o resultado desse comando.",
+                )
+            elif "resultado=" not in normalize(joined) or command not in joined:
+                report.erro(
+                    "docs/TASKS.md",
+                    f"{label} declarou '(verifica: {command})', mas a evidencia nao "
+                    "registra o resultado desse comando (esperado 'resultado=' "
+                    "citando o comando declarado).",
+                )
+            continue
+        if evidences or adopted is None:
+            continue
+        done = DATE_PREFIX_RE.match(line)
+        done_date = parse_date(done.group(1)) if done else None
+        if done_date is not None and done_date >= adopted:
+            report.aviso(
+                "docs/TASKS.md",
+                f"{label} concluida sem sub-linha 'Evidencia:' "
+                "(tipo=; procedimento=; resultado=).",
+            )
 
 
 def archive_task_ids(root):
@@ -484,15 +718,16 @@ def show_progress(root):
         sections = {}
 
     def count(sec):
-        return sum(1 for l in sections.get(sec, []) if not is_placeholder(l))
+        return sum(1 for t in sections.get(sec, []) if not is_placeholder(t["line"]))
 
     done_ids = set()
-    for line in sections.get("concluidas", []):
-        done_ids.update(TASK_ID_RE.findall(line))
+    for task in sections.get("concluidas", []):
+        done_ids.update(TASK_ID_RE.findall(task["line"]))
 
     print("Tarefas (docs/TASKS.md):")
     print(f"  Em andamento: {count('em andamento')}")
     print(f"  Proximas:     {count('proximas tarefas')}")
+    print(f"  Aguardando:   {count('aguardando usuario')}")
     print(f"  Concluidas:   {count('concluidas')}")
     print(f"  Ideias:       {count('ideias')}")
 
@@ -543,7 +778,7 @@ def main(argv=None):
     check_bridges(root, report)
     check_markers(root, report)
     check_session(root, report)
-    check_consensus(root, report)
+    check_consensus(root, report, adoption_date(root)[0])
     task_ids, done_ids = check_tasks(root, report)
     check_specs(root, report, task_ids, done_ids)
     report.print()

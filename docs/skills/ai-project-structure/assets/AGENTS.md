@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- ai-project-structure:core:start v2.1.0 -->
+<!-- ai-project-structure:core:start v2.2.0 -->
 <!-- Bloco gerenciado pela skill ai-project-structure. Nao edite dentro dos
      marcadores: atualizacoes da skill podem substituir este bloco (sempre com
      confirmacao). Regras especificas deste projeto vao na secao
@@ -74,6 +74,7 @@ IA nao alucina por capricho: ela preenche vazio. Quando faltar contexto obrigato
 - **Pergunte.** Nao preencha por inferencia plausivel.
 - Resposta adiada ("Avançar") adia a pergunta; **nunca autoriza inventar** a resposta.
 - Registre perguntas abertas explicitamente: como tarefa em `TASKS.md` ou na secao "Perguntas Abertas" da spec correspondente (quando o modulo de specs estiver ativo).
+- Pergunta que **trava a tarefa** move a tarefa para a secao "## Aguardando Usuario" de `TASKS.md`, com `**Pergunta:**`, `**Resposta:** (A preencher.)` e o marcador `(bloqueada: AAAA-MM-DD)`. Enquanto a resposta nao chegar, a tarefa nao volta para "Proximas Tarefas" e ninguem preenche a lacuna por inferencia.
 - Placeholder honesto ("(A preencher.)") e melhor que conteudo inventado.
 
 ## Onde Escrever Cada Coisa
@@ -82,7 +83,7 @@ IA nao alucina por capricho: ela preenche vazio. Quando faltar contexto obrigato
 - **`MEMORY.md`**: o que o projeto **aprendeu**. Fatos persistentes nao-decididos (preferencias, licoes, refs externas).
 - **`DECISIONS.md`**: o que foi **decidido** formalmente, com motivo e impacto.
 - **`PROJECT_CONTEXT.md`**: o que o projeto **e**. Estrutura permanente; raramente muda.
-- **`TASKS.md`**: o que esta **em aberto**. Fonte unica de verdade do backlog vivo. Tarefas usam ID `T-NNN`; o modelo esta no proprio arquivo.
+- **`TASKS.md`**: o que esta **em aberto**. Fonte unica de verdade do backlog vivo. Tarefas usam ID `T-NNN`; o modelo esta no proprio arquivo. Tarefa concluida carrega evidencia de fechamento; tarefa parada por pergunta ao usuario fica em "Aguardando Usuario".
 - **`CONSENSUS.md`**: debate entre modelos para chegar a um consenso. Apenas para duvidas reais.
 - **`CHANGELOG.md`**: historico de mudancas relevantes na estrutura ou no produto.
 - **`STACK.md`**: com o que o projeto e **construido** e onde consultar cada tecnologia (opcional; crie quando o projeto tiver codigo). Antes de resolver problema de stack, consulte a documentacao apontada la.
@@ -103,6 +104,21 @@ Atualize apenas o arquivo cuja funcao foi acionada na sessao. Atualizar tudo a c
 - Trabalho de uma feature avancou? Atualize o `Status` da spec em `docs/specs/` e mova as tarefas dela em `TASKS.md` (quando o modulo de specs estiver ativo).
 
 Pendencias de sessao que sejam acionaveis devem virar tarefa em `TASKS.md` antes de fechar a sessao. `TASKS.md` e canonico; "Pendencias" em `SESSION.md` e snapshot historico daquela sessao.
+
+## Evidencia De Fechamento
+
+Tarefa concluida e afirmacao. Sem evidencia, e afirmacao sem lastro. Toda tarefa movida para "## Concluidas" em `TASKS.md` carrega uma sub-linha:
+
+```md
+- AAAA-MM-DD T-001: Descricao curta e acionavel. (spec: 0001-login-social)
+  - Evidencia: tipo=comando; procedimento=<o que foi feito>; resultado=<o que saiu>
+```
+
+- `tipo` aceita `comando`, `revisao-manual` ou `conferencia`. Tarefa de conteudo, pesquisa ou decisao usa `revisao-manual` ou `conferencia`. Nunca invente um comando inexistente so para preencher o campo.
+- Tarefa aberta pode declarar de antemao como pretende ser verificada, com `(verifica: <comando>)` no fim da linha. O marcador e opcional; declarado, vira contrato: a evidencia da tarefa concluida precisa registrar o resultado daquele comando.
+- A exigencia nao e retroativa. A data em que ela passa a valer fica declarada uma vez em `TASKS.md`, no marcador `(convencoes-2-2-0-desde: AAAA-MM-DD)`. Linha concluida antes dessa data fica como esta: registro historico nao vira alegacao sem evidencia.
+
+O validador confere a forma da evidencia, nunca o conteudo. Evidencia colada sem conferencia real passa no script e falha no proposito.
 
 ## Memoria Da Sessao
 
@@ -157,6 +173,18 @@ O registro deve separar:
 
 Cada entrada deve ter `**Status:** aberto | resolvido | arquivado`. Quando o status estiver aberto, inclua tambem `**Proximo passo:**` com dono claro, para evitar consenso parado sem responsavel.
 
+### Independencia Declarada
+
+Consenso so vale como segunda opiniao se as posicoes forem independentes. Modelo que le a posicao do outro antes de escrever produz concordancia por cortesia, e consenso fraco fica indistinguivel de consenso forte. Cada entrada declara como foi produzida:
+
+- `**Metodo:** pareceres-independentes | debate-aberto`
+- `**Exposicao previa a outras posicoes:** sim | nao`
+- `**Rodada:** N de 3`
+
+Na rodada 1, cada modelo preenche apenas a propria secao, sem ler as demais. Da rodada 2 em diante a exposicao previa e esperada e deve ser declarada como `sim`. Tres rodadas sem convergencia e o teto: escale para o usuario em vez de abrir a quarta.
+
+Os tres campos sao autodeclarados. O validador checa presenca e valor permitido, **nunca veracidade**: nenhum script prova que um modelo nao leu a posicao do outro. O ganho e rastreabilidade, nao garantia.
+
 ### Regra De Desempate
 
 Quando os modelos nao convergem:
@@ -186,6 +214,7 @@ Opcional: se a secao "Concluidas" de `TASKS.md` ficar longa, mova as mais antiga
 Antes de finalizar, confira:
 
 - se a tarefa pedida foi realmente atendida;
+- se toda tarefa concluida nesta sessao carrega evidencia de fechamento;
 - se os arquivos de memoria afetados pela funcao acionada foram atualizados;
 - se pendencias acionaveis viraram tarefas em `TASKS.md`;
 - se houve aprendizado promovido para `MEMORY.md` quando aplicavel;

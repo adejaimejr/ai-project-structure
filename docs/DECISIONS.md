@@ -137,3 +137,23 @@ Registro de decisoes importantes do projeto.
 - `TASKS.md` cresce mais rapido (uma sub-linha por tarefa concluida); a rotacao opcional de "Concluidas" deixa de ser opcional na pratica em projetos longos.
 - Aumenta o numero de contratos verificados por script e tambem o de contratos julgados na mao (scaffold e atualizacao), enquanto nao existir runner de evals.
 - Decisao tomada apos revisao por modelo distinto; debate completo em `docs/CONSENSUS.md`, entrada de 2026-09-02. Spec de execucao: `docs/specs/0003-tasks-verificaveis.md`.
+
+## 2026-09-02 - Severidade da evidencia ausente e corte declarado por projeto
+
+### Decisao
+
+- Evidencia ausente em tarefa concluida que **nao** declarou `(verifica:)` gera **AVISO**. ERRO fica reservado para a tarefa que declarou comando e concluiu sem o resultado dele. Quem quer portao duro roda `--strict`.
+- A nao retroatividade da regra depende de um corte declarado **por projeto**, no marcador `(convencoes-2-2-0-desde: AAAA-MM-DD)` do proprio `docs/TASKS.md`. Sem o marcador, nem a evidencia nem os campos declarativos de consenso sao cobrados. O mesmo corte governa as duas regras.
+- No scaffold, a skill preenche o marcador com a data do dia; na atualizacao, com a data da atualizacao. Nunca com data anterior.
+
+### Motivo
+
+- ERRO neste validador significa contradicao ou quebra estrutural (arquivo do nucleo ausente, ID duplicado, marcador despareado, Status invalido). Omitir evidencia sem ter declarado nada e lacuna de qualidade, nao contradicao.
+- Evidencia e prosa: erro duro compra conformidade formal e aumenta o incentivo ao teatro de conformidade ja registrado como risco no consenso. AVISO para ERRO continua reversivel; o caminho inverso ja teria bloqueado projetos.
+- Sem corte declarado, as 15 linhas historicas deste repositorio virariam 15 avisos e `--strict` deixaria de retornar 0, contra dois criterios de aceite da spec 0003.
+- Corte fixo no codigo do validador nao serve: o validador e instalado uma vez e roda contra projetos em versoes diferentes. Corte no marcador do `AGENTS.md` tambem nao: quebraria a paridade byte a byte do bloco core.
+
+### Impacto
+
+- Projeto em 2.1.0 nao e afetado ate declarar o marcador; a atualizacao passa a ter um passo explicito para isso (`references/atualizacao.md`, passo 7b).
+- Registrado tambem como DEC-010 e DEC-011 na spec `docs/specs/0003-tasks-verificaveis.md`.

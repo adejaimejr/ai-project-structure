@@ -23,7 +23,8 @@ ai-project-structure/
 │   └── openai.yaml     # metadado OPCIONAL do Codex (UI + politica de invocacao)
 ├── evals/
 │   ├── evals.json      # suite local de teste da skill (nao vai para a instalacao)
-│   └── fixtures/       # projetos de teste (v1-project, broken-project)
+│   ├── verify_repository.py    # prova a integridade deste repositorio
+│   └── fixtures/       # projetos de teste (v1-project, broken-project, aguardando-project)
 ├── CHANGELOG.md        # historico de versoes da skill
 ├── install.sh          # instalador para as tres ferramentas
 └── README.md           # este arquivo
@@ -105,6 +106,28 @@ Checa: arquivos do nucleo, pontes, marcadores do bloco gerenciado, formato das
 entradas de SESSION/CONSENSUS, limites de rotacao, IDs `T-NNN`, coerencia do
 modulo de specs (nomes, Status, tarefas referenciadas) e ausencia de travessao
 (em dash, U+2014), que e proibido nos textos do projeto.
+
+Da versao 2.2.0 em diante checa tambem: evidencia de fechamento em tarefa
+concluida (AVISO), tarefa que declarou `(verifica:)` e concluiu sem o resultado
+do comando (ERRO), tarefa em `Aguardando Usuario` sem `**Pergunta:**` (ERRO),
+valor desconhecido em marcador conhecido, idade do bloqueio e os campos
+declarativos de `CONSENSUS.md`. A cobranca de evidencia depende do marcador
+`(convencoes-2-2-0-desde: AAAA-MM-DD)` no `TASKS.md` do projeto: sem ele, nada e
+cobrado, e nenhuma linha anterior a essa data e cobrada.
+
+## Verificador do repositorio
+
+```bash
+python3 evals/verify_repository.py            # exit 0 se o repositorio esta integro
+python3 evals/verify_repository.py --verbose  # mostra a saida do que falhar
+```
+
+So existe no repositorio-fonte (`evals/` nao e distribuido). Roda o validador na
+raiz com `--strict`, os fixtures com os exit codes esperados, a paridade dos
+blocos gerenciados e das pontes, as convencoes nos templates e no dogfood, a
+coerencia de versao entre `SKILL.md`, marcadores e `CHANGELOG.md`, a estrutura de
+`evals.json`, a ausencia de travessao em arquivo versionado e a paridade dos tres
+destinos, instalando em pasta temporaria. Nao toca nas instalacoes reais.
 
 ## Atualizar um projeto existente
 

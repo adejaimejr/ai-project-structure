@@ -1,8 +1,9 @@
 # Spec 0003 - Tarefas com evidencia, espera explicita e consenso declarado (skill 2.2.0)
 
-**Status:** Definida
+**Status:** Concluida
 **Criada em:** 2026-09-02
 **Definida em:** 2026-09-02 (apos revisao por modelo distinto; ver `docs/CONSENSUS.md`, entrada de 2026-09-02)
+**Concluida em:** 2026-09-02
 **Esforco:** M, quatro mudancas pequenas e independentes na mesma versao, mais o dogfood do meta-projeto.
 
 ## Problema E Resultado Esperado
@@ -80,6 +81,9 @@ Julgados na mao, sem runner hoje (registrado como limitacao conhecida):
 - DEC-008: a evidencia obrigatoria nao e retroativa. Vale para tarefa concluida a partir da 2.2.0. O validador nao cobra evidencia de tarefa anterior, e `references/atualizacao.md` nao reescreve historico. Motivo: tornar retroativa converteria registro historico em alegacao sem evidencia, em todo projeto que atualizar. Decisao do usuario em 2026-09-02.
 - DEC-009: o verificador de integridade vive em `docs/skills/ai-project-structure/evals/`, nunca em `scripts/` na raiz. Motivo duplo: `scripts/` na raiz viola a regra de raiz minima registrada em "Regras Do Projeto" do `AGENTS.md`, cuja excecao cobre apenas `README.md`, `LICENSE` e `.gitignore`; e `evals/` nao e distribuido pelo `install.sh`, entao o verificador nao vai parar na maquina de todo usuario. Colocacao proposta pelo Codex; a segunda razao foi verificada por `diff -rq` contra `~/.claude/skills/ai-project-structure`.
 
+- DEC-010: evidencia ausente em tarefa concluida que **nao** declarou `(verifica:)` gera **AVISO**, nao ERRO. Confirmada na implementacao de T-010, em 2026-09-02. Motivo: ERRO esta reservado neste validador para contradicao e quebra estrutural (arquivo do nucleo ausente, ID duplicado, marcador despareado, Status invalido, e a propria tarefa que declarou comando e nao o cumpriu). Omitir evidencia sem ter declarado nada e lacuna de qualidade, nao contradicao. Alem disso, evidencia e prosa: transformar sua ausencia em erro duro compra conformidade formal e aumenta o incentivo ao teatro de conformidade que o proprio consenso listou como risco. Quem quer o portao duro roda `--strict`, que e o que este repositorio faz. AVISO para ERRO continua reversivel; o contrario ja teria bloqueado projetos. O argumento de custo levantado na sessao (ERRO exigiria comparar datas em toda linha concluida) nao decidiu nada: a comparacao de datas e necessaria nas duas severidades, por causa de DEC-011.
+- DEC-011: a nao retroatividade de DEC-008 precisa de um corte declarado por projeto, e ele vive em `docs/TASKS.md`, no marcador `(convencoes-2-2-0-desde: AAAA-MM-DD)`. Decidida na implementacao de T-010, em 2026-09-02. Motivo: sem corte, as 15 linhas historicas deste repositorio virariam 15 avisos e `--strict` deixaria de retornar 0, contra dois criterios de aceite desta spec. Corte global no codigo do validador nao serve, porque o validador e instalado uma vez e roda contra projetos em versoes diferentes; corte no marcador do `AGENTS.md` tambem nao, porque quebraria a paridade byte a byte do bloco core. Sem o marcador, a cobranca de evidencia e a de campos declarativos de consenso ficam silenciosas: projeto 2.1.0 nao e afetado. O mesmo corte governa as duas regras, para nao criar duas convencoes.
+
 ## Tarefas
 
 - T-009: bloco core v2.2.0 e templates de TASKS.md e CONSENSUS.md com as convencoes novas
@@ -93,5 +97,10 @@ Julgados na mao, sem runner hoje (registrado como limitacao conhecida):
 
 ## Evidencia De Conclusao
 
-- Verificacao: (A preencher.)
-- Resultado: (A preencher.)
+- Verificacao: `python3 docs/skills/ai-project-structure/evals/verify_repository.py`
+- Resultado: exit 0, 26 de 26 verificacoes passaram (raiz em `--strict` sem erro e sem aviso; os 4 casos de fixture com os exit codes esperados; bloco core identico entre a raiz e `assets/AGENTS.md` com 11373 bytes; bloco specs identico ao partial; as duas pontes identicas; convencoes presentes nos templates e no dogfood; versao 2.2.0 coerente entre `SKILL.md`, marcadores e `CHANGELOG.md`; 9 evals coerentes; nenhum travessao em 117 arquivos; tres destinos identicos entre si e identicos a fonte canonica, com `install.sh` rodado em pasta temporaria).
+- Verificacao complementar: `python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict`
+- Resultado: exit 0, 0 erros e 0 avisos.
+- Divergencia induzida e desfeita: heading alterado dentro do bloco core da raiz. Resultado: `verify_repository.py` acusou `[FALHA] bloco core identico entre AGENTS.md e assets/AGENTS.md: 11390 bytes` e retornou exit 1; desfeita a alteracao, voltou a exit 0.
+- Matriz de casos do validador (projeto descartavel, um caso por regra nova mais os casos que devem ficar silenciosos por nao retroatividade): 17 de 17 conforme esperado.
+- Limitacao conhecida: os criterios "julgados na mao" acima (scaffold minimal, scaffold completa e atualizacao de projeto 2.1.0) continuam sem runner e nao foram exercitados nesta sessao. Estao registrados como tarefa em `TASKS.md`.

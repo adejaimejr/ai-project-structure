@@ -68,6 +68,15 @@ Ofereca apenas arquivos que **nao existem** no destino. **Nunca** toque no conte
 
 Se `docs/TASKS.md` nao usa IDs `T-NNN`, ofereca atribuir `T-001, T-002, ...` as tarefas existentes na ordem em que aparecem (Em Andamento primeiro, depois Proximas, depois Concluidas). Recusado → siga em frente; o validador emitira apenas um INFO "formato v1".
 
+## 7b. ADOTAR AS CONVENCOES 2.2.0
+
+Ao atualizar um projeto que vem de 2.1.0 ou anterior:
+
+- adicione a secao `## Aguardando Usuario` em `docs/TASKS.md`, entre "Proximas Tarefas" e "Concluidas", se ainda nao existir;
+- adicione ao cabecalho de `docs/TASKS.md` o marcador `(convencoes-2-2-0-desde: AAAA-MM-DD)` com a **data da atualizacao**, nunca uma data anterior;
+- **nao escreva evidencia em tarefa ja concluida.** A regra nao e retroativa: linha antiga fica como esta, e o validador nao a cobra. Inventar evidencia para historico transforma registro em alegacao falsa;
+- **nao preencha os campos declarativos de consenso em entradas antigas** de `docs/CONSENSUS.md` pelo mesmo motivo. Da proxima entrada em diante, use `**Metodo:**`, `**Exposicao previa a outras posicoes:**` e `**Rodada:** N de 3`.
+
 ## 8. REGISTRAR
 
 - Atualize `vX.Y.Z` nos marcadores aplicados.

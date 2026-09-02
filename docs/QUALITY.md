@@ -40,13 +40,19 @@ Atualize apenas o arquivo cuja funcao foi acionada na sessao:
 
 ## Testes E Validacao
 
-Quando o projeto tiver codigo, registrar aqui:
+Comando unico de integridade deste repositorio (roda o validador em `--strict`, os fixtures, a paridade dos blocos gerenciados, a coerencia de versao, `evals.json`, a ausencia de travessao e a paridade dos tres destinos com `install.sh` em pasta temporaria):
 
-- comandos de teste;
-- comandos de lint;
-- comandos de build;
-- criterios manuais de aceitacao;
-- cenarios que precisam ser verificados antes de finalizar.
+```bash
+python3 docs/skills/ai-project-structure/evals/verify_repository.py
+```
+
+Validador da estrutura, isolado:
+
+```bash
+python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict
+```
+
+Nenhum dos dois escreve no repositorio nem nas instalacoes reais da skill. Os evals de `docs/skills/ai-project-structure/evals/evals.json` continuam sendo rodados na mao, um por vez, em cada ferramenta: nao ha runner automatico.
 
 ## Criterios De Aceite
 

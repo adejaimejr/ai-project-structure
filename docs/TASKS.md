@@ -34,7 +34,9 @@ Modelo de linha concluida:
 
 ## Aguardando Usuario
 
-- (Vazio. Tarefa que travou por falta de resposta do usuario vem para ca, com `**Pergunta:**` e `**Resposta:** (A preencher.)`.)
+- T-018: Responder as perguntas abertas da spec 0004 para ela poder virar `Definida`. (prioridade: media) (bloqueada: 2026-09-02) (spec: 0004-modulo-de-loop)
+  - **Pergunta:** P-1 a P-8 em `docs/specs/0004-modulo-de-loop.md`. As tres que mais mudam o escopo: P-3 (qual ferramenta executa o loop), P-4 (se o loop pode escrever na memoria sozinho, incluindo a propria evidencia) e P-8 (se automacao de consenso e teto de custo entram na 2.3.0 ou ficam para depois).
+  - **Resposta:** (A preencher.)
 
 ## Concluidas
 

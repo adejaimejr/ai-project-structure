@@ -41,6 +41,40 @@ As entradas anteriores a 2026-08-20 foram rotacionadas para `docs/archive/SESSIO
 - Motivo: 
 ```
 
+## 2026-09-02 - Claude (publicacao da 2.2.0 e abertura da spec 0004)
+
+### Objetivo
+
+- Publicar a 2.2.0 no GitHub e abrir a spec do modulo de loop, cujo pre-requisito passou a existir hoje.
+
+### O Que Foi Feito
+
+- `git push origin main`: os 5 commits da 2.2.0 sairam do laptop (`7040e4d..c5d8488`).
+- Spec `0004-modulo-de-loop` criada como `Rascunho`. Ela separa o que ja esta decidido (DEC-001, DEC-003 e DEC-005, herdadas da 0003) do que depende de resposta do usuario.
+- O pre-requisito que DEC-005 mandou para o modulo de loop, "secao Testes E Validacao de `QUALITY.md` com comando real", passou a ser satisfeito por este repositorio hoje, com `verify_repository.py`. E o que destrava a discussao do loop sem contrariar DEC-003.
+- Nenhuma tarefa de implementacao aberta: com oito perguntas em aberto, abrir tarefa seria comprar escopo que ainda nao existe.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/specs/0004-modulo-de-loop.md` (novo), `docs/TASKS.md`, `docs/SESSION.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma nova. A spec 0004 registra tres decisoes herdadas e nenhuma propria, de proposito: decidir agora seria decidir sem as respostas.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum.
+
+### Pendencias
+
+- T-018 em `## Aguardando Usuario`: as oito perguntas da spec 0004. Primeiro uso real da secao neste repositorio, o que tambem exercita a convencao contra um caso que nao foi construido para testa-la.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario, nao um agente.
+- Motivo: a spec so anda com as respostas de P-1 a P-8. P-3, P-4 e P-8 mudam o escopo o suficiente para que qualquer implementacao antes delas seja retrabalho.
+
 ## 2026-09-02 - Claude + Codex (evals 1, 2, 5, 6 e 9 no Codex CLI)
 
 ### Objetivo

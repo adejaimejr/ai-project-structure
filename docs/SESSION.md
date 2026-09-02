@@ -72,7 +72,7 @@ As entradas anteriores a 2026-08-20 foram rotacionadas para `docs/archive/SESSIO
 
 ### Pendencias
 
-- A skill instalada nos tres destinos globais esta com a versao anterior de `SKILL.md` e `references/atualizacao.md` (as correcoes de T-015 nao foram propagadas). Precisa de `./install.sh` para ficar em dia.
+- Nenhuma acionavel. As correcoes de T-015 e T-016 foram propagadas para os tres destinos globais a pedido do usuario, com paridade conferida por `diff -rq`.
 
 ### Proximo Passo Recomendado
 

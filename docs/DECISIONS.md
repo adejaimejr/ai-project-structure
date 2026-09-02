@@ -111,3 +111,29 @@ Registro de decisoes importantes do projeto.
 - Uma unica fonte (`docs/skills/ai-project-structure/`) gera a instalacao nas tres ferramentas; atualizar = editar a fonte e rodar `install.sh`.
 - Registro anterior de instalacao (2026-04-25) fica **substituido** por este: aquela instalacao nao persistiu e apontava o Codex para o caminho errado.
 
+
+## 2026-09-02 - Evidencia obrigatoria em tarefa, secao Aguardando Usuario e consenso declarado
+
+### Decisao
+
+- Toda tarefa movida para `Concluidas` a partir da skill 2.2.0 carrega evidencia de fechamento em sub-linha propria (`Evidencia: tipo=...; procedimento=...; resultado=...`). O marcador `(verifica: <comando>)` na tarefa aberta continua opcional; quando presente, a evidencia deve registrar o resultado daquele comando, e a ausencia do resultado e ERRO.
+- A regra nao e retroativa: tarefa concluida antes da 2.2.0 nao e cobrada, e o fluxo de `references/atualizacao.md` nao reescreve historico.
+- Tarefa travada por falta de resposta do usuario vive na secao `## Aguardando Usuario`, com `**Pergunta:**`, `**Resposta:** (A preencher.)` e `(bloqueada: AAAA-MM-DD)`. A secao nao rotaciona; gera aviso por idade. Secao separada para bloqueio nao humano so quando existir caso real.
+- Registro de consenso passa a declarar `**Metodo:**`, `**Exposicao previa a outras posicoes:**` e `**Rodada:** N de 3`, com rodada 1 cega e teto de 3 rodadas antes de escalar para o usuario. O validador checa presenca e valor, nunca veracidade.
+- O verificador de integridade do meta-projeto vive em `docs/skills/ai-project-structure/evals/verify_repository.py`. Nao criar `scripts/` na raiz.
+- O modulo de loop autonomo fica fora da 2.2.0 e nunca entra no scaffold. Sera modulo opcional, no padrao do modulo de specs, ativavel apenas em projeto cuja secao "Testes E Validacao" de `QUALITY.md` tenha comando real.
+
+### Motivo
+
+- Verificacao inteiramente opcional deixa passar exatamente as tarefas menos verificadas, preservando a lacuna que a mudanca pretende fechar. Tornar `(verifica:)` obrigatorio seria pior: empurraria o usuario a inventar comando falso em tarefa de conteudo, pesquisa ou decisao.
+- A regra "Nunca Inferir" manda perguntar quando falta contexto, mas nao existia lugar para a tarefa esperar a resposta; a regra existia e nao era observavel.
+- Consenso fraco era visualmente indistinguivel de consenso forte. Os campos declarativos nao provam independencia, mas tornam o grau de confianca observavel.
+- `scripts/` na raiz viola a regra de raiz minima, cuja excecao cobre apenas `README.md`, `LICENSE` e `.gitignore`. Alem disso `evals/` nao e distribuido pelo `install.sh`, entao o verificador nao vai parar na maquina de todo usuario.
+- O portao de verificacao de um loop nao pode existir no dia zero de um projeto novo, porque nao ha suite de teste ainda. Um loop cujo unico portao e "o Markdown esta bem formado" e pior que nenhum loop, porque parece um portao.
+
+### Impacto
+
+- Bloco core, templates de `TASKS.md` e `CONSENSUS.md`, validador, evals e fixtures mudam na skill 2.2.0.
+- `TASKS.md` cresce mais rapido (uma sub-linha por tarefa concluida); a rotacao opcional de "Concluidas" deixa de ser opcional na pratica em projetos longos.
+- Aumenta o numero de contratos verificados por script e tambem o de contratos julgados na mao (scaffold e atualizacao), enquanto nao existir runner de evals.
+- Decisao tomada apos revisao por modelo distinto; debate completo em `docs/CONSENSUS.md`, entrada de 2026-09-02. Spec de execucao: `docs/specs/0003-tasks-verificaveis.md`.

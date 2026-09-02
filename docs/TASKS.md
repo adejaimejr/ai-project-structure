@@ -21,7 +21,11 @@ Modelo de linha:
 
 ## Proximas Tarefas
 
-- (Vazio.)
+- T-009: Bloco core v2.2.0 e templates de `TASKS.md` e `CONSENSUS.md` com evidencia obrigatoria, `(verifica:)`, secao `Aguardando Usuario` e campos declarativos de consenso. (prioridade: alta) (spec: 0003-tasks-verificaveis)
+- T-010: Checks novos no validador: evidencia, `(verifica:)` sem resultado, `Aguardando Usuario` sem pergunta, marcador com valor desconhecido, campos de consenso e teto de rodadas. (prioridade: alta) (verifica: python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict) (spec: 0003-tasks-verificaveis)
+- T-011: Criar `evals/verify_repository.py` (raiz, fixtures, paridade de blocos e templates, `evals.json`, install em destino temporario) e corrigir os 4 headings ausentes em `SESSION.md`. (prioridade: alta) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0003-tasks-verificaveis)
+- T-012: Fixture `aguardando-project`, evals atualizados para 2.2.0, dogfood do meta-projeto e reinstalacao com paridade nos tres destinos. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0003-tasks-verificaveis)
+- T-013: Rotacionar as entradas antigas de `CONSENSUS.md` e de `SESSION.md` para `docs/archive/CONSENSUS-2026.md` e `docs/archive/SESSIONS-2026.md`, e atualizar o indice do archive. Os dois arquivos passaram de 30KB e o validador ja avisa nos dois. (prioridade: baixa) (verifica: python3 docs/skills/ai-project-structure/scripts/validate_structure.py .)
 
 ## Concluidas
 

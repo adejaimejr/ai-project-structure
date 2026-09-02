@@ -39,6 +39,54 @@ Sempre adicione a sessao mais recente no topo.
 - Motivo: 
 ```
 
+## 2026-09-02 - Claude + Codex (planejamento da skill 2.2.0)
+
+### Objetivo
+
+- Avaliar tecnicamente se faz sentido adicionar um loop autonomo a este projeto e, se nao fizer agora, extrair da analise as melhorias que valem sem depender dele.
+
+### O Que Foi Feito
+
+- Parecer tecnico sobre loop autonomo, com leitura do repositorio e conferencia da documentacao atual de `/goal`, hooks e modo headless do Claude Code e do Codex CLI. Conclusao: o portao de verificacao nao pode existir no dia zero de um projeto scaffoldado, entao o loop fica como modulo opcional futuro, nunca no scaffold.
+- Da analise saiu o PRD da skill 2.2.0, escrito como spec em `Rascunho`: evidencia obrigatoria em tarefa concluida, secao para tarefa esperando resposta do usuario, consenso com independencia declarada e verificador de integridade do meta-projeto.
+- Validacao do PRD por modelo distinto no Codex CLI, em duas rodadas: rodada 1 cega (proibida a leitura da spec) e rodada 2 adversarial com a spec a vista. Primeiro uso real da regra de rodada cega que a propria spec propoe.
+- O Codex encontrou dois erros reais: `scripts/check.sh` na raiz violava a regra de raiz minima, e o caminho do validador citado na spec estava errado. Ambos confirmados no repositorio.
+- Codex tambem reverteu a decisao mais fraca do PRD (verificacao inteiramente opcional) e propos campos declarativos de consenso, que consertam o problema original melhor que a versao anterior.
+- Debate registrado em `CONSENSUS.md` e fechado como `resolvido` apos o usuario decidir os dois residuos (nome da secao de espera e retroatividade da evidencia).
+- Spec 0003 promovida de `Rascunho` para `Definida` com nove decisoes e criterios de aceite separados entre verificaveis por comando e julgados na mao.
+- Tarefas T-009 a T-013 abertas em `TASKS.md`.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/specs/0003-tasks-verificaveis.md` (criado; `Rascunho` e depois `Definida`).
+- `docs/CONSENSUS.md` (entrada de 2026-09-02, fechada como `resolvido`).
+- `docs/DECISIONS.md` (entrada de 2026-09-02).
+- `docs/TASKS.md` (T-009 a T-013 em "Proximas Tarefas").
+- `docs/MEMORY.md` (aprendizado sobre o que o `install.sh` distribui).
+- `docs/SESSION.md` (esta entrada).
+
+### Decisoes Tomadas
+
+- Loop autonomo fora da 2.2.0 e fora do scaffold; vira modulo opcional futuro, ativavel so em projeto com comando real em `QUALITY.md`.
+- Evidencia de fechamento obrigatoria em tarefa concluida a partir da 2.2.0, nao retroativa; `(verifica:)` continua opcional.
+- Secao `## Aguardando Usuario` em vez de `## Bloqueadas`; secao para bloqueio nao humano so quando houver caso real.
+- Verificador de integridade em `evals/`, nunca em `scripts/` na raiz.
+- Registro completo em `docs/DECISIONS.md`, entrada de 2026-09-02.
+
+### Aprendizados Para MEMORY.md
+
+- `evals/`, `install.sh`, `README.md` e `CHANGELOG.md` existem apenas na fonte canonica da skill e nao sao distribuidos pelo `install.sh`. Determina onde colocar ferramenta que deve ficar so no repositorio. Promovido para `MEMORY.md`.
+
+### Pendencias
+
+- Severidade da evidencia ausente em tarefa concluida que nao declarou `(verifica:)`: a spec define AVISO, o Codex pediu apenas "obrigatoria" sem nomear severidade. Decidir ao implementar T-010.
+- `CONSENSUS.md` passou de 30KB e o validador ja avisa (T-013).
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente com contexto suficiente; a spec 0003 e autossuficiente.
+- Motivo: comecar por T-009 (bloco core e templates), porque T-010, T-011 e T-012 dependem das convencoes estarem escritas.
+
 ## 2026-08-20 - Claude (skill 2.1.0)
 
 ### Objetivo

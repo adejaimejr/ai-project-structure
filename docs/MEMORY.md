@@ -77,7 +77,7 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
 
 ### Project
 
-- 
+- O `install.sh` da skill nao distribui tudo o que existe na fonte canonica: `evals/`, `install.sh`, `README.md` e `CHANGELOG.md` ficam apenas em `docs/skills/ai-project-structure/` e nao aparecem em `~/.claude/skills/`, `~/.agents/skills/` nem `~/.gemini/skills/` (verificado por `diff -rq` em 2026-09-02). Ferramenta que deve ficar restrita ao repositorio vai em `evals/`; o que vai em `scripts/` chega na maquina de todo usuario.
 
 ### Reference
 

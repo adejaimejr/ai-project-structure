@@ -14,6 +14,7 @@ Tarefa concluida deixa de ser afirmacao em prosa: passa a carregar evidencia. Es
 - `validate_structure.py`: checks novos de evidencia, `(verifica:)` sem resultado, `Aguardando Usuario` sem pergunta, valor desconhecido em marcador conhecido, idade do bloqueio e campos de consenso. `--progress` passa a contar a secao nova.
 - `evals/verify_repository.py` (so no repositorio-fonte): prova em um comando a integridade do meta-projeto (raiz em `--strict`, fixtures, paridade dos blocos gerenciados e das pontes, convencoes nos templates e no dogfood, coerencia de versao, `evals.json`, ausencia de travessao e paridade dos tres destinos com `install.sh` em pasta temporaria).
 - Fixture nova `evals/fixtures/aguardando-project` (caso valido exit 0, caso invalido exit 1) e eval 9 correspondente.
+- Correcao achada no dogfood do mesmo dia: o validador tratava **qualquer** `T-NNN` da linha como ID da tarefa, entao uma tarefa que cita outra ("continuando o que sobrou de T-001") era acusada de ID duplicado, e uma linha concluida que mencionasse outro ID marcava esse outro como concluido, o que podia dar spec "Concluida" por engano. Agora vale o ID que abre a linha, depois da data quando ela e concluida; o resto do texto e referencia. A fixture `aguardando-project` guarda a correcao.
 - Marcadores dos blocos gerenciados atualizados para v2.2.0.
 
 ## 2.1.0 - 2026-08-20

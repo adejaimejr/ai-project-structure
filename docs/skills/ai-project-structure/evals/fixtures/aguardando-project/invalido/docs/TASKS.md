@@ -19,7 +19,7 @@ Formato de tarefa:
 
 ## Concluidas
 
-- 2026-09-02 T-003: Configurar o linter do projeto. (verifica: ruff check .)
+- 2026-09-02 T-003: Configurar o linter do projeto, continuando o que sobrou de T-001. (verifica: ruff check .)
   - Evidencia: tipo=comando; procedimento=ruff check .; resultado=All checks passed, exit 0
 
 ## Ideias

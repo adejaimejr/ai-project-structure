@@ -130,7 +130,7 @@ No cabecalho de `docs/TASKS.md`, troque o placeholder do marcador `(convencoes-2
 
 ### 6. Adicione a primeira entrada em `docs/SESSION.md`
 
-Logo apos o bloco "Modelo Para Nova Sessao", insira:
+O template termina no fim do bloco cercado de "Modelo Para Nova Sessao". Insira **depois** desse bloco, no fim do arquivo, nunca dentro da cerca:
 
 ```md
 ## AAAA-MM-DD - <agente que executou (ex: Claude, Codex, Gemini)>

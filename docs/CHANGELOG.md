@@ -9,6 +9,7 @@ Historico de mudancas relevantes.
 - `validate_structure.py` com os checks correspondentes; `evals/verify_repository.py` novo, provando a integridade do repositorio em um comando; fixture `aguardando-project` e eval 9.
 - Dogfood: `docs/TASKS.md` e `docs/CONSENSUS.md` adotaram as convencoes, os 4 headings ausentes de `SESSION.md` foram corrigidos e `SESSION.md`/`CONSENSUS.md` foram rotacionados para `docs/archive/`.
 - Comando de integridade registrado em `docs/QUALITY.md`, secao "Testes E Validacao".
+- Criterios de aceite sem runner exercitados na mao (scaffold minimal, scaffold completa e atualizacao de um projeto 2.1.0), com quatro correcoes: tres de texto e uma no validador, que tratava qualquer `T-NNN` da linha como ID da tarefa.
 
 ## 2026-08-20 (publicacao no GitHub)
 

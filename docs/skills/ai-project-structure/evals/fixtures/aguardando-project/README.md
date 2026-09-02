@@ -9,6 +9,10 @@ evidencia de fechamento, introduzidas na versao 2.2.0 da estrutura.
 - `invalido/`: a mesma tarefa aguardando, sem a sub-linha `**Pergunta:**`.
   Esperado: exit 1, com o erro apontando a tarefa.
 
+Nos dois casos a tarefa T-003 cita T-001 no meio da descricao. E de proposito:
+guarda contra a regressao em que o validador tratava qualquer `T-NNN` da linha
+como ID da tarefa e acusava referencia legitima como ID duplicado.
+
 Rode com:
 
 ```bash

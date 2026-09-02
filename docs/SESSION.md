@@ -41,6 +41,44 @@ As entradas anteriores a 2026-08-20 foram rotacionadas para `docs/archive/SESSIO
 - Motivo: 
 ```
 
+## 2026-09-02 - Claude (T-014, criterios sem runner)
+
+### Objetivo
+
+- Exercitar na mao os tres criterios de aceite da spec 0003 que nao tem runner: scaffold minimal, scaffold completa e atualizacao de um projeto 2.1.0.
+
+### O Que Foi Feito
+
+- Skill invocada da instalacao real, nao da fonte do repositorio, em tres projetos descartaveis fora do repositorio. Isso tambem testou que a instalacao de ontem esta usavel.
+- Scaffold minimal e scaffold completa com o modulo de specs: `--strict` exit 0 nos dois, marcadores em v2.2.0, data de adocao preenchida, sem git, sem `partials/` copiado.
+- Projeto 2.1.0 sintetizado com os templates daquela versao tirados do git, com dados de usuario reais (tarefas concluidas sem evidencia, tarefa parada esperando resposta, consenso antigo, regras locais) e atualizado pelo fluxo de `references/atualizacao.md`.
+- O projeto 2.1.0 validou limpo **antes** da atualizacao, sob o validador 2.2.0. E a prova pratica de DEC-011: sem o marcador de corte, a cobranca nao existe.
+- Depois da atualizacao, a regra foi testada nos dois sentidos: tarefa concluida hoje sem evidencia gerou AVISO, as concluidas em agosto continuaram silenciosas, e o AVISO sumiu quando a evidencia entrou.
+- Quatro defeitos achados. Tres eram texto (T-015). O quarto era codigo e apareceu quando o proprio `TASKS.md` deste repositorio ficou com uma tarefa citando outra: o validador contava qualquer `T-NNN` da linha como ID e acusava duplicidade. Corrigido em T-016, com guarda na fixture.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/skills/ai-project-structure/SKILL.md`, `docs/skills/ai-project-structure/references/atualizacao.md` (correcoes de T-015).
+- `docs/skills/ai-project-structure/scripts/validate_structure.py`, `docs/skills/ai-project-structure/evals/fixtures/aguardando-project/` e `docs/skills/ai-project-structure/CHANGELOG.md` (correcao de T-016).
+- `docs/TASKS.md`, `docs/SESSION.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma decisao nova. Tres achados eram defeito de texto e um era defeito de codigo; nenhum tocou o desenho da 2.2.0.
+
+### Aprendizados Para MEMORY.md
+
+- Dogfood pega o que teste sintetico nao pega: o bug de ID so apareceu porque uma tarefa real precisou citar outra. Nao promovido para `MEMORY.md` por ser generico demais para virar regra acionavel.
+
+### Pendencias
+
+- A skill instalada nos tres destinos globais esta com a versao anterior de `SKILL.md` e `references/atualizacao.md` (as correcoes de T-015 nao foram propagadas). Precisa de `./install.sh` para ficar em dia.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): outra ferramenta (Codex CLI ou Gemini CLI).
+- Motivo: T-014 rodou no Claude Code, e quem escreveu os templates julgou o proprio trabalho. Os evals 1, 2, 5, 6 e 9 continuam valendo mais quando rodados por outro modelo, sem este contexto.
+
 ## 2026-09-02 - Claude (implementacao da skill 2.2.0)
 
 ### Objetivo

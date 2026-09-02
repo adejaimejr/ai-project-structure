@@ -62,7 +62,9 @@ Bloco `specs` ausente e usuario nao usa specs → nao ofereca a insercao; apenas
 
 ## 6. NOVOS ARQUIVOS
 
-Ofereca apenas arquivos que **nao existem** no destino. **Nunca** toque no conteudo de `docs/*.md` com dados do usuario (SESSION, MEMORY, TASKS, etc.).
+Ofereca apenas arquivos que **nao existem** no destino. **Nunca** sobrescreva `docs/*.md` com dados do usuario (SESSION, MEMORY, TASKS, etc.) pelo template.
+
+A unica excecao e o passo 7b, e ela e **aditiva**: acrescenta secao e marcador ao `docs/TASKS.md` sem apagar, reescrever ou reordenar nada que ja estava la. Qualquer outra edicao em arquivo do usuario continua fora.
 
 ## 7. MIGRAR TASKS
 
@@ -75,7 +77,8 @@ Ao atualizar um projeto que vem de 2.1.0 ou anterior:
 - adicione a secao `## Aguardando Usuario` em `docs/TASKS.md`, entre "Proximas Tarefas" e "Concluidas", se ainda nao existir;
 - adicione ao cabecalho de `docs/TASKS.md` o marcador `(convencoes-2-2-0-desde: AAAA-MM-DD)` com a **data da atualizacao**, nunca uma data anterior;
 - **nao escreva evidencia em tarefa ja concluida.** A regra nao e retroativa: linha antiga fica como esta, e o validador nao a cobra. Inventar evidencia para historico transforma registro em alegacao falsa;
-- **nao preencha os campos declarativos de consenso em entradas antigas** de `docs/CONSENSUS.md` pelo mesmo motivo. Da proxima entrada em diante, use `**Metodo:**`, `**Exposicao previa a outras posicoes:**` e `**Rodada:** N de 3`.
+- **nao preencha os campos declarativos de consenso em entradas antigas** de `docs/CONSENSUS.md` pelo mesmo motivo. Da proxima entrada em diante, use `**Metodo:**`, `**Exposicao previa a outras posicoes:**` e `**Rodada:** N de 3`;
+- procure tarefas que **ja estavam paradas esperando o usuario** e ofereca mover cada uma para a secao nova. Sem isso a secao nasce vazia e a convencao nao pega no projeto. Use a pergunta e a data que ja estao escritas na tarefa: se a tarefa nao diz qual e a pergunta, **pergunte ao usuario**, nao deduza. Recusado, a tarefa fica onde esta.
 
 ## 8. REGISTRAR
 

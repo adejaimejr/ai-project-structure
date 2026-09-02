@@ -56,6 +56,9 @@ MARKER_RE = re.compile(
 )
 ENTRY_RE = re.compile(r"^## \d{4}-\d{2}-\d{2}", re.MULTILINE)
 TASK_ID_RE = re.compile(r"\bT-(\d+)\b")
+# ID proprio da tarefa: o que abre a linha, depois da data quando ela e concluida.
+# Qualquer outro T-NNN no texto e referencia a outra tarefa, nao um segundo ID.
+TASK_OWN_ID_RE = re.compile(r"^(?:\d{4}-\d{2}-\d{2}\s+)?T-(\d+)\b")
 SPEC_REF_RE = re.compile(r"\(spec:\s*([^)]+)\)")
 SPEC_NAME_RE = re.compile(r"^(\d{4})-[a-z0-9][a-z0-9-]*\.md$")
 PRIORITY_RE = re.compile(r"\(prioridade:\s*([^)]*)\)")
@@ -422,7 +425,8 @@ def check_tasks(root, report):
             line = task["line"]
             if is_placeholder(line):
                 continue
-            ids = TASK_ID_RE.findall(line)
+            own = TASK_OWN_ID_RE.match(line)
+            ids = [own.group(1)] if own else []
             # Unicidade vale no arquivo todo (inclusive Ideias e Concluidas).
             all_ids.extend(ids)
             if sec == "concluidas":
@@ -473,8 +477,8 @@ def check_tasks(root, report):
 
 
 def task_label(line):
-    ids = TASK_ID_RE.findall(line)
-    return f"T-{ids[0]}" if ids else f'"{line[:60]}"'
+    own = TASK_OWN_ID_RE.match(line)
+    return f"T-{own.group(1)}" if own else f'"{line[:60]}"'
 
 
 def check_markers_values(sections, report):
@@ -722,7 +726,9 @@ def show_progress(root):
 
     done_ids = set()
     for task in sections.get("concluidas", []):
-        done_ids.update(TASK_ID_RE.findall(task["line"]))
+        own = TASK_OWN_ID_RE.match(task["line"])
+        if own:
+            done_ids.add(own.group(1))
 
     print("Tarefas (docs/TASKS.md):")
     print(f"  Em andamento: {count('em andamento')}")

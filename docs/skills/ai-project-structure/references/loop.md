@@ -113,14 +113,18 @@ O `loop.sh` continua sem saber o que e perfil: ele recebe uma string de `--agent
 
 Quando os perfis de executar tiverem degraus (`executar`, `executar-dificil`, `executar-muito-dificil`), **proponha um e diga por que em uma linha**. Nunca escolha em silencio: o nivel muda o consumo de plano, e quem paga e o usuario.
 
-Sinais que valem, do mais forte para o mais fraco:
+**Comece sempre em `executar`.** Nao e chute conservador: numa bancada com tres ferramentas, uma tarefa de implementar funcao do zero, com regra de borda e suite inteira como portao, passou de primeira no esforco padrao de cada uma. O degrau base da conta da maioria.
 
-1. **A rodada anterior falhou.** E o unico sinal com evidencia de verdade. Suba um degrau e diga que esta subindo por isso. Note que o loop **nao registra fracasso em lugar nenhum**, de proposito: esse sinal vem do usuario ou do historico da conversa, nunca do `TASKS.md`.
-2. **A tarefa pertence a uma spec** (`(spec: NNNN-slug)`). Trabalho tamanho-feature costuma comecar em `executar-dificil`.
-3. **O portao e uma suite inteira**, e nao um comando pontual. Suite que falha em varios pontos exige mais raciocinio que um check de uma linha.
-4. **O que a tarefa diz.** Comportamento novo, mais de um arquivo, ou regra de borda pede mais que renomear, ajustar texto ou mover uma linha.
+Suba **so quando algum destes valer**, e diga qual:
 
-Na duvida entre dois degraus, **proponha o mais baixo**. O loop tem tentativas, e subir depois custa menos que gastar o teto em tarefa simples: numa bancada com tres ferramentas, uma tarefa pequena passou de primeira no nivel padrao de cada uma.
+1. **A rodada anterior falhou.** Sobe um degrau. E o unico sinal com evidencia de verdade, e o mais forte de todos: em vez de adivinhar dificuldade, voce ja sabe que o degrau anterior nao deu. O loop **nao registra fracasso em lugar nenhum**, de proposito, entao esse sinal vem do usuario ou do historico da conversa, nunca do `TASKS.md`.
+2. **Duas rodadas ja falharam.** Sobe para `executar-muito-dificil`, e diga tambem que talvez o problema nao seja esforco: tarefa que falha duas vezes costuma estar mal especificada ou grande demais para uma rodada.
+3. **O usuario disse que e dificil.** Vale mais que qualquer leitura sua da tarefa.
+4. **A tarefa mexe em varias partes ao mesmo tempo** e ainda tem regra de borda ou contrato para respeitar. Nao basta "tem suite" nem "e comportamento novo": isso vale para quase toda tarefa de codigo e nao separa nada.
+
+Repare no que **nao** e sinal: portao ser uma suite, a tarefa pertencer a uma spec, ou a descricao parecer longa. Os tres disparam em quase todo trabalho real, e regra que sempre responde a mesma coisa nao ajuda a decidir.
+
+Na duvida entre dois degraus, **proponha o mais baixo**. O loop tem tentativas, e subir na segunda custa menos que gastar o teto em tarefa que passaria de primeira.
 
 Nao invente rubrica com pontuacao. Isso e julgamento declarado, nao medicao: diga o sinal que voce usou e deixe o usuario discordar em uma palavra.
 

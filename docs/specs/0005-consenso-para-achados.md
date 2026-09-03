@@ -1,7 +1,8 @@
 # Spec 0005 - Consenso que serve para achado, e nao so para debate
 
-**Status:** Rascunho
+**Status:** Definida
 **Criada em:** 2026-09-03
+**Definida em:** 2026-09-03 (apos o usuario responder P-1 a P-6; as respostas viraram DEC-002 a DEC-007)
 **Esforco:** M, quatro lacunas independentes no mesmo modulo. Depende de respostas do usuario antes de virar `Definida`.
 
 ## Problema E Resultado Esperado
@@ -27,6 +28,7 @@ A evidencia desta spec e um projeto real do usuario que usa a estrutura sob pres
 - Revisao do teto de rodadas a luz do uso real.
 - Aviso do ponto cego da validacao cruzada onde quem usa consenso vai ler.
 - Checks correspondentes em `validate_structure.py`, na medida em que sejam verificaveis por forma e nao por conteudo.
+- Versao da skill para 2.4.0 e marcadores dos blocos gerenciados para v2.4.0, porque o bloco core muda.
 
 ### Fora Do Escopo
 
@@ -36,28 +38,42 @@ A evidencia desta spec e um projeto real do usuario que usa a estrutura sob pres
 
 ## Criterios De Aceite
 
-Nao podem ser escritos ainda: dependem das respostas em "Perguntas Abertas". Escrever agora seria inventar criterio, que e o que a regra "Nunca Inferir" proibe. O que ja se sabe:
+Verificaveis por comando:
 
-- Nenhum travessao (U+2014) em arquivo novo ou alterado.
-- Projeto que nao usa achado nao paga nada por ele.
-- `verify_repository.py` continua em exit 0.
+- Entrada de consenso que declara `**Achado:**` e tratada como achado pelo validador; entrada sem esse campo segue sendo debate e nao ganha cobranca nova.
+- Achado sem `**Escapou de verificacao:**` gera AVISO; com valor fora de `sim | nao` gera AVISO.
+- Achado com `**Escapou de verificacao:** sim` e sem a secao "Por Que Nada Pegou Antes" gera AVISO.
+- `**Rodada:** N de N` com N maior que 3 e sem `**Pendente da rodada anterior:**` gera AVISO. Substitui a regra da 2.2.0, que exigia `**Proximo passo:**` acima de 3.
+- Projeto que nunca registra achado nao recebe nenhum aviso novo: nada do formato de achado dispara em entrada de debate.
+- Bloco core identico entre raiz e `assets/AGENTS.md`, ambos em v2.4.0, e o aviso do ponto cego cabe em ate quatro linhas.
+- Templates de `CONSENSUS.md` trazem o modelo de achado, alem do modelo de debate que ja existe.
+- `verify_repository.py` em exit 0, e nenhum travessao (U+2014) em arquivo novo ou alterado.
+
+Julgados na mao, sem runner hoje:
+
+- Se a secao "Por Que Nada Pegou Antes", quando preenchida, analisa o mecanismo do ponto cego em vez de repetir "nada a declarar". O validador confere presenca; merito nao da para verificar por script, e essa e a mesma limitacao declarada na 2.2.0 para os campos de independencia.
 
 ## Decisoes
 
 - DEC-001: o projeto usado como evidencia foi lido em modo somente-leitura, a pedido do usuario, e nao sera alterado por esta spec. Motivo: ele e a fonte de evidencia; muda-lo contaminaria a propria evidencia, e a decisao de atualizar a estrutura dele e do usuario, em outro momento.
 
+- DEC-002 (P-1, decidida pelo usuario em 2026-09-03): o identificador de achado e **livre**, amarrado a unidade de trabalho de cada projeto, e nao um `A-NNN` global. Motivo: e o que o uso real produziu, e prefixo global engessaria projetos que ja tem a propria nomenclatura. Consequencia aceita: o validador **nao verifica** unicidade nem se uma revalidacao aponta para achado existente, diferente de `(spec: NNNN-slug)`, que resolve hoje. Mitigacao a avaliar na implementacao: o identificador fica livre, mas a entrada o **declara** num campo fixo, o que permite conferir presenca sem opinar sobre valor.
+- DEC-004 (P-2, decidida pelo usuario em 2026-09-03): **o teto de tres rodadas deixa de existir**, e no lugar dele cada rodada acima da terceira declara `**Pendente da rodada anterior:**`, dizendo o que a anterior deixou em aberto. Motivo: o teto foi escrito sem evidencia e o uso real chegou a sete rodadas sem que isso fosse fracasso; o proposito original, evitar rodada por cerimonia, sobrevive na exigencia de justificar a continuidade. O validador confere presenca do campo, nunca a qualidade da justificativa.
+- DEC-005 (P-3, decidida pelo usuario em 2026-09-03): achado e **entrada propria** em `CONSENSUS.md`, com `Status` e `Proximo passo` proprios, e nao subsecao de uma entrada de rodada. Motivo: e o que o uso real produziu, e so assim da para dizer que um achado especifico esta aberto ou disposto. Consequencia aceita: o arquivo cresce mais rapido, e a rotacao para `docs/archive/` deixa de ser opcional em projeto com muitos achados.
+- DEC-006 (P-4, decidida pelo usuario em 2026-09-03): achado vira tarefa em `TASKS.md` **somente depois de a disposicao concluir que ha trabalho**, e a tarefa cita o achado na linha. Motivo: abrir tarefa para todo achado encheria o backlog com item que a disposicao descarta. Risco aceito: entre registrar e dispor existe uma janela em que o item so vive no consenso, e quem fecha a sessao precisa olhar os achados abertos.
+- DEC-007 (P-5, decidida pelo usuario em 2026-09-03): a secao "Por Que Nada Pegou Antes" e obrigatoria **quando o achado escapou de verificacao existente**, e dispensada quando a propria validacao o pegou de primeira. Para isso ser verificavel sem julgar merito, o achado declara `**Escapou de verificacao:** sim | nao`, no mesmo padrao dos campos de independencia da 2.2.0: o validador cobra a secao quando a declaracao for `sim`.
+- DEC-003 (P-6, decidida pelo usuario em 2026-09-03): o aviso sobre o ponto cego da validacao cruzada vai para o **bloco core**, e nao so para o template de `CONSENSUS.md`. Motivo: quem mais precisa do aviso e quem confia em varias rodadas, e essa confianca se forma antes de a pessoa abrir o template. Consequencia aceita: todo projeto paga a leitura, inclusive quem nunca usa consenso, entao o texto tem de ser curto o bastante para justificar o custo permanente.
+
 ## Tarefas
 
-- (Vazio ate a spec virar `Definida`.)
+- T-046: bloco core v2.4.0, template de CONSENSUS.md com o modelo de achado, e o aviso do ponto cego
+- T-047: checks do formato de achado e do teto de rodadas no validador
+- T-048: fixture e evals do formato de achado
+- T-049: dogfood, CHANGELOG e reinstalacao com paridade
 
 ## Perguntas Abertas
 
-- P-1: **qual o identificador de achado?** Um `A-NNN` global, no padrao de `T-NNN` e `DEC-NNN`, que o validador consegue conferir quanto a unicidade? Ou identificador livre, amarrado a unidade de trabalho do projeto, como o uso real fez? Livre e mais fiel ao que aconteceu na pratica e impede qualquer verificacao automatica.
-- P-2: **o teto de rodadas vira o que?** Sobe para um numero maior, some, ou vira "sem teto, mas cada rodada acima de tres precisa dizer o que a anterior deixou em aberto"? A ultima opcao mantem o proposito original, que era evitar rodada por cerimonia, sem contrariar o uso real.
-- P-3: **achado e entrada propria em `CONSENSUS.md`, ou secao dentro de uma entrada?** Entrada propria da rastreabilidade e faz o arquivo crescer rapido; secao agrupa por tema e dificulta apontar para um achado especifico.
-- P-4: **achado que exige trabalho abre tarefa em `TASKS.md` automaticamente?** Se nao abrir, o achado pode morrer no registro. Se abrir sempre, todo achado vira backlog, inclusive os que a disposicao descarta.
-- P-5: **"Por Que Nada Pegou Antes" e obrigatoria em achado, ou so recomendada?** Obrigatoria garante a analise do ponto cego; tambem cria campo que se preenche com "nada a declarar" quando ninguem quer pensar.
-- P-6: **o aviso do ponto cego vai no bloco core, que todo projeto le, ou so no template de `CONSENSUS.md`?** No core, todo projeto paga a leitura, inclusive quem nunca usa consenso. No template, so quem abre o arquivo ve, e quem mais precisa e justamente quem ja esta escrevendo consenso.
+- (Vazio. As seis perguntas do Rascunho foram respondidas pelo usuario em 2026-09-03 e viraram DEC-002 a DEC-007.)
 
 ## Evidencia De Conclusao
 

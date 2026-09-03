@@ -30,18 +30,23 @@ Modelo de linha concluida:
 
 ## Proximas Tarefas
 
+- T-046: Bloco core v2.4.0 com o aviso do ponto cego da validacao cruzada, e template de `CONSENSUS.md` com o modelo de achado (identificador livre declarado em campo, `Escapou de verificacao`, `Pendente da rodada anterior` e a secao "Por Que Nada Pegou Antes"). (prioridade: alta) (spec: 0005-consenso-para-achados)
+- T-047: Checks no validador: achado sem `Escapou de verificacao` ou com valor fora do conjunto, achado que declarou `sim` e nao tem a secao, e `Rodada` acima de 3 sem `Pendente da rodada anterior`, substituindo a regra do teto da 2.2.0. (prioridade: alta) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0005-consenso-para-achados)
+- T-048: Fixture e evals do formato de achado, com caso valido e caso invalido, e conferencia de que entrada de debate nao dispara nenhum aviso novo. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0005-consenso-para-achados)
+- T-049: Dogfood no proprio repositorio, CHANGELOG da skill e do projeto, e reinstalacao com paridade nos tres destinos. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0005-consenso-para-achados)
+
 
 
 
 
 ## Aguardando Usuario
 
-- T-045: Responder as seis perguntas abertas da spec 0005 para ela poder virar `Definida`. (prioridade: media) (bloqueada: 2026-09-03) (spec: 0005-consenso-para-achados)
-  - **Pergunta:** P-1 a P-6 em `docs/specs/0005-consenso-para-achados.md`. As duas que mais mudam escopo: P-1, se o identificador de achado e global e verificavel ou livre e fiel ao uso real; e P-6, se o aviso do ponto cego entra no bloco core, que todo projeto le, ou fica so no template de `CONSENSUS.md`.
-  - **Resposta:** (A preencher.)
+- (Vazio. Tarefa que travou por falta de resposta do usuario vem para ca, com `**Pergunta:**` e `**Resposta:** (A preencher.)`.)
 
 ## Concluidas
 
+- 2026-09-03 T-045: Respondidas as seis perguntas abertas da spec 0005, que passou de `Rascunho` para `Definida`. (spec: 0005-consenso-para-achados)
+  - Evidencia: tipo=conferencia; procedimento=as seis perguntas levadas ao usuario com o tradeoff de cada opcao, e as respostas escritas como DEC-002 a DEC-007 na spec; resultado=6 de 6 respondidas, "Perguntas Abertas" zerada, e uma das respostas tornou verificavel um criterio que parecia julgamento: "Por Que Nada Pegou Antes" obrigatoria so quando o achado escapou virou campo declarado `Escapou de verificacao: sim | nao`, no mesmo padrao dos campos de independencia da 2.2.0
 - 2026-09-03 T-044: `CONSENSUS.md` protegido contra escrita do agente do loop, buraco que a revisao de T-042 tinha deixado passar. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)
   - Evidencia: tipo=comando; procedimento=conferido que `CONSENSUS.md` nao aparecia nem no bloco nem no prompt, ao contrario dos outros arquivos de memoria; adicionado nos dois com a razao especifica (entrada de consenso declara metodo, exposicao previa e rodada, e a rodada tem um agente so); bloco propagado para o `AGENTS.md` da raiz; depois a bateria e `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=55 de 55 e exit 0 com 33 de 33
 - 2026-09-03 T-043: Variancia entre rodadas identicas medida e registrada na spec 0004. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)

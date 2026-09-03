@@ -38,8 +38,8 @@ Modelo de linha concluida:
 
 ## Aguardando Usuario
 
-- T-053: Responder as perguntas abertas da spec 0006 para ela poder virar `Definida`. (prioridade: media) (bloqueada: 2026-09-03) (spec: 0006-automacao-do-consenso)
-  - **Pergunta:** apos a rodada 1 cega de 2026-09-03 com tres posicoes (registrada em `docs/CONSENSUS.md`), sobrou isto: **ratificar** P-1, P-2 e P-3, unanimes; **ratificar ou virar** P-4, P-5 e P-6, decididas por 2 a 1, sendo que o Claude perdeu P-4 e P-5 e a dissidencia do Grok em P-6 tem argumento proprio; **decidir P-7**, sobre a forma da entrada; **decidir** se proveniencia (comando, exit code, caminho do artefato) entra no escopo, o que os tres recomendam; e **mandar corrigir** os quatro defeitos da spec que a rodada confirmou, que nao dependem de decisao.
+- T-053: Responder P-7 e P-8 da spec 0006 para ela poder virar `Definida`. P-1 a P-6 ja foram ratificadas em 2026-09-03 e viraram DEC-001 a DEC-006. (prioridade: media) (bloqueada: 2026-09-03) (spec: 0006-automacao-do-consenso)
+  - **Pergunta:** **P-7**, se a forma da entrada de `CONSENSUS.md` fica mesmo fora do escopo, sendo que nem o modelo de debate nem o de achado representam N agentes, falha individual ou hash de insumo. Ficou mais urgente com a DEC-004, que mandou cobrir tambem o achado: sao duas formas para acomodar. E **P-8**, se proveniencia (comando, exit code, caminho do artefato) entra no escopo, recomendada pelas tres posicoes da rodada, porque sem ela os campos escritos pela automacao voltam a ser autodeclaracao, so que do script.
   - **Resposta:** (A preencher.)
 
 ## Concluidas

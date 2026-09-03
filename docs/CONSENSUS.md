@@ -133,9 +133,9 @@ Os debates de 2026-04-25 foram rotacionados para `docs/archive/CONSENSUS-2026.md
 
 ## 2026-09-03 - As seis perguntas da spec 0006 (automacao do consenso)
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** o usuario ratifica P-1, P-2 e P-3 (unanimes), decide P-4, P-5 e P-6 (maioria de 2 a 1, com o Claude vencido em duas), decide se a proveniencia entra no escopo, e manda corrigir os quatro defeitos da spec que a rodada confirmou.
+**Resolvido em:** 2026-09-03. O usuario ratificou as seis, tanto as tres unanimes quanto as tres de maioria, e elas viraram DEC-001 a DEC-006 em `docs/specs/0006-automacao-do-consenso.md`. Ficaram fora da ratificacao, e seguem em T-053: P-7, sobre a forma da entrada, e P-8, sobre proveniencia entrar no escopo.
 
 **Metodo:** pareceres-independentes
 
@@ -257,4 +257,6 @@ Uma mudanca de escopo recomendada pelos tres, que so o usuario pode fazer: **pro
 
 ### Decisao Para Registrar Em DECISIONS.md
 
-Nada ainda. As quatro convergencias viram `DEC-NNN` **na spec 0006**, nao em `DECISIONS.md`, porque sao decisoes locais de desenho dela. Duas delas podem subir para `DECISIONS.md` depois, se sobreviverem a implementacao: a excecao a DEC-019 por escritor deterministico, que muda uma decisao ja registrada do projeto, e a regra de que campo declarativo escrito por execucao vale mais que campo digitado, que vale para qualquer automacao futura e nao so para esta.
+Cinco das seis ficam **so na spec 0006** (DEC-001 e DEC-003 a DEC-006), porque sao desenho local dela.
+
+Uma sobe para `docs/DECISIONS.md`, porque muda o alcance de uma decisao ja registrada do projeto: a **DEC-002**, que estende a 0004/DEC-019. Aquela decisao proibia o **agente** do loop de escrever em `CONSENSUS.md`; agora fica dito que a proibicao vale para agente e nao para um orquestrador mecanico, e que o que a sustenta e a separacao entre quem opina e quem escreve, nunca a quantidade de agentes. Registrada em 2026-09-03 com o titulo "Agente nao escreve consenso; orquestrador deterministico escreve o recorte que a execucao comprova".

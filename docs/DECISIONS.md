@@ -20,6 +20,26 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-09-03 - Agente nao escreve consenso; orquestrador deterministico escreve o recorte que a execucao comprova
+
+### Decisao
+
+- A proibicao da 0004/DEC-019 vale para **agente**, e nao para todo software: um agente de IA continua proibido de escrever em `docs/CONSENSUS.md`, em qualquer numero.
+- Um **orquestrador mecanico** pode escrever, e so o recorte que a execucao comprova: a pergunta, as posicoes literais dos agentes, as falhas de quem nao respondeu, os comandos usados, e os campos `Metodo`, `Exposicao previa a outras posicoes` e `Rodada`.
+- As secoes de julgamento (pontos de acordo, consenso final, qualquer sintese) **nunca** sao escritas por software, e a entrada nasce com `Status: aberto` e `Proximo passo` com dono humano.
+- O que sustenta a excecao e a **separacao entre quem opina e quem escreve**, nunca a quantidade de agentes.
+
+### Motivo
+
+- Rodada 1 cega de 2026-09-03 sobre a spec 0006, com tres posicoes independentes. O Claude havia proposto que a DEC-019 caisse por haver N agentes em vez de um; Codex e Grok chegaram sozinhos a mesma correcao, e ela e melhor: se quem escreve for um dos opinantes, ou um sintetizador livre, o acoplamento volta com N igual a qualquer coisa. O Grok precisou o ponto: a DEC-019 nomeia o agente, entao aplica-la a um script nao seria heranca, seria estende-la a um sujeito que ela nunca nomeou.
+- A razao original da DEC-019 continua intacta e nao foi afrouxada: consenso escrito por um modelo, declarando a propria independencia, e a fraude que os campos da 2.2.0 existem para denunciar.
+
+### Impacto
+
+- Passam a existir **duas politicas de escrita** no projeto: o agente do loop nunca escreve em `CONSENSUS.md`; o orquestrador da spec 0006 escreve um recorte. Elas divergem de proposito, e cada prompt precisa dizer qual vale ali.
+- Sem proveniencia registrada ao lado (comando, exit code, caminho do artefato bruto), os campos escritos pelo orquestrador voltam a ser autodeclaracao, so que do script. As tres posicoes da rodada apontaram isso, e a questao esta aberta como P-8 na spec 0006.
+- Limite conhecido, registrado na propria rodada: isolar as posicoes resolve a **producao** delas e nao a **transcricao**. Enquanto quem organiza a saida for um dos participantes, o problema que motivou a spec sobrevive.
+
 ## 2026-09-03 - Fixture de check AVISO roda em --strict e confere quais avisos sairam
 
 ### Decisao

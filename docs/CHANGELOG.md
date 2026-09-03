@@ -2,6 +2,13 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (spec 0006 com seis decisoes ratificadas)
+
+- Rodada 1 cega com tres posicoes independentes (Claude selado antes das demais, Codex, Grok via `cursor-agent`) respondeu as seis perguntas da spec 0006. Tres unanimes, duas com o Claude vencido por 2 a 1, uma com dissidencia registrada.
+- Ratificadas pelo usuario e escritas como DEC-001 a DEC-006 na spec, cada uma declarando como foi decidida.
+- DEC-002 subiu para `docs/DECISIONS.md`: a proibicao da 0004/DEC-019 vale para agente e nao para software, e um orquestrador mecanico pode escrever o recorte que a execucao comprova. O que sustenta a excecao e a separacao entre quem opina e quem escreve, nunca a quantidade de agentes.
+- Restam P-7 (forma da entrada) e P-8 (proveniencia no escopo), as duas mexendo em escopo, entao a spec segue `Rascunho`.
+
 ## 2026-09-03 (fixture debate-project)
 
 - Fixture `debate-project`: projeto que usa consenso e nunca registra achado, com conjunto de diagnosticos vazio em `--strict`. Fecha o ultimo residuo da rodada 2 do achado `0005-A1`. `verify_repository.py` de 42 para 44 verificacoes.

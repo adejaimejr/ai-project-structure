@@ -2,7 +2,69 @@
 
 Debates antigos de `docs/CONSENSUS.md`, rotacionados em 2026-09-02 e de novo em 2026-09-03, pela regra de "Rotacao De Arquivos" do `AGENTS.md`.
 
-Cobre os dois debates de 2026-04-25 e a revisao da spec 0003 de 2026-09-02, todos `resolvido`. Os de 2026-04-25 sao anteriores a versao 2.2.0 e nao trazem os campos declarativos de metodo, exposicao previa e rodada; o de 2026-09-02 e a primeira entrada do repositorio que os traz.
+Cobre os dois debates de 2026-04-25, a revisao da spec 0003 de 2026-09-02 e o achado `0005-A1` de 2026-09-03, todos `resolvido`. Os de 2026-04-25 sao anteriores a versao 2.2.0 e nao trazem os campos declarativos de metodo, exposicao previa e rodada; o de 2026-09-02 e a primeira entrada do repositorio que os traz.
+
+## 2026-09-03 - Par de fixture nao separa nada quando o check novo e AVISO
+
+**Achado:** 0005-A1
+
+**Status:** resolvido
+
+**Resolvido em:** 2026-09-03, depois da rodada 2. A disposicao se sustenta com as correcoes registradas em "Revalidacao", e o residuo saiu daqui para o backlog: T-050, T-051 e T-052. A pergunta que a rodada 2 deixou aberta (identificador estavel de diagnostico ou fragmento de mensagem) foi respondida pelo usuario no mesmo dia: identificador estavel, e T-051 foi desbloqueada com essa escolha.
+
+**Metodo:** debate-aberto
+
+**Exposicao previa a outras posicoes:** sim
+
+**Rodada:** 2 de 2
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Primeiro uso do formato de achado neste repositorio, no dogfood da 2.4.0 (T-049), sobre trabalho da propria T-048.
+- Proveniencia dos campos declarativos: a rodada 1 foi escrita so pelo Claude, sem outra posicao a vista (`pareceres-independentes`, exposicao previa `nao`). Os campos acima descrevem a rodada 2, em que o Codex leu a disposicao antes de escrever. As secoes "Disposicao" e "Por Que Nada Pegou Antes" continuam como saidas da rodada 1: o que a rodada 2 corrigiu esta em "Revalidacao", e nao reescrito por cima.
+- O repositorio tem um unico padrao de fixture, herdado da 2.2.0: um par `valido`/`invalido` declarado no dicionario `FIXTURES` de `verify_repository.py`, com o exit code esperado de cada lado. Ele funciona porque todo check daquela versao era ERRO, e ERRO muda o exit code.
+
+### O Que Foi Encontrado
+
+- Os checks de achado da 2.4.0 sao AVISO, por decisao da spec: a forma e verificavel, o merito nao. Sem `--strict`, aviso nao muda exit code.
+- Consequencia: a fixture `achado-project`, escrita no padrao existente, teria `invalido: 0` e `valido: 0` no `FIXTURES`, e `verify_repository.py` imprimiria `[OK] fixture achado-project/invalido: exit 0 (esperado 0)`. Verde, e sem provar nada: os cinco avisos poderiam nunca ter disparado, ou disparar na entrada errada, e o check passaria igual.
+
+### Disposicao
+
+- A fixture continua no `FIXTURES` (que cobre a regressao de "nao virou ERRO por acidente"), e ganhou `verificar_achado` ao lado: roda os dois lados com `--strict`, exige exit 0 no valido e exit 1 no invalido, **conta** os avisos e confere que nenhum deles cita a entrada de debate que abre os dois arquivos.
+- A contagem e a checagem do controle sao o que faltava: sem elas, o par mede presenca de aviso, nao qual aviso.
+
+### Revalidacao
+
+Rodada 2, em 2026-09-03, pelo Codex CLI (`gpt-5.6-sol`, `model_reasoning_effort=high`, sandbox `read-only`), a pedido do usuario. Veredito: **se sustenta com ressalva**.
+
+Aceito, e sao correcoes de fato, todas conferidas no codigo antes de registrar:
+
+- **A disposicao descreve mal o proprio codigo.** `verificar_achado` conta linhas `[AVISO]` e confere uma unica exclusao, o titulo da entrada de controle. Ela nao compara motivo nem titulo dos avisos. A frase "sem elas, o par mede presenca de aviso, nao qual aviso" prometeu mais do que o codigo entrega: o portao continua sem saber **qual** aviso saiu. A entrada correspondente de `DECISIONS.md` herdou o mesmo exagero e foi corrigida.
+- **A contagem fixa em cinco e rigida e fraca ao mesmo tempo.** Quebra quando a fixture cresce por motivo legitimo, e aceita regressao compensada: um aviso certo some, outro errado aparece, o total continua cinco e o portao passa. Contraexemplo do Codex: os cinco avisos caindo todos na mesma entrada.
+- **T-050, como estava escrita, contradizia a propria disposicao.** Ela mandava recusar par cujos dois lados declarem o mesmo exit code, e `achado-project` tem os dois lados em 0 **de proposito**, que e exatamente a guarda de regressao que esta disposicao decidiu manter. Reescrita.
+- **A causa estrutural e mais funda que "exit codes iguais".** O `FIXTURES` modela status de processo e nao associa cada fixture aos diagnosticos que ela deve produzir. Exit codes diferentes tambem escondem teste inutil: um lado invalido que sai 1 por arquivo obrigatorio ausente passaria por T-050 sem nunca exercitar o check pretendido.
+- **O criterio "projeto que nunca registra achado nao recebe aviso novo" nao e exercitado literalmente.** Os dois lados de `achado-project` tem achado. Um bug que so emitisse aviso em arquivo sem nenhum achado passaria. Conferido: nenhuma outra fixture com entrada de debate roda em `--strict` (a do `v1-project` tem uma, e roda sem a flag).
+
+Onde a revalidacao ficou incompleta, e isso tambem e registro:
+
+- O Codex nao considerou que a **raiz deste repositorio ja e um controle vivo** do ultimo item: ela roda em `--strict` no primeiro check de `verify_repository.py`, tem uma entrada de debate sem `**Achado:**` (a de 2026-09-02) e fecha com zero avisos. Um `check_consensus_achado` que disparasse em entrada de debate reprovaria ali. E controle parcial, porque depende do dogfood e nao de fixture, e nao cobre arquivo sem nenhum achado; a critica sobrevive, mas nao inteira.
+- Sobre `**Escapou de verificacao:** sim`, o Codex considera discutivel, porque nenhum portao verde chegou a existir. **Mantido `sim`**: o criterio da DEC-007 e se a verificacao existente pegaria o defeito, e ela nao pegaria. A secao "Por Que Nada Pegou Antes" ja declara essa nuance em vez de esconde-la.
+- Os contraexemplos do Codex foram derivados por leitura, sem mutacao de fixture nem do validador, porque esta rodada proibiu editar arquivos. Nenhum deles foi executado.
+
+Residuo desta rodada: T-050 (reescrita), T-051 (desbloqueada em 2026-09-03, com o usuario escolhendo identificador estavel de diagnostico em vez de fragmento de mensagem) e T-052.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: nada, e a nuance importa. O defeito nunca chegou a ser commitado, porque apareceu ao escrever a fixture. O que escapa aqui e outra coisa: **nenhuma verificacao existente teria notado**, e o mecanismo de fixture nao tem como reclamar de um par que nao separa. Se a fixture tivesse sido escrita no padrao herdado, a suite reportaria 36 de 36 com um check inutil dentro.
+- Mecanismo do ponto cego: o padrao de fixture foi desenhado quando todo check novo era ERRO, e o exit code separava os casos por construcao. A hipotese "o exit code separa" ficou implicita no padrao em vez de escrita, e um check AVISO a quebra sem que nada acuse.
+- Conserto de portao proposto: `verificar_achado` ja cobre este par. O conserto geral, que continua em aberto, seria `verify_repository.py` recusar um par `valido`/`invalido` cujos dois lados declarem o mesmo exit code esperado, em vez de depender de quem escreve a proxima fixture lembrar disso.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Fixture cujo caso invalido produz apenas AVISO nao prova nada pelo exit code sem `--strict`: ela roda com a flag e confere quais avisos sairam, nunca so quantos exit codes bateram.
 
 ## 2026-09-02 - Revisao da spec 0003 (skill 2.2.0) por modelo distinto
 

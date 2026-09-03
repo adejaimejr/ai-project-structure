@@ -39,7 +39,7 @@ Modelo de linha concluida:
 ## Aguardando Usuario
 
 - T-053: Responder as perguntas abertas da spec 0006 para ela poder virar `Definida`. (prioridade: media) (bloqueada: 2026-09-03) (spec: 0006-automacao-do-consenso)
-  - **Pergunta:** apos a rodada 1 cega de 2026-09-03 (registrada em `docs/CONSENSUS.md`), sobrou isto para o usuario: **ratificar** P-1, P-2, P-3 e P-6, onde Claude e Codex convergiram; **decidir** P-4 (cobre so debate ou tambem achado: as duas posicoes usam o mesmo fato, existe um unico achado registrado, para concluir o oposto) e P-5 (a lista de agentes vive em `docs/MEMORY.md` ou vem explicita por chamada); e **decidir P-7**, que nasceu da rodada: a forma da entrada de `CONSENSUS.md` fica mesmo fora do escopo, sendo que nem o modelo de debate nem o de achado representam N agentes, falha individual ou hash de insumo?
+  - **Pergunta:** apos a rodada 1 cega de 2026-09-03 com tres posicoes (registrada em `docs/CONSENSUS.md`), sobrou isto: **ratificar** P-1, P-2 e P-3, unanimes; **ratificar ou virar** P-4, P-5 e P-6, decididas por 2 a 1, sendo que o Claude perdeu P-4 e P-5 e a dissidencia do Grok em P-6 tem argumento proprio; **decidir P-7**, sobre a forma da entrada; **decidir** se proveniencia (comando, exit code, caminho do artefato) entra no escopo, o que os tres recomendam; e **mandar corrigir** os quatro defeitos da spec que a rodada confirmou, que nao dependem de decisao.
   - **Resposta:** (A preencher.)
 
 ## Concluidas

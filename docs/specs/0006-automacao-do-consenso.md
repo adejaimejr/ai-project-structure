@@ -71,7 +71,11 @@ Herdadas, sem nova discussao, e listadas porque restringem o desenho desta spec:
 
 ## Perguntas Abertas
 
-Rodada 1 cega registrada em `docs/CONSENSUS.md`, entrada "2026-09-03 - As seis perguntas da spec 0006". Resultado: P-1, P-2, P-3 e P-6 convergiram entre Claude e Codex e esperam ratificacao do usuario; P-4 e P-5 divergiram e sobem para ele pela regra de desempate; P-7 nasceu da propria rodada. O Grok nao foi consultado, por limite de cota. **Nenhuma virou DEC ainda:** parecer de modelo nao e decisao de projeto.
+Rodada 1 cega com **tres posicoes** (Claude selado, Codex, Grok), registrada em `docs/CONSENSUS.md`, entrada "2026-09-03 - As seis perguntas da spec 0006".
+
+Resultado: **P-1, P-2 e P-3 unanimes**; **P-4, P-5 e P-6 por maioria de 2 a 1**, com o Claude vencido em P-4 e P-5; **P-7** nasceu da rodada anterior e segue aberta. **Nenhuma virou DEC:** parecer de modelo nao e decisao de projeto, e a regra de desempate manda o usuario decidir quando ele esta disponivel.
+
+A rodada tambem confirmou quatro defeitos nesta spec, que nao dependem de decisao: a premissa falsa em P-3(c) sobre o isolamento da rodada de 2026-09-03; a nao independencia entre P-3, P-4 e P-6; o exemplo de revisores dentro do enunciado de P-5, que e o catalogo que a DEC-016 proibiu; e o "Fora Do Escopo" que confunde o projeto-evidencia da 0005 com o projeto-alvo de um script distribuido. Os tres modelos tambem recomendam mover **proveniencia** de fora para dentro do escopo.
 
 - **P-1. O que a operacao entrega no fim?** (a) so o material bruto por agente, em arquivos, e a pessoa monta a entrada de `CONSENSUS.md`; (b) a entrada montada com as posicoes preenchidas e as secoes de julgamento ("Pontos De Acordo", "Consenso Final") em branco; (c) a entrada inteira, incluindo os pontos de acordo. Trade-off: (c) e o que mais economiza tempo e e onde a fraude volta pela porta dos fundos, porque quem sintetiza acordo esta julgando. (a) e o mais conservador e o que menos reduz o custo do Problema 2.
 

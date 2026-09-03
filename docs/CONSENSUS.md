@@ -135,7 +135,7 @@ Os debates de 2026-04-25 foram rotacionados para `docs/archive/CONSENSUS-2026.md
 
 **Status:** aberto
 
-**Proximo passo:** o usuario decide P-4 e P-5, onde as duas posicoes divergem, e decide se vale rodar o Grok antes disso. As outras quatro convergiram e estao prontas para virar DEC na spec 0006 assim que ele ratificar.
+**Proximo passo:** o usuario ratifica P-1, P-2 e P-3 (unanimes), decide P-4, P-5 e P-6 (maioria de 2 a 1, com o Claude vencido em duas), decide se a proveniencia entra no escopo, e manda corrigir os quatro defeitos da spec que a rodada confirmou.
 
 **Metodo:** pareceres-independentes
 
@@ -198,102 +198,63 @@ O que declarou nao ter conseguido avaliar: nao executou as CLIs nem prototipou b
 
 ### Posicao Do Grok
 
-**Nao consultado nesta rodada.** Cinco tentativas da rodada real, todas recusadas com a mesma mensagem: `You've reached your free Grok Build usage limit for now. Get SuperGrok for much higher limits`. Entre elas o usuario refez o login e a CLI se atualizou sozinha, de `1.0.5 (5115b46bc909)` para `1.0.13 (5e9a58528b76)`, sem efeito.
+`cursor-grok-4.6-xhigh`, via `cursor-agent -p --mode ask --force`, em modo read-only **por construcao** e nao por pedido no prompt.
 
-O diagnostico foi refeito depois de uma leitura errada, e vale registrar as duas. Em ordem: `grok -p "oi"` passou; a rodada real falhou; `grok --always-approve -m grok-4.6 --effort xhigh -p "Responda apenas: ok"` passou; a rodada em `--effort high` falhou; e tres prompts de enchimento (1000, 2000 e 3000 bytes) falharam. **A primeira leitura foi que o gatilho era o tamanho do pedido, e ela nao se sustenta**: o prompt de 1000 bytes falhou depois de um de 20 bytes ter passado, entao o que separa passar de falhar e o **momento**, nao o volume. O padrao e o de uma franquia pequena que repoe com o tempo (a propria mensagem diz "try again later"), com os dois sucessos gastando o que havia disponivel.
+Cinco tentativas pela CLI propria do Grok falharam antes disso, todas com `You've reached your free Grok Build usage limit`, mesmo apos o usuario assinar e refazer o login. A rodada so aconteceu porque a assinatura do Cursor expoe o mesmo modelo por outro caminho.
 
-Conclusao com o que da para afirmar: `grok models` responde `You are logged in with grok.com` com `grok-4.6` disponivel, entao nao e autenticacao, e a CLI trata esta conta como **free tier** apesar da assinatura feita hoje. Ou a assinatura nao cobre o produto de CLI, que a mensagem chama de Grok Build, ou ela nao esta sendo aplicada por ele. Pendente do usuario junto ao fornecedor; nao e coisa que agente resolva.
+- **P-1:** (b), com uma precisao que as opcoes nao dao: quem monta a entrada e **o script orquestrador, nunca um dos agentes**. `Status`, `Proximo passo`, `Metodo`, `Exposicao previa` e `Rodada` saem da execucao; acordo e consenso final ficam em branco; os artefatos brutos ficam gravados ao lado como fonte. Aceita perder: entrada com consenso vazio pode ser lida como acordo por omissao, e montador fragil cola posicao no lugar errado sem o validador pegar, porque ele nunca checa merito.
+- **P-2:** **o script desta operacao escreve o que P-1 marcar como mecanico; os agentes continuam proibidos.** "Nao e abrir a DEC-019 nem manter por simetria": a DEC-019 nomeia o **agente**, entao aplica-la ao script nao e heranca, e extensao a um sujeito que ela nao nomeia. Aplicar ao script recria o Problema 3; deixar os N agentes escreverem recria a fraude, agora com corrida no mesmo Markdown. Aceita perder: bug no montador carimba `Metodo` ou `Rodada` errados com cara de fato, e sem sidecar de proveniencia o criterio de coerencia com a execucao vira forma, nao verdade.
+- **P-3:** nenhuma das tres. Isolar as **posicoes contemporaneas**, mantendo leitura do repositorio. E `CONSENSUS.md` nao e um degrau unico: em debate rodada 1 o arquivo fica fora do workspace; em revalidacao de achado a entrada sob revisao entra **de proposito**, porque e o objeto da pergunta. Aceita perder: `AGENTS.md`, `DECISIONS.md` e `SESSION.md` ainda correlacionam os modelos, entao o ponto cego nao some com isolamento de posicao.
+- **P-4:** **os dois**, como dois pacotes sobre um primitivo unico (invocar agentes isolados e coletar artefatos). "O caro e isolamento e invocacao, nao o template." Se o corte for inevitavel: primitivo mais pareceres primeiro, e o pacote de achado na sequencia imediata, nao numa spec futura. Aceita perder: esforco G cresce e a v1 pode sair pela metade.
+- **P-5:** N e os comandos entram **na chamada**, no contrato que o loop ja ensinou; lista em `MEMORY.md` e o padrao deste usuario, resolvido pelo agente de chat, nunca catalogo dentro da skill. **`N=1` e valido**, porque debate quer `N>=2` e achado quer `N=1`, e recusar 1 quebraria o caso que doeu. Aceita perder: `MEMORY.md` desatualizado dispara o revisor errado, e o usuario pode passar quatro agentes e queimar plano.
+- **P-6:** **divergiu dos outros dois.** A automacao cobre a rodada 1 cega quando o metodo e `pareceres-independentes`, e ali a cegueira e obrigatoria por construcao; rodada 2 de debate fica **manual nesta versao**, porque exige o pacote inteiro das posicoes anteriores e nunca um resumo, senao o Problema 3 volta pelo orquestrador. E revalidacao de achado nao e "rodada 2 de debate": e pacote proprio, com exposicao controlada da entrada-alvo. Aceita perder: o custo medido no Problema 2 foi o da revalidacao do `0005-A1`, que e rodada com exposicao, entao automatizar so a cegueira de debate nao teria evitado aquela transcricao.
 
-Consequencia para esta rodada: **duas posicoes, nao tres.** Onde as duas divergem, nao ha desempate por terceiro, e a regra de desempate manda o usuario decidir.
+Criticas a spec, as que mudam trabalho:
+
+1. **P-3(c) atribui a 2026-09-03 um isolamento que nao aconteceu.** Aquela rodada teve sandbox `read-only` **com o repositorio visivel**, e foi lendo o codigo que o Codex pegou o erro factual. "Sem acesso ao repositorio" teria cegado a unica rodada que a spec usa como prova. Premissa falsa, e ela e a ancora empirica da spec.
+2. **P-3, P-4 e P-6 nao sao independentes**, e a escada (a) para (c) esconde isso: o isolamento que o achado precisa e o **oposto** do isolamento da rodada 1 cega, porque revalidar uma disposicao exige ve-la.
+3. **P-5 usa como exemplo os revisores deste usuario.** Isso e o catalogo que a DEC-016 proibiu, so que dentro do enunciado da pergunta.
+4. **"Alterar qualquer projeto que nao seja este repositorio" esta confuso no Fora Do Escopo.** Parece copiado da 0005/DEC-001, que fala do projeto-evidencia. Mas se o produto e um script da skill, ele **vai** rodar em projeto de usuario por desenho. Dogfood aqui ou feature distribuida? O escopo fica ilegivel.
+5. **Proveniencia deveria estar dentro do escopo**, e nao fora: sem comando, exit e caminho do artefato, os campos escritos pela automacao voltam a ser autodeclaracao, so que do script em vez do modelo.
+6. **Risco nao listado, e o mais grave:** se quem dispara a operacao for o modelo criticado, o Problema 3 sobrevive mesmo com N isolados. O script tem de escrever o artefato e a entrada; o chat nao transcreve.
+7. Risco nao listado: agentes em paralelo no mesmo checkout vazam por arquivo, mesmo com prompt cego. Isolamento por construcao exige workspace separado, nao so prompt separado.
+8. Risco nao listado: o mesmo `AGENTS.md` e a mesma spec, escritos pelo Claude, enquadram todos os pareceres. Isolar posicoes nao isola o enquadramento.
+
+O que declarou nao ter conseguido avaliar: as flags de sandbox somente-leitura equivalentes ao `read-only` do Codex nas outras ferramentas; se extrair um invocador compartilhado do `loop.sh` e barato; o custo empirico de N agentes em paralelo; e a posicao dos outros modelos, por construcao.
 
 ### Pontos De Acordo
 
-Quatro das seis perguntas convergiram, e em duas delas os dois modelos rejeitaram as opcoes oferecidas pela pergunta, independentemente:
+Com tres posicoes o placar mudou em relacao ao que duas sugeriam. **Tres unanimidades, duas maiorias de 2 a 1 contra o Claude, e uma maioria de 2 a 1 com dissidencia substantiva.**
 
-- **P-1: convergencia forte.** Os dois recusaram a exclusao entre bruto e minuta. O Claude escreveu que "a entrada precisa apontar para o artefato bruto de cada agente, e nao substitui-lo"; o Codex recusou a pergunta e pediu os dois lado a lado. Mesma linha de corte nos dois: a operacao para onde comeca o julgamento.
-- **P-2: convergencia no resultado, com o Codex corrigindo o fundamento.** Os dois disseram sim com excecao estreita. O Claude justificou por "sao N agentes, e a razao da DEC-019 era um agente so"; o Codex mostrou que isso nao basta, porque o acoplamento volta se quem escreve for um dos opinantes ou um sintetizador livre. O que sustenta a excecao e o **escritor deterministico**, nao a cardinalidade. Correcao aceita.
-- **P-3: convergencia forte, e os dois disseram que a pergunta esta mal posta.** Ambos rejeitaram a escada (a)/(b)/(c) pelo mesmo motivo: o que precisa ser isolado sao as posicoes da rodada atual, nao o repositorio, porque tirar o repositorio degrada a qualidade sem comprar isolamento. O Codex acrescentou o que faltava: sandbox somente-leitura impede escrita e nao leitura, entao o isolamento tem de vir de snapshot e barreira de acesso, com manifesto e hashes.
-- **P-6: convergencia forte.** Os dois modos, rodada 1 cega por construcao, e o ponto que os dois fizeram com palavras diferentes: a execucao **determina** os campos declarativos em vez de o usuario digita-los, e a operacao nunca deduz sozinha rodada ou quais posicoes fornecer.
+- **P-1: 3 de 3.** Os tres recusaram a exclusao entre bruto e minuta, e puseram a linha de corte no mesmo lugar: a operacao para onde comeca o julgamento. Codex e Grok acrescentaram, separadamente, que quem monta e o orquestrador e nunca um dos agentes.
+- **P-2: 3 de 3 no resultado, com o Claude perdendo o fundamento.** Codex e Grok chegaram sozinhos a mesma correcao: o que sustenta a excecao nao e haver N agentes, e sim o **escritor deterministico**. O Grok foi mais preciso que os dois: a DEC-019 nomeia o **agente**, entao aplica-la ao script nao seria heranca, seria estender a decisao a um sujeito que ela nunca nomeou.
+- **P-3: 3 de 3, e os tres disseram que a pergunta esta mal posta.** Todos rejeitaram a escada pelo mesmo motivo: o que se isola sao as posicoes contemporaneas, nao o repositorio. O Grok foi alem e mostrou que a premissa empirica da pergunta e falsa, porque a rodada de 2026-09-03 teve o repositorio visivel, e foi lendo o codigo que o Codex achou o erro.
+- **P-4: 2 a 1, o Claude perdeu.** Codex e Grok convergiram em cobrir debate e achado sobre um primitivo comum. O argumento do Claude, "existe um achado so e fui eu que escrevi, entao e n=1", levou dos dois o mesmo contra-argumento: o caro e isolamento e invocacao, nao o template, e cortar o achado faz a spec nao resolver o problema que a motivou.
+- **P-5: 2 a 1, o Claude perdeu, e ha fato verificado do lado da maioria.** Codex e Grok disseram que N e os comandos entram na chamada, com `MEMORY.md` sendo padrao resolvido pelo agente de chat e nunca configuracao lida por script. Conferido: o `loop.sh` recebe `--agente` e obedece, sem ler `MEMORY.md` em momento nenhum. O Grok acrescentou o que os outros dois nao viram: **`N=1` precisa ser valido**, porque revalidacao de achado tem exatamente um revisor.
+- **P-6: 2 a 1 pelos dois modos, com dissidencia que nao da para ignorar.** Claude e Codex querem os dois modos automatizados. O Grok quer so a rodada 1 cega na v1, e o motivo e forte: rodada 2 exige o pacote **inteiro** das posicoes anteriores, e no instante em que o orquestrador resume, o Problema 3 volta por dentro da propria automacao.
 
-Fora das perguntas, um acordo que nenhum dos dois foi solicitado a dar: os dois apontaram, sem combinar, que a spec trata isolamento por construcao como se produzisse independencia real, e nao produz.
+Um acordo que ninguem foi solicitado a dar, e que os tres deram: **isolamento por construcao nao produz independencia real.** Claude falou de vies de treino compartilhado, Codex de manifesto e barreira de acesso, Grok do enquadramento comum vindo do mesmo `AGENTS.md` e da mesma spec escrita por um dos participantes.
 
 ### Riscos E Tradeoffs
 
-- **A rodada tem n=2, e um dos dois escreveu a spec.** E menos independencia do que o formato sugere. Onde os dois concordam, concordam com o enquadramento de um deles.
-- **Convergencia nao e prova.** Os quatro acordos podem vir de vies compartilhado de treino, e o proprio Claude levantou isso na posicao dele. Ninguem mediu.
-- **A entrada bateu no defeito que a posicao do Codex descreve.** O campo `**Rodada:** 1 de 1` acima afirma um denominador que nao se sabe: se o Grok rodar depois, ainda e rodada 1. E o exemplo vivo da critica 5 dele, acontecendo no registro que a discute.
-- **O material bruto nao foi preservado**, contra o que a P-1 dos dois recomenda. Este registro e resumo conferido, nao artefato.
-- Quatro decisoes prontas para virar DEC ficam paradas ate o usuario ratificar. O custo de esperar e baixo; o de ratificar por conta propria seria transformar parecer de modelo em decisao de projeto, que e o que a regra de desempate proibe.
+- **O risco que o Grok listou esta acontecendo neste registro.** "Se quem dispara a operacao for o modelo criticado, o Problema 3 sobrevive mesmo com N isolados." Quem isolou as tres posicoes, leu as tres e escreveu este resumo foi o Claude, que e uma das tres e o alvo das criticas das outras duas. O isolamento resolveu a **producao** das posicoes e nao resolveu a **transcricao**, que era o Problema 3 desde o inicio. Esta entrada e evidencia de que a spec ataca o problema certo, e de que a rodada manual nao o resolve.
+- **A rodada tem n=3 e nao tem tres enquadramentos.** Os tres leram a mesma spec, escrita por um deles, com as perguntas redigidas por ele. Onde os tres concordam, concordam dentro de um enquadramento so.
+- **As criticas mais duras vieram de fora do que foi perguntado.** Nenhuma pergunta cobria "a ancora empirica da spec e falsa" nem "P-3, P-4 e P-6 nao sao independentes". O valor da rodada esteve menos nas respostas e mais no que o enunciado nao previu.
+- O campo `**Rodada:** 1 de 1` continua afirmando um denominador que ninguem sabe, e o Codex apontou essa fragilidade na mesma rodada em que ela aparece.
+- O material bruto de cada agente segue fora do repositorio, contra o que os tres recomendam em P-1.
 
 ### Consenso Final
 
-**Parcial.** Quatro perguntas convergiram (P-1, P-2, P-3, P-6) e estao prontas para virar decisao da spec 0006, com a redacao da P-2 seguindo o fundamento do Codex e nao o do Claude. Duas divergiram e sobem para o usuario:
+**Tres perguntas fechadas por unanimidade, tres decididas por maioria, e quatro defeitos confirmados na spec.**
 
-- **P-4, o que a primeira versao cobre.** Claude: so debate, porque existe um unico achado registrado e ele foi escrito pelo proprio Claude ontem, entao automatizar aquela forma e automatizar um palpite n=1. Codex: os dois, com coletor comum e dois renderizadores, porque a revalidacao de achado e o unico caso doloroso observado e deixa-la de fora entrega ferramenta que nao resolve o que motivou a spec. As duas posicoes usam **o mesmo fato** (existe um achado so, e ele doeu) para concluir o oposto.
-- **P-5, onde mora a lista de agentes.** Claude: lista nomeada em `docs/MEMORY.md`, no mesmo lugar dos perfis que ja existem. Codex: lista explicita por chamada, porque o executor nao deve interpretar Markdown nem escolher modelo, e `MEMORY.md` e preferencia resolvida pelo agente de chat, nao configuracao. Ponto de fato a favor do Codex, conferido: o `loop.sh` de hoje recebe `--agente` e obedece, sem ler `MEMORY.md`. Os dois concordam em pelo menos duas configuracoes distintas e em nenhum N padrao oculto.
+Prontas para virar DEC, com 3 de 3: **P-1** (minuta deterministica mais bruto preservado, montada pelo orquestrador, julgamento em branco), **P-2** (o script escreve o recorte mecanico, os agentes seguem proibidos, e o fundamento e o escritor deterministico e nao a cardinalidade) e **P-3** (isolar posicoes contemporaneas, manter leitura do repositorio, e tratar `CONSENSUS.md` conforme o caso: fora em debate rodada 1, dentro em revalidacao de achado).
+
+Decididas por maioria, para o usuario ratificar ou virar: **P-4** (cobrir os dois, 2 a 1), **P-5** (N e comandos na chamada, com `N=1` valido, 2 a 1 e com fato verificado) e **P-6** (dois modos, 2 a 1, com a dissidencia do Grok registrada porque o argumento dela sobrevive a derrota).
+
+Defeitos que nao dependem de decisao e precisam ser corrigidos: a premissa falsa em P-3(c) sobre a rodada de 2026-09-03; a nao independencia entre P-3, P-4 e P-6; o exemplo de revisores dentro do enunciado de P-5, que e o catalogo que a DEC-016 proibiu; e o "Fora Do Escopo" que confunde o projeto-evidencia da 0005 com o projeto-alvo de um script distribuido.
+
+Uma mudanca de escopo recomendada pelos tres, que so o usuario pode fazer: **proveniencia (comando, exit code, caminho do artefato) sai de fora e entra no escopo.** Sem ela, os campos escritos pela automacao voltam a ser autodeclaracao, so que do script em vez do modelo, e o Resultado esperado 1 nao se cumpre.
 
 ### Decisao Para Registrar Em DECISIONS.md
 
 Nada ainda. As quatro convergencias viram `DEC-NNN` **na spec 0006**, nao em `DECISIONS.md`, porque sao decisoes locais de desenho dela. Duas delas podem subir para `DECISIONS.md` depois, se sobreviverem a implementacao: a excecao a DEC-019 por escritor deterministico, que muda uma decisao ja registrada do projeto, e a regra de que campo declarativo escrito por execucao vale mais que campo digitado, que vale para qualquer automacao futura e nao so para esta.
-
-## 2026-09-03 - Par de fixture nao separa nada quando o check novo e AVISO
-
-**Achado:** 0005-A1
-
-**Status:** resolvido
-
-**Resolvido em:** 2026-09-03, depois da rodada 2. A disposicao se sustenta com as correcoes registradas em "Revalidacao", e o residuo saiu daqui para o backlog: T-050, T-051 e T-052. A pergunta que a rodada 2 deixou aberta (identificador estavel de diagnostico ou fragmento de mensagem) foi respondida pelo usuario no mesmo dia: identificador estavel, e T-051 foi desbloqueada com essa escolha.
-
-**Metodo:** debate-aberto
-
-**Exposicao previa a outras posicoes:** sim
-
-**Rodada:** 2 de 2
-
-**Escapou de verificacao:** sim
-
-### Contexto
-
-- Primeiro uso do formato de achado neste repositorio, no dogfood da 2.4.0 (T-049), sobre trabalho da propria T-048.
-- Proveniencia dos campos declarativos: a rodada 1 foi escrita so pelo Claude, sem outra posicao a vista (`pareceres-independentes`, exposicao previa `nao`). Os campos acima descrevem a rodada 2, em que o Codex leu a disposicao antes de escrever. As secoes "Disposicao" e "Por Que Nada Pegou Antes" continuam como saidas da rodada 1: o que a rodada 2 corrigiu esta em "Revalidacao", e nao reescrito por cima.
-- O repositorio tem um unico padrao de fixture, herdado da 2.2.0: um par `valido`/`invalido` declarado no dicionario `FIXTURES` de `verify_repository.py`, com o exit code esperado de cada lado. Ele funciona porque todo check daquela versao era ERRO, e ERRO muda o exit code.
-
-### O Que Foi Encontrado
-
-- Os checks de achado da 2.4.0 sao AVISO, por decisao da spec: a forma e verificavel, o merito nao. Sem `--strict`, aviso nao muda exit code.
-- Consequencia: a fixture `achado-project`, escrita no padrao existente, teria `invalido: 0` e `valido: 0` no `FIXTURES`, e `verify_repository.py` imprimiria `[OK] fixture achado-project/invalido: exit 0 (esperado 0)`. Verde, e sem provar nada: os cinco avisos poderiam nunca ter disparado, ou disparar na entrada errada, e o check passaria igual.
-
-### Disposicao
-
-- A fixture continua no `FIXTURES` (que cobre a regressao de "nao virou ERRO por acidente"), e ganhou `verificar_achado` ao lado: roda os dois lados com `--strict`, exige exit 0 no valido e exit 1 no invalido, **conta** os avisos e confere que nenhum deles cita a entrada de debate que abre os dois arquivos.
-- A contagem e a checagem do controle sao o que faltava: sem elas, o par mede presenca de aviso, nao qual aviso.
-
-### Revalidacao
-
-Rodada 2, em 2026-09-03, pelo Codex CLI (`gpt-5.6-sol`, `model_reasoning_effort=high`, sandbox `read-only`), a pedido do usuario. Veredito: **se sustenta com ressalva**.
-
-Aceito, e sao correcoes de fato, todas conferidas no codigo antes de registrar:
-
-- **A disposicao descreve mal o proprio codigo.** `verificar_achado` conta linhas `[AVISO]` e confere uma unica exclusao, o titulo da entrada de controle. Ela nao compara motivo nem titulo dos avisos. A frase "sem elas, o par mede presenca de aviso, nao qual aviso" prometeu mais do que o codigo entrega: o portao continua sem saber **qual** aviso saiu. A entrada correspondente de `DECISIONS.md` herdou o mesmo exagero e foi corrigida.
-- **A contagem fixa em cinco e rigida e fraca ao mesmo tempo.** Quebra quando a fixture cresce por motivo legitimo, e aceita regressao compensada: um aviso certo some, outro errado aparece, o total continua cinco e o portao passa. Contraexemplo do Codex: os cinco avisos caindo todos na mesma entrada.
-- **T-050, como estava escrita, contradizia a propria disposicao.** Ela mandava recusar par cujos dois lados declarem o mesmo exit code, e `achado-project` tem os dois lados em 0 **de proposito**, que e exatamente a guarda de regressao que esta disposicao decidiu manter. Reescrita.
-- **A causa estrutural e mais funda que "exit codes iguais".** O `FIXTURES` modela status de processo e nao associa cada fixture aos diagnosticos que ela deve produzir. Exit codes diferentes tambem escondem teste inutil: um lado invalido que sai 1 por arquivo obrigatorio ausente passaria por T-050 sem nunca exercitar o check pretendido.
-- **O criterio "projeto que nunca registra achado nao recebe aviso novo" nao e exercitado literalmente.** Os dois lados de `achado-project` tem achado. Um bug que so emitisse aviso em arquivo sem nenhum achado passaria. Conferido: nenhuma outra fixture com entrada de debate roda em `--strict` (a do `v1-project` tem uma, e roda sem a flag).
-
-Onde a revalidacao ficou incompleta, e isso tambem e registro:
-
-- O Codex nao considerou que a **raiz deste repositorio ja e um controle vivo** do ultimo item: ela roda em `--strict` no primeiro check de `verify_repository.py`, tem uma entrada de debate sem `**Achado:**` (a de 2026-09-02) e fecha com zero avisos. Um `check_consensus_achado` que disparasse em entrada de debate reprovaria ali. E controle parcial, porque depende do dogfood e nao de fixture, e nao cobre arquivo sem nenhum achado; a critica sobrevive, mas nao inteira.
-- Sobre `**Escapou de verificacao:** sim`, o Codex considera discutivel, porque nenhum portao verde chegou a existir. **Mantido `sim`**: o criterio da DEC-007 e se a verificacao existente pegaria o defeito, e ela nao pegaria. A secao "Por Que Nada Pegou Antes" ja declara essa nuance em vez de esconde-la.
-- Os contraexemplos do Codex foram derivados por leitura, sem mutacao de fixture nem do validador, porque esta rodada proibiu editar arquivos. Nenhum deles foi executado.
-
-Residuo desta rodada: T-050 (reescrita), T-051 (desbloqueada em 2026-09-03, com o usuario escolhendo identificador estavel de diagnostico em vez de fragmento de mensagem) e T-052.
-
-### Por Que Nada Pegou Antes
-
-- O que passou verde: nada, e a nuance importa. O defeito nunca chegou a ser commitado, porque apareceu ao escrever a fixture. O que escapa aqui e outra coisa: **nenhuma verificacao existente teria notado**, e o mecanismo de fixture nao tem como reclamar de um par que nao separa. Se a fixture tivesse sido escrita no padrao herdado, a suite reportaria 36 de 36 com um check inutil dentro.
-- Mecanismo do ponto cego: o padrao de fixture foi desenhado quando todo check novo era ERRO, e o exit code separava os casos por construcao. A hipotese "o exit code separa" ficou implicita no padrao em vez de escrita, e um check AVISO a quebra sem que nada acuse.
-- Conserto de portao proposto: `verificar_achado` ja cobre este par. O conserto geral, que continua em aberto, seria `verify_repository.py` recusar um par `valido`/`invalido` cujos dois lados declarem o mesmo exit code esperado, em vez de depender de quem escreve a proxima fixture lembrar disso.
-
-### Decisao Para Registrar Em DECISIONS.md
-
-- Fixture cujo caso invalido produz apenas AVISO nao prova nada pelo exit code sem `--strict`: ela roda com a flag e confere quais avisos sairam, nunca so quantos exit codes bateram.

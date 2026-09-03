@@ -102,6 +102,7 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
 
 ### Project
 
+- Ponte so existe para ferramenta que nao le `AGENTS.md` sozinha. Verificado em 2026-09-03 contando referencias dentro dos proprios binarios: Grok cita `AGENTS.md` 46 vezes e opencode 29, e nenhum dos dois procura `GROK.md` ou `OPENCODE.md`. Codex tambem le `AGENTS.md` direto, que e o padrao Agent Skills. Sobram Claude Code, que entra por `CLAUDE.md`, e Gemini CLI, por `GEMINI.md`. Criar ponte para as outras seria arquivo morto. Como bonus, Grok e opencode tambem olham `CLAUDE.md` por compatibilidade, e a nossa ponte so aponta para o `AGENTS.md`, entao isso ajuda.
 - A skill fechou a versao 2.3.0 em 2026-09-02, com o modulo de loop: a estrutura passou a executar tarefa verificavel, nao so descreve-la. Publicada no GitHub e instalada nos tres destinos globais.
 - Gemini CLI nao roda nesta maquina: a conta cai em `IneligibleTierError`, com o free tier do Gemini Code Assist descontinuado para este cliente, que foi mandado migrar para Antigravity. Nao e defeito do modulo de loop, e nao adianta reinvestigar sem mudar de conta.
 - A evidencia de uma tarefa fechada pelo loop vale exatamente o que o portao dela vale. Numa bancada com tres ferramentas, duas fecharam tarefa com bug numa regra de borda que a suite nao cobria, e a evidencia estava correta. O argumento completo esta em `references/loop.md`, secao "A Evidencia Vale O Que O Portao Vale"; antes de declarar `(verifica:)` numa tarefa, pergunte se aquele comando falharia caso o trabalho saisse errado.

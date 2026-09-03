@@ -63,6 +63,14 @@ Opcoes:
 > Nota: o caminho oficial do Codex e `~/.agents/skills/` (padrao Agent Skills),
 > **nao** `~/.codex/skills/`.
 
+### Por Que So Duas Pontes
+
+`CLAUDE.md` e `GEMINI.md` existem porque Claude Code e Gemini CLI entram por
+arquivo proprio. Codex, Grok e opencode leem `AGENTS.md` direto, entao ponte
+para eles seria arquivo morto: nenhum dos binarios procura `GROK.md` ou
+`OPENCODE.md`. Conferido em 2026-09-03 contando as referencias dentro dos
+proprios executaveis.
+
 ### Instalacao manual (sem o script)
 
 ```bash

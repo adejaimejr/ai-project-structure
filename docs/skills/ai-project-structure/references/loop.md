@@ -214,6 +214,8 @@ O bloco do `AGENTS.md` depende de o agente escolher ler o arquivo. O prompt do `
 
 A regra que sai disso: quando a violacao de uma restricao **passa despercebida no portao**, ela nao pode morar so no bloco. Tem que estar no prompt, onde nao da para nao ler.
 
+E nao custa: na matriz refeita, com a restricao no prompt, o consumo **caiu** em todas as ferramentas que rodaram, uma delas pela metade. Dizer a restricao antes evita o agente explorar um caminho que seria descartado depois.
+
 ### A Evidencia Vale O Que O Portao Vale
 
 Isto precisa estar dito com todas as letras: a evidencia prova que **o comando declarado passou**, e nada alem disso. Numa bancada com tres ferramentas, duas entregaram implementacao com bug numa regra de borda que a suite de testes nao cobria. O portao ficou verde, a evidencia foi escrita com lastro real de exit code, e o bug foi junto.

@@ -88,11 +88,18 @@ Desta spec, todas ratificadas pelo usuario em 2026-09-03 a partir da rodada 1 ce
 
 P-1 a P-6 foram respondidas pela rodada 1 cega de 2026-09-03 e ratificadas pelo usuario no mesmo dia; viraram DEC-001 a DEC-006 acima. A rodada esta em `docs/CONSENSUS.md`, entrada "2026-09-03 - As seis perguntas da spec 0006", com as tres posicoes na integra.
 
-Continuam abertas:
+Continuam abertas, e as duas passaram por rodada 1 cega em 2026-09-03, registrada em `docs/CONSENSUS.md`, entrada "2026-09-03 - P-7 e P-8". **As tres posicoes convergiram no que fazer nas duas**, e o que sobrou para o usuario e calibragem, nao empate:
+
 
 - **P-7. A forma da entrada de `CONSENSUS.md` fica mesmo fora do escopo?** (aberta pela rodada 1: o Codex mostrou uma contradicao que o Claude nao viu). O modelo de debate tem secoes nomeadas para Codex, Claude e Gemini, e o de achado tem uma `Revalidacao` unica. Nenhum dos dois representa N agentes arbitrarios, falha individual de um agente, comando executado, hash de insumo, ou varias revalidacoes. Entao "N agentes" e "nao mexer na forma" nao cabem juntos. Ou a forma muda nesta spec, ou o requisito encolhe para o que ja e representavel, e isso enfraquece o objetivo. Qual dos dois? **Ficou mais urgente depois da DEC-004**, que mandou cobrir tambem o achado: sao duas formas para acomodar, nao uma.
+  **Rodada 1: 3 de 3 pela forma entrar no escopo**, com secao repetivel por participante e id arbitrario nas duas formas, secao propria para agente que falhou, e check novo valendo so para entrada automatizada, por marcador opt-in (`**Origem:**`). Fato que barateia a decisao, conferido no codigo: **o validador nunca exigiu heading nomeado**. O congelamento em Codex, Claude e Gemini esta no template, e nao no contrato do script.
+  **Calibragem em aberto:** os diagnosticos novos sao ERRO (Codex, porque em entrada automatizada a forma e contrato da operacao) ou AVISO (Grok, por simetria com o resto de consenso)?
 
 - **P-8. Proveniencia entra no escopo?** (recomendada pelas **tres** posicoes da rodada 1, e por isso registrada em vez de decidida por mim). Hoje "Fora Do Escopo" nao a menciona e "Incluido" tambem nao. Os tres modelos disseram, com palavras diferentes, a mesma coisa: sem registrar comando, exit code e caminho do artefato ao lado da entrada, os campos `Metodo`, `Exposicao previa` e `Rodada` escritos pela automacao **voltam a ser autodeclaracao**, so que do script em vez do modelo, e o Resultado esperado 1 nao se cumpre. O custo e um sidecar por rodada e a decisao de onde ele mora, que esbarra em P-1 (o artefato bruto tambem precisa de casa).
+  **Rodada 1: 3 de 3 por entrar**, com sidecar guardando bruto e manifesto fora do `CONSENSUS.md`, e ponte dentro da entrada. O bruto **nao** pode ficar em `.gitignore`, senao o teste da DEC-001, conferir o campo olhando o bruto ao lado, morre na sessao seguinte.
+  **Calibragem em aberto:** quanto do manifesto a entrada repete? Codex quer comando, diretorio e hashes de insumo e saida **dentro** da entrada, lendo a DEC-002 ao pe da letra. Grok quer o comando integral so no manifesto e uma ponte curta, por rotacao e leitura humana. As duas leituras da DEC-002 se defendem.
+
+- **P-9. Quando a minuta e escrita?** (conflito entre duas decisoes **ja ratificadas**, achado pelo Grok e sem dono ate agora). A DEC-003 manda o agente nao ver as posicoes **contemporaneas**; a DEC-006 manda o agente da rodada 2 ver as **anteriores** na integra. Se o orquestrador gravar a minuta no repositorio no meio da rodada, o repositorio visivel vaza o contemporaneo por dentro. Escrita atomica so no fim da rodada resolve, e custa retomada apos interrupcao e tratamento de colisao de execucao. Nenhuma das seis decisoes escolheu isso.
 
 ## Evidencia De Conclusao
 

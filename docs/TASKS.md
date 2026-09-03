@@ -30,7 +30,9 @@ Modelo de linha concluida:
 
 ## Proximas Tarefas
 
-- (Vazio.)
+- T-054: `check_consensus_declaration` nao acusa `**Rodada:**` **ausente** (retorna calado, ao contrario de `Metodo` e `Exposicao previa`), e usa `re.match` em vez de `fullmatch`, entao `1 de 1` seguido de qualquer texto passa. Achados pelo Codex na rodada de P-7 e P-8, conferidos no codigo. **Decidir antes de consertar:** fechar os dois para toda entrada e cobranca nova em projeto que ja usa a estrutura, o que esbarra no criterio "projeto que nao automatiza nao ganha cobranca nova"; o Grok propos cobrar `Rodada` ausente so em entrada automatizada. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)
+- T-055: O `Modelo De Debate` de `docs/CONSENSUS.md` da raiz nao traz `Metodo`, `Exposicao previa a outras posicoes` nem `Rodada`, que o `AGENTS.md` exige e o template em `assets/docs/CONSENSUS.md` ja tem desde a 2.2.0. Quem copiar o modelo da raiz produz entrada que falha em `--strict`. Achado pelos dois modelos na rodada de P-7 e P-8, conferido. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)
+- T-056: `spec_overview` conta sub-item indentado como pergunta aberta, porque testa `line.strip().startswith("- ")` sem olhar indentacao. Uma spec com bullets aninhados em "Perguntas Abertas" reporta numero inflado no `--progress`. Encontrado ao escrever a spec 0006, que passou a reportar 7 em vez de 3. Contornado no texto por ora. (prioridade: baixa) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)
 
 
 
@@ -38,8 +40,8 @@ Modelo de linha concluida:
 
 ## Aguardando Usuario
 
-- T-053: Responder P-7 e P-8 da spec 0006 para ela poder virar `Definida`. P-1 a P-6 ja foram ratificadas em 2026-09-03 e viraram DEC-001 a DEC-006. (prioridade: media) (bloqueada: 2026-09-03) (spec: 0006-automacao-do-consenso)
-  - **Pergunta:** **P-7**, se a forma da entrada de `CONSENSUS.md` fica mesmo fora do escopo, sendo que nem o modelo de debate nem o de achado representam N agentes, falha individual ou hash de insumo. Ficou mais urgente com a DEC-004, que mandou cobrir tambem o achado: sao duas formas para acomodar. E **P-8**, se proveniencia (comando, exit code, caminho do artefato) entra no escopo, recomendada pelas tres posicoes da rodada, porque sem ela os campos escritos pela automacao voltam a ser autodeclaracao, so que do script.
+- T-053: Ratificar P-7 e P-8 e responder P-9 da spec 0006, para ela poder virar `Definida`. P-1 a P-6 ja viraram DEC-001 a DEC-006 em 2026-09-03. (prioridade: media) (bloqueada: 2026-09-03) (spec: 0006-automacao-do-consenso)
+  - **Pergunta:** as tres perguntas passaram por rodada 1 cega em 2026-09-03, com **3 de 3 convergindo no que fazer** em P-7 e P-8. O que sobrou nao e empate, e **calibragem**: (1) os diagnosticos novos sao ERRO ou AVISO em entrada automatizada? (2) quanto do manifesto a entrada repete, comando e hashes dentro (Codex) ou ponte curta (Grok)? E **P-9**, nova, que e conflito entre duas decisoes ja ratificadas: a DEC-003 proibe ver posicao contemporanea e a DEC-006 exige ver as anteriores, e nenhuma das duas escolheu **quando** a minuta e escrita; escrita incremental vaza o contemporaneo pelo proprio repositorio.
   - **Resposta:** (A preencher.)
 
 ## Concluidas

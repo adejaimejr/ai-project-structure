@@ -2,6 +2,14 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (rodada de P-7 e P-8 da spec 0006)
+
+- Rodada 1 cega sobre as duas perguntas restantes, primeiro uso da DEC-003: os agentes rodaram numa copia com a entrada da rodada anterior retida, e com uma nota dizendo que a omissao era proposital.
+- 3 de 3 nas duas: a forma da entrada entra no escopo e a proveniencia entra no escopo. Sobrou calibragem, nao empate.
+- Fato que barateia a decisao de forma, conferido no codigo: o validador nunca exigiu heading de posicao nomeado. O congelamento em Codex, Claude e Gemini estava no template, e nao no contrato.
+- P-9 nova, e e conflito entre DEC-003 e DEC-006 ja ratificadas: nenhuma das duas escolheu quando a minuta e escrita, e escrita incremental vaza posicao contemporanea pelo repositorio.
+- Quatro defeitos do que ja esta publicado viraram T-054, T-055 e T-056.
+
 ## 2026-09-03 (spec 0006 com seis decisoes ratificadas)
 
 - Rodada 1 cega com tres posicoes independentes (Claude selado antes das demais, Codex, Grok via `cursor-agent`) respondeu as seis perguntas da spec 0006. Tres unanimes, duas com o Claude vencido por 2 a 1, uma com dissidencia registrada.

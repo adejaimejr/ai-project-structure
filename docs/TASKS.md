@@ -30,7 +30,6 @@ Modelo de linha concluida:
 
 ## Proximas Tarefas
 
-- T-020: `scripts/loop.sh` neutro: `--tarefa`, `--agente`, `--tentativas`; uma tarefa por rodada, ate 3 tentativas realimentando a saida da falha, fecho so com lastro de comando, e tarefa sem contexto movida para `Aguardando Usuario` com a pergunta escrita. (prioridade: alta) (spec: 0004-modulo-de-loop)
 - T-021: `verify_repository.py` cobrindo o bloco `loop` e o partial com a mesma paridade de `core` e `specs`, e versao 2.3.0 coerente entre `SKILL.md`, marcadores e `CHANGELOG.md`. (prioridade: alta) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
 - T-022: Evals e fixtures do modulo: ativacao recusada sem comando real, ativacao aceita, scaffold sem vestigio do modulo, e o comportamento do `loop.sh` exercitado com agente falso nos quatro caminhos (portao passa, portao falha 3x, tarefa sem `(verifica:)`, falta de contexto). (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
 - T-023: Dogfood: ativar o modulo neste repositorio e rodar o loop numa tarefa real com `(verifica:)`, conferindo que a evidencia escrita bate com a saida do comando. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
@@ -43,6 +42,8 @@ Modelo de linha concluida:
 
 ## Concluidas
 
+- 2026-09-02 T-020: `scripts/loop.sh` neutro e `scripts/loop_task.py`, que faz toda edicao de `TASKS.md` reusando o parser do validador. (spec: 0004-modulo-de-loop)
+  - Evidencia: tipo=comando; procedimento=duas baterias em projetos descartaveis, uma para o helper (elegibilidade, fecho, bloqueio, tarefa dentro de cerca, portao vermelho recusado, integridade do historico) e outra para os quatro caminhos do `loop.sh` com agente falso (tarefa sem portao, portao verde, portao vermelho 3x com realimentacao conferida no prompt da tentativa 2, e falta de contexto), mais `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=23 de 23 no helper e 22 de 22 no loop, verificador exit 0 com 26 de 26, e `validate_structure.py --strict` exit 0 nos projetos depois de cada rodada
 - 2026-09-02 T-019: Bloco de loop, `assets/partials/AGENTS-loop-block.md`, `references/loop.md`, marcadores dos tres blocos em v2.3.0 e fluxo de ativacao no `SKILL.md` com o portao de `QUALITY.md`. (spec: 0004-modulo-de-loop)
   - Evidencia: tipo=comando; procedimento=partial e `references/loop.md` criados, `SKILL.md` em 2.3.0 com a secao "Ativar O Modulo De Loop" e o portao que recusa ativacao sem comando executavel, marcadores `core`, `specs` e `loop` em v2.3.0 (DEC-009), secao 2.3.0 no CHANGELOG da skill, passo 4 de `references/atualizacao.md` ensinado a tratar o bloco `loop` sem nunca oferecer a ativacao, e `python3 docs/skills/ai-project-structure/evals/verify_repository.py` rodado depois; resultado=exit 0 com 26 de 26 verificacoes, incluindo "marcadores em v2.3.0" e "CHANGELOG.md da skill tem a secao 2.3.0"; validador `--strict` exit 0
 - 2026-09-02 T-024: Rotacionadas para `docs/archive/SESSIONS-2026.md` as 6 entradas de 2026-08-20, que levaram `SESSION.md` de volta a 31KB. (verifica: python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict)

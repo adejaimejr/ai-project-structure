@@ -13,6 +13,10 @@ Na memoria do projeto, o loop escreve **apenas o que um comando comprova**:
 
 Excecao unica: **falta de contexto obrigatorio**. Nesse caso o loop move a tarefa para "## Aguardando Usuario", escreve `**Pergunta:**` com a duvida, `**Resposta:** (A preencher.)` e `(bloqueada: AAAA-MM-DD)`, e para. Registrar duvida e o oposto de alegar conclusao, por isso e a unica escrita sem comando por tras.
 
+### Como Pedir Ajuda No Meio De Uma Rodada
+
+Faltou contexto obrigatorio? Escreva a pergunta, em uma frase, no arquivo `.loop-pergunta` na raiz do projeto e **pare**. O loop registra a pergunta na tarefa e encerra a rodada. Nao escolha por inferencia plausivel para nao interromper o ciclo: uma rodada a menos custa pouco, e um palpite escrito como se fosse decisao custa caro.
+
 ### Limites
 
 - Uma tarefa por rodada, indicada no comando. O loop nunca escolhe sozinho no que trabalhar.

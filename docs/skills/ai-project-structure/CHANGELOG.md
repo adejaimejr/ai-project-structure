@@ -9,6 +9,9 @@ Modulo de loop: a estrutura passa a poder executar uma tarefa verificavel, nao s
 - **Modulo opcional de loop**, no padrao do modulo de specs: `references/loop.md`, `assets/partials/AGENTS-loop-block.md` e marcadores `ai-project-structure:loop:start|end`. Ativado so a pedido explicito, nunca no scaffold.
 - **Portao de ativacao**: a secao "Testes E Validacao" de `QUALITY.md` do projeto-alvo precisa ter comando executavel. Vazia ou com o texto do template, a ativacao e recusada.
 - **Limite do que a automacao escreve**: o loop fecha tarefa apenas quando ela declarou `(verifica: <comando>)` e o comando saiu 0, colando a saida real como `Evidencia: tipo=comando`. Nunca escreve `tipo=revisao-manual` nem `tipo=conferencia`, e nao toca `SESSION.md`, `MEMORY.md`, `DECISIONS.md`, `AGENTS.md` nem specs. Excecao unica: falta de contexto move a tarefa para `Aguardando Usuario` com a pergunta escrita.
+- `scripts/loop.sh`: orquestra uma rodada. Uma tarefa, ate 3 tentativas, com a saida do portao voltando como contexto da tentativa seguinte. Exit codes distintos por caminho (0 fechou, 1 nao elegivel, 2 portao falhou, 3 aguardando usuario).
+- `scripts/loop_task.py`: toda edicao de `TASKS.md` passa por aqui, reusando o parser do `validate_structure.py`. Um parser so no projeto, em vez de dois divergindo.
+- Protocolo de falta de contexto por arquivo (`.loop-pergunta`), nao por linha sentinela no stdout: cada ferramenta formata saida de um jeito, e arquivo existe ou nao existe.
 - Marcadores dos tres blocos gerenciados atualizados para v2.3.0. Eles andam juntos mesmo quando o conteudo de um bloco nao muda, porque o marcador diz qual versao da skill escreveu aquele bloco.
 
 ## 2.2.0 - 2026-09-02

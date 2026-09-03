@@ -18,7 +18,9 @@ ai-project-structure/
 │   └── docs/...        # inclui docs/specs/README.md (modulo opcional)
 ├── references/         # fluxos detalhados: atualizacao.md, specs.md, loop.md
 ├── scripts/
-│   └── validate_structure.py   # validador (Python 3, so stdlib)
+│   ├── validate_structure.py   # validador (Python 3, so stdlib)
+│   ├── loop.sh                 # modulo de loop: orquestra uma rodada
+│   └── loop_task.py            # modulo de loop: edicoes em TASKS.md
 ├── agents/
 │   └── openai.yaml     # metadado OPCIONAL do Codex (UI + politica de invocacao)
 ├── evals/

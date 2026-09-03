@@ -42,15 +42,50 @@ loop.sh --tarefa T-042 --agente "gemini -p" --projeto /caminho/do/projeto
 ```
 
 - `--tarefa` (obrigatorio): o `T-NNN`.
-- `--agente` (obrigatorio): comando headless da ferramenta que voce usa. O script nao assume nenhuma.
+- `--agente` (obrigatorio): comando headless da ferramenta que voce usa. O script nao assume nenhuma. O prompt entra como ultimo argumento. Argumento com espaco dentro de aspas nao e suportado.
 - `--tentativas` (padrao 3).
 - `--projeto` (padrao: diretorio atual).
+- `--seco`: roda o ciclo sem chamar o agente, para testar portao e fluxo.
 
-Exit 0 apenas quando o portao passou e a tarefa foi fechada. Qualquer outro caminho sai diferente de zero, o que deixa a composicao por fora funcionar:
+Exit codes, distintos de proposito para dar para ramificar por fora:
+
+| Codigo | Significado |
+|---|---|
+| 0 | portao passou; tarefa fechada com evidencia de comando |
+| 1 | erro de uso, ou tarefa nao elegivel (sem `(verifica:)`, ja concluida, inexistente) |
+| 2 | portao falhou em todas as tentativas; nada movido, nada escrito |
+| 3 | o agente sinalizou falta de contexto; tarefa em "Aguardando Usuario" |
+
+Qualquer caminho diferente de sucesso sai diferente de zero, o que deixa a composicao por fora funcionar:
 
 ```bash
 loop.sh --tarefa T-042 --agente "claude -p" && say pronto
 ```
+
+## Como O Agente Pede Ajuda
+
+A regra "Nunca Inferir" manda perguntar quando falta contexto, e numa rodada de loop nao ha com quem falar. O protocolo e um arquivo:
+
+1. O prompt manda o agente escrever a pergunta, em uma frase, em `.loop-pergunta` na raiz do projeto, e parar.
+2. Depois de cada tentativa, antes de rodar o portao, o `loop.sh` procura esse arquivo.
+3. Achou: o helper move a tarefa para "## Aguardando Usuario" com `**Pergunta:**` preenchida, o arquivo e apagado e a rodada termina com codigo 3. O portao nem chega a rodar.
+
+Arquivo, e nao linha sentinela no stdout, porque cada ferramenta formata a saida de um jeito e nenhuma garante que o modelo emita uma string exata. Arquivo existe ou nao existe.
+
+`.loop-pergunta` e temporario e some assim que e lido. Se sobrar de uma rodada interrompida, a rodada seguinte avisa e remove: uma pergunta ja registrada em `TASKS.md` nao precisa do arquivo de novo.
+
+## Como A Evidencia E Escrita
+
+Quem escreve e o `loop_task.py`, nunca o shell. Ele reusa o parser do `validate_structure.py`, entao o que ele entende por secao, ID e marcador e exatamente o que o validador entende; nao ha dois parsers do mesmo arquivo divergindo com o tempo.
+
+A evidencia e sempre uma sub-linha so:
+
+```md
+- AAAA-MM-DD T-042: Descricao da tarefa. (verifica: pytest -q)
+  - Evidencia: tipo=comando; procedimento=pytest -q; resultado=exit 0; 42 passed in 3.10s
+```
+
+`resultado` recebe o exit code e a saida real do comando, com espacos colapsados para caber em uma linha. Saida longa e cortada pelo comeco, preservando o fim, que e onde suite de teste costuma imprimir o placar; quando isso acontece o corte fica declarado no proprio campo, em vez de escondido.
 
 ## Isolamento
 

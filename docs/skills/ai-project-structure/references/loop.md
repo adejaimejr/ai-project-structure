@@ -118,7 +118,7 @@ O `loop.sh` continua sem saber o que e perfil: ele recebe uma string de `--agent
 
 Quando os perfis de executar tiverem degraus (`executar`, `executar-dificil`, `executar-muito-dificil`), **proponha um e diga por que em uma linha**. Nunca escolha em silencio: o nivel muda o consumo de plano, e quem paga e o usuario.
 
-**Comece sempre em `executar`.** Nao e chute conservador: numa bancada com tres ferramentas, uma tarefa de implementar funcao do zero, com regra de borda e suite inteira como portao, passou de primeira no esforco padrao de cada uma. O degrau base da conta da maioria.
+**Comece sempre em `executar`.** Nao e chute conservador, e o que a evidencia diz: tres bancadas, quatro ferramentas, tarefas indo de implementar funcao do zero a arrumar um manual espalhado por cinco arquivos, e **todas terminaram com portao verde na primeira tentativa**, varias delas no modelo mais barato disponivel.
 
 Suba **so quando algum destes valer**, e diga qual:
 
@@ -127,11 +127,9 @@ Suba **so quando algum destes valer**, e diga qual:
    O loop **nao registra fracasso em lugar nenhum**, por decisao registrada. Entao esse sinal so existe dentro da conversa em que a rodada aconteceu: em sessao nova, ele desaparece. Nao trate silencio como prova de que nunca falhou. Proponha o degrau base dizendo **"nao tenho registro de rodada anterior"**, e nao "e a primeira rodada", e deixe uma porta aberta em meia linha: se ja tentou antes, o usuario corrige e voce sobe.
 2. **Duas rodadas ja falharam.** Sobe para `executar-muito-dificil`, e diga tambem que talvez o problema nao seja esforco: tarefa que falha duas vezes costuma estar mal especificada ou grande demais para uma rodada.
 3. **O usuario disse que e dificil.** Vale mais que qualquer leitura sua da tarefa.
-4. **A tarefa mexe em varias partes ao mesmo tempo** e ainda tem regra de borda ou contrato para respeitar. Nao basta "tem suite" nem "e comportamento novo": isso vale para quase toda tarefa de codigo e nao separa nada.
+E so isso. **Nao estime dificuldade lendo a tarefa.** Nem por ela tocar varios arquivos, nem por ter regra de borda, nem por pertencer a uma spec, nem por o portao ser uma suite. Ja tentei com esses sinais e eles erraram: numa tarefa de conteudo com sete problemas espalhados por cinco arquivos, o sinal mandou subir um degrau e o modelo mais barato resolveu de primeira.
 
-Repare no que **nao** e sinal: portao ser uma suite, a tarefa pertencer a uma spec, ou a descricao parecer longa. Os tres disparam em quase todo trabalho real, e regra que sempre responde a mesma coisa nao ajuda a decidir.
-
-Na duvida entre dois degraus, **proponha o mais baixo**. O loop tem tentativas, e subir na segunda custa menos que gastar o teto em tarefa que passaria de primeira.
+Nenhuma estimativa a priori se provou util ate agora, e cada degrau desnecessario e cota de plano ou dinheiro gasto a toa. Na duvida, **degrau base**: subir depois de uma falha real custa uma rodada, e comecar alto custa em toda tarefa que passaria de primeira.
 
 Nao invente rubrica com pontuacao. Isso e julgamento declarado, nao medicao: diga o sinal que voce usou e deixe o usuario discordar em uma palavra.
 

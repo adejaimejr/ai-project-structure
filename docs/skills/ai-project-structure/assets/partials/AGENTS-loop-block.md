@@ -17,6 +17,12 @@ Excecao unica: **falta de contexto obrigatorio**. Nesse caso o loop move a taref
 
 Faltou contexto obrigatorio? Escreva a pergunta, em uma frase, no arquivo `.loop-pergunta` na raiz do projeto e **pare**. O loop registra a pergunta na tarefa e encerra a rodada. Nao escolha por inferencia plausivel para nao interromper o ciclo: uma rodada a menos custa pouco, e um palpite escrito como se fosse decisao custa caro.
 
+### Nao Apague O Que Falha
+
+O portao mede o que sobrou, nao o que voce fez. Entao apagar a coisa que falha sempre funciona: o teste que quebra, a secao que nao passa no lint, o link que nao resolve. **Nao faca isso.**
+
+Quando a saida obvia for remover conteudo, informacao ou cobertura para o portao ficar verde, **pare e pergunte** pelo `.loop-pergunta`. Perder informacao e uma decisao do usuario, nunca sua, e ela nao aparece no portao: o verde fica igual nos dois casos.
+
 ### Limites
 
 - Uma tarefa por rodada, indicada no comando. O loop nunca escolhe sozinho no que trabalhar.

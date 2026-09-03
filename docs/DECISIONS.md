@@ -20,6 +20,25 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-09-03 - Arquivo de memoria do projeto se escreve por substituicao atomica
+
+### Decisao
+
+- Toda automacao deste projeto que grave um arquivo de `docs/` usa temporario no mesmo diretorio, `fsync`, e `os.replace`. Nunca `write_text` direto, nunca append no meio do arquivo.
+- Vale para o `loop_task.py`, que ja esta publicado, e para qualquer operacao futura, incluindo o orquestrador da spec 0006.
+
+### Motivo
+
+- `write_text` trunca antes de escrever. Crash, disco cheio ou processo morto no meio deixam o arquivo partido, e os arquivos de `docs/` sao a memoria do projeto: `TASKS.md` e o backlog vivo, e perde-lo custa mais que qualquer rodada.
+- Achado pelo Grok na rodada de P-9 da spec 0006, ao comparar o que a operacao de consenso precisaria fazer com o que o `loop_task.py` ja fazia. Conferido no codigo antes de aceito.
+- A alternativa, confiar que a escrita e curta o bastante para nao ser interrompida, e a mesma aposta que qualquer arquivo de banco de dados aprendeu a nao fazer.
+
+### Impacto
+
+- `loop_task.py` corrigido na 2.5.1, com regressao provada por mutacao: com o comportamento antigo de volta, o teste acusa arquivo truncado.
+- O pior caso passa a ser um temporario orfao ao lado do arquivo. Ruim, e nao destrutivo.
+- Consequencia para a spec 0006: a minuta em `CONSENSUS.md` se escreve pelo mesmo caminho, substituindo o arquivo inteiro, o que ja era o desenho que a rodada de P-9 convergiu.
+
 ## 2026-09-03 - Agente nao escreve consenso; orquestrador deterministico escreve o recorte que a execucao comprova
 
 ### Decisao

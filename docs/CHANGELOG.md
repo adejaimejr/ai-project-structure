@@ -2,6 +2,12 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (skill v2.5.1)
+
+- `loop_task.py` grava `docs/TASKS.md` por substituicao atomica. Antes usava `write_text` direto, que trunca antes de escrever: crash no meio partia o backlog vivo do projeto. Provado por mutacao; `test_loop.py` de 55 para 58 verificacoes.
+- Regra em `docs/DECISIONS.md`: arquivo de memoria se escreve por substituicao atomica, nunca direto. Vale alem desta correcao.
+- Prompt de revalidacao adversarial em `docs/PROMPTS.md`, distribuindo cinco superficies entre familias de modelo diferentes.
+
 ## 2026-09-03 (rodada de P-9 da spec 0006)
 
 - 3 de 3 no desenho de quando a minuta e escrita. O criterio que resolve o conflito entre DEC-003 e DEC-006: publicado e anterior, nao publicado e contemporaneo. As duas decisoes falavam de momentos diferentes, e faltava escolher o instante da gravacao.

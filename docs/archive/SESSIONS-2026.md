@@ -4,6 +4,120 @@ Entradas antigas de `docs/SESSION.md`, rotacionadas em 2026-09-02 pela regra de 
 
 Cobre de 2026-04-25 (criacao da estrutura multiagente e validacao por tri-consenso) a 2026-09-03 (skill 2.4.0 e 2.5.0, com o formato de achado, o diagnostico com identidade estavel e as fixtures que os provaram). Ordem cronologica inversa, igual a do arquivo principal. Rotacionado tres vezes em 2026-09-03.
 
+## 2026-09-03 - Claude (fixture de controle do criterio de achado)
+
+### Objetivo
+
+- T-052, o ultimo residuo da rodada 2 do achado `0005-A1`: exercitar literalmente o criterio "projeto que nunca registra achado nao recebe nenhum aviso novo".
+
+### O Que Foi Feito
+
+- Fixture `debate-project`: projeto que **usa** consenso de verdade e nunca declara `**Achado:**`. Oracle de conjunto vazio em `--strict`, que nesta arquitetura nao e teste fraco, porque a comparacao e nos dois sentidos e qualquer diagnostico reprova.
+- Quatro controles no mesmo `CONSENSUS.md`: cerca dentro do corpo de uma entrada citando `**Achado:**`; entrada anterior a data de adocao, sem os campos declarativos; entrada na rodada 5 com `Pendente da rodada anterior`; e entrada que declara `Escapou de verificacao` **sem** declarar `Achado`, que fixa o opt-in do formato.
+- Correcao de rota no meio: a primeira versao da fixture punha o modelo de achado cercado no topo do arquivo e o README dizia que aquilo guardava `strip_fences`. Nao guardava: o modelo fica antes de qualquer entrada datada e nunca entra em corpo de entrada. A cerca foi movida para dentro de uma entrada, e so entao o controle passou a existir.
+- **Provado por mutacao, com duas rodadas.** Mutacao A (formato de achado deixa de ser opt-in): 37 de 44, com 6 diagnosticos inesperados so nesta fixture. Mutacao B (`strip_fences` para de limpar cercas): 42 de 44, e **so esta fixture acusou**. As outras cinco seguiram verdes, que e exatamente o buraco que T-052 existia para fechar.
+- Reversao das mutacoes por backup em `cp`, e nao por `git checkout`, aplicando a licao da sessao anterior.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `evals/fixtures/debate-project/` (novo, 14 arquivos), `evals/verify_repository.py`, `CHANGELOG.md`.
+- Projeto: `docs/TASKS.md`, `docs/CHANGELOG.md`, `docs/SESSION.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma nova. A fixture **fixa** uma decisao ja tomada na spec 0005: o formato de achado e opt-in pelo campo `**Achado:**`, entao entrada que declara `Escapou de verificacao` sem declarar `Achado` segue sendo debate e nao e cobrada. Mudar isso passa a ser mudanca visivel, e nao silenciosa.
+
+### Aprendizados Para MEMORY.md
+
+- Promovidos dois, no fechamento do dia: portao novo so entra depois de a mutacao provar que ele acusa; e reverter mutacao temporaria por backup proprio, nunca por `git checkout`, quando o arquivo tem trabalho nao commitado.
+- O aprendizado anterior sobre check AVISO e portao continua valendo sem alteracao.
+
+### Pendencias
+
+- Nenhuma. Backlog zerado, cinco specs `Concluida`, "Aguardando Usuario" vazia.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, e de preferencia o proprio usuario usando a 2.5.0 em projeto real.
+- Motivo: a spec 0005 fechou e o residuo dela tambem. O que vem agora depende de uso: o formato de achado so tem um achado registrado, e a forma dele ainda e n=1.
+
+## 2026-09-03 - Claude (skill 2.5.0, diagnostico com identidade)
+
+### Objetivo
+
+- Fazer T-050 e T-051 juntas, que sao o mesmo desenho: tirar do portao a dependencia de exit code e de texto de mensagem.
+
+### O Que Foi Feito
+
+- T-051: os 39 diagnosticos de `validate_structure.py` ganharam codigo estavel, declarado no conjunto `CODIGOS`. `Report.add` recusa codigo nao declarado, entao diagnostico sem identidade quebra na hora de escrever. Um check estatico por AST conferiu que nenhum dos 39 sites ficou sem codigo e que nenhum codigo declarado sobrou sem uso.
+- Flag `--codigos` nova: `NIVEL|CODIGO|ARQUIVO|SUJEITO`, uma linha por diagnostico, sem prosa. O `SUJEITO` (tarefa, entrada de consenso ou spec) e a peca que faltava: e ele que denuncia aviso que passou a cair na entrada errada, com codigo e contagem identicos.
+- T-050: `FIXTURES` deixou de mapear nome para exit code e passou a declarar modo, exit esperado e o conjunto exato de diagnosticos. Comparacao nos dois sentidos, e fixture sem a chave `diagnosticos` e recusada em vez de virar aprovacao silenciosa. `verificar_achado` foi absorvida: um mecanismo, nao dois.
+- **Discriminacao provada por mutacao, nao por afirmacao.** Tres mutacoes temporarias, revertidas depois: regressao compensada (o contraexemplo exato do Codex, com total e exit code identicos), sujeito trocado com codigos identicos, e fixture declarada sem oracle. As tres reprovaram; a primeira e a segunda passariam verdes na contagem de linhas antiga.
+- Versao 2.5.0: mudou script distribuido e o formato da saida virou contrato publico, entao nao cabia amendar a 2.4.0. Marcadores dos tres blocos subiram juntos por DEC-009, com o conteudo do bloco core inalterado.
+- Publicada: `git push origin main` levou `e70bd7c..28681fd`, e `./install.sh` propagou a 2.5.0 para os tres destinos globais, com paridade conferida por `diff -rq` e a flag `--codigos` presente nos tres.
+- `SESSION.md` passou de 30KB e disparou `AVISO|ROTACAO`. Rotacionadas as quatro entradas mais antigas para `docs/archive/SESSIONS-2026.md`, que ficou com 24, mantendo as 6 mais recentes aqui e atualizando o indice do arquivo. Primeira vez que o aviso foi lido ja pelo codigo, e nao pela prosa.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `scripts/validate_structure.py`, `evals/verify_repository.py`, `SKILL.md`, `CHANGELOG.md`, `README.md`, `assets/AGENTS.md`, `assets/partials/AGENTS-specs-block.md`, `assets/partials/AGENTS-loop-block.md`.
+- Projeto: `AGENTS.md`, `docs/TASKS.md`, `docs/CHANGELOG.md`, `docs/MEMORY.md`, `docs/SESSION.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`.
+
+### Decisoes Tomadas
+
+- Identificador estavel escolhido pelo usuario na rodada 2 do achado `0005-A1`. Implementado como codigo por diagnostico, com a saida `--codigos` separada do relatorio humano: o relatorio continua legivel e o portao ganha um formato que nao muda quando a redacao muda.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum novo. O aprendizado ja registrado sobre check AVISO foi atualizado para apontar a implementacao em vez da tarefa pendente.
+
+### Pendencias
+
+- Escorreguei uma vez: usei `git checkout` para reverter uma mutacao de teste em `verify_repository.py`, que e arquivo versionado com trabalho **nao commitado** por cima, e apaguei a reescrita inteira. Refeita na hora, sem perda. A licao e de operacao, nao do produto: para reverter mutacao temporaria em arquivo com trabalho pendente, guarde o original antes em vez de confiar no git.
+- T-052 continua aberta e independente destas duas.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, para T-052.
+- Motivo: a fixture so-debate e o unico residuo da rodada 2 que sobrou, e agora ela tem onde encaixar: entra no `FIXTURES` com oracle de conjunto vazio em `--strict`.
+
+## 2026-09-03 - Claude e Codex (rodada 2 do achado 0005-A1)
+
+### Objetivo
+
+- Revalidar a disposicao do achado `0005-A1` com um modelo distinto, a pedido do usuario. Primeiro uso real da revalidacao que a 2.4.0 acabou de criar.
+
+### O Que Foi Feito
+
+- Rodada 2 no Codex CLI (`gpt-5.6-sol`, `model_reasoning_effort=high`, sandbox `read-only`, para ele nao poder editar nada). Prompt adversarial pedindo especificamente casos em que `verificar_achado` ficaria verde com o comportamento errado.
+- Veredito do Codex: **se sustenta com ressalva**. Tres criticas conferidas no codigo antes de aceitar, e as tres procedem.
+- **A disposicao da rodada 1 descrevia mal o proprio codigo.** Ela dizia que o check passou a medir "qual aviso", e `verificar_achado` conta linhas `[AVISO]` e confere uma unica exclusao. A entrada de `DECISIONS.md` tinha herdado o mesmo exagero: corrigida, com a correcao declarada em vez de silenciosa.
+- **T-050 contradizia a propria disposicao.** Recusar par com o mesmo exit code nos dois lados eliminaria justamente a guarda que a disposicao mandou manter (`achado-project` tem os dois lados em 0 de proposito). Reescrita para exigir oracle discriminante por fixture.
+- **O criterio "projeto que nunca registra achado nao recebe aviso novo" nao e exercitado literalmente**: os dois lados de `achado-project` tem achado, e a unica fixture com entrada de debate (`v1-project`) roda sem `--strict`. Virou T-052.
+- Onde a revalidacao ficou incompleta, tambem registrado: o Codex nao viu que a raiz ja e um controle vivo desse ultimo item, porque roda em `--strict`, tem entrada de debate e fecha com zero avisos. Controle parcial, e a critica sobrevive reduzida.
+- `**Escapou de verificacao:** sim` mantido contra a ressalva do Codex: o criterio da DEC-007 e se a verificacao existente pegaria o defeito, e ela nao pegaria.
+
+### Arquivos Criados Ou Alterados
+
+- Projeto: `docs/CONSENSUS.md`, `docs/DECISIONS.md`, `docs/MEMORY.md`, `docs/TASKS.md`, `docs/SESSION.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma nova. Uma decisao existente (fixture de check AVISO, 2026-09-03) foi **corrigida**: a regra segue valendo, a descricao que ela fazia da implementacao estava errada.
+
+### Aprendizados Para MEMORY.md
+
+- Refinamento do aprendizado ja promovido: contar linhas `[AVISO]` nao basta, porque aceita regressao compensada. Atualizado no lugar em vez de duplicado.
+
+### Pendencias
+
+- Nenhuma bloqueante. T-051 chegou a entrar em "Aguardando Usuario" com a pergunta "identificador estavel de diagnostico ou fragmento da mensagem?", e o usuario respondeu no mesmo dia: **identificador estavel**. A tarefa voltou para "Proximas Tarefas" com a escolha escrita nela. O achado `0005-A1` passou para `resolvido`, com o residuo em T-050, T-051 e T-052.
+- Observacao sobre a forma, ainda n=1: o primeiro achado deste repositorio precisou de duas rodadas, e a rodada 2 achou erro factual na rodada 1. Isso e o formato funcionando, nao falhando, mas vale ver se o padrao se repete antes de tirar conclusao.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, atacando T-051 e T-050 juntas.
+- Motivo: as duas dependem do mesmo desenho (identificador estavel de diagnostico), ja escolhido pelo usuario. Separadas, o oracle seria escrito duas vezes.
+
 ## 2026-09-03 - Claude (skill 2.4.0, consenso que serve para achado)
 
 ### Objetivo

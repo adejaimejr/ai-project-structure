@@ -32,6 +32,103 @@ Use docs/CONSENSUS.md para registrar sua posicao sobre esta decisao. Inclua cont
 Revise a mudanca usando docs/QUALITY.md. Verifique se a tarefa foi atendida, se o escopo foi respeitado, se a memoria da sessao precisa ser atualizada e se alguma decisao deve ir para docs/DECISIONS.md.
 ```
 
+## Revalidar A Skill Inteira Em Varios Modelos
+
+Prompt para abrir uma sessao nova cujo objetivo e **atacar** a skill 2.5.1 e tudo que foi construido em cima dela, usando os modelos disponiveis, e transformar o que sobreviver em conserto.
+
+Escrito em 2026-09-03, depois de tres rodadas de consenso que acharam sete defeitos reais em codigo ja publicado. Reaproveitando em versao futura, atualize a versao da skill, a lista de tarefas abertas e o inventario de modelos, que envelhece rapido.
+
+```text
+Contexto: /Users/adejaimejunioer/Dev/2026/ai-project-structure. Skill `ai-project-structure` 2.5.1, publicada e instalada. Sou o dono do projeto e quero uma revalidacao adversarial do sistema inteiro, usando varios modelos, para descobrir onde ele nao entrega o que promete.
+
+Nao quero uma nota de aprovacao. Quero achados, e quero que os que sobreviverem virem conserto.
+
+## Leia antes de qualquer coisa
+
+1. `AGENTS.md` inteiro.
+2. `docs/SESSION.md`, as quatro entradas mais recentes.
+3. `docs/TASKS.md`, secoes abertas.
+4. `docs/DECISIONS.md`, as tres entradas de 2026-09-03.
+5. `docs/specs/0006-automacao-do-consenso.md`, incluindo DEC-001 a DEC-006 e as tres perguntas abertas.
+6. `docs/MEMORY.md`, secoes `## User`, `## Feedback` e `## Project`. E ali que estao os perfis de agente e as licoes que ja custaram tempo.
+
+## O que ja esta resolvido, e voce nao deve redescobrir
+
+- A estrutura, o modulo de specs e o modulo de loop existem e estao validados por bancada. Nao repita bancada de loop.
+- O formato de achado (2.4.0) e o diagnostico com identificador estavel (2.5.0) foram desenhados e provados por mutacao.
+- Sete defeitos ja foram achados e registrados: T-054, T-055, T-056 e T-058 seguem abertos, com o problema descrito e o conserto ainda em aberto. Nao os reache: confirme que continuam validos e siga adiante.
+- Tres calibragens da spec 0006 esperam decisao minha, em T-053. Nao decida por mim.
+
+## O que quero descobrir
+
+Onde o sistema **promete e nao entrega**. Cinco superficies, e a pergunta que interessa em cada uma:
+
+1. **Contrato do bloco core (`AGENTS.md`).** Que regra dele nao e verificavel, nem por script nem por pessoa? Que regra e violavel sem que nada acuse? Ha regra que contradiz outra?
+2. **Validador (`scripts/validate_structure.py`).** Os 39 diagnosticos cobram o que dizem cobrar? Onde estao os falsos negativos, ou seja, o documento errado que passa limpo? Escreva o documento que passa e nao deveria.
+3. **Modulo de loop (`scripts/loop.sh`, `scripts/loop_task.py`, `references/loop.md`).** Qual e o caminho em que o loop escreve algo que o comando nao comprova? Onde ele perde trabalho? O que acontece com entrada hostil, arquivo enorme, ou tarefa cujo portao mente?
+4. **Portao dos evals (`evals/verify_repository.py`, `evals/test_loop.py`, `evals/fixtures/`).** Que mutacao no codigo passa verde? Esta e a pergunta mais importante das cinco, porque um portao cego faz todas as outras respostas valerem menos.
+5. **Fluxos de scaffold e atualizacao (`SKILL.md`, `references/atualizacao.md`, `references/specs.md`).** Um agente que nunca viu este projeto consegue seguir? Onde ele erraria? Aqui vale executar de verdade num diretorio descartavel, e nao so ler.
+
+## Metodo
+
+**Confira o inventario de modelos antes de assumir qualquer coisa.** Rode `cursor-agent --list-models`, `codex --version` e `claude --help`. O que sei hoje, e pode ter mudado:
+
+- `cursor-agent -p --force --model <id>` da acesso a varias familias com uma assinatura: `cursor-grok-4.6-xhigh`, `gpt-5.6-sol-xhigh`, `claude-opus-5-thinking-high`, `gemini-3.8-flash-high`, `kimi-k3-max`, `glm-5.2-max`. Use `--mode ask` para parecer somente-leitura.
+- `codex exec -s read-only -m gpt-5.6-sol -c model_reasoning_effort="high"` funciona direto.
+- A CLI propria do Grok esta bloqueada por cota mesmo com assinatura; use o Grok pelo `cursor-agent`.
+- A CLI do Gemini nao roda nesta maquina; use o Gemini pelo `cursor-agent`.
+
+**Uma familia de modelo por superficie, nao a mesma pergunta para todos.** Cinco agentes fazendo a mesma pergunta produzem cinco versoes do mesmo vies. Distribua as cinco superficies entre familias diferentes, e use uma familia **diferente da que achou** para verificar cada achado.
+
+**Cada agente roda cego e isolado.** Aplique a DEC-003 da spec 0006: crie um worktree descartavel (`git worktree add`) e retire de la o corpo das entradas de `docs/CONSENSUS.md`, **deixando uma nota dizendo que a omissao foi proposital**. Agente que ve arquivo incompleto sem aviso conclui coisa errada sobre o repositorio. Mantenha os modelos de debate e de achado, que sao referencia de forma.
+
+**Sele a sua propria posicao antes de rodar qualquer agente**, num arquivo fora do repositorio, se voce for opinar. Escrever depois de ler os outros e `debate-aberto` fingindo ser parecer independente.
+
+**Confira todo achado no codigo antes de aceitar.** Isto nao e opcional e e o que separou sinal de ruido nas rodadas anteriores: varios achados estavam certos, e a moldura de alguns estava errada. Achado que voce nao conseguiu confirmar no codigo entra como "nao confirmado", nunca como achado.
+
+**Mutacao, e nao leitura, para a superficie 4.** Quebre de proposito o que o portao deveria pegar, rode, e veja se ele acusa. Reverta a mutacao com backup feito por `cp` antes, **nunca com `git checkout`**: o arquivo pode ter trabalho nao commitado por cima, e isso ja destruiu uma reescrita inteira aqui.
+
+## Como registrar
+
+- Cada achado vira uma entrada de achado em `docs/CONSENSUS.md`, no formato da 2.4.0: `**Achado:** <identificador>`, `**Escapou de verificacao:** sim | nao`, disposicao, e a secao "Por Que Nada Pegou Antes" quando escapou. Use identificador ligado a superficie, por exemplo `REVAL-1`.
+- Achado so vira tarefa em `docs/TASKS.md` **depois** de a disposicao concluir que ha trabalho (DEC-006 da spec 0005), e a tarefa cita o achado.
+- Conserto que voce aplicar carrega evidencia de comando, e o comando declarado em `(verifica:)` precisa aparecer no campo `resultado=`.
+- **Nao decida o que e meu.** Calibragem de escopo, mudanca de contrato publico e qualquer coisa que mude o que a skill promete: registre com as opcoes e o tradeoff, e me pergunte.
+
+## Restricoes que ja custaram tempo aqui
+
+- **Nenhum travessao (U+2014).** O validador trata como ERRO e varre tambem arquivo nao commitado.
+- **Nada de `scripts/` na raiz.** Ferramenta so-do-repo vai em `docs/skills/ai-project-structure/evals/`.
+- `evals/`, `install.sh`, `README.md` e `CHANGELOG.md` da skill **nao sao distribuidos** pelo `install.sh`. Mudanca so neles nao exige reinstalacao nem bump.
+- **O bloco core da raiz e do `assets/AGENTS.md` tem de ficar byte a byte identico.** Edite o asset e propague por script.
+- **Subiu versao?** `SKILL.md`, os marcadores dos tres blocos e a secao do `CHANGELOG` da skill precisam bater, senao `verify_repository.py` reprova.
+- **`docs/CONSENSUS.md` e `docs/SESSION.md` batem em 30KB rapido** e disparam `AVISO|ROTACAO`. Rotacione para `docs/archive/` e atualize o indice de la. Nao encurte conteudo para o portao ficar verde: isso e exatamente o que a regra "Nao Apague O Que Falha" proibe.
+- **Ao cortar secao de `CONSENSUS.md` por script, ancore a busca no inicio da entrada.** Os mesmos headings existem no modelo cercado no topo do arquivo, e um `index()` ingenuo casa com o template e duplica a entrada inteira. Ja aconteceu.
+- **As CLIs se atualizam sozinhas no meio da sessao.** Antes de atribuir mudanca de comportamento a uma alteracao sua, confira a versao.
+- **Nao deixe artefato bruto so em `/tmp`.** Ele some, e o material das rodadas anteriores ja se perdeu assim.
+
+## Verificacao, ao terminar cada tarefa
+
+```
+python3 docs/skills/ai-project-structure/evals/verify_repository.py
+python3 docs/skills/ai-project-structure/evals/test_loop.py
+python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict
+```
+
+Baseline de hoje: 44 de 44, 58 de 58, e exit 0 sem erro e sem aviso. Qualquer numero menor e regressao sua, nao ruido.
+
+## Pronto quando
+
+1. As cinco superficies foram atacadas, cada uma por uma familia de modelo diferente, com o registro de qual rodou onde e com que comando.
+2. Todo achado foi confirmado no codigo, ou marcado explicitamente como nao confirmado.
+3. A superficie 4 tem pelo menos tres mutacoes executadas, com o resultado de cada uma escrito, incluindo as que o portao **nao** pegou.
+4. Os achados estao em `docs/CONSENSUS.md` e o trabalho que sobrou esta em `docs/TASKS.md`.
+5. As tres verificacoes passam, e a sessao esta registrada em `docs/SESSION.md`.
+6. Voce me disse, em uma frase, qual foi o achado mais caro e por que ele escapou ate agora.
+
+Comece confirmando o inventario de modelos e me mostrando o plano de distribuicao das cinco superficies antes de gastar a primeira chamada.
+```
+
 ## Rodar Os Evals Da Skill Em Outra Ferramenta
 
 Os evals de `docs/skills/ai-project-structure/evals/evals.json` precisam rodar nas tres ferramentas (Claude Code, Codex CLI, Gemini CLI) antes de uma versao da skill ser considerada validada. Os dois prompts abaixo cobrem Codex e Gemini.

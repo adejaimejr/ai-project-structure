@@ -25,8 +25,10 @@ Somente biblioteca padrao (Python 3.8+). Exit code: 0 em sucesso, 1 em erro.
 """
 
 import argparse
+import os
 import re
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 
@@ -143,8 +145,33 @@ def ler(projeto):
 
 
 def escrever(caminho, linhas, original):
+    """Grava `TASKS.md` por substituicao atomica, nunca por escrita direta.
+
+    `write_text` trunca o arquivo antes de escrever: crash, disco cheio ou
+    processo morto no meio deixam `TASKS.md` partido, e ele e o backlog vivo do
+    projeto. Temporario no mesmo diretorio (portanto no mesmo filesystem, para o
+    rename ser atomico), `fsync` antes de fechar, e `os.replace`, que substitui
+    de uma vez ou nao substitui.
+
+    O pior caso passa a ser um temporario orfao ao lado do arquivo, que nao
+    destroi nada."""
     fim = "\n" if original.endswith("\n") else ""
-    caminho.write_text("\n".join(linhas) + fim, encoding="utf-8")
+    conteudo = "\n".join(linhas) + fim
+    fd, tmp = tempfile.mkstemp(dir=str(caminho.parent), prefix=caminho.name + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as saida:
+            saida.write(conteudo)
+            saida.flush()
+            os.fsync(saida.fileno())
+        os.replace(tmp, caminho)
+    except BaseException:
+        # Falhou antes do replace: o original continua intacto, e o temporario
+        # nao pode ficar para tras poluindo docs/.
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def cmd_check(args):

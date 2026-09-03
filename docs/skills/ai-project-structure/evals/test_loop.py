@@ -219,6 +219,58 @@ def testar_helper(res):
         res.check(validar(root) == 0, "validador --strict exit 0 depois de bloquear")
 
 
+def testar_escrita_atomica(res):
+    """T-057: `TASKS.md` se escreve por substituicao atomica, nunca direto.
+
+    Nao basta ler o codigo e ver `os.replace`: o teste quebra a escrita de
+    proposito, no meio, e confere que o arquivo original sobreviveu inteiro.
+    Com `write_text` direto este caso deixava o arquivo truncado."""
+    sys.path.insert(0, str(SKILL / "scripts"))
+    try:
+        import loop_task
+    except ImportError as exc:
+        res.check(False, "G: loop_task importavel", str(exc))
+        return
+
+    with tempfile.TemporaryDirectory() as tmp:
+        alvo = Path(tmp) / "TASKS.md"
+        original = "# TASKS\n\n- T-001: linha que nao pode sumir.\n"
+        alvo.write_text(original, encoding="utf-8")
+
+        # Quebra no meio da gravacao, depois de o conteudo novo comecar a ser
+        # escrito e antes de o rename acontecer.
+        fsync_real = os.fsync
+
+        def fsync_que_falha(fd):
+            raise OSError("falha simulada no meio da escrita")
+
+        os.fsync = fsync_que_falha
+        try:
+            loop_task.escrever(alvo, ["# TASKS", "", "- T-001: conteudo novo."], original)
+        except OSError:
+            pass
+        else:
+            res.check(False, "G: escrita quebrada propaga o erro", "nao levantou")
+        finally:
+            os.fsync = fsync_real
+
+        res.check(
+            alvo.read_text(encoding="utf-8") == original,
+            "G: TASKS.md intacto depois de escrita interrompida",
+            "arquivo foi alterado ou truncado",
+        )
+        sobrou = [f.name for f in Path(tmp).iterdir() if f.name != "TASKS.md"]
+        res.check(not sobrou, "G: nenhum temporario orfao deixado para tras",
+                  ", ".join(sobrou))
+
+        # E o caminho feliz continua funcionando.
+        loop_task.escrever(alvo, ["# TASKS", "", "- T-001: conteudo novo."], original)
+        res.check(
+            alvo.read_text(encoding="utf-8") == "# TASKS\n\n- T-001: conteudo novo.\n",
+            "G: escrita bem-sucedida substitui o conteudo",
+        )
+
+
 def testar_loop(res):
     # A: tarefa sem (verifica:) e recusada antes de chamar o agente
     with tempfile.TemporaryDirectory() as tmp:
@@ -321,6 +373,7 @@ def main(argv=None):
 
     res = Resultado(args.verbose)
     testar_helper(res)
+    testar_escrita_atomica(res)
     testar_loop(res)
     print(f"Modulo de loop: {res.total - res.falhas}/{res.total} verificacoes passaram.")
     return 1 if res.falhas else 0

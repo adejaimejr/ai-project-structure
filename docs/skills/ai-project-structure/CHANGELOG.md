@@ -2,6 +2,14 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.5.1 - 2026-09-03
+
+Conserto de seguranca de dado, nao feature. Achado pelo Grok numa rodada de consenso sobre a spec 0006, e conferido no codigo antes de aceito.
+
+- **`loop_task.py` grava `docs/TASKS.md` por substituicao atomica.** Antes usava `write_text` direto, que trunca o arquivo antes de escrever: crash, disco cheio ou processo morto no meio deixavam partido o backlog vivo do projeto. Agora e temporario no mesmo diretorio, `fsync`, e `os.replace`. O pior caso passou a ser um temporario orfao, que nao destroi nada.
+- Regressao provada por mutacao, e nao por leitura: com o `write_text` de volta, o caso novo acusa arquivo truncado. `evals/test_loop.py` foi de 55 para 58 verificacoes.
+- Marcadores dos tres blocos em v2.5.1. O conteudo do bloco core nao mudou; eles sobem juntos por DEC-009, para o marcador continuar dizendo qual versao da skill escreveu o bloco.
+
 ## 2.5.0 - 2026-09-03
 
 Portao que so olha exit code nao prova nada. Esta versao troca isso por diagnostico com identidade. Veio da revalidacao do achado `0005-A1` pelo Codex, registrada em `docs/CONSENSUS.md` do repositorio-fonte.

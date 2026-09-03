@@ -208,6 +208,12 @@ A evidencia e sempre uma sub-linha so:
   - Evidencia: tipo=comando; procedimento=pytest -q; resultado=exit 0; 42 passed in 3.10s
 ```
 
+### Regra Critica Vai No Prompt, Nao So No Bloco
+
+O bloco do `AGENTS.md` depende de o agente escolher ler o arquivo. O prompt do `loop.sh` chega sempre. A diferenca nao e teorica: a regra "nao apague o que falha" viveu so no bloco por uma bancada, e um modelo mais barato apagou informacao para o portao passar mesmo com ela escrita la. Movida para o prompt, sem mudar mais nada, o mesmo modelo passou a perguntar.
+
+A regra que sai disso: quando a violacao de uma restricao **passa despercebida no portao**, ela nao pode morar so no bloco. Tem que estar no prompt, onde nao da para nao ler.
+
 ### A Evidencia Vale O Que O Portao Vale
 
 Isto precisa estar dito com todas as letras: a evidencia prova que **o comando declarado passou**, e nada alem disso. Numa bancada com tres ferramentas, duas entregaram implementacao com bug numa regra de borda que a suite de testes nao cobria. O portao ficou verde, a evidencia foi escrita com lastro real de exit code, e o bug foi junto.

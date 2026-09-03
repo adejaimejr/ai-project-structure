@@ -107,7 +107,13 @@ loop, depois de rodar o portao.
 
 Se faltar contexto obrigatorio para decidir alguma coisa, NAO invente e NAO
 escolha por inferencia plausivel. Escreva a pergunta, em uma frase, no arquivo
-$PROJETO/$ARQUIVO_PERGUNTA e pare imediatamente."
+$PROJETO/$ARQUIVO_PERGUNTA e pare imediatamente.
+
+NAO APAGUE O QUE FALHA. O portao mede o que sobrou, entao remover o teste, a
+secao, o link ou a frase que falha sempre deixa ele verde. Se a saida obvia
+para passar no portao for apagar conteudo ou cobertura, isso e falta de
+contexto: escreva a pergunta em $PROJETO/$ARQUIVO_PERGUNTA e pare. Perder
+informacao e decisao de quem pediu a tarefa, nunca sua."
 
   if [ -n "$FALHA_ANTERIOR" ]; then
     PROMPT="$PROMPT
@@ -131,9 +137,11 @@ $FALHA_ANTERIOR"
       if [ -z "$MEXEU" ]; then
         echo
         echo "[ERRO] o agente saiu com codigo $AGENTE_CODIGO e nao alterou nenhum arquivo." >&2
-        echo "Provavelmente o comando de --agente esta incompleto para uso nao" >&2
-        echo "supervisionado. Veja a tabela de comandos por ferramenta em" >&2
-        echo "references/loop.md. Parando antes de queimar as outras tentativas." >&2
+        echo "A causa esta na saida dele, acima. As duas mais comuns sao o comando" >&2
+        echo "de --agente estar incompleto para uso nao supervisionado (ver a tabela" >&2
+        echo "por ferramenta em references/loop.md) e a ferramenta ter recusado por" >&2
+        echo "conta propria, por cota, credencial ou limite de uso." >&2
+        echo "Parando antes de queimar as outras tentativas." >&2
         exit 4
       fi
       echo "[AVISO] o agente saiu com codigo $AGENTE_CODIGO, mas alterou arquivos; o portao decide."

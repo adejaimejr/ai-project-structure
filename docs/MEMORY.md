@@ -78,15 +78,17 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
   - Codex, executar: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="high"`
   - Codex, executar-dificil: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="xhigh"`
   - Codex, executar-muito-dificil: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="max"`
+  - Grok, planejar: `grok --always-approve -m grok-4.6 --effort xhigh -p`. O `xhigh` e o teto do Grok, e planejar merece o teto.
   - Grok, executar: `grok --always-approve -m grok-4.6 --effort high -p`
   - Grok, executar-dificil: `grok --always-approve -m grok-4.6 --effort xhigh -p`
   - Grok, executar-muito-dificil: `grok --always-approve -m grok-4.6 --effort xhigh -p`. **E o mesmo comando de `executar-dificil`, por decisao do usuario em 2026-09-02**: a escada do Grok termina em `xhigh` (a interface chama de "Extra High"; confirmado no menu e nas strings do binario, que so trazem `low`, `medium`, `high` e `xhigh`), e ficar sem opcao no degrau mais alto era pior que repetir o teto. Ao cair nesse degrau no Grok, **diga que ja e o teto da ferramenta** e ofereca outra se a tarefa parecer precisar de mais.
   - O usuario ainda nao tem plano no Grok; ate ter, roda em credito.
+  - opencode, planejar: `opencode run --auto -m deepseek/deepseek-v4-pro`
   - opencode, executar: `opencode run --auto -m deepseek/deepseek-v4-flash`
-  - opencode, executar-dificil: `opencode run --auto -m deepseek/deepseek-v4-pro --variant high`
-  - opencode, executar-muito-dificil: mesmo comando do `executar-dificil`. O `pro` e o topo do DeepSeek no catalogo do opencode; ao cair nesse degrau, diga que ja e o teto e ofereca outra ferramenta.
-  - No opencode a escada e **por modelo, nao por esforco**: o catalogo nao declara conjunto de variantes para os modelos DeepSeek, entao `--variant` pode ser inerte ali. Ele ficou registrado no perfil do `pro` porque foi assim que a rodada de validacao correu, nao porque tenha efeito comprovado.
-  - Os dois perfis foram exercitados em 2026-09-02 no subprojeto `durakit`: portao verde na tentativa 1 nos dois, e os dois acertaram os casos que as regras determinam e a suite nao cobre. O `flash` deu conta da mesma tarefa que o `pro`, por um terco do preco, entao comece nele.
+  - opencode, executar-dificil: `opencode run --auto -m deepseek/deepseek-v4-flash`. Mesmo modelo do degrau base, por decisao do usuario em 2026-09-03: o `flash` deu conta da mesma tarefa que o `pro` na validacao, entao subir de modelo cedo demais so encarece.
+  - opencode, executar-muito-dificil: `opencode run --auto -m deepseek/deepseek-v4-pro`. O `pro` e o topo do DeepSeek no catalogo do opencode; ao cair nesse degrau, diga que ja e o teto e ofereca outra ferramenta.
+  - No opencode a escada e **por modelo, nao por esforco**: o catalogo nao declara conjunto de variantes para os modelos DeepSeek, entao `--variant` pode ser inerte ali. A rodada de validacao do `pro` usou `--variant high`, mas o flag foi retirado dos perfis: nao houve como confirmar que ele muda alguma coisa, e flag que aparenta controle sem ter e pior que flag nenhuma.
+  - Os dois modelos foram exercitados em 2026-09-02 no subprojeto `durakit`: portao verde na tentativa 1 nos dois, e os dois acertaram os casos que as regras determinam e a suite nao cobre.
   - **Atencao ao custo:** DeepSeek entra por chave de API, entao e cobranca por token de verdade, diferente de Claude e Codex. Precos do catalogo em 2026-09-02, por 1M de tokens: `flash` 0,14 de entrada e 0,28 de saida; `pro` 0,435 e 0,87.
   - Rotulo de interface nao e o valor da CLI. No Claude, "Extra" e `xhigh`. No Codex, o menu mostra Light, Medium, High, Extra High e Ultra, que sao `low`, `medium`, `high`, `xhigh` e `ultra`; o nivel `max` existe no catalogo e nao aparece nesse menu.
   - `ultra` do Codex nao e so mais esforco: o catalogo o descreve como "maximum reasoning with automatic task delegation", ou seja, ele abre subagentes, e a interface avisa que consome limite mais rapido. Por isso os perfis param em `max`: dentro de uma rodada de loop, com ate 3 tentativas e sem ninguem olhando, delegacao automatica multiplica consumo de plano sem aviso.

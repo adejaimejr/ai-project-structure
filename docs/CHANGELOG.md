@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (revalidacao adversarial da skill 2.5.1)
+
+- Sete superficies atacadas por quatro familias de modelo, 24 mutacoes no portao dos evals (16 cegas), 70 itens confirmados no codigo, registrados como REVAL-1 a REVAL-7 em `docs/CONSENSUS.md`. Consertos sem bump em `evals/`, `install.sh` e README da skill (T-068); o resto virou T-059 a T-067. Material bruto em `docs/archive/revalidacao-2026-09-03/`.
+
 ## 2026-09-03 (skill v2.5.1 publicada)
 
 - 2.5.1 instalada nos tres destinos globais. `diff -rq` acusa so `evals/`, `install.sh`, `README.md` e `CHANGELOG.md`, que nao sao distribuidos, e o `os.replace` da T-057 chegou nos tres `loop_task.py`.

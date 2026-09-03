@@ -4,19 +4,19 @@
     {
       "id": 1,
       "prompt": "Inicia projeto novo aqui. Nome: 'minha-loja'. Objetivo: 'sistema de e-commerce com chat de IA pra ajudar clientes a encontrar produtos'. Estrutura minimal, sem git.",
-      "expected_output": "As respostas ja estao no prompt, entao a skill NAO repete as perguntas 1-3 da entrevista (pode confirmar apenas a pergunta 4, specs; sem resposta, default e nao ativar). Cria o nucleo da estrutura no diretorio atual: AGENTS.md, CLAUDE.md, GEMINI.md, docs/README.md, docs/PROJECT_CONTEXT.md, docs/SESSION.md, docs/MEMORY.md, docs/CONSENSUS.md, docs/TASKS.md, docs/DECISIONS.md, docs/QUALITY.md, docs/CHANGELOG.md, docs/archive/README.md. AGENTS.md contem os marcadores ai-project-structure:core:start v2.2.0 e core:end, mais a secao 'Regras Do Projeto' fora do bloco. PROJECT_CONTEXT.md preenchido com 'minha-loja' e o objetivo. docs/TASKS.md traz a secao '## Aguardando Usuario' e o marcador (convencoes-2-2-0-desde:) preenchido com a data de hoje, nao com o placeholder AAAA-MM-DD. Primeira entrada em SESSION.md com a data de hoje. Nao cria opcionais nem docs/specs/. Nao inicializa git.",
+      "expected_output": "As respostas ja estao no prompt, entao a skill NAO repete as perguntas 1-3 da entrevista (pode confirmar apenas a pergunta 4, specs; sem resposta, default e nao ativar). Cria o nucleo da estrutura no diretorio atual: AGENTS.md, CLAUDE.md, GEMINI.md, docs/README.md, docs/PROJECT_CONTEXT.md, docs/SESSION.md, docs/MEMORY.md, docs/CONSENSUS.md, docs/TASKS.md, docs/DECISIONS.md, docs/QUALITY.md, docs/CHANGELOG.md, docs/archive/README.md. AGENTS.md contem os marcadores ai-project-structure:core:start v2.5.1 e core:end, mais a secao 'Regras Do Projeto' fora do bloco. PROJECT_CONTEXT.md preenchido com 'minha-loja' e o objetivo. docs/TASKS.md traz a secao '## Aguardando Usuario' e o marcador (convencoes-2-2-0-desde:) preenchido com a data de hoje, nao com o placeholder AAAA-MM-DD. Primeira entrada em SESSION.md com a data de hoje. Nao cria opcionais nem docs/specs/. Nao inicializa git.",
       "files": []
     },
     {
       "id": 2,
       "prompt": "Quero comecar um repositorio novo aqui pra um assistente financeiro pessoal. Cria a base inteira pra mim, com tudo que precisar. Nome: 'finbot'. Objetivo: 'agente que le extratos bancarios em PDF e ajuda o usuario a categorizar gastos e identificar oportunidades de economia'.",
-      "expected_output": "A skill dispara mesmo sem o usuario mencionar 'ai-project-structure' por nome (frase 'comecar repositorio novo' + 'cria a base inteira'). Cria estrutura completa: nucleo + opcionais (ARCHITECTURE, API, DATA_MODEL, GLOSSARY, ONBOARDING, ROADMAP, PROMPTS, STACK). AGENTS.md com marcadores core v2.2.0. PROJECT_CONTEXT.md preenchido com 'finbot' e o objetivo. Primeira entrada em SESSION.md. docs/specs/ so se o usuario confirmar na pergunta 4; sem confirmacao, nao cria.",
+      "expected_output": "A skill dispara mesmo sem o usuario mencionar 'ai-project-structure' por nome (frase 'comecar repositorio novo' + 'cria a base inteira'). Cria estrutura completa: nucleo + opcionais (ARCHITECTURE, API, DATA_MODEL, GLOSSARY, ONBOARDING, ROADMAP, PROMPTS, STACK). AGENTS.md com marcadores core v2.5.1. PROJECT_CONTEXT.md preenchido com 'finbot' e o objetivo. Primeira entrada em SESSION.md. docs/specs/ so se o usuario confirmar na pergunta 4; sem confirmacao, nao cria.",
       "files": []
     },
     {
       "id": 3,
       "prompt": "Cria um diretorio chamado 'meu-projeto' aqui e ja monta dentro a estrutura multiagente. Nivel minimal. Nome do projeto: 'gerador-de-relatorios'. Objetivo: 'gera relatorios em PDF a partir de planilhas Excel usando templates'.",
-      "expected_output": "A skill cria o diretorio 'meu-projeto' caso ainda nao exista e coloca a estrutura nucleo dentro dele (nao no diretorio atual). AGENTS.md com marcadores core v2.2.0. PROJECT_CONTEXT.md preenchido com 'gerador-de-relatorios' e objetivo. SESSION.md com primeira entrada. Sem docs/specs/.",
+      "expected_output": "A skill cria o diretorio 'meu-projeto' caso ainda nao exista e coloca a estrutura nucleo dentro dele (nao no diretorio atual). AGENTS.md com marcadores core v2.5.1. PROJECT_CONTEXT.md preenchido com 'gerador-de-relatorios' e objetivo. SESSION.md com primeira entrada. Sem docs/specs/.",
       "files": []
     },
     {
@@ -28,7 +28,7 @@
     {
       "id": 5,
       "prompt": "Inicia projeto novo aqui. Nome: 'blog-pessoal'. Objetivo: 'blog estatico com posts em markdown'. Minimal, e ativa o modulo de specs.",
-      "expected_output": "Cria o nucleo + docs/specs/README.md (com o Modelo De Spec). AGENTS.md contem, alem do bloco core, o bloco entre ai-project-structure:specs:start v2.2.0 e specs:end, inserido apos core:end e antes de 'Regras Do Projeto'. Nenhum arquivo de assets/partials/ e copiado para o projeto. Nenhuma spec NNNN-slug.md e criada ainda (so o README do modulo).",
+      "expected_output": "Cria o nucleo + docs/specs/README.md (com o Modelo De Spec). AGENTS.md contem, alem do bloco core, o bloco entre ai-project-structure:specs:start v2.5.1 e specs:end, inserido apos core:end e antes de 'Regras Do Projeto'. Nenhum arquivo de assets/partials/ e copiado para o projeto. Nenhuma spec NNNN-slug.md e criada ainda (so o README do modulo).",
       "files": []
     },
     {
@@ -42,7 +42,7 @@
     {
       "id": 7,
       "prompt": "Valida a estrutura deste projeto.",
-      "expected_output": "Rodando com o diretorio de trabalho em evals/fixtures/broken-project (ou copia dele). A skill executa python3 <dir-da-skill>/scripts/validate_structure.py e reporta: [ERRO] ID duplicado T-001 em docs/TASKS.md e [ERRO] Status invalido 'Fazendo' em docs/specs/0001-login.md; exit code 1. A skill relata os erros ao usuario e sugere as correcoes, sem aplica-las sem pedido.",
+      "expected_output": "Rodando com o diretorio de trabalho em evals/fixtures/broken-project (ou copia dele). A skill executa python3 <dir-da-skill>/scripts/validate_structure.py e reporta: [ERRO] [TASK-ID-DUPLICADO] ID duplicado T-001 em docs/TASKS.md e [ERRO] [SPEC-STATUS-INVALIDO] Status invalido 'Fazendo' em docs/specs/0001-login.md; exit code 1. O codigo entre colchetes e o identificador estavel da 2.5.0. A skill relata os erros ao usuario e sugere as correcoes, sem aplica-las sem pedido.",
       "files": [
         "fixtures/broken-project"
       ]

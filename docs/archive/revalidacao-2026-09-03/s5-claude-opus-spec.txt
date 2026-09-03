@@ -1,0 +1,26 @@
+Spec criada. Validador limpo.
+
+**Saída do validador:**
+```
+Validando estrutura em: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/s5/scaffold
+Nenhum problema encontrado.
+
+Resumo: 0 erros, 0 avisos.
+EXIT=0
+```
+
+**O que foi feito**
+
+`docs/specs/0001-busca-por-voz-no-catalogo.md` - Status `Rascunho`. Título/slug veio do teu pedido (regra de ouro: não repergunta o que já foi respondido). As outras 4 perguntas: `Avançar`.
+
+Registro dos "Avançar", como manda a regra "Nunca Inferir":
+- **Na spec**, seção "Perguntas Abertas": P-1 a P-4, com data e a tarefa que rastreia cada uma.
+- **Em `TASKS.md`**, seção "Aguardando Usuario": T-002 a T-005, uma por pergunta, cada uma com `**Pergunta:**`, `**Resposta:** (A preencher.)`, `(bloqueada: 2026-09-03)` e `(spec: 0001-busca-por-voz-no-catalogo)`.
+
+Nada de problema, escopo ou critério de aceite foi inventado. Todos ficaram `(A preencher.)`.
+
+Status `Rascunho`, não `Definida`: sem critérios de aceite não há o que fechar.
+
+Também atualizados: `SESSION.md` (entrada nova no topo) e `CHANGELOG.md`.
+
+Spec destravada quando responderes T-002 a T-005.

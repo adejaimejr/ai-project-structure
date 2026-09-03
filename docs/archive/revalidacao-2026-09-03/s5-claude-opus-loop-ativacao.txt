@@ -1,0 +1,16 @@
+Loop **nao ativado**. Portao reprovou.
+
+**Motivo:** `docs/QUALITY.md` nao tem secao "Testes E Validacao" nem comando executavel. So tem `- Checklist basica do projeto.` Regra da skill: sem portao real, ativacao e recusada. Loop sem portao fecha tarefa com evidencia que nao prova nada.
+
+**Decisao conservadora tomada** (sem voce para responder): parei em vez de inventar comando de portao. Inventar destravaria a ativacao mas produziria evidencia de fechamento sem lastro: pior que nao ter loop.
+
+**Feito:**
+- `docs/TASKS.md`: T-005 criada em "## Aguardando Usuario", com a pergunta travante e `(bloqueada: 2026-09-03)`.
+- `docs/SESSION.md`: entrada nova no topo, com a recusa e as decisoes.
+- `AGENTS.md` **nao tocado**. Nenhum bloco `loop` inserido.
+- `docs/MEMORY.md` nao tocado: perfis de loop pedem nome de ferramenta e modelo, que seriam inferencia.
+- `CHANGELOG.md` nao tocado: nada de estrutura mudou.
+
+Validador: `0 erros, 0 avisos`.
+
+**Para destravar:** diga qual comando prova que o trabalho deste projeto ficou bom (ex: `pytest -q`, `npm test`, lint). Registro em `docs/QUALITY.md` e ativo o modulo na sequencia.

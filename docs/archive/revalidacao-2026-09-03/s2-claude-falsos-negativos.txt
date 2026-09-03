@@ -1,0 +1,40 @@
+
+=== FN-A bloco loop com start sem end e sem versao
+  esperado: MARCADOR-DESPAREADO ou MARCADOR-VERSAO-INVALIDA para o bloco loop
+  --strict --codigos -> exit 0; diagnosticos: (nenhum)
+
+=== FN-B entrada de SESSION com data 2026-9-3 e sem headings
+  esperado: SESSAO-SEM-HEADINGS
+  --strict --codigos -> exit 0; diagnosticos: (nenhum)
+
+=== FN-C tarefa em Concluidas sem data e sem Evidencia (adocao 2026-09-01)
+  esperado: EVIDENCIA-AUSENTE
+  --strict --codigos -> exit 0; diagnosticos: (nenhum)
+
+=== FN-D tarefa em Aguardando Usuario sem (bloqueada:) nem **Resposta:**
+  esperado: algo sobre (bloqueada:) ausente; sem ele a idade nunca e cobrada
+  --strict --codigos -> exit 0; diagnosticos: (nenhum)
+
+=== FN-E CLAUDE.md com regras de produto e processo
+  esperado: PONTE-QUEBRADA ou similar: AGENTS.md diz que ponte nao pode ter regra
+  --strict --codigos -> exit 0; diagnosticos: (nenhum)
+
+=== FN-F consenso aberto com Proximo passo vazio e sem Rodada
+  esperado: CONSENSO-ABERTO-SEM-PROXIMO-PASSO (dono ausente) e Rodada ausente (T-054)
+  --strict --codigos -> exit 0; diagnosticos: (nenhum)
+
+=== FN-G bloco specs ativo em AGENTS.md sem docs/specs/
+  esperado: algum diagnostico de modulo incoerente
+  --strict --codigos -> exit 0; diagnosticos: (nenhum)
+
+=== FN-H tarefa com (verifica:) concluida com resultado= vazio
+  esperado: EVIDENCIA-SEM-RESULTADO
+  --strict --codigos -> exit 0; diagnosticos: (nenhum)
+
+=== FN-I marcadores do core invertidos (end antes de start)
+  esperado: MARCADOR-DESPAREADO
+  --strict --codigos -> exit 0; diagnosticos: (nenhum)
+
+=== FN-J entrada real seguida de exemplo em cerca ~~~ (nao ```)
+  esperado: nenhum diagnostico se a cerca til fosse tratada; ver se a entrada de exemplo e cobrada
+  --strict --codigos -> exit 1; diagnosticos: AVISO|CONSENSO-SEM-STATUS|docs/CONSENSUS.md|2026-01-01 - Entrada dentro de cerca til

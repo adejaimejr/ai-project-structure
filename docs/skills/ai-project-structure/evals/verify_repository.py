@@ -23,7 +23,9 @@ Confere, em um comando so:
    e identicos a fonte canonica, tirando o que nao e distribuido.
 
 Nunca escreve no repositorio nem nas instalacoes reais da skill: o passo 8 roda
-`install.sh --project` com o diretorio de trabalho em uma pasta temporaria.
+`install.sh --project` com o diretorio de trabalho em uma pasta temporaria, e os
+scripts sao conferidos com `ast.parse` e `PYTHONDONTWRITEBYTECODE`, porque
+`py_compile` gravava `scripts/__pycache__` na fonte e ele ia parar nos destinos.
 
 Este script vive em `evals/`, que o `install.sh` nao distribui: e ferramenta de
 repositorio, nao chega na maquina de quem instala a skill.
@@ -50,6 +52,10 @@ ASSETS = SKILL / "assets"
 # Presentes apenas na fonte canonica: o install.sh nao os copia.
 NAO_DISTRIBUIDO = {"evals", "install.sh", "README.md", "CHANGELOG.md"}
 IGNORADOS = {"__pycache__", ".DS_Store"}
+
+# A bateria do loop tinha 58 verificacoes em 2026-09-03. Menos que isso e teste que
+# sumiu; ao acrescentar testes, suba o piso junto.
+LOOP_TESTES_MINIMO = 58
 
 # Criterio de aceite da spec 0005: o aviso do ponto cego e permanente no bloco
 # core, entao todo projeto paga a leitura dele. Quatro linhas e o teto.
@@ -392,9 +398,13 @@ def verificar_evals_json(res):
 
 def verificar_scripts(res, verbose):
     """Os scripts distribuidos precisam ao menos compilar antes de sair daqui."""
+    # `ast.parse` em vez de `py_compile`: o segundo grava `scripts/__pycache__` na
+    # fonte, e o `install.sh` copiava isso para os tres destinos (REVAL-4).
+    compila = [sys.executable, "-c",
+               "import ast, sys; ast.parse(open(sys.argv[1], encoding='utf-8').read(), sys.argv[1])"]
     for rel, cmd in (
-        ("scripts/validate_structure.py", [sys.executable, "-m", "py_compile"]),
-        ("scripts/loop_task.py", [sys.executable, "-m", "py_compile"]),
+        ("scripts/validate_structure.py", compila),
+        ("scripts/loop_task.py", compila),
         ("scripts/loop.sh", ["bash", "-n"]),
     ):
         caminho = SKILL / rel
@@ -413,9 +423,16 @@ def verificar_testes_do_loop(res, verbose):
     if not teste.is_file():
         res.check(False, "evals/test_loop.py existe", "arquivo ausente")
         return
-    p = subprocess.run([sys.executable, str(teste)], capture_output=True, text=True)
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    p = subprocess.run([sys.executable, str(teste)], capture_output=True, text=True, env=env)
     resumo = next((l for l in p.stdout.splitlines() if "verificacoes passaram" in l), "")
     res.check(p.returncode == 0, "bateria do modulo de loop", resumo.strip())
+    # Exit 0 com zero verificacoes e bateria que sumiu, nao bateria verde (REVAL-4,
+    # mutacao M18: sem nenhum teste o script imprimia 0/0 e este portao aceitava).
+    m = re.search(r"(\d+)/(\d+) verificacoes passaram", resumo)
+    total = int(m.group(2)) if m else 0
+    res.check(total >= LOOP_TESTES_MINIMO, f"bateria do loop com pelo menos {LOOP_TESTES_MINIMO} verificacoes",
+              f"{total} verificacoes")
     if p.returncode != 0 and verbose:
         print(p.stdout)
 
@@ -462,6 +479,12 @@ def hashes(base):
         if path.is_file():
             saida[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
     return saida
+
+
+def verificar_sem_pycache(res):
+    """Nenhum `__pycache__` dentro da skill: o `install.sh` copiava o que existisse."""
+    achados = sorted(p.relative_to(SKILL).as_posix() for p in SKILL.rglob("__pycache__"))
+    res.check(not achados, "nenhum __pycache__ dentro da skill", ", ".join(achados))
 
 
 def verificar_install(res, verbose):
@@ -532,6 +555,7 @@ def main(argv=None):
     verificar_scripts(res, args.verbose)
     verificar_testes_do_loop(res, args.verbose)
     verificar_travessao(res)
+    verificar_sem_pycache(res)
     verificar_install(res, args.verbose)
     res.print()
     return 1 if res.falhas else 0

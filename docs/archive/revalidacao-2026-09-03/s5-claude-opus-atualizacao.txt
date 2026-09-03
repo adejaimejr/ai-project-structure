@@ -1,0 +1,29 @@
+Atualizacao feita. v1 → **2.5.1**. Validador: `0 erros, 0 avisos`, zero diagnosticos.
+
+## Aplicado
+
+| Arquivo | Mudanca |
+|---|---|
+| `AGENTS.md` | v1 substituido pelo bloco `core` v2.5.1 com marcadores. Secao propria do usuario "Regra Local Do Time" preservada abaixo de `## Regras Do Projeto` |
+| `CLAUDE.md`, `GEMINI.md` | trocados pelos templates atuais (pontes imutaveis) |
+| `docs/TASKS.md` | IDs `T-001`..`T-004`, cabecalho de formato, secao `## Aguardando Usuario`, marcador `(convencoes-2-2-0-desde: 2026-09-03)` |
+| `docs/CONSENSUS.md` | secoes 2.2.0/2.4.0 acrescentadas (Independencia Declarada, Achado, Ponto Cego, Modelo De Debate, Modelo De Achado). Entrada de 2026-06-10 preservada intacta em `## Registros` |
+| `docs/SESSION.md` | entrada de 2026-09-03 com aplicado/pulado |
+| `docs/CHANGELOG.md` | linha da atualizacao |
+
+## Confirmacoes que aceitei sozinho (nao havia usuario)
+
+1. **AGENTS.md v1 → bloco v2** - opcao (a) substituir, recomendada pelo fluxo. Secao fora do template movida, nao apagada.
+2. **Pontes divergentes** - substituir pelos templates. Elas nao carregavam regra propria, so texto curto.
+3. **Migrar TASKS para `T-NNN`** - aceito. Ordem: Em Andamento → Proximas → Concluidas.
+4. **Modulo de specs** - nao ativado (recomendado).
+5. **Arquivos opcionais** (ARCHITECTURE, API, DATA_MODEL, GLOSSARY, ONBOARDING, ROADMAP, PROMPTS, STACK) - nao criados.
+
+## Nao feito, de proposito
+
+- **Modulo de loop**: nao oferecido. So a pedido explicito e com comando real em `QUALITY.md` (que hoje so tem "Checklist basica do projeto").
+- **Evidencia retroativa** em `T-004` (ja concluida) e **campos declarativos** na entrada antiga de CONSENSUS: regra nao e retroativa; inventar viraria alegacao falsa.
+- **`## Aguardando Usuario` nasceu vazia**: nenhuma tarefa existente registrava pergunta parada. Nao deduzi pergunta nenhuma.
+- **git nao inicializado**. `docs/QUALITY.md`, `MEMORY.md`, `PROJECT_CONTEXT.md`, `DECISIONS.md`, `README.md` continuam com o conteudo do usuario, intocados.
+
+Pendencia registrada: revisar se "Regra Local Do Time" deve virar item dentro de `## Regras Do Projeto` em vez de secao irma.

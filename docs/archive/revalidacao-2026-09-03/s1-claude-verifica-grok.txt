@@ -1,0 +1,7 @@
+V-A-S1-2 evidencia sem tipo/procedimento/resultado: (1, 'ERRO|TASK-ID-DUPLICADO|docs/TASKS.md|T-001')
+V-A-S1-4 (verifica: ) vazio: (1, 'ERRO|TASK-ID-DUPLICADO|docs/TASKS.md|T-001')
+V-A-S1-5 cerca aberta esconde tarefas (inclui ID duplicado): (0, '(nenhum)')
+V-A-S1-7 rodada 2 com exposicao nao: (0, '(nenhum)')
+V-A-S1-3 travessao em README.md da raiz e app.py: (0, '(nenhum)')
+V-A-S1-2 (refeito) evidencia sem tipo/procedimento/resultado: (0, '(nenhum)')
+V-A-S1-4 (refeito) (verifica: ) vazio: (0, '(nenhum)')

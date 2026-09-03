@@ -1,0 +1,52 @@
+
+=== M17 verify sem verificar_fixtures
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 30/30 verificacoes passaram.
+  restaurado ok
+
+=== M18 test_loop sem nenhum teste (0/0)
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 44/44 verificacoes passaram.
+  restaurado ok
+
+=== M19 FIXTURES sem debate-project
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 42/42 verificacoes passaram.
+  restaurado ok
+
+=== M20 assets/docs/STACK.md apagado
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 44/44 verificacoes passaram.
+  restaurado ok
+
+=== M21 evals.json sem o eval 10
+  gate=verify exit=1 -> PEGOU
+  Resumo: 43/44 verificacoes passaram.
+   [FALHA] 10 evals coerentes: eval na posicao 10 com id 99
+  restaurado ok
+
+=== M22 loop.sh manda o agente trabalhar na T-999
+  gate=loop exit=0 -> PASSOU VERDE (cego)
+  Modulo de loop: 58/58 verificacoes passaram.
+  restaurado ok
+
+=== M23 loop.sh sem NAO APAGUE O QUE FALHA e sem proibicao de editar memoria
+  gate=loop exit=0 -> PASSOU VERDE (cego)
+  Modulo de loop: 58/58 verificacoes passaram.
+  restaurado ok
+
+=== M24 loop_task bloquear aceita tarefa ja em Aguardando
+  gate=loop exit=0 -> PASSOU VERDE (cego)
+  Modulo de loop: 58/58 verificacoes passaram.
+  restaurado ok
+
+=== Suspeita: verify_repository grava __pycache__ na fonte?
+  scripts/__pycache__ existe depois do verify: True | ['loop_task.cpython-314.pyc', 'validate_structure.cpython-314.pyc']
+
+=== Suspeita: loop_task.escrever muda o modo do TASKS.md?
+  modo antes=0o664 depois=0o600 -> MUDOU
+
+=== M18 REFEITA depois do conserto (bateria 0/0)
+  exit 1 -> PEGOU
+   [FALHA] bateria do loop com pelo menos 58 verificacoes: 0 verificacoes
+  restaurado ok

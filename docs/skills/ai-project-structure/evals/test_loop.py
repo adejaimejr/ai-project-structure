@@ -29,6 +29,11 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Importar `loop_task` gravaria `scripts/__pycache__` na fonte, e o `install.sh`
+# copiava isso para os destinos. Nem este processo nem os `loop.sh` que ele chama.
+sys.dont_write_bytecode = True
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
 EVALS = Path(__file__).resolve().parent
 SKILL = EVALS.parent
 ASSETS = SKILL / "assets"

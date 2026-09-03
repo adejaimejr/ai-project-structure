@@ -41,6 +41,47 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-03 - Claude Fable, com Grok, Codex, Gemini, GPT e Claude Opus (revalidacao adversarial da skill 2.5.1)
+
+### Objetivo
+
+- Atacar a skill inteira, sete superficies, com uma familia de modelo por superficie e outra verificando, e transformar o que sobreviver em conserto ou tarefa.
+
+### O Que Foi Feito
+
+- **Inventario conferido antes de gastar chamada**: `cursor-agent --list-models` nao tinha mais Kimi, GLM nem Gemini 3.8; sobraram quatro familias reais (Grok, GPT/Codex, Claude, Gemini 3.7 Flash). Distribuicao: Grok nas superficies 1 e 6, Codex nas 2, 4 e 7, Gemini na 3, Claude Opus executando a 5 pela skill instalada. Claude Fable selou posicao propria antes de qualquer agente rodar (arquivo em `docs/archive/revalidacao-2026-09-03/`), e verificou no codigo cada achado de outra familia.
+- **Isolamento por DEC-003**: worktree descartavel com o corpo das duas entradas abertas de `CONSENSUS.md` retirado e nota dizendo que a omissao era proposital. Nenhum agente reportou a omissao como defeito.
+- **Sete entradas de achado**, REVAL-1 a REVAL-7, em `docs/CONSENSUS.md` (REVAL-5 ja rotacionada por tamanho). Itens confirmados no codigo, contados por entrada: 10 no contrato do core (REVAL-1), 12 no validador (REVAL-2), 11 no loop (REVAL-3), 16 mutacoes cegas mais 3 efeitos colaterais no portao (REVAL-4), 8 nos templates (REVAL-6) e 10 na distribuicao (REVAL-7); nenhum ficou como "nao confirmado".
+- **Superficie 4 por mutacao, 24 rodadas**, cada uma revertida de backup por `cp` e conferida por SHA-256: 16 passaram verde cegas, 8 pegaram. Codex, somente leitura, previu as cegas antes de ver o resultado e acertou todas as que os dois cobriram; a tabela dele mostra 10 de 39 codigos com fixture que os produza.
+- **Consertos aplicados sem bump** (T-068): verificador sem `__pycache__` na fonte, piso de 58 na bateria do loop, `install.sh` sem bytecode e com `--all` no cabecalho, `evals.json` em 2.5.1, README da skill com instalacao manual completa.
+- **Superficie 5 executada de verdade**, quatro fluxos pelo `claude -p` contra `~/.claude/skills`: scaffold, atualizacao de v1, spec com "Avançar" e ativacao de loop recusada. Nenhum defeito de fluxo.
+- **Codex morreu na cota** do plano na superficie 7 depois de 312 mil tokens; refeita com GPT-5.6 via `cursor-agent`, que confirmou os mesmos itens. O usuario pediu no meio da sessao para nao gastar mais Codex nem GPT sol: nenhuma chamada foi feita depois disso.
+- Rotacao de `CONSENSUS.md`: as rodadas de P-7/P-8 e P-9 (ainda `aberto`, T-053) foram para o archive por tamanho, com nota e ponteiros na spec 0006.
+
+### Arquivos Criados Ou Alterados
+
+- Skill (nao distribuidos): `evals/verify_repository.py`, `evals/test_loop.py`, `evals/evals.json`, `install.sh`, `README.md`.
+- Projeto: `docs/CONSENSUS.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/MEMORY.md`, `docs/CHANGELOG.md`, `docs/specs/0006-automacao-do-consenso.md`, `docs/archive/CONSENSUS-2026.md`, `docs/archive/README.md`, `docs/archive/revalidacao-2026-09-03/` (27 arquivos de material bruto, travessoes trocados por hifen e contados).
+
+### Decisoes Tomadas
+
+- Nenhuma de contrato. As calibragens estao em T-059, T-061 e T-067, em "Aguardando Usuario". Proposta de decisao registrada em REVAL-4: codigo de diagnostico sem fixture que o produza nao entra em `CODIGOS`.
+
+### Aprendizados Para MEMORY.md
+
+- Mutacao vale para portao **antigo**, nao so novo: os 44 de 44 escondiam seis checks inteiros que podiam sumir sem um FALHA.
+- Tres sessoes de Codex `xhigh` em paralelo estouram a cota do plano em uma hora; GPT-5.6 via `cursor-agent` e o fallback da mesma familia. O usuario pediu `terra` para teste daqui em diante.
+
+### Pendencias
+
+- T-059, T-061, T-067 aguardam o usuario. T-060, T-062, T-063, T-064, T-065 abertas, alem de T-053 a T-058 que continuam validas (confirmadas pelas quatro familias).
+- Achado mais caro: o portao dos evals (REVAL-4). Escapou porque o total de verificacoes e dinamico e nunca foi comparado com nada, e fixture so nascia junto com check novo.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario para T-059 (uma resposta destrava REVAL-1, 2 e 6); qualquer agente para T-065, que nao depende de decisao e e o que impede a proxima regressao silenciosa.
+- Motivo: enquanto 29 dos 39 codigos nao tiverem fixture, qualquer conserto de T-060 a T-064 pode regredir sem o portao acusar.
+
 ## 2026-09-03 - Claude (T-057 e o prompt de revalidacao)
 
 ### Objetivo

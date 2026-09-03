@@ -1,0 +1,33 @@
+=== 1a instalacao global (HOME falso)
+  (0, "Instalando skill 'ai-project-structure' (escopo: global)\n  [Claude Code] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/fakehome/.claude/skills/ai-project-structure\n  [Codex CLI] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/fakehome/.agents/skills/ai-project-structure\n  [Gemini CLI] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/fakehome/.gemini/skills/ai-project-structure\nConcluido.")
+  arquivos: 102 | __pycache__ copiado: 6
+=== 2a instalacao (idempotencia)
+  arvore identica: True
+=== destino ja existente e DIFERENTE
+  (0, "Instalando skill 'ai-project-structure' (escopo: global)\n  [Claude Code] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/fakehome/.claude/skills/ai-project-structure\nConcluido.")
+  SKILL.md sobrescrito sem aviso: True
+  validate_structure.py sobrescrito sem aviso: True
+  extra.md na raiz do destino sobrou: True | scripts/meu.py sobrou: False
+=== instalacao parcial: destino/assets sem permissao de escrita
+  exit 1
+  45c4/scratchpad/fakehome/.claude/skills/ai-project-structure/assets/CLAUDE.md: Permission denied
+  rm: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/fakehome/.claude/skills/ai-project-structure/assets: Directory not empty
+  destino depois da falha: SKILL.md atualizado? True | assets existe? True | agents existe? True | scripts existe? True
+=== --uninstall --claude
+  (0, "Removendo skill 'ai-project-structure' (escopo: global)\n  [Claude Code] removido: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/fakehome/.claude/skills/ai-project-structure\nConcluido.")
+  .claude/skills sobrou vazio: True | codex intacto: True
+=== --project em pasta sem git
+  (0, "Instalando skill 'ai-project-structure' (escopo: project)\n  [Claude Code] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/proj-nogit/.claude/skills/ai-project-structure\n  [Codex CLI] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/proj-nogit/.agents/skills/ai-project-structure\n  [Gemini CLI] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/proj-nogit/.gemini/skills/ai-project-structure\nConcluido.")
+  dirs: ['.agents/skills/ai-project-structure', '.claude/skills/ai-project-structure', '.gemini/skills/ai-project-structure']
+=== --project --uninstall
+  (0, "Removendo skill 'ai-project-structure' (escopo: project)\n  [Claude Code] removido: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/proj-nogit/.claude/skills/ai-project-structure\n  [Codex CLI] removido: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/proj-nogit/.agents/skills/ai-project-structure\n  [Gemini CLI] removido: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/proj-nogit/.gemini/skills/ai-project-structure\nConcluido.")
+  sobrou: ['.agents', '.agents/skills', '.claude', '.claude/skills', '.gemini', '.gemini/skills']
+=== --all --project --gemini
+  (0, "Instalando skill 'ai-project-structure' (escopo: project)\n  [Claude Code] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/proj-nogit/.claude/skills/ai-project-structure\n  [Codex CLI] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/proj-nogit/.agents/skills/ai-project-structure\n  [Gemini CLI] -> /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/proj-nogit/.gemini/skills/ai-project-structure\nConcluido.")
+  dirs: ['.agents/skills/ai-project-structure', '.claude/skills/ai-project-structure', '.gemini/skills/ai-project-structure']
+=== --uninstall com nada instalado
+  (0, "Removendo skill 'ai-project-structure' (escopo: global)\n  [Claude Code] removido: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/fakehome/.claude/skills/ai-project-structure\n  [Codex CLI] removido: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/fakehome/.agents/skills/ai-project-structure\n  [Gemini CLI] removido: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/fakehome/.gemini/skills/ai-project-structure\nConcluido.")
+=== argumento desconhecido
+  (2, 'Argumento desconhecido: --claude-code')
+=== --help lista --all?
+  "--all" no help: False

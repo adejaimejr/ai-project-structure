@@ -129,13 +129,15 @@ Rodada verde e ausencia de objecao, nao prova de que funciona. Modelos que leem 
 
 ## Registros
 
-Os debates de 2026-04-25 foram rotacionados para `docs/archive/CONSENSUS-2026.md`.
+As entradas anteriores a 2026-09-03 (e as duas rodadas de P-7/P-8 e P-9 da spec 0006, que continuam `aberto` aguardando calibragem do usuario em T-053) foram rotacionadas para `docs/archive/CONSENSUS-2026.md`. Abaixo ficam os achados da revalidacao adversarial de 2026-09-03. A entrada REVAL-5 (fluxos de scaffold, atualizacao e specs), unica que fechou `resolvido` sem defeito, foi rotacionada no mesmo dia para `docs/archive/CONSENSUS-2026.md` por tamanho.
 
-## 2026-09-03 - P-9 da spec 0006: quando a minuta e escrita
+## 2026-09-03 - REVAL-1: o contrato do bloco core promete o que o validador nao cobra
+
+**Achado:** REVAL-1
 
 **Status:** aberto
 
-**Proximo passo:** o usuario ratifica o desenho, que teve 3 de 3, e decide as duas divergencias: se a retomada apos interrupcao e automatica ou exige palavra humana, e onde o bruto mora **durante** a rodada.
+**Proximo passo:** usuario decide, item a item, quais promessas viram check (com nivel) e quais viram texto honesto no proprio bloco core. Registro em T-059.
 
 **Metodo:** pareceres-independentes
 
@@ -143,91 +145,54 @@ Os debates de 2026-04-25 foram rotacionados para `docs/archive/CONSENSUS-2026.md
 
 **Rodada:** 1 de 1
 
+**Escapou de verificacao:** sim
+
 ### Contexto
 
-P-9 nao e pergunta de desenho novo: e **conflito entre duas decisoes ja ratificadas** no mesmo dia. A DEC-003 manda o agente nao ver posicoes contemporaneas; a DEC-006 manda o da rodada 2 ver as anteriores na integra; e nenhuma das duas escolheu o instante da gravacao.
+- Superficie 1 da revalidacao adversarial da skill 2.5.1. Grok 4.6 (`cursor-agent -p --mode ask --force --model cursor-grok-4.6-xhigh`) atacou o bloco core num worktree com as entradas contemporaneas de `CONSENSUS.md` retiradas. Claude Fable selou posicao antes de rodar qualquer agente e conferiu cada item no codigo, com projeto minimo montado a partir de `assets/` e `validate_structure.py --strict --codigos`. Bruto em `docs/archive/revalidacao-2026-09-03/`.
 
-Duas ressalvas de independencia, as duas contra a forca desta rodada:
+### O Que Foi Encontrado
 
-- **Quem descobriu o conflito foi o Grok**, na rodada anterior. Reter aquela entrada fez ele responder sem lembrar do proprio argumento, o que preserva a cegueira do raciocinio, mas a spec que ele leu credita o achado a ele por nome. Ele sabia que a pergunta era dele.
-- **O enunciado e a transcricao que o Claude fez do achado do Grok.** Os tres responderam a versao de um dos tres. Se a transcricao estreitou o problema, os tres herdaram o estreitamento e nenhum tinha como perceber. E o Problema 3 da spec, agora na formulacao da pergunta em vez de na transcricao da resposta.
+Regra do core violavel sem nenhum diagnostico, cada uma reproduzida com exit 0 em `--strict`:
 
-Posicao do Claude selada antes dos dois rodarem. Codex em `codex exec -s read-only -m gpt-5.6-sol`, esforco `high`. Grok em `cursor-agent -p --mode ask --force --model cursor-grok-4.6-xhigh`. Copia do repositorio com o corpo da entrada de P-7 e P-8 retido, pela DEC-003.
+- **Evidencia de fechamento.** Linha em Concluidas sem prefixo de data nao e cobrada (`check_evidence`, `done_date is None`). A migracao real de v1 (superficie 5) produziu exatamente isso: `T-004` sem data, sem evidencia, validador limpo.
+- **Forma da evidencia.** O core diz que "o validador confere a forma da evidencia". Basta uma sub-linha que comece com `Evidencia:`; `tipo=`, `procedimento=` e `resultado=` nao sao exigidos. `(verifica: )` vazio anula o unico ERRO da regra, porque string vazia esta contida em qualquer texto. `resultado=` vazio passa.
+- **Aguardando Usuario.** O core exige `**Pergunta:**`, `**Resposta:**` e `(bloqueada:)`; so a pergunta e cobrada. Sem `(bloqueada:)`, `TASK-BLOQUEADA-ANTIGA` nunca dispara.
+- **Pontes imutaveis.** `check_bridges` so confere a substring `AGENTS.md`. Ponte com regra de produto, arquitetura e estilo passa.
+- **Rodada 2 com exposicao `nao`.** O core diz que da rodada 2 em diante a exposicao "deve ser declarada como sim"; nenhum cruzamento existe. `**Proximo passo:**` vazio satisfaz "com dono claro".
+- **Travessao "em qualquer texto".** So `AGENTS.md`, as pontes e `docs/**/*.md`. `README.md` da raiz e qualquer `.py` passam.
+- **Cerca aberta.** Um ` ``` ` sem par esconde do validador tudo ate o fim do arquivo: ID duplicado e concluida sem evidencia somem.
+- **Marcadores.** `MARKER_RE` casa so `core|specs`; bloco `loop` despareado ou sem versao passa. Marcadores invertidos (end antes de start) passam.
+- **Modulo incoerente.** Bloco specs em `AGENTS.md` sem `docs/specs/` nao acusa.
+- **Leitura obrigatoria.** O core manda ler `docs/ARCHITECTURE.md` sem "se existir"; o scaffold minimal nao cria o arquivo.
 
-### Pergunta Ou Decisao
+Nao verificavel por desenho (e o core ja admite parte disso): ordem de leitura, Nunca Inferir, escopo, desempate, veracidade dos campos de independencia, "achado so vira tarefa depois da disposicao". Contradicoes de texto: core aceita pergunta aberta "como tarefa em TASKS.md **ou** na spec", o bloco specs manda registrar na spec; o gatilho "trabalho relevante atualiza SESSION.md" nao abre excecao para o loop, que e proibido de escrever la; a rotacao por 30KB pode obrigar a arquivar menos de 5 entradas.
 
-Quando a minuta e escrita no `CONSENSUS.md`, e o que acontece com o material da rodada em caso de interrupcao e de colisao entre duas execucoes.
+### Disposicao
 
-### Posicao Do Claude
+- Cada item e conserto pequeno no validador, mas o **nivel** de cada diagnostico novo e cobranca nova em projeto existente, e isso e calibragem do usuario (mesmo criterio de T-054). Proposta para decisao: data ausente em Concluidas, `(verifica: )` vazio, marcador invertido e loop despareado viram ERRO (sao contradicao estrutural); forma da evidencia, `Resposta`/`(bloqueada:)` ausentes, rodada 2 com `nao`, proximo passo vazio e cerca aberta viram AVISO; travessao fora de `docs/` e ponte com regra ficam como estao, com o texto do core dizendo o alcance real. `ARCHITECTURE.md` ganha "quando existir" no core.
 
-Selada antes das demais.
+### Revalidacao
 
-- **Tres artefatos, tres momentos.** Bruto de cada agente escrito assim que aquele agente termina, em diretorio nao visivel aos demais; manifesto incremental no mesmo lugar; minuta no `CONSENSUS.md` escrita **uma vez so**, no fim.
-- **O ponto que levantei:** o vazamento nao vem do momento, vem do lugar. Tratar "quando escrever" sem tratar "onde" leva a resposta cara e errada, que e segurar tudo em memoria ate o fim.
-- **Interrupcao:** repositorio fica intacto, diretorio de execucao fica com os brutos pagos. A proxima execucao **nao retoma sozinha**: reporta e para, com o precedente do `loop.sh`, que nao retoma rodada.
-- **Resolve ou adia:** admiti que **adia parcialmente**. Se o diretorio de execucao estiver dentro do projeto e o agente tiver leitura do repositorio, que a DEC-003 permite, ele pode ler o bruto de quem terminou antes. Ou o diretorio fica fora do projeto durante a rodada, ou a DEC-003 passa a excluir explicitamente o diretorio corrente. Preferi a primeira, porque depender de o agente respeitar pasta proibida e voltar a confiar no prompt.
-- **Decisao que muda:** nenhuma de valor; a **DEC-003 fica incompleta**, porque diz o que isolar e nao diz onde as posicoes moram durante a rodada. Isso e omissao, nao contradicao com a DEC-006.
+- Claude Fable, familia diferente de quem achou: cada item reproduzido em projeto minimo com o comando em `docs/archive/revalidacao-2026-09-03/s1-claude-verifica-grok.txt` e `s2-claude-falsos-negativos.txt`. Nenhum item ficou como "nao confirmado". Ressalva de metodo: a transcricao e do Claude, que tambem opinou; o bruto do Grok esta ao lado para conferencia.
 
-### Posicao Do Codex
+### Por Que Nada Pegou Antes
 
-- **Barreira de rodada, em tres fases.** Antes de comecar: lock exclusivo por projeto, `run-id`, pacote de entrada imutavel por agente, e manifesto inicial numa **area persistente do orquestrador, fora do repositorio e inacessivel aos agentes**. Durante: nada em `CONSENSUS.md`, nada com posicao contemporanea em caminho visivel, e cada agente que termina tem stdout, stderr, exit code e metadados salvos na hora com arquivo temporario, `fsync` e rename atomico. No fim: manifesto selado, minuta gerada pela primeira vez, e publicacao.
-- **Ordem de publicacao, que so ele argumentou:** o bundle (`docs/consensus/runs/<run-id>/`) e publicado **antes** da entrada. Assim, interrupcao entre as duas deixa bundle sem entrada, que da para finalizar, e **nunca** deixa entrada apontando para evidencia inexistente.
-- **Interrupcao com retomada condicional:** se pergunta, modo, rodada, participantes, comandos e hashes dos insumos forem identicos, retoma o mesmo `run-id`, reusa as respostas completas e chama so quem falta. Se qualquer insumo diferir, recusa a retomada automatica. Saida parcial nunca vira posicao por inferencia.
-- **Colisao:** lock exclusivo por projeto durante **toda** a rodada, e nao so na escrita final. Segunda execucao falha rapido informando qual run esta ativo. Lock por arquivo nao pode ser recuperado so por idade: tem de conferir identidade do processo.
-- **Licoes que tirou do `loop.sh`, as tres conferidas aqui:** ele so muda o estado canonico depois do portao; o `TMP` com `trap 'rm -rf' EXIT` (linhas 86-87) serve para dado descartavel e nao para parecer ja pago; e o `.loop-pergunta` de nome global mostra por que arquivo temporario sem `run-id` nao serve para execucao concorrente.
-- **Risco novo, e e o mais grave da rodada:** o bruto pode conter segredo, credencial ou dado pessoal encontrado no repositorio. Como a DEC-001 exige preservacao literal e a P-8 aponta para artefato versionado, **redacao automatica alteraria justamente a evidencia que deveria ser conferivel**. Sem politica de dados sensiveis, consenso automatizado vira "mecanismo permanente de exfiltracao para o historico Git".
-
-### Posicao Do Grok
-
-- **Tres artefatos, tres momentos**, com a mesma estrutura, e uma frase que os outros dois nao escreveram: "a minuta em `CONSENSUS.md` nao e o unico arquivo que vaza".
-- **O corte que resolve o conflito:** **publicado = anterior; nao publicado = contemporaneo.** A DEC-003 e a DEC-006 falavam de momentos diferentes, e nenhuma tinha escolhido o instante da gravacao. Com esse criterio, enquanto a minuta desta rodada nao foi gravada, o contemporaneo ainda nao e anterior.
-- **Argumento que sozinho ja proibe publicar cedo, e que veio de uma decisao ratificada:** a DEC-005 tornou `N=1` valido. Entao **minuta a meio, com 1 de 3 posicoes, e indistinguivel de uma corrida `N=1` concluida**. Nao e so vazamento: e ambiguidade de leitura.
-- **Onde o bruto mora:** in-repo desde a volta de cada agente, fora do `.gitignore` como a P-8 exige, mas **fora da arvore em que os agentes da rodada corrente executam**. Ele nomeia o triangulo: P-8 manda o bruto sobreviver a sessao, a DEC-003 manda o colega nao ve-lo agora, e bruto so em `/tmp` perde trabalho na interrupcao, "o que ja aconteceu na rodada das seis perguntas".
-- **Interrupcao sem retomada automatica e sem descarte automatico:** cadeado presente faz a proxima execucao recusar e pedir `--retomar` ou `--descartar`. "`--descartar` e decisao humana: joga fora trabalho pago; o script nao infere isso." Se o sidecar ja tem os brutos e a minuta nao saiu, a retomada **monta a minuta a partir do bruto, sem nova chamada**.
-- **Sobre o `loop.sh`:** apontou que o paralelo certo e o `TASKS.md` so mudar no fecho, e o errado e a politica de leftover, porque "apagar leftover e perder trabalho" quando o leftover e parecer pago. E notou que o `loop.sh` **nao tem** protecao de colisao, entao dois loops na mesma tarefa correm em `TASKS.md`: "nao copiar o buraco".
-- **Risco novo, conferido aqui:** `loop_task.py` grava `TASKS.md` com `write_text` direto (linha 147), que nao e atomico, e crash no meio pode **rasgar o arquivo de memoria**. A spec nao lista arquivo de memoria partido.
-- **Alerta sobre o proprio check:** tratar diretorio de corrida incompleto como ERRO puniria interrupcao e vazaria cobranca para quem so teve uma corrida morta. Tem de ser AVISO, e so com o marcador de automacao.
-
-### Pontos De Acordo
-
-**3 de 3 no desenho.** As tres posicoes chegaram, separadamente, a mesma arquitetura:
-
-- **Tres artefatos com momentos diferentes**, e a minuta escrita **uma vez so, no fim**, por substituicao atomica do arquivo inteiro e nunca por append no meio do Markdown.
-- **Nada com posicao contemporanea em caminho que um agente ainda em curso consiga listar.** Os tres disseram, com palavras diferentes, que isolamento pedido no prompt nao fecha vazamento por filesystem.
-- **Interrupcao deixa o `CONSENSUS.md` byte a byte como estava.** Nunca meia rodada no repositorio.
-- **O bruto de quem ja respondeu nao pode ser descartado.** Chamada paga.
-- **Nenhuma das seis decisoes precisa ser revertida.** Os tres classificaram o conflito como **lacuna**, e nao contradicao: falta uma DEC nova sobre o instante da gravacao.
-- **Nenhum check de forma prova o momento da escrita.** Isso e teste de orquestrador, com agente falso, e os tres desenharam variacoes do mesmo teste: plantar token unico no bruto de um agente e conferir que o artefato do outro nao o contem.
-
-Convergencia 2 de 3, com o Claude fora: **lock exclusivo por projeto durante toda a rodada**. Codex e Grok pediram; o Claude so propos nome de diretorio a prova de colisao, que e mais fraco.
-
-### Riscos E Tradeoffs
-
-- **Divergencia 1, retomada.** Codex aceita retomada **automatica** quando pergunta, modo, rodada, participantes, comandos e hashes forem identicos. Claude e Grok exigem **palavra humana** (`--retomar` ou `--descartar`), com o Grok sendo explicito: descartar trabalho pago e decisao de pessoa. E 2 a 1 pela palavra humana, e a posicao do Codex e a que preserva mais trabalho automaticamente.
-- **Divergencia 2, onde o bruto mora durante a rodada.** Codex e Claude o mantem **fora do repositorio** ate o fim, e publicam no fecho. Grok o quer **in-repo desde o inicio**, fora da arvore de execucao, argumentando que a P-8 exige que ele sobreviva a sessao e que `/tmp` ja perdeu material nesta propria spec. As duas atendem a durabilidade; elas diferem em quanto confiam na separacao de arvore.
-- **O risco de segredo no bruto nao tem solucao proposta por ninguem.** O Codex mostrou a armadilha inteira: a DEC-001 exige literal, a P-8 exige versionado, e redigir automaticamente destruiria a evidencia. As tres posicoes juntas nao produziram saida para isso.
-- **A rodada tem n=3 e um enquadramento so**, e desta vez com agravante: o enunciado e a transcricao, feita por um dos tres, do achado de outro dos tres.
-- Dois defeitos de codigo ja publicado apareceram como efeito colateral: escrita nao atomica em `TASKS.md`, e ausencia de protecao de colisao no `loop.sh`. Nenhum dos dois e da spec 0006.
-
-### Consenso Final
-
-**O desenho tem 3 de 3 e esta pronto para virar DEC**, com o criterio operacional do Grok como o coracao dela: **publicado e anterior, nao publicado e contemporaneo**. A DEC-003 e a DEC-006 nunca se contradisseram; elas falavam de momentos diferentes, e faltava alguem escolher o instante da gravacao.
-
-Concretamente: lock exclusivo por projeto na abertura; bruto e manifesto gravados assim que cada agente encerra, em lugar que os agentes da rodada corrente nao alcancam; minuta escrita uma vez so, no fim, por substituicao atomica do arquivo inteiro; interrupcao deixando o repositorio intacto e o material pago preservado; e teste de orquestrador com token plantado, porque nenhum check de forma alcanca o momento da escrita.
-
-**Duas calibragens para o usuario:** retomada automatica com insumos identicos (Codex) ou palavra humana sempre (Claude e Grok, 2 a 1); e bruto fora do repositorio ate o fecho (Codex e Claude) ou in-repo fora da arvore de execucao (Grok).
-
-**Uma coisa que a rodada nao resolveu e ninguem deve fingir que resolveu:** o bruto pode conter segredo do repositorio, e a combinacao de "preservar literal" com "versionar" cria caminho de exfiltracao permanente para o historico. Isso precisa de decisao propria antes de qualquer linha de codigo.
+- O que passou verde: `verify_repository.py` 44 de 44 e a raiz em `--strict`, em todas as versoes desde a 2.2.0.
+- Mecanismo do ponto cego: cada check nasceu com fixture para o caso **novo** daquela versao, nunca para o contrato inteiro do bloco core. O core foi escrito como promessa e o validador como amostra, e ninguem cruzou os dois linha a linha. A raiz, dogfood, nunca produziu nenhum dos documentos errados acima.
+- Conserto de portao proposto: tabela contrato-para-codigo em `evals/` (cada regra verificavel do core aponta o codigo de diagnostico que a cobra, ou declara "nao verificavel") e uma fixture por codigo. Ver REVAL-4.
 
 ### Decisao Para Registrar Em DECISIONS.md
 
-Nada ainda. Quando o usuario ratificar, isto vira DEC-007 na spec 0006. **Uma parte deve subir para `docs/DECISIONS.md`**: a regra de que arquivo de memoria do projeto se escreve por substituicao atomica, e nunca por escrita direta, porque ela vale para o `loop_task.py` que ja esta publicado e para qualquer automacao futura, e nao so para esta operacao.
+- Nenhuma ate o usuario calibrar os niveis.
 
-## 2026-09-03 - P-7 e P-8 da spec 0006: forma da entrada e proveniencia
+## 2026-09-03 - REVAL-2: o validador tem falso negativo em quase toda regra que nao nasceu com fixture
+
+**Achado:** REVAL-2
 
 **Status:** aberto
 
-**Proximo passo:** o usuario ratifica ou vira as duas. As tres posicoes convergiram no **o que** e divergiram no **quanto**, entao nao ha empate a desfazer, ha calibragem a escolher.
+**Proximo passo:** usuario calibra niveis (junto com REVAL-1, em T-059); qualquer agente conserta os dois tracebacks e o codigo morto (T-064).
 
 **Metodo:** pareceres-independentes
 
@@ -235,75 +200,263 @@ Nada ainda. Quando o usuario ratificar, isto vira DEC-007 na spec 0006. **Uma pa
 
 **Rodada:** 1 de 1
 
+**Escapou de verificacao:** sim
+
 ### Contexto
 
-Rodada 1 cega sobre duas perguntas **novas**: P-7 nasceu da rodada anterior e P-8 foi registrada depois dela. Ninguem tinha opinado sobre nenhuma das duas.
+- Superficie 2. Codex (`codex exec -s read-only -m gpt-5.6-sol -c model_reasoning_effort="xhigh"`) atacou `validate_structure.py` com o `main` real sobre `assets/` e overlays em memoria, porque o sandbox recusou escrever em `/tmp`. Claude escreveu dez documentos-que-passam antes de ler o Codex (`s2-claude-falsos-negativos.txt`) e reproduziu cada achado novo em projeto de verdade (`s2-claude-verifica-codex.txt`). Os itens que Grok tambem achou na superficie 1 estao em REVAL-1 e nao se repetem aqui.
 
-Primeiro uso da DEC-003, ratificada horas antes. Os agentes rodaram numa copia do repositorio em que o corpo da entrada da rodada anterior foi **retido**, com uma nota no lugar dizendo que a omissao era proposital. Reter sem avisar teria feito os dois concluirem que nenhuma rodada havia acontecido, que e falso. O modelo de debate e o de achado ficaram na copia, porque **sao o objeto de P-7**.
+### O Que Foi Encontrado
 
-A posicao do Claude foi selada antes dos dois rodarem. Codex em `codex exec -s read-only -m gpt-5.6-sol`, esforco `high`. Grok em `cursor-agent -p --mode ask --force --model cursor-grok-4.6-xhigh`, read-only por construcao.
+Documento errado que passa limpo em `--strict`, alem dos de REVAL-1:
 
-### Pergunta Ou Decisao
+- `SESSION.md`, `CONSENSUS.md` e `TASKS.md` **vazios** (zero bytes) passam: os parsers devolvem colecoes vazias. O proprio `assets/` passa com so o INFO da data.
+- Spec `Concluida` com a secao "Evidencia De Conclusao" **vazia** passa: o check so recusa a substring `(a preencher`. Qualquer texto que nao seja isso, como `- banana`, satisfaz.
+- `T-1` e aceito como ID (`\d+`); segunda `(prioridade: lixo)` na mesma linha nao e olhada; `(spec: 0001-NNNN-ausente)` e ignorado porque contem `NNNN` em qualquer posicao; `(bloqueada:)` fora de "Aguardando Usuario" e aceito.
+- `T-001` vivo e `T-001` em `docs/archive/TASKS-*.md` nao sao duplicidade: o archive so entra na conferencia de specs.
+- Status de spec no meio de um paragrafo (`... contem **Status:** Rascunho`) e aceito: a regex nao esta ancorada.
+- Regra anti-drift das specs (`status vive so em TASKS.md`) nao tem check nenhum: `- T-001: tarefa (status: concluida) [x] feito` dentro da spec passa.
+- Entrada de `CONSENSUS.md` na rodada 2 com exposicao `nao`, `Proximo passo` vazio e secao "Por Que Nada Pegou Antes" sem conteudo passa.
 
-**P-7:** a forma da entrada de `CONSENSUS.md` fica fora do escopo da spec 0006, sendo que nem o modelo de debate nem o de achado representam N agentes, falha individual ou hash de insumo? **P-8:** proveniencia (comando, exit code, caminho do artefato) entra no escopo?
+Traceback em vez de diagnostico:
 
-### Posicao Do Claude
+- Arquivo fora de UTF-8 (`MEMORY.md` em latin-1): `read()` so captura `OSError`, `UnicodeDecodeError` derruba o script inteiro.
+- Rotulo com acento combinante (`**Metodo:́**`, U+0301): `field_value` normaliza antes de fazer `split(":**")` e cai em `IndexError`.
 
-Selada antes das demais.
+Falso positivo: heading ATX com fechamento (`### Objetivo ###`), valido em CommonMark, gera `SESSAO-SEM-HEADINGS`. Exemplo em cerca `~~~` (nao ```) e lido como entrada real.
 
-- **P-7: a forma muda nesta spec.** Mudei de ideia em relacao ao que eu mesmo escrevi no "Fora Do Escopo": a DEC-004 tornou aquilo insustentavel, porque com debate e achado dentro sao duas formas a acomodar. Proposta: trocar os headings fixos por um por participante, `### Posicao De <rotulo>`, com o rotulo vindo da chamada. Aceito perder: entradas antigas ficam com a forma velha e o validador aceita as duas por um tempo, que e divida e nao elegancia.
-- **P-8: entra, e e o que faz a DEC-002 valer alguma coisa.** Sem proveniencia gravada, "a execucao comprova" e frase falsa, porque nada distingue campo escrito pela execucao de campo digitado. Mora num sidecar ao lado do bruto que a DEC-001 ja manda preservar, e nao dentro do `CONSENSUS.md`, que ja bate na rotacao com duas entradas.
-- **Buraco que declarei nao saber resolver:** o validador nao tem como saber se uma entrada foi escrita por automacao ou na mao. Ou a entrada declara isso num campo, e ai a verificacao volta a depender de autodeclaracao, ou o check so vale para quem ja tem o ponteiro.
-- Conflito que apontei entre as ratificadas: DEC-001 manda preservar o bruto e nao diz onde; DEC-002 manda escrever no `CONSENSUS.md`; P-8 pergunta onde mora a proveniencia. As tres esbarram na mesma lacuna, e talvez a pergunta certa nao fosse P-8 e sim "onde mora o material da rodada".
+Codigo morto: `ENTRY_RE` (linha 59) e `DATE_RE` (linha 70) nunca sao usados.
 
-### Posicao Do Codex
+### Disposicao
 
-- **P-7: a forma entra no escopo**, com esquema **versionado** e ativado por `**Origem:** automacao-consenso/v1`, sem invalidar entradas manuais antigas. Cada invocacao vira entrada propria com `**Tipo:** debate | achado`, `**Execucao:** <run-id>`, participantes por id arbitrario, um bloco por participante com resultado `sucesso | falha`, debate com `N>=2`, achado com `N>=1` e blocos repetiveis, vinculo entre revalidacoes sucessivas pelo identificador do achado e pelo `run-id` anterior, e secoes de julgamento vazias.
-- **P-8: entra**, com pasta canonica por execucao (`docs/consensus/runs/<run-id>/`) contendo `manifest.json`, os insumos efetivamente fornecidos a cada agente, stdout, stderr e registros de falha. A entrada **repete** por participante o comando (como vetor JSON de argumentos), o diretorio, o exit code, o caminho do bruto, o SHA-256 do insumo e da saida, e o caminho do manifesto. O manifesto e a fonte canonica; os campos da entrada sao projecao deterministica conferivel. Argumento: um sidecar **sem** esses campos na entrada contrariaria a DEC-002, que ja autorizou escrever os comandos.
-- Propos treze codigos de diagnostico, e defendeu que para entrada automatizada eles sejam **ERRO** e nao aviso, "pois ali a forma e contrato da operacao".
-- **Achados de codigo, os tres conferidos aqui antes de aceitos:** `check_consensus_declaration` nao diagnostica `Rodada` **ausente**, porque retorna calado; o formato usa `re.match` e nao `fullmatch`, entao `1 de 1` seguido de lixo passa; e o `Modelo De Debate` do `docs/CONSENSUS.md` da raiz **nao tem** `Metodo`, `Exposicao previa` nem `Rodada`, que o `AGENTS.md` exige e o asset da skill ja traz.
-- Correcoes a criterios de aceite da spec: "N artefatos de posicao" esta errado, o certo e **N artefatos de execucao**, dos quais so os sucessos contem posicao; e "o artefato nao contem texto das outras posicoes" e inadequado para rodada 2, porque ali as posicoes anteriores sao **exigidas** pela DEC-006, e o que se proibe sao as **contemporaneas**.
-- Conflito que apontou entre ratificadas: a DEC-001 exige posicao **sem resumo**, e copia literal em Markdown e insegura, porque a saida pode trazer heading, cerca ou o travessao que o projeto proibe. Falta definir um escape reversivel e deterministico.
+- Tracebacks, codigo morto, `~~~`, ATX fechado, `NNNN` em qualquer posicao e ancoragem do Status: conserto sem decisao, com fixture ou teste para cada (T-064).
+- Arquivo vazio, evidencia de spec vazia, `T-1`, duplicidade com archive, `(bloqueada:)` fora de secao e anti-drift: cada um e cobranca nova em projeto existente; entram na mesma calibragem de REVAL-1 (T-059), com a proposta de ERRO para vazio e duplicidade com archive, AVISO para o resto.
 
-### Posicao Do Grok
+### Revalidacao
 
-- **P-7: a pergunta esta mal posta como binario.** Partiu "forma" em tres camadas que hoje ja nao coincidem: os campos declarativos da 2.2.0, os headings de posicao, e o que o validador de fato cobra. Recomendacao: os campos da 2.2.0 **ficam fora**, os headings **entram** nas duas formas, e o validador so ganha check novo em entrada produzida pela automacao. Concretamente: `### Posicao De <id>` no debate, `### Revalidacao De <id>` no achado, e `### Falha De <id>` quando o agente nao produziu posicao.
-- **O achado que mais muda a pergunta, conferido aqui:** o validador **nao cobra heading nomeado nenhum**. Nao existe codigo exigindo `Posicao Do Codex` nem uma `Revalidacao` unica. As unicas exigencias de heading no script inteiro sao as de `SESSION.md` e a de "Por Que Nada Pegou Antes". "O gargalo e o template, nao o contrato do script."
-- **P-8: entra, e nao e um terceiro pacote**, e o que impede DEC-001 e DEC-002 de nascerem autodeclaracao do script. Sidecar por rodada com bruto e manifesto, mais **ponte** na minuta: `### Proveniencia` com o caminho do sidecar e, por agente, id, exit code e caminho. O comando integral fica no manifesto. Justificativa para nao engolir o transcript: colocar o bruto dentro do `CONSENSUS.md` quebra a rotacao de ~20 entradas ou ~30KB.
-- Propos oito codigos, todos **AVISO**, cobrados so com `Origem: automacao`. Entre eles, um que os outros dois nao propuseram: `CONSENSO-CAMPOS-INCOERENTES`, cruzando manifesto e campos da 2.2.0 nos pontos que a DEC-006 torna deterministicos (modo cego implica `Exposicao previa: nao`; rodada `>=2` implica `sim`). Argumento: **essa fatia e veracidade de processo**, e e a unica que o script passa a poder cobrar sem contrariar o comentario de `check_consensus_declaration`, que promete nunca checar veracidade.
-- **Conflito entre duas ratificadas, que ninguem mais viu:** DEC-003 versus DEC-006 no **momento da escrita**. Na rodada 2 o agente **deve** ver as posicoes anteriores e **nao pode** ver as contemporaneas. Se o orquestrador gravar a minuta no repositorio no meio da rodada, o repositorio visivel vaza o contemporaneo. As seis decisoes nao escolhem quando escrever.
-- Risco de rotacao que so ele levantou: o sidecar nao e o `CONSENSUS.md`. Arquivar a entrada e deixar o bruto para tras quebra o teste da DEC-001, que e conferir o campo olhando o bruto **ao lado**.
-- Recusa explicita: nao aceita `gitignore` no bruto, "senao o teste ao lado morre na sessao seguinte".
+- Claude Fable, familia diferente. Todos os itens reproduzidos em projeto minimo montado de `assets/` com `--strict --codigos`; os dois tracebacks reproduzidos com o `stderr` capturado. Nada nao confirmado. A transcricao e do Claude; o bruto do Codex esta ao lado.
 
-### Pontos De Acordo
+### Por Que Nada Pegou Antes
 
-**As tres convergem no que fazer, e divergem em quanto.** Nao ha empate a desfazer.
-
-- **P-7: 3 de 3, a forma entra no escopo.** Os tres recusaram encolher o requisito. Os tres chegaram, separadamente, a secao repetivel por participante com id arbitrario: o Claude escreveu `### Posicao De <rotulo>`, o Grok `### Posicao De <id>`, e o Codex "participantes identificados por IDs arbitrarios, sem secoes fixas".
-- **P-7: 2 de 3 no gatilho opt-in, e o terceiro nao contradiz.** Codex e Grok propuseram, sem combinar, um marcador `**Origem:**` que faz o check novo valer so para entrada automatizada, preservando o criterio de que projeto que nao automatiza nao ganha cobranca. O Claude tinha declarado esse exato problema como "buraco que nao sei resolver". Os outros dois resolveram.
-- **P-8: 3 de 3, proveniencia entra.** Sidecar com bruto e manifesto, fora do `CONSENSUS.md`, com ponte dentro. Os tres deram o mesmo motivo de fundo: sem isso, os campos escritos pela automacao voltam a ser autodeclaracao, so que do script.
-- **Fora do que foi perguntado, 2 de 3:** Codex e Grok apontaram que a linha do "Fora Do Escopo" sobre nao mexer na forma virou **letra morta** depois da DEC-004, e que ela hoje se anula com a linha do "Incluido".
-
-### Riscos E Tradeoffs
-
-- **A divergencia real esta no quanto a entrada repete do manifesto.** Codex quer comando, hashes de insumo e saida, e diretorio **dentro** da entrada, argumentando que a DEC-002 autorizou escrever comandos e que sidecar sem isso a contraria. Grok quer o comando integral so no manifesto e uma ponte curta na entrada, argumentando rotacao e leitura humana. O Claude ficou no meio, sem tratar do ponto. **E escolha de calibragem, e as duas leituras da DEC-002 sao defensaveis.**
-- **Segunda divergencia: nivel dos diagnosticos.** Codex quer ERRO para entrada automatizada, porque ali a forma e contrato da operacao. Grok quer AVISO, por simetria com todo o resto de consenso. O projeto tem precedente dos dois lados.
-- **O conflito DEC-003 versus DEC-006 nao tem dono.** O momento da escrita nao foi decidido por nenhuma das seis, e nenhuma tarefa cobre isso hoje.
-- **Rodada com n=3 e um enquadramento so**, de novo: as duas perguntas foram redigidas pelo Claude, e a de P-7 foi redigida como binario, que o Grok recusou.
-- **A transcricao continua sendo do modelo criticado.** O risco registrado na rodada anterior nao foi resolvido por esta: quem leu as tres posicoes e escreveu este resumo foi um dos tres.
-
-### Consenso Final
-
-**As duas perguntas tem resposta convergente, e o que falta e voce escolher a calibragem.**
-
-**P-7, com 3 de 3:** a forma entra no escopo desta spec, com secao repetivel por participante e id arbitrario nas duas formas, secao propria para agente que falhou, e check novo valendo **so** para entrada automatizada, por marcador opt-in. O que barateia a decisao: o validador nunca exigiu heading nomeado, entao o congelamento em Codex, Claude e Gemini esta no template e nao no contrato, e mudar custa menos do que a spec supunha.
-
-**P-8, com 3 de 3:** proveniencia entra no escopo, com sidecar por rodada guardando bruto e manifesto, e ponte na entrada. O bruto nao pode ser ignorado pelo git, senao o teste da DEC-001, conferir o campo olhando o bruto ao lado, morre na sessao seguinte.
-
-**Duas calibragens para voce decidir**, e as duas mudam trabalho: quanto do manifesto a entrada repete (Codex quer comando e hashes dentro, Grok quer ponte curta), e se os diagnosticos novos sao ERRO ou AVISO em entrada automatizada.
-
-**Um conflito entre decisoes ja ratificadas, achado pelo Grok e sem dono:** DEC-003 e DEC-006 nao escolhem o **momento da escrita**, e escrita incremental no meio da rodada vaza posicao contemporanea pelo proprio repositorio.
+- O que passou verde: `verify_repository.py` 44 de 44 em todas as versoes; sete fixtures com oracle exato.
+- Mecanismo do ponto cego: o oracle exato prova que a fixture produz **exatamente** o que declara, e nada sobre o que o check deveria pegar fora dela. Fixture nasce por feature (2.2.0, 2.4.0), nunca por regra; e o documento "errado de um jeito que ninguem escreveu ainda" nunca entrou em fixture nenhuma.
+- Conserto de portao proposto: o de REVAL-4.
 
 ### Decisao Para Registrar Em DECISIONS.md
 
-Nada ainda. As duas viram DEC na spec 0006 quando o usuario ratificar, junto com a calibragem que ele escolher. Nenhuma das duas parece ter impacto alem da spec, ao contrario da DEC-002, que precisou subir porque mexia no alcance da 0004/DEC-019.
+- Nenhuma ate a calibragem.
+
+## 2026-09-03 - REVAL-3: o loop escreve o que o comando nao comprova em quatro caminhos, e perde trabalho em tres
+
+**Achado:** REVAL-3
+
+**Status:** aberto
+
+**Proximo passo:** qualquer agente conserta os itens sem decisao (T-060, exige 2.5.2); usuario decide o que fazer com `--seco --agente` e com a truncagem do `(verifica:)` (T-061).
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 3. Gemini 3.7 Flash (`cursor-agent -p --mode ask --force --model gemini-3.7-flash-high`) atacou `loop.sh`, `loop_task.py` e `references/loop.md`. Claude rodou nove entradas hostis com agente falso (`s3-claude-hostil.txt`) antes de ler o Gemini, e depois conferiu os tres achados que nao tinha (`s3-claude-verifica-gemini.txt`).
+
+### O Que Foi Encontrado
+
+Evidencia que o comando nao comprova:
+
+- **Comando com parenteses e truncado e o truncado e executado.** `VERIFICA_RE` para no primeiro `)`. `(verifica: python3 -c "print(1)")` vira `python3 -c "print(1"`, o portao roda isso e falha por sintaxe, e o mesmo regex no validador aceita a evidencia truncada.
+- **`procedimento=` nao e o comando que rodou.** `loop.sh` captura o comando antes do agente e `cmd_fechar` rele a linha depois. Agente que troca `(verifica: bash portao.sh)` por `(verifica: true)` fecha com `procedimento=true; resultado=exit 0; suite-real-passou`, e `--strict` aceita.
+- **`--seco --agente "claude -p"` grava `agente=claude -p`** sem o agente ter rodado. O comentario do codigo diz que `agente` e "fato conhecido com certeza".
+- **`fechar` e `bloquear` apagam as sub-linhas preexistentes** da tarefa (notas, contexto), contra "nao sobrescreva conteudo existente sem preservar".
+
+Trabalho perdido ou exit errado:
+
+- **Saida de portao maior que o limite de argumento** (1.2MB no macOS) faz a tentativa 2 falhar com `Argument list too long`, e o loop reporta exit 4 "agente mal configurado".
+- **Bytes fora de UTF-8 na saida do portao** derrubam `cmd_fechar` com traceback; portao verde, tarefa nao fecha, exit 1.
+- **`.loop-pergunta` vazio**: exit 1 em vez de 3, tarefa nao bloqueada, arquivo fica no disco.
+- Agente que remove o marcador `(verifica:)`: portao verde, fecho falha, exit 1.
+- Agente que so apaga arquivo e sai 1: `find -newer` nao ve, exit 4.
+
+Documentacao: a tabela de exit codes de `references/loop.md` nao tem o exit 4; `--agente` relativo com `--projeto` em outro diretorio falha depois do `cd`. Portao que mente (`true`) e por desenho, e a evidencia deixa visivel (`procedimento=true`), como `references/loop.md` ja diz.
+
+### Disposicao
+
+- Conserto direto, sem decisao (T-060): capturar a linha da tarefa junto com o comando no arranque e passar para `fechar` (ou `fechar` recusar se a linha mudou); preservar sub-linhas em `fechar`/`bloquear`; `errors="replace"` na leitura de saida e de pergunta; realimentacao por arquivo ou truncada ao mesmo limite do `resultado`; pergunta vazia vira exit 3 com pergunta "(vazia)" ou exit proprio, e o arquivo some; exit 4 documentado. Teste de mutacao para cada um.
+- Decisao do usuario (T-061): `(verifica:)` com parenteses e mudanca de formato (ex: exigir o comando entre crases, ou aceitar ate o ultimo `)` da linha); `--seco` com `--agente` e proibir a combinacao ou nao gravar `agente=`.
+
+### Revalidacao
+
+- Claude Fable, familia diferente. Os nove cenarios de Claude e os tres do Gemini rodaram de verdade com `loop.sh` e agente falso; saidas em `docs/archive/revalidacao-2026-09-03/`. Nada nao confirmado.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: `test_loop.py` 58 de 58, e tres bancadas reais com portao verde na tentativa 1.
+- Mecanismo do ponto cego: a bateria cobre o caminho feliz de cada exit code e nunca entrada hostil; os agentes reais das bancadas eram cooperativos e os portoes curtos. A evidencia registra o que **a linha diz** no fim, e ninguem perguntou se a linha ainda era a mesma do inicio.
+- Conserto de portao proposto: casos hostis em `test_loop.py` (parenteses, saida enorme, nao UTF-8, pergunta vazia, agente que edita a propria tarefa, sub-linhas preexistentes).
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Nenhuma ate o usuario decidir o formato de `(verifica:)`.
+
+## 2026-09-03 - REVAL-4: o portao dos evals e cego para 29 dos 39 diagnosticos e para o prompt do loop
+
+**Achado:** REVAL-4
+
+**Status:** aberto
+
+**Proximo passo:** qualquer agente escreve o manifesto de cobertura e as fixtures por codigo (T-065); usuario decide se quer piso fixo de verificacoes no `verify_repository.py` (aplicado hoje para a bateria do loop, com 58).
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 4, a mais importante. Claude executou 16 mutacoes com backup por `cp` antes de ler qualquer agente (`mutacoes-claude.txt`); Codex (mesmo perfil de REVAL-2), somente leitura, **previu** mutacoes e uma tabela de cobertura dos 39 codigos; Claude executou depois as 8 previsoes que ainda nao tinha rodado (`mutacoes-claude-rodada2.txt`). 24 mutacoes no total, cada uma revertida do backup e conferida por SHA-256.
+
+### O Que Foi Encontrado
+
+Mutacao que passa verde no `verify_repository.py` (44 de 44), com a promessa quebrada:
+
+- Desligar `check_session` (M1), `check_em_dash` do validador (M2), `check_bridges` (M3), `check_evidence` (M5), `check_markers_values` (M9), `check_rotation` (M10): seis checks inteiros somem sem um unico FALHA. Codex previu os seis antes de ver o resultado.
+- Remover a chamada de `verificar_fixtures` (M17): o resumo cai de 44 para 30 e o exit continua 0. Nao ha manifesto de etapas nem total esperado.
+- Esvaziar `test_loop.py` (M18): imprime `0/0 verificacoes passaram`, exit 0, e o verificador aceita.
+- Tirar `debate-project` do `FIXTURES` (M19): a fixture continua no disco e ninguem nota. Apagar `assets/docs/STACK.md` (M20): o destino e comparado com a fonte ja reduzida.
+- Versao em prosa (`SKILL.md:186`, `CHANGELOG.md:11`) desatualizada (M8): so frontmatter, marcadores e heading do CHANGELOG sao conferidos.
+- No prompt do `loop.sh`: mandar o agente trabalhar na `T-999` (M22), remover "nao apague o que falha" e a proibicao de editar memoria (M23): 58 de 58. A unica assercao sobre o conteudo do prompt e a realimentacao da falha. `references/loop.md` diz que essas regras estao no prompt **porque** o portao nao as pega; o teste do prompt tambem nao.
+- `loop_task`: leftover de `.loop-pergunta` nao removido (M12), truncagem de `resultado` desligada (M13), `bloquear` aceitando tarefa ja bloqueada (M24): 58 de 58.
+
+Cobertura positiva (tabela do Codex, conferida contra as mutacoes): **10 de 39** codigos tem fixture que acusa se o check sumir. A raiz em `--strict` sai limpa e nao cobre nenhum.
+
+Pegou, como devia: `check_markers` (M4, via `ESTRUTURA-V1`), `check_waiting` (M6), `TASK-ID-DUPLICADO` (M7), `check_specs` (M11), `.loop-pergunta` ignorado (M14), secoes elegiveis (M15), ordem de captura do comando (M16), eval removido do `evals.json` (M21).
+
+Efeitos colaterais achados pelo caminho, os dois de suspeita do Codex e confirmados por execucao: `verify_repository.py` afirma "nunca escreve no repositorio" e gravava `scripts/__pycache__` na fonte via `py_compile`, que o `install.sh` copiava para os tres destinos (6 arquivos por instalacao); e `loop_task.escrever`, da 2.5.1, troca o modo do `TASKS.md` de 664 para 600 porque `mkstemp` cria com 0600 e `os.replace` nao preserva. `evals.json` ainda pede marcador `v2.2.0` nos evals 1, 2, 3 e 5, e o eval 7 nao conhece os codigos da 2.5.0.
+
+### Disposicao
+
+- Aplicado hoje, sem bump (arquivos nao distribuidos): `verify_repository.py` confere os scripts com `ast.parse` e roda a bateria com `PYTHONDONTWRITEBYTECODE`, ganhou o check "nenhum `__pycache__` dentro da skill" e o piso de 58 verificacoes na bateria do loop; `test_loop.py` nao grava bytecode; `install.sh` apaga `__pycache__` do destino; `evals.json` em 2.5.1 com os codigos; README da skill corrigido. Mutacao M18 refeita depois: pega.
+- Fica para T-065: manifesto de cobertura codigo-para-fixture com uma fixture por codigo (29 faltam), manifesto de etapas do verificador, inventario de fixtures no disco contra o `FIXTURES`, assercao do conteudo do prompt no `test_loop.py`, e a versao em prosa entrar em `verificar_versao`.
+- Fica para T-060 (distribuido, exige 2.5.2): preservar o modo do arquivo em `escrever`, com teste.
+
+### Revalidacao
+
+- Claude executou; Codex previu as cegas. As previsoes bateram nas 8 que os dois cobriram, e o Codex ainda apontou as duas suspeitas que viraram achado. Familia diferente nos dois sentidos.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: 44 de 44 e 58 de 58, lidos como "cobertura" em todas as sessoes desde a 2.2.0, inclusive nas tres rodadas de consenso de hoje.
+- Mecanismo do ponto cego: o numero total e dinamico e nunca foi comparado com nada, entao verificacao que some nao e regressao; fixture so nasce quando um check nasce, e o contrato do validador nunca foi enumerado contra as fixtures; a bateria do loop assere exit code e arquivos, nunca o texto que o agente recebe. "Mutacao antes de portao novo" virou regra em `MEMORY.md` hoje, mas so para portao **novo**: ninguem mutacionou os antigos.
+- Conserto de portao proposto: o manifesto de T-065, e a regra de que todo codigo em `CODIGOS` precisa de fixture que o produza, cobrada pelo proprio `verify_repository.py`.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Proposta: "codigo de diagnostico sem fixture que o produza nao entra em `CODIGOS`". Depende do usuario.
+
+## 2026-09-03 - REVAL-6: templates entregues ficaram atras do bloco core, e um deles ensina o anti-padrao
+
+**Achado:** REVAL-6
+
+**Status:** aberto
+
+**Proximo passo:** qualquer agente aplica os consertos de texto (T-063); usuario decide o nivel de `CONVENCOES-DATA-INVALIDA` em T-059.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 6. Grok 4.6 (mesmo perfil de REVAL-1) atacou todos os arquivos de `assets/`, montando projeto minimal e completo com specs e simulando o dia seguinte. Claude fez o mesmo antes de ler o Grok (`s6-claude-dia-seguinte.txt`) e conferiu os achados novos no template.
+
+### O Que Foi Encontrado
+
+- **Irmaos de T-055**: `QUALITY.md` (checklists), `PROMPTS.md`, `ONBOARDING.md` e `README.md` nao mencionam evidencia de fechamento, Aguardando Usuario, campos de independencia nem achado. O prompt "Solicitar Consenso Entre Modelos" pede posicao sem `Metodo`, `Exposicao previa` e `Rodada`: quem o segue produz entrada que falha em `--strict`. O modelo de sessao corta a nota "qualquer agente serve se tiver contexto suficiente" que o core pede.
+- **Sobras do meta-projeto**: `assets/docs/ARCHITECTURE.md` lista `docs/skills/` como modulo do projeto-alvo; `GLOSSARY.md` define skill como "ensinar o Codex".
+- **Core manda ler `docs/ARCHITECTURE.md`** e o nivel minimal, recomendado, nao o cria.
+- **Placeholder `AAAA-MM-DD` esquecido** no marcador de adocao e so INFO, `--strict` passa, e a cobranca de evidencia fica desligada no projeto inteiro.
+- **O unico exemplo de evidencia** no template e `tipo=comando; procedimento=pytest -q` numa estrutura cuja unica tarefa real e de conteudo, que o core manda fechar com `revisao-manual` ou `conferencia`.
+- Copia literal do Modelo De Debate (com os valores em uniao `aberto | resolvido | arquivado`) e do modelo de linha concluida (com `(spec: 0001-login-social)`) falha em `--strict`; o segundo e ERRO por spec inexistente. Baixa: modelo e forma, nao valor, mas o exemplo de spec e uma armadilha real.
+- Dia 0, 1 e 2 com os templates preenchidos passam em `--strict`; `partials/` nunca e copiado, e nenhuma instrucao leva a copiar a pasta.
+
+### Disposicao
+
+- Texto: atualizar QUALITY, PROMPTS, ONBOARDING, README e SESSION dos assets para a 2.2.0/2.4.0; limpar ARCHITECTURE e GLOSSARY; trocar o exemplo de evidencia por um de `revisao-manual` ao lado do de comando; tirar `(spec: 0001-login-social)` do modelo de linha; core ganhar "quando existir" em ARCHITECTURE.md. Nada disso muda contrato.
+- Decisao do usuario (T-059): `CONVENCOES-DATA-INVALIDA` sobe para AVISO (e `--strict` passa a travar scaffold que pulou o 5b) ou fica INFO.
+
+### Revalidacao
+
+- Claude Fable conferiu cada linha citada nos assets e reproduziu o placeholder e o dia seguinte. Nada nao confirmado.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: `verify_repository.py` confere que os templates de `TASKS.md` e `CONSENSUS.md` carregam as convencoes atuais, por substring, e nada mais dos assets.
+- Mecanismo do ponto cego: a paridade e verificada so nos arquivos que mudaram na 2.2.0 e na 2.4.0; os outros templates nunca entraram no portao, e o dogfood da raiz reescreveu os proprios `QUALITY.md` e `PROMPTS.md` sem propagar para o asset.
+- Conserto de portao proposto: `verificar_convencoes` cobrir todos os templates que citam regra do core, com a lista de termos por arquivo.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Nenhuma ate a calibragem do INFO.
+
+## 2026-09-03 - REVAL-7: a distribuicao funciona, mas o README ensinava instalacao quebrada e o instalador levava bytecode
+
+**Achado:** REVAL-7
+
+**Status:** aberto
+
+**Proximo passo:** usuario decide se `install.sh` deve avisar antes de sobrescrever destino editado e se deve virar copia atomica (T-067).
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 7. Codex rodou 312 mil tokens e morreu na cota do plano ("You've hit your usage limit") antes do relatorio; a superficie foi refeita com a mesma familia por outra assinatura, GPT-5.6 via `cursor-agent -p --mode ask --force --model gpt-5.6-sol-high`. Claude exercitou o `install.sh` de verdade em HOME falso antes de ler qualquer agente (`s7-claude-install.txt`) e conferiu as strings do binario do Codex 0.152.1.
+
+### O Que Foi Encontrado
+
+- **README da skill**: "Instalacao manual" copiava so `SKILL.md`, `assets` e `agents`, sem `scripts/` e `references/`; quem seguisse ficava sem validador, atualizacao, specs e loop. A lista de fixtures parava em tres (faltavam `achado-project` e `debate-project`). Corrigido hoje.
+- **`__pycache__` distribuido**: `scripts/__pycache__` (gravado pelo proprio verificador, ver REVAL-4) ia junto em `cp -R`, seis arquivos por instalacao. Corrigido hoje no `install.sh`.
+- **Idempotente, mas nao seguro**: rodar duas vezes da arvore identica; destino editado localmente (`SKILL.md`, `validate_structure.py`) e sobrescrito sem aviso; arquivo extra na raiz do destino sobrevive para sempre (so `assets/`, `agents/`, `scripts/` e `references/` sao apagados antes da copia).
+- **Falha parcial**: com `assets/` do destino sem permissao de escrita, o `SKILL.md` ja foi trocado quando o `rm -rf` falha, e o destino fica em 2.5.1 no frontmatter com `assets/` da versao anterior. Nao ha copia atomica nem rollback.
+- `--uninstall` em HOME vazio imprime "removido" para cada destino que nao existia; `--all` funcionava e nao estava no cabecalho (adicionado hoje).
+- `agents/openai.yaml`: o binario do Codex 0.152.1 contem `policy.allow_implicit_invocation` e o texto "When false, the skill is not injected into..."; a chave e lida. O comportamento real de invocacao implicita nao foi exercitado com uma sessao do Codex, por cota.
+- CHANGELOG da skill: a entrada 2.3.0 lista exit codes 0 a 3 e o exit 4 aparece so em item posterior; a 2.5.1 repete a versao em prosa. Nada descreve comportamento que o codigo nao tenha.
+- Achados so do GPT-5.6, conferidos: `install.sh --help` omite `--global` e `--help` (o cabecalho e a ajuda sao o mesmo texto); o comentario de `agents/openai.yaml` o chama de "parte do Agent Skills Open Standard" e o proprio Codex o descreve como "extended, product-specific config"; falha forcada no terceiro `cp` deixa `SKILL.md` e `assets/` novos com `scripts/` e `references/` velhos, e uma reinstalacao completa recupera. `codex help skills` nao existe na 0.152.1.
+
+### Disposicao
+
+- Aplicado hoje, sem bump: README, `install.sh` (`__pycache__` e `--all` no cabecalho), `evals.json`.
+- Decisao do usuario (T-067): avisar ou recusar quando o destino diverge da fonte; copiar para temporario e trocar com `mv` no fim; apagar arquivo extra na raiz do destino.
+
+### Revalidacao
+
+- GPT-5.6 (cursor), familia diferente de Claude, achou por conta propria os mesmos quatro itens centrais (transacionalidade, `__pycache__`, instalacao manual, versao em prosa) e mais tres pequenos, todos conferidos no codigo por Claude. Nada nao confirmado.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: `verificar_install` compara os tres destinos entre si e com a fonte, ignorando `__pycache__` de proposito (`IGNORADOS`), entao o bytecode distribuido nunca apareceu no diff. O README nunca teve check.
+- Mecanismo do ponto cego: o portao ignora exatamente o artefato que estava vazando, e testa so o caminho feliz do `install.sh` (destino novo, sem falha, sem edicao local).
+- Conserto de portao proposto: `verificar_install` conferir que o destino nao contem `__pycache__` (feito indiretamente hoje, pelo check na fonte) e exercitar reinstalacao sobre destino sujo.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Nenhuma.

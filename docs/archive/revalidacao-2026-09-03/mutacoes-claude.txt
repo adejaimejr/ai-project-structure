@@ -1,0 +1,105 @@
+
+=== M1 desliga check_session
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 44/44 verificacoes passaram.
+  restaurado ok
+
+=== M2 desliga check_em_dash do validador
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 44/44 verificacoes passaram.
+  restaurado ok
+
+=== M3 desliga check_bridges
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 44/44 verificacoes passaram.
+  restaurado ok
+
+=== M4 desliga check_markers
+  gate=verify exit=1 -> PEGOU
+  Resumo: 43/44 verificacoes passaram.
+   [FALHA] fixture v1-project com 2 diagnosticos exatos: nao saiu: INFO|ESTRUTURA-V1|AGENTS.md|
+  restaurado ok
+
+=== M5 desliga check_evidence
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 44/44 verificacoes passaram.
+  restaurado ok
+
+=== M6 desliga check_waiting (controle, deve pegar)
+  gate=verify exit=1 -> PEGOU
+  Resumo: 42/44 verificacoes passaram.
+   [FALHA] fixture aguardando-project/invalido em normal: exit 0 (esperado 1)
+   [FALHA] fixture aguardando-project/invalido com 1 diagnosticos exatos: nao saiu: ERRO|AGUARDANDO-SEM-PERGUNTA|docs/TASKS.md|T-002
+  restaurado ok
+
+=== M7 TASK-ID-DUPLICADO nunca dispara (controle, deve pegar)
+  gate=verify exit=1 -> PEGOU
+  Resumo: 43/44 verificacoes passaram.
+   [FALHA] fixture broken-project com 2 diagnosticos exatos: nao saiu: ERRO|TASK-ID-DUPLICADO|docs/TASKS.md|T-001
+  restaurado ok
+
+=== M8 versao em prosa do SKILL.md desatualizada
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 44/44 verificacoes passaram.
+  restaurado ok
+
+=== M9 check_markers_values desligado (prioridade, bloqueada, tipo de evidencia)
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 44/44 verificacoes passaram.
+  restaurado ok
+
+=== M10 check_rotation nunca avisa
+  gate=verify exit=0 -> PASSOU VERDE (cego)
+  Resumo: 44/44 verificacoes passaram.
+  restaurado ok
+
+=== M11 check_specs desligado
+  gate=verify exit=1 -> PEGOU
+  Resumo: 43/44 verificacoes passaram.
+   [FALHA] fixture broken-project com 2 diagnosticos exatos: nao saiu: ERRO|SPEC-STATUS-INVALIDO|docs/specs/0001-login.md|0001-login.md
+  restaurado ok
+
+=== M12 loop.sh nao remove .loop-pergunta leftover no arranque
+  gate=loop exit=0 -> PASSOU VERDE (cego)
+  Modulo de loop: 58/58 verificacoes passaram.
+  restaurado ok
+
+=== M13 loop_task sem truncagem de resultado
+  gate=loop exit=0 -> PASSOU VERDE (cego)
+  Modulo de loop: 58/58 verificacoes passaram.
+  restaurado ok
+
+=== M14 loop.sh ignora .loop-pergunta (controle, deve pegar)
+  gate=loop exit=1 -> PEGOU
+  Modulo de loop: 52/58 verificacoes passaram.
+   [FALHA] D: falta de contexto sai 3: exit 0
+   [FALHA] D: tarefa foi para Aguardando Usuario
+   [FALHA] D: pergunta registrada
+   [FALHA] D: campo de resposta em aberto
+   [FALHA] D: nenhuma evidencia escrita
+   [FALHA] D: arquivo de sinal removido
+  restaurado ok
+
+=== M15 loop_task fecha tarefa de qualquer secao
+  gate=loop exit=1 -> PEGOU
+  Modulo de loop: 57/58 verificacoes passaram.
+   [FALHA] check recusa tarefa concluida: [ERRO] T-001 nao declarou '(verifica: <comando>)'. Sem comando declara
+  restaurado ok
+
+=== M16 loop.sh le o comando do portao DEPOIS do agente (ordem)
+  gate=loop exit=1 -> PEGOU
+  Modulo de loop: 49/58 verificacoes passaram.
+   [FALHA] B: evidencia com a saida real
+   [FALHA] C: portao vermelho sai 2: exit 0
+   [FALHA] C: tarefa continua em Em Andamento
+   [FALHA] C: nenhuma evidencia escrita
+   [FALHA] C: agente chamado 3 vezes: 1 chamadas
+   [FALHA] C: saida da falha realimenta a tentativa 2
+  restaurado ok
+
+SHA final:
+ae34677c71be9f10ca585bd3c5a874c7c1f0206f36bfef9d58fd92cd78402f39  docs/skills/ai-project-structure/scripts/validate_structure.py
+221b48b8bbb1d55d299b1bdc47cf40ec3560b0bde398de00edd5d5f0b779da87  docs/skills/ai-project-structure/scripts/loop.sh
+51b1eb5d2ca33638f0f58933b5870fe9930ee40c1b30459b4e2dfbb9e8b81d2b  docs/skills/ai-project-structure/scripts/loop_task.py
+59bafb640a49155b895d1b746d5d382ee6745b6198414e0fc5793fcbaa426b71  docs/skills/ai-project-structure/SKILL.md
+

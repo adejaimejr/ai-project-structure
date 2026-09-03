@@ -1,0 +1,58 @@
+=== H1: comando com parenteses em (verifica:)
+  loop exit 2
+  Portao:  python3 -c "print(1
+  --- portao saiu com codigo 2
+  --- portao saiu com codigo 2
+  --- portao saiu com codigo 2
+
+=== H2: saida do portao com 1.2MB, portao vermelho (realimentacao entra no argv do agente)
+  loop exit 4
+  === Tentativa 1 de 3 ===
+  === Tentativa 2 de 3 ===
+  /Users/adejaimejunioer/Dev/2026/ai-project-structure/docs/skills/ai-project-structure/scripts/loop.sh: line 141: /private/tmp/claude-501/-Users-adejaimejunioer-Dev-2026-ai-project-structure/dd102825-ff96-463b-8b15-457fb22d45c4/scratchpad/hostil/h2-saida-enorme-agente: Argument list too long
+  [ERRO] o agente saiu com codigo 1 e nao alterou nenhum arquivo.
+  Parando antes de queimar as outras tentativas.
+
+=== H3: saida do portao com bytes nao UTF-8, portao verde
+  loop exit 1
+  --- portao saiu com codigo 0
+  Traceback (most recent call last):
+  UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 3: invalid start byte
+  Concluidas: - (Vazio.)
+  Em Andamento: - T-019: Tarefa alvo. (verifica: bash portao.sh)
+
+=== H4: agente troca o (verifica:) da propria tarefa por true durante a rodada; portao real = bash portao.sh (verde)
+  loop exit 0
+  Concluidas:
+    - 2026-09-03 T-019: Tarefa alvo. (verifica: true)
+      - Evidencia: tipo=comando; agente=h4-agente-troca-verifica-agente; procedimento=true; resultado=exit 0; suite-real-passou
+  validate --strict: (0, '')
+
+=== H5: agente remove o marcador (verifica:) da tarefa; portao real verde
+  loop exit 1
+  --- portao saiu com codigo 0
+  [ERRO] T-019 nao declarou '(verifica:)'; o loop nao pode fechar.
+  Em Andamento: - T-019: Tarefa alvo.
+
+=== H6: .loop-pergunta vazio
+  loop exit 1
+  O agente sinalizou falta de contexto. Registrando a pergunta e parando.
+  [ERRO] arquivo de pergunta vazio; nao ha o que registrar.
+  .loop-pergunta sobrou? True
+  Em Andamento: - T-019: Tarefa alvo. (verifica: bash portao.sh)
+
+=== H7: portao que mente (sempre 0) e agente que nao faz nada
+  loop exit 0
+  Concluidas:
+    - 2026-09-03 T-019: Tarefa alvo. (verifica: true)
+      - Evidencia: tipo=comando; agente=h7-portao-mente-agente; procedimento=true; resultado=exit 0; (sem saida)
+  validate --strict: (0, '')
+
+=== H8: agente so apaga arquivo (nao cria nem modifica) e sai 1
+  loop exit 4
+  [ERRO] o agente saiu com codigo 1 e nao alterou nenhum arquivo.
+  docs/README.md existe? False
+
+=== H9: --agente com argumento entre aspas (documentado como nao suportado): o que acontece?
+  loop exit 0
+  args recebidos pelo agente (primeiros 80): --model "gpt 5" Voce esta trabalhando no projeto em /private/tmp/claude-501/-Use

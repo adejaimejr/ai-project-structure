@@ -1,0 +1,13 @@
+=== V-A-S3-4: fechar apaga sub-linhas preexistentes?
+  helper: T-019 movida para Concluidas com evidencia de comando. 
+  "Cuidado" sobrou? False | "Contexto" sobrou? False
+  Concluidas:
+   - 2026-09-03 T-019: Tarefa com notas. (verifica: true)
+      - Evidencia: tipo=comando; procedimento=true; resultado=exit 0; ok
+=== V-A-S3-4b: bloquear apaga sub-linhas?
+  "Cuidado" sobrou? False
+=== V-A-S3-5: --seco --agente grava agente= sem agente rodar?
+  exit 0
+  evidencia: ['- Evidencia: tipo=comando; agente=claude -p; procedimento=true; resultado=exit 0; (sem saida)']
+=== V-A-S3-9: --agente relativo com --projeto em outro dir
+  exit 4 | ['/Users/adejaimejunioer/Dev/2026/ai-project-structure/docs/skills/ai-project-structure/scripts/loop.sh: line 141: ./rel-agente.sh: No such file or directory', '[ERRO] o agente saiu com codigo 1 e nao alterou nenhum arquivo.']

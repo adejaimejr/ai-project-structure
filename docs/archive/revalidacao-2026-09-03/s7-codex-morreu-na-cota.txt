@@ -1,0 +1,7 @@
+docs/skills/ai-project-structure/install.sh:40:    --all)       DO_CLAUDE=1; DO_CODEX=1; DO_GEMINI=1; ANY_TOOL=1 ;;
+
+ERROR: You've hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at 9:21 PM.
+ERROR: You've hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at 9:21 PM.
+tokens used
+312,916
+exit 1

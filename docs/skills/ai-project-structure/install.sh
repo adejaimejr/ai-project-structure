@@ -12,6 +12,7 @@
 #   ./install.sh --codex          # so Codex CLI
 #   ./install.sh --gemini         # so Gemini CLI
 #   ./install.sh --project --gemini
+#   ./install.sh --all            # mesmo que sem argumento: as tres ferramentas
 #   ./install.sh --uninstall      # remove a skill dos destinos escolhidos
 #
 # Caminhos de destino:
@@ -78,6 +79,8 @@ install_to() {
   if [ -d "$SRC_DIR/references" ]; then
     rm -rf "$dest/references"; cp -R "$SRC_DIR/references" "$dest/references"
   fi
+  # Bytecode da fonte nao e da skill: nunca vai junto.
+  find "$dest" -type d -name __pycache__ -prune -exec rm -rf {} +
   echo "  [$tool] -> $dest"
 }
 

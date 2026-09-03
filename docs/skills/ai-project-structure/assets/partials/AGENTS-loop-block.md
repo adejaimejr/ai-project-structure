@@ -27,7 +27,7 @@ Quando a saida obvia for remover conteudo, informacao ou cobertura para o portao
 
 - Uma tarefa por rodada, indicada no comando. O loop nunca escolhe sozinho no que trabalhar.
 - Tarefa sem `(verifica:)` nao e elegivel: o loop recusa antes de chamar o agente.
-- O loop nao escreve em `SESSION.md`, `MEMORY.md`, `DECISIONS.md`, `AGENTS.md` nem em specs. O relatorio da rodada da o material; quem registra e voce.
+- O loop nao escreve em `SESSION.md`, `MEMORY.md`, `DECISIONS.md`, `CONSENSUS.md`, `AGENTS.md` nem em specs. O relatorio da rodada da o material; quem registra e voce. `CONSENSUS.md` e caso especial: uma entrada la declara metodo, exposicao previa e rodada, e uma rodada de loop tem um agente so. Consenso de um modelo so e o que esses campos existem para denunciar.
 - O aviso de parada e o exit code mais o relatorio em stdout. Som, notificacao ou webhook se compoem por fora.
 
 O fluxo completo e o uso estao em `references/loop.md` da skill `ai-project-structure`.

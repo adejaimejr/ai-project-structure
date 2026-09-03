@@ -2,6 +2,11 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (fixture debate-project)
+
+- Fixture `debate-project`: projeto que usa consenso e nunca registra achado, com conjunto de diagnosticos vazio em `--strict`. Fecha o ultimo residuo da rodada 2 do achado `0005-A1`. `verify_repository.py` de 42 para 44 verificacoes.
+- Provada por mutacao: quebrando `strip_fences`, so ela acusa; as outras cinco fixtures seguem verdes. Muda apenas `evals/`, que nao e distribuido, entao nao houve bump de versao nem reinstalacao.
+
 ## 2026-09-03 (skill v2.5.0 publicada)
 
 - 2.5.0 empurrada para o GitHub (`e70bd7c..28681fd`) e instalada nos tres destinos globais. Paridade conferida por `diff -rq`: so `evals/`, `install.sh`, `README.md` e `CHANGELOG.md` ficam de fora, como esperado, e os tres `SKILL.md` instalados declaram `version: "2.5.0"`. A flag `--codigos` chegou nos tres.

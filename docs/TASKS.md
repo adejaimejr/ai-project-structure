@@ -30,7 +30,7 @@ Modelo de linha concluida:
 
 ## Proximas Tarefas
 
-- T-052: Fixture so com entrada de debate, sem nenhum achado, rodada em `--strict` esperando saida limpa, para exercitar literalmente o criterio "projeto que nunca registra achado nao recebe aviso novo". Hoje os dois lados de `achado-project` tem achado, e a unica fixture com entrada de debate (`v1-project`) roda sem a flag. Rodada 2 do achado `0005-A1`. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)
+- (Vazio.)
 
 
 
@@ -42,6 +42,8 @@ Modelo de linha concluida:
 
 ## Concluidas
 
+- 2026-09-03 T-052: Fixture so com entrada de debate, sem nenhum achado, rodada em `--strict` esperando saida limpa, exercitando literalmente o criterio "projeto que nunca registra achado nao recebe aviso novo". (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)
+  - Evidencia: tipo=comando; procedimento=fixture `debate-project` com quatro controles no mesmo `CONSENSUS.md` (cerca dentro do corpo de uma entrada citando `**Achado:**`; entrada anterior a data de adocao, sem os campos declarativos; entrada na rodada 5 com `Pendente da rodada anterior`; e entrada que declara `Escapou de verificacao` sem declarar `Achado`, fixando o opt-in), declarada no `FIXTURES` com `strict` e conjunto de diagnosticos vazio; discriminacao provada por duas mutacoes temporarias no validador, revertidas de um backup em vez de `git checkout`; depois `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=mutacao A (formato de achado deixa de ser opt-in) reprovou com 6 diagnosticos inesperados so nesta fixture, 37 de 44; mutacao B (`strip_fences` para de limpar cercas) reprovou **so** nesta fixture, 42 de 44, provando que nenhuma outra cobria esse caso; sem mutacao, `python3 docs/skills/ai-project-structure/evals/verify_repository.py` exit 0 com 44 de 44 (eram 42), `test_loop.py` 55 de 55 e `validate_structure.py . --strict` exit 0
 - 2026-09-03 T-051: Cada diagnostico de `validate_structure.py` ganhou identificador estavel, e o portao passou a comparar o conjunto esperado de diagnosticos no lugar de contar linhas `[AVISO]`. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)
   - Evidencia: tipo=comando; procedimento=os 39 diagnosticos ganharam codigo declarado no conjunto `CODIGOS`, com `Report.add` recusando codigo nao declarado e um check estatico por AST conferindo que nenhum dos 39 sites ficou sem codigo e que nenhum codigo declarado sobrou sem uso; flag `--codigos` nova, com saida `NIVEL|CODIGO|ARQUIVO|SUJEITO`, onde o sujeito e a tarefa, entrada ou spec de que o diagnostico fala; depois `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=AST em 39 sites, 39 codigos distintos, zero sem codigo e zero declarado sem uso; `python3 docs/skills/ai-project-structure/evals/verify_repository.py` exit 0 com 42 de 42 (eram 40), `test_loop.py` 55 de 55 e `validate_structure.py . --strict` exit 0
 - 2026-09-03 T-050: `verify_repository.py` passou a exigir oracle discriminante por fixture (modo, exit e conjunto exato de diagnosticos), em vez de aceitar exit code como prova. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)

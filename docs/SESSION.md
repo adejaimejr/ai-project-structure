@@ -4,7 +4,7 @@ Registro cronologico inverso das sessoes de IA.
 
 Sempre adicione a sessao mais recente no topo.
 
-As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`. Este arquivo mantem as 6 mais recentes.
+As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`. Este arquivo mantem as 7 mais recentes.
 
 ## Modelo Para Nova Sessao
 
@@ -40,6 +40,42 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Agente sugerido (ou "qualquer agente"): 
 - Motivo: 
 ```
+
+## 2026-09-03 - Claude (fixture de controle do criterio de achado)
+
+### Objetivo
+
+- T-052, o ultimo residuo da rodada 2 do achado `0005-A1`: exercitar literalmente o criterio "projeto que nunca registra achado nao recebe nenhum aviso novo".
+
+### O Que Foi Feito
+
+- Fixture `debate-project`: projeto que **usa** consenso de verdade e nunca declara `**Achado:**`. Oracle de conjunto vazio em `--strict`, que nesta arquitetura nao e teste fraco, porque a comparacao e nos dois sentidos e qualquer diagnostico reprova.
+- Quatro controles no mesmo `CONSENSUS.md`: cerca dentro do corpo de uma entrada citando `**Achado:**`; entrada anterior a data de adocao, sem os campos declarativos; entrada na rodada 5 com `Pendente da rodada anterior`; e entrada que declara `Escapou de verificacao` **sem** declarar `Achado`, que fixa o opt-in do formato.
+- Correcao de rota no meio: a primeira versao da fixture punha o modelo de achado cercado no topo do arquivo e o README dizia que aquilo guardava `strip_fences`. Nao guardava: o modelo fica antes de qualquer entrada datada e nunca entra em corpo de entrada. A cerca foi movida para dentro de uma entrada, e so entao o controle passou a existir.
+- **Provado por mutacao, com duas rodadas.** Mutacao A (formato de achado deixa de ser opt-in): 37 de 44, com 6 diagnosticos inesperados so nesta fixture. Mutacao B (`strip_fences` para de limpar cercas): 42 de 44, e **so esta fixture acusou**. As outras cinco seguiram verdes, que e exatamente o buraco que T-052 existia para fechar.
+- Reversao das mutacoes por backup em `cp`, e nao por `git checkout`, aplicando a licao da sessao anterior.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `evals/fixtures/debate-project/` (novo, 14 arquivos), `evals/verify_repository.py`, `CHANGELOG.md`.
+- Projeto: `docs/TASKS.md`, `docs/CHANGELOG.md`, `docs/SESSION.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma nova. A fixture **fixa** uma decisao ja tomada na spec 0005: o formato de achado e opt-in pelo campo `**Achado:**`, entao entrada que declara `Escapou de verificacao` sem declarar `Achado` segue sendo debate e nao e cobrada. Mudar isso passa a ser mudanca visivel, e nao silenciosa.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum. O aprendizado sobre check AVISO e portao ja esta registrado e continua valendo sem alteracao.
+
+### Pendencias
+
+- Nenhuma. Backlog zerado, cinco specs `Concluida`, "Aguardando Usuario" vazia.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, e de preferencia o proprio usuario usando a 2.5.0 em projeto real.
+- Motivo: a spec 0005 fechou e o residuo dela tambem. O que vem agora depende de uso: o formato de achado so tem um achado registrado, e a forma dele ainda e n=1.
 
 ## 2026-09-03 - Claude (skill 2.5.0, diagnostico com identidade)
 

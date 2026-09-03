@@ -106,6 +106,11 @@ FIXTURES = {
             "INFO|TASKS-FORMATO-V1|docs/TASKS.md|",
         ],
     },
+    # Controle do criterio "projeto que nunca registra achado nao recebe aviso
+    # novo": consenso de verdade, nenhum achado, e nenhum diagnostico esperado.
+    # Conjunto vazio nao e teste fraco aqui, porque a comparacao e nos dois
+    # sentidos: qualquer diagnostico que apareca reprova.
+    "debate-project": {"strict": True, "exit": 0, "diagnosticos": []},
     "aguardando-project/valido": {"strict": True, "exit": 0, "diagnosticos": []},
     "aguardando-project/invalido": {
         "strict": False,

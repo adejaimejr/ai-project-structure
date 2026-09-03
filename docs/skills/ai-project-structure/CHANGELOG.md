@@ -17,6 +17,8 @@ Modulo de loop: a estrutura passa a poder executar uma tarefa verificavel, nao s
 - `references/loop.md` ganhou a tabela de comandos por ferramenta (Claude, Codex, Gemini e Grok), as duas armadilhas que custam uma rodada (`--skip-git-repo-check` no Codex fora de repo git, `--skip-trust` no Gemini) e a secao "A Evidencia Vale O Que O Portao Vale".
 - A evidencia escrita pelo loop passa a registrar `agente=<comando>`: quem fechou a tarefa, nao so que o portao passou.
 - Chamada assistida: `SKILL.md` ganhou "Rodar Uma Tarefa Com O Loop". O usuario pede em linguagem natural e o agente do chat monta o comando, lendo os perfis por intencao e ferramenta que ficam em `docs/MEMORY.md`, secao `## User`. Nome de modelo e flag de esforco nunca entram na skill: eles envelhecem, e a memoria do projeto e o lugar deles.
+- Perfis de execucao podem ter degraus de esforco (`executar`, `executar-dificil`, `executar-muito-dificil`). `references/loop.md` ganhou "Escolher O Nivel De Esforco": a skill propoe um degrau a partir de sinais reais e diz por que, em vez de escolher em silencio ou inventar rubrica. Na duvida entre dois, propoe o mais baixo.
+- `references/loop.md` ganhou "Configurar Os Perfis": fluxo conversacional para ver, trocar e criar perfil, com a regra de confirmar nome de modelo e nivel na propria CLI antes de gravar.
 - Marcadores dos tres blocos gerenciados atualizados para v2.3.0. Eles andam juntos mesmo quando o conteudo de um bloco nao muda, porque o marcador diz qual versao da skill escreveu aquele bloco.
 
 ## 2.2.0 - 2026-09-02

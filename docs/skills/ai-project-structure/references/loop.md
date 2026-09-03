@@ -109,6 +109,21 @@ Com os perfis registrados, voce pede em linguagem natural ("roda o loop na T-042
 
 O `loop.sh` continua sem saber o que e perfil: ele recebe uma string de `--agente` e obedece. Quem traduz intencao em comando e o agente do chat, lendo a sua memoria. Assim a escolha de modelo nunca entra no codigo da skill, que nao tem como acompanhar o catalogo de tres fornecedores.
 
+## Escolher O Nivel De Esforco
+
+Quando os perfis de executar tiverem degraus (`executar`, `executar-dificil`, `executar-muito-dificil`), **proponha um e diga por que em uma linha**. Nunca escolha em silencio: o nivel muda o consumo de plano, e quem paga e o usuario.
+
+Sinais que valem, do mais forte para o mais fraco:
+
+1. **A rodada anterior falhou.** E o unico sinal com evidencia de verdade. Suba um degrau e diga que esta subindo por isso. Note que o loop **nao registra fracasso em lugar nenhum**, de proposito: esse sinal vem do usuario ou do historico da conversa, nunca do `TASKS.md`.
+2. **A tarefa pertence a uma spec** (`(spec: NNNN-slug)`). Trabalho tamanho-feature costuma comecar em `executar-dificil`.
+3. **O portao e uma suite inteira**, e nao um comando pontual. Suite que falha em varios pontos exige mais raciocinio que um check de uma linha.
+4. **O que a tarefa diz.** Comportamento novo, mais de um arquivo, ou regra de borda pede mais que renomear, ajustar texto ou mover uma linha.
+
+Na duvida entre dois degraus, **proponha o mais baixo**. O loop tem tentativas, e subir depois custa menos que gastar o teto em tarefa simples: numa bancada com tres ferramentas, uma tarefa pequena passou de primeira no nivel padrao de cada uma.
+
+Nao invente rubrica com pontuacao. Isso e julgamento declarado, nao medicao: diga o sinal que voce usou e deixe o usuario discordar em uma palavra.
+
 ## Configurar Os Perfis
 
 Dispare este fluxo quando o usuario pedir para ver, trocar ou criar perfil: "configura os perfis do loop", "quero mudar o modelo que o loop usa", "que modelo o loop esta usando", "o loop esta rodando com o que".

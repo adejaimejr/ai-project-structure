@@ -69,13 +69,19 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
 
 ### User
 
-- Perfis de loop, por intencao e ferramenta. Registrados em 2026-09-02 a pedido do usuario, para nao ter que digitar o comando na hora de chamar o `loop.sh`:
+- Perfis de loop, por intencao e ferramenta. Registrados em 2026-09-02 a pedido do usuario, para nao ter que digitar o comando na hora de chamar o `loop.sh`. Executar tem tres niveis, escolhidos conforme a dificuldade da tarefa:
   - Claude, planejar: `claude -p --permission-mode bypassPermissions --model fable --effort max`
-  - Claude, executar: `claude -p --permission-mode bypassPermissions --model opus --effort high`. Use `--effort xhigh` quando a tarefa for dificil; os niveis sao low, medium, high, xhigh e max.
+  - Claude, executar: `claude -p --permission-mode bypassPermissions --model opus --effort high`
+  - Claude, executar-dificil: `claude -p --permission-mode bypassPermissions --model opus --effort xhigh`
+  - Claude, executar-muito-dificil: `claude -p --permission-mode bypassPermissions --model opus --effort max`
   - Codex, planejar: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-sol -c model_reasoning_effort="high"`
   - Codex, executar: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="high"`
-  - Grok, executar: `grok --always-approve -m grok-4.6 --effort high -p`. O usuario ainda nao tem plano no Grok; ate ter, roda em credito.
-- Nome de modelo envelhece rapido. Os acima foram conferidos em 2026-09-02 contra `claude --help` (aliases `fable`, `opus`, `sonnet`) e `~/.codex/models_cache.json` (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`). Confira de novo antes de confiar.
+  - Codex, executar-dificil: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="xhigh"`
+  - Codex, executar-muito-dificil: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="max"`
+  - Grok, executar: `grok --always-approve -m grok-4.6 --effort high -p`. O usuario ainda nao tem plano no Grok; ate ter, roda em credito. Os niveis de esforco aceitos pelo Grok nao foram confirmados, entao ele nao tem os tres degraus.
+  - Rotulo de interface nao e o valor da CLI. No Claude, "Extra" e `xhigh`. No Codex, o menu mostra Light, Medium, High, Extra High e Ultra, que sao `low`, `medium`, `high`, `xhigh` e `ultra`; o nivel `max` existe no catalogo e nao aparece nesse menu.
+  - `ultra` do Codex nao e so mais esforco: o catalogo o descreve como "maximum reasoning with automatic task delegation", ou seja, ele abre subagentes, e a interface avisa que consome limite mais rapido. Por isso os perfis param em `max`: dentro de uma rodada de loop, com ate 3 tentativas e sem ninguem olhando, delegacao automatica multiplica consumo de plano sem aviso.
+- Nome de modelo e nivel de esforco envelhecem rapido. Os acima foram conferidos em 2026-09-02: `claude --help` da os aliases (`fable`, `opus`, `sonnet`) e os niveis (`low, medium, high, xhigh, max`); `~/.codex/models_cache.json` da os modelos e os niveis por modelo (`sol` e `terra` vao ate `ultra`). Confira de novo antes de confiar.
 - O usuario usa Claude e Codex por assinatura, e pretende assinar o Grok. O custo em dolar que as CLIs imprimem e preco de tabela da API e nao corresponde ao que ele paga.
 
 ### Feedback

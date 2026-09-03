@@ -214,13 +214,14 @@ Quando o usuario pedir para rodar o loop em uma tarefa (ex: "roda o loop na T-04
 1. **Confirme que o modulo esta ativo** no projeto: o `AGENTS.md` precisa ter o bloco entre `ai-project-structure:loop:start` e `loop:end`. Sem isso, ofereca a ativacao (secao abaixo) em vez de rodar.
 2. **Confira a tarefa.** Ela precisa ter `(verifica: <comando>)`. Se nao tiver, nao invente um comando: mostre a tarefa e pergunte qual comando prova que ela ficou pronta. Tarefa sem portao nao entra no loop.
 3. **Leia os perfis** em `docs/MEMORY.md`, secao `## User`. Eles mapeiam intencao e ferramenta para o comando do agente. Se nao existirem, pergunte qual ferramenta e qual modelo usar, e **ofereca registrar o perfil** ali para nao perguntar de novo. Nunca invente nome de modelo nem flag: se nao souber, pergunte (regra "Nunca Inferir").
-4. **Monte e mostre o comando antes de rodar**, para o usuario poder corrigir:
+4. **Se os perfis de executar tiverem degraus de esforco**, proponha um a partir da tarefa e diga o motivo em uma linha, seguindo "Escolher O Nivel De Esforco" em `references/loop.md`. Na duvida entre dois, proponha o mais baixo.
+5. **Monte e mostre o comando antes de rodar**, para o usuario poder corrigir:
 
 ```bash
 <dir-desta-skill>/scripts/loop.sh --tarefa T-042 --agente "<perfil escolhido>"
 ```
 
-5. **Rode e reporte** o que aconteceu, traduzindo o exit code: 0 fechou com evidencia, 2 o portao falhou em todas as tentativas, 3 a tarefa foi para "Aguardando Usuario" com uma pergunta, 4 o comando do agente esta mal configurado. Em 3, mostre a pergunta que ficou registrada.
+6. **Rode e reporte** o que aconteceu, traduzindo o exit code: 0 fechou com evidencia, 2 o portao falhou em todas as tentativas, 3 a tarefa foi para "Aguardando Usuario" com uma pergunta, 4 o comando do agente esta mal configurado. Em 3, mostre a pergunta que ficou registrada.
 
 A tabela de comandos por ferramenta, as armadilhas de flag e o formato dos perfis estao em `references/loop.md`.
 

@@ -49,7 +49,7 @@ Comportamento do `loop.sh`, verificavel com agente falso (um script que finge se
 - Portao falha nas 3 tentativas: a tarefa **nao** se move, nada de evidencia e escrito, o relatorio mostra as 3 saidas e o exit e diferente de 0.
 - A saida da tentativa que falhou aparece no contexto passado a tentativa seguinte.
 - Agente sinaliza falta de contexto: a tarefa vai para `## Aguardando Usuario` com `**Pergunta:**` preenchida, `**Resposta:** (A preencher.)` e `(bloqueada: AAAA-MM-DD)` do dia. Nenhuma evidencia e escrita. Exit diferente de 0.
-- Em nenhum caminho o `loop.sh` escreve `Evidencia:` de tipo `revisao-manual` ou `conferencia`.
+- Em nenhum caminho o `loop.sh` escreve `Evidencia:` de tipo `revisao-manual` ou `conferencia`, nem entrada em `SESSION.md`, nem qualquer linha em `MEMORY.md`, `DECISIONS.md`, `AGENTS.md` ou specs.
 - Depois de qualquer rodada, `validate_structure.py <projeto> --strict` continua em exit 0.
 - `--tentativas N` muda o numero de tentativas; o padrao e 3.
 - Nenhum travessao (U+2014) em arquivo novo ou alterado.
@@ -72,6 +72,7 @@ Desta spec, todas decididas pelo usuario em 2026-09-02:
 - DEC-006 (P-6): falta de contexto move a tarefa para `## Aguardando Usuario` com a pergunta escrita. **Excecao explicita a DEC-001.** Motivo: DEC-001 protege contra alegacao de conclusao nao merecida, e registrar duvida e o oposto disso; o pior que essa escrita produz e uma pergunta boba, que a pessoa le e descarta. E a unica opcao que faz a pergunta sobreviver ao fim da rodada, que era o Problema 2 da spec 0003. Impacto alem desta spec: copiada para `docs/DECISIONS.md` junto com DEC-001.
 - DEC-007 (P-7): o aviso de parada e o exit code mais o relatorio em stdout. Quem quiser som, notificacao ou webhook compoe por fora. Motivo: codigo por plataforma numa skill que roda em tres ferramentas e em tres sistemas nao se paga, e nao ha jeito honesto de verificar isso num eval.
 - DEC-008 (P-8): teto de custo e automacao do consenso ficam fora da 2.3.0. Motivo: com DEC-003 e DEC-004, o custo ja esta limitado por construcao, e medir tokens de forma portatil nas tres ferramentas nao da. Automacao do consenso mexe em `CONSENSUS.md` e nos campos declarativos da 2.2.0, nao no ciclo de execucao: merece spec propria.
+- DEC-010 (consequencia de DEC-001, registrada para nao ficar implicita): o loop tambem **nao escreve entrada em `SESSION.md`**. Uma entrada de sessao afirma o que foi feito, e nenhum comando comprova isso; o relatorio da rodada da o material para a pessoa escrever. Mesma razao exclui `MEMORY.md`, `DECISIONS.md`, `AGENTS.md` e specs.
 - DEC-009 (decisao de implementacao, nao veio de pergunta): os marcadores dos tres blocos passam a v2.3.0 juntos, mesmo que o conteudo de `core` e `specs` nao mude. Motivo: o marcador diz qual versao da skill escreveu aquele bloco, e `verify_repository.py` ja exige que todos batam com o `SKILL.md`. A alternativa, deixar marcadores em versoes diferentes no mesmo arquivo, exigiria afrouxar essa checagem, que hoje pega drift de verdade. O fluxo de atualizacao vai mostrar um diff de uma linha nesses casos; e ruido pequeno e honesto.
 
 ## Tarefas

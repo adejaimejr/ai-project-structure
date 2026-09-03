@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- ai-project-structure:core:start v2.2.0 -->
+<!-- ai-project-structure:core:start v2.3.0 -->
 <!-- Bloco gerenciado pela skill ai-project-structure. Nao edite dentro dos
      marcadores: atualizacoes da skill podem substituir este bloco (sempre com
      confirmacao). Regras especificas deste projeto vao na secao

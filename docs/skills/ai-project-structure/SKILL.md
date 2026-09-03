@@ -1,6 +1,6 @@
 ---
 name: ai-project-structure
-version: "2.2.0"
+version: "2.3.0"
 description: Use sempre que o usuario quiser iniciar um projeto novo de IA, criar a estrutura inicial de um repositorio multiagente, ou fazer scaffold de um projeto Markdown que sera tocado por varias IAs. Dispare mesmo que o usuario nao mencione a skill por nome - basta o pedido envolver frases como "inicia projeto novo", "cria projeto", "scaffold projeto", "estrutura inicial", "novo repo de IA", "inicia projeto de IA", "monta a base do projeto", "cria a pasta do projeto", ou qualquer pedido para preparar um diretorio com AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ (SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS, etc). Use tambem quando o usuario quiser converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ou ativar o modulo de specs (docs/specs/) em um projeto existente. Esta skill cria os arquivos de fato, nao apenas explica como criar.
 ---
 
@@ -12,7 +12,8 @@ A estrutura tem como nucleo:
 - raiz minima com arquivos de entrada dos agentes (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`);
 - memoria do projeto em `docs/` com `PROJECT_CONTEXT`, `SESSION`, `MEMORY`, `CONSENSUS`, `TASKS`, `DECISIONS`, `QUALITY`, `CHANGELOG` e `archive/`;
 - arquivos opcionais (`ARCHITECTURE`, `API`, `DATA_MODEL`, `GLOSSARY`, `ONBOARDING`, `ROADMAP`, `PROMPTS`, `STACK`);
-- modulo opcional de specs (`docs/specs/`) para trabalho tamanho-feature.
+- modulo opcional de specs (`docs/specs/`) para trabalho tamanho-feature;
+- modulo opcional de loop, que executa uma tarefa verificavel sem supervisao. Nunca entra no scaffold e so pode ser ativado em projeto que ja tem comando real em "Testes E Validacao" de `QUALITY.md`.
 
 A partir da versao 2.2.0 a estrutura tambem cobra que o trabalho seja verificavel:
 
@@ -176,7 +177,7 @@ No final, liste de forma curta:
 
 - caminho absoluto do destino;
 - nivel escolhido (completa ou minimal) e se o modulo de specs foi ativado;
-- versao da estrutura: 2.2.0;
+- versao da estrutura: 2.3.0;
 - arquivos criados (em arvore);
 - proximo passo sugerido: preencher os demais campos de `PROJECT_CONTEXT.md` e adicionar tarefas iniciais em `TASKS.md`;
 - oferta: "quer validar a estrutura? `python3 <dir-desta-skill>/scripts/validate_structure.py <destino>`".
@@ -206,6 +207,12 @@ Para projeto que ja usa esta estrutura:
 
 Siga `references/specs.md` para: ativar o modulo de specs em um projeto que nao o tem, ou criar uma nova spec (`docs/specs/NNNN-slug.md`) com entrevista curta e tarefas em `TASKS.md`.
 
+## Ativar O Modulo De Loop
+
+Siga `references/loop.md`. **Nunca ative no scaffold**, em nenhum nivel, e nunca ofereca a ativacao por conta propria: ela e sempre pedido explicito do usuario.
+
+Antes de tocar qualquer arquivo, confira o portao: a secao "Testes E Validacao" de `docs/QUALITY.md` do projeto-alvo precisa ter comando executavel. Vazia, ou ainda com o texto do template, a ativacao e **recusada**, com o motivo dito ao usuario. Um loop sem portao real nao sabe se o trabalho ficou bom, e um portao falso e pior que nenhum.
+
 ## Arquivos Em `assets/`
 
 Os templates ficam em `assets/`:
@@ -217,6 +224,7 @@ assets/
   GEMINI.md
   partials/
     AGENTS-specs-block.md   (material de insercao; nunca copiado ao projeto)
+    AGENTS-loop-block.md    (idem, so quando o modulo de loop e ativado)
   docs/
     README.md
     PROJECT_CONTEXT.md

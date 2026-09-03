@@ -30,7 +30,6 @@ Modelo de linha concluida:
 
 ## Proximas Tarefas
 
-- T-019: Bloco de loop, `assets/partials/AGENTS-loop-block.md`, marcadores `loop` em v2.3.0 e fluxo de ativacao no `SKILL.md`, com o portao que recusa ativacao sem comando real em "Testes E Validacao" de `QUALITY.md`. (prioridade: alta) (spec: 0004-modulo-de-loop)
 - T-020: `scripts/loop.sh` neutro: `--tarefa`, `--agente`, `--tentativas`; uma tarefa por rodada, ate 3 tentativas realimentando a saida da falha, fecho so com lastro de comando, e tarefa sem contexto movida para `Aguardando Usuario` com a pergunta escrita. (prioridade: alta) (spec: 0004-modulo-de-loop)
 - T-021: `verify_repository.py` cobrindo o bloco `loop` e o partial com a mesma paridade de `core` e `specs`, e versao 2.3.0 coerente entre `SKILL.md`, marcadores e `CHANGELOG.md`. (prioridade: alta) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
 - T-022: Evals e fixtures do modulo: ativacao recusada sem comando real, ativacao aceita, scaffold sem vestigio do modulo, e o comportamento do `loop.sh` exercitado com agente falso nos quatro caminhos (portao passa, portao falha 3x, tarefa sem `(verifica:)`, falta de contexto). (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
@@ -44,6 +43,8 @@ Modelo de linha concluida:
 
 ## Concluidas
 
+- 2026-09-02 T-019: Bloco de loop, `assets/partials/AGENTS-loop-block.md`, `references/loop.md`, marcadores dos tres blocos em v2.3.0 e fluxo de ativacao no `SKILL.md` com o portao de `QUALITY.md`. (spec: 0004-modulo-de-loop)
+  - Evidencia: tipo=comando; procedimento=partial e `references/loop.md` criados, `SKILL.md` em 2.3.0 com a secao "Ativar O Modulo De Loop" e o portao que recusa ativacao sem comando executavel, marcadores `core`, `specs` e `loop` em v2.3.0 (DEC-009), secao 2.3.0 no CHANGELOG da skill, passo 4 de `references/atualizacao.md` ensinado a tratar o bloco `loop` sem nunca oferecer a ativacao, e `python3 docs/skills/ai-project-structure/evals/verify_repository.py` rodado depois; resultado=exit 0 com 26 de 26 verificacoes, incluindo "marcadores em v2.3.0" e "CHANGELOG.md da skill tem a secao 2.3.0"; validador `--strict` exit 0
 - 2026-09-02 T-024: Rotacionadas para `docs/archive/SESSIONS-2026.md` as 6 entradas de 2026-08-20, que levaram `SESSION.md` de volta a 31KB. (verifica: python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict)
   - Evidencia: tipo=comando; procedimento=entradas movidas por script preservando a ordem cronologica inversa, ponteiro do arquivo principal e indice do archive atualizados, e `python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict` rodado depois; resultado=exit 0 sem aviso de rotacao; SESSION.md de 31KB para 16KB (12 entradas para 6), archive de 10 para 16 entradas, nenhuma entrada perdida
 - 2026-09-02 T-018: Respondidas as perguntas abertas da spec 0004, que passou de `Rascunho` para `Definida`. (spec: 0004-modulo-de-loop)

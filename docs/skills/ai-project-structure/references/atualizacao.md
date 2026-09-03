@@ -49,12 +49,14 @@ Mostre o diff entre o `AGENTS.md` atual do projeto e o bloco `core` do template 
 
 ### v2 → v2.x (com marcadores)
 
-Para cada bloco (`core`; `specs`, se existir no projeto):
+Para cada bloco (`core`; `specs` e `loop`, se existirem no projeto):
 
 - conteudo identico ao template atual → pule em silencio;
 - conteudo diferente → mostre o diff **so do bloco** e pergunte: aplicar / pular / decidir depois. Bloco pulado vira tarefa em `TASKS.md`.
 
 Bloco `specs` ausente e usuario nao usa specs → nao ofereca a insercao; apenas mencione que o modulo existe.
+
+Bloco `loop` ausente → **nao ofereca a insercao**. O modulo de loop so entra a pedido explicito do usuario e depois do portao de `QUALITY.md` (ver `loop.md`). Atualizar nao e ocasiao para ativar modulo novo.
 
 ## 5. PONTES
 

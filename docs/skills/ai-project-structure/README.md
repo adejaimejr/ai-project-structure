@@ -14,9 +14,9 @@ ai-project-structure/
 ├── SKILL.md            # instrucoes da skill (formato padrao, cross-tool; version no frontmatter)
 ├── assets/             # templates copiados para o projeto-alvo
 │   ├── AGENTS.md  CLAUDE.md  GEMINI.md
-│   ├── partials/       # blocos de insercao (nunca copiados ao projeto)
+│   ├── partials/       # blocos de insercao specs e loop (nunca copiados ao projeto)
 │   └── docs/...        # inclui docs/specs/README.md (modulo opcional)
-├── references/         # fluxos detalhados: atualizacao.md, specs.md
+├── references/         # fluxos detalhados: atualizacao.md, specs.md, loop.md
 ├── scripts/
 │   └── validate_structure.py   # validador (Python 3, so stdlib)
 ├── agents/

@@ -2,6 +2,15 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.3.0 - 2026-09-02 (em construcao)
+
+Modulo de loop: a estrutura passa a poder executar uma tarefa verificavel, nao so descreve-la. Desenho e decisoes na spec `docs/specs/0004-modulo-de-loop.md` do repositorio-fonte.
+
+- **Modulo opcional de loop**, no padrao do modulo de specs: `references/loop.md`, `assets/partials/AGENTS-loop-block.md` e marcadores `ai-project-structure:loop:start|end`. Ativado so a pedido explicito, nunca no scaffold.
+- **Portao de ativacao**: a secao "Testes E Validacao" de `QUALITY.md` do projeto-alvo precisa ter comando executavel. Vazia ou com o texto do template, a ativacao e recusada.
+- **Limite do que a automacao escreve**: o loop fecha tarefa apenas quando ela declarou `(verifica: <comando>)` e o comando saiu 0, colando a saida real como `Evidencia: tipo=comando`. Nunca escreve `tipo=revisao-manual` nem `tipo=conferencia`, e nao toca `SESSION.md`, `MEMORY.md`, `DECISIONS.md`, `AGENTS.md` nem specs. Excecao unica: falta de contexto move a tarefa para `Aguardando Usuario` com a pergunta escrita.
+- Marcadores dos tres blocos gerenciados atualizados para v2.3.0. Eles andam juntos mesmo quando o conteudo de um bloco nao muda, porque o marcador diz qual versao da skill escreveu aquele bloco.
+
 ## 2.2.0 - 2026-09-02
 
 Tarefa concluida deixa de ser afirmacao em prosa: passa a carregar evidencia. Espera por resposta do usuario ganha lugar proprio. Consenso passa a declarar como foi produzido. Ver a spec `docs/specs/0003-tasks-verificaveis.md` do repositorio-fonte.

@@ -98,6 +98,8 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
 
 ### Feedback
 
+- **Regra:** portao novo so entra depois de voce quebrar de proposito o que ele deveria pegar, e ver ele acusar. **Por que:** em 2026-09-03, cinco mutacoes temporarias derrubaram duas verificacoes que pareciam boas: contar linhas `[AVISO]` aceitava regressao compensada, e o `strip_fences` podia quebrar sem nenhuma das cinco fixtures acusar. Nas duas vezes, o portao estava verde e cego, e nenhuma leitura do codigo tinha mostrado isso. **Quando aplicar:** ao escrever ou revisar qualquer check, fixture ou eval. Reverta a mutacao de um backup proprio, nunca de `git checkout` (regra abaixo), e registre na evidencia o que cada mutacao produziu.
+- **Regra:** para reverter mutacao temporaria em arquivo versionado com trabalho **nao commitado** por cima, guarde o original com `cp` antes e restaure dele. Nunca `git checkout <arquivo>`. **Por que:** em 2026-09-03 isso apagou a reescrita inteira do `verify_repository.py`, que estava pronta e nao commitada; `git checkout` restaura do index, nao do estado anterior a mutacao. **Quando aplicar:** sempre que a mutacao de teste cair em arquivo que voce esta editando na mesma sessao.
 - **Regra:** nunca usar o caractere travessao (em dash, U+2014) em textos do projeto ou da skill; usar dois-pontos, ponto-e-virgula, virgula, parenteses ou hifen simples. **Por que:** pedido explicito do usuario em 2026-08-20; o validador da skill acusa ocorrencias como erro. **Quando aplicar:** qualquer texto escrito neste repositorio e nos templates que a skill gera.
 
 ### Project

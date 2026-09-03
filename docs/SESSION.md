@@ -66,7 +66,8 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 ### Aprendizados Para MEMORY.md
 
-- Nenhum. O aprendizado sobre check AVISO e portao ja esta registrado e continua valendo sem alteracao.
+- Promovidos dois, no fechamento do dia: portao novo so entra depois de a mutacao provar que ele acusa; e reverter mutacao temporaria por backup proprio, nunca por `git checkout`, quando o arquivo tem trabalho nao commitado.
+- O aprendizado anterior sobre check AVISO e portao continua valendo sem alteracao.
 
 ### Pendencias
 

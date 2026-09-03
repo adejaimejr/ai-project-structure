@@ -198,7 +198,11 @@ O que declarou nao ter conseguido avaliar: nao executou as CLIs nem prototipou b
 
 ### Posicao Do Grok
 
-**Nao consultado nesta rodada.** Duas tentativas, uma antes e outra depois de o usuario refazer o login, as duas recusadas com a mesma mensagem: `You've reached your free Grok Build usage limit for now. Get SuperGrok for much higher limits`. O `grok models` responde `You are logged in with grok.com` com `grok-4.6` disponivel, entao a sessao existe e o bloqueio e de cota, nao de autenticacao. O usuario assinou o Grok em 2026-09-03; a hipotese aberta e a assinatura nao cobrir o produto de CLI, que a propria mensagem chama de Grok Build.
+**Nao consultado nesta rodada.** Cinco tentativas da rodada real, todas recusadas com a mesma mensagem: `You've reached your free Grok Build usage limit for now. Get SuperGrok for much higher limits`. Entre elas o usuario refez o login e a CLI se atualizou sozinha, de `1.0.5 (5115b46bc909)` para `1.0.13 (5e9a58528b76)`, sem efeito.
+
+O diagnostico foi refeito depois de uma leitura errada, e vale registrar as duas. Em ordem: `grok -p "oi"` passou; a rodada real falhou; `grok --always-approve -m grok-4.6 --effort xhigh -p "Responda apenas: ok"` passou; a rodada em `--effort high` falhou; e tres prompts de enchimento (1000, 2000 e 3000 bytes) falharam. **A primeira leitura foi que o gatilho era o tamanho do pedido, e ela nao se sustenta**: o prompt de 1000 bytes falhou depois de um de 20 bytes ter passado, entao o que separa passar de falhar e o **momento**, nao o volume. O padrao e o de uma franquia pequena que repoe com o tempo (a propria mensagem diz "try again later"), com os dois sucessos gastando o que havia disponivel.
+
+Conclusao com o que da para afirmar: `grok models` responde `You are logged in with grok.com` com `grok-4.6` disponivel, entao nao e autenticacao, e a CLI trata esta conta como **free tier** apesar da assinatura feita hoje. Ou a assinatura nao cobre o produto de CLI, que a mensagem chama de Grok Build, ou ela nao esta sendo aplicada por ele. Pendente do usuario junto ao fornecedor; nao e coisa que agente resolva.
 
 Consequencia para esta rodada: **duas posicoes, nao tres.** Onde as duas divergem, nao ha desempate por terceiro, e a regra de desempate manda o usuario decidir.
 

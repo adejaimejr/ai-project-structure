@@ -20,6 +20,27 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-09-03 - Promessa do bloco core que o validador nao cobra vira check com nivel declarado, ou texto honesto
+
+### Decisao
+
+- Toda regra do bloco core que a revalidacao adversarial mostrou violavel sem diagnostico (REVAL-1, REVAL-2 e REVAL-6 em `docs/CONSENSUS.md`) ganha check no `validate_structure.py`, com o nivel abaixo, ou tem o texto do core corrigido para dizer o alcance real.
+- **ERRO** (contradicao estrutural): linha em Concluidas sem data; marcador verifica com comando vazio; marcadores invertidos; bloco `loop` despareado ou sem versao; arquivo do nucleo vazio; `T-NNN` repetido entre o arquivo vivo e o archive.
+- **AVISO** (lacuna de qualidade): forma da evidencia com os tres campos presentes e nao vazios; `Resposta` e marcador bloqueada ausentes em Aguardando Usuario; rodada 2 ou maior com exposicao `nao`; `Proximo passo` vazio; cerca aberta; spec Concluida com evidencia vazia; status de tarefa dentro da spec; ID fora de tres digitos; marcador bloqueada fora de secao; e `CONVENCOES-DATA-INVALIDA` sobe de INFO para AVISO, entao `--strict` passa a travar scaffold que pulou o passo 5b.
+- **So texto**: travessao fora de `docs/` e ponte com regra continuam sem check, e o core passa a dizer isso.
+- Codigo novo de diagnostico so entra em `CODIGOS` com fixture que o produza e com a mutacao registrada na evidencia da tarefa.
+
+### Motivo
+
+- Proposta registrada em REVAL-1 e aceita pelo usuario item a item em 2026-09-03 (T-059), sem alteracao de nivel. O criterio e o mesmo da decisao de 2026-09-02 sobre severidade: ERRO para contradicao ou quebra estrutural, AVISO para lacuna de qualidade.
+- A revalidacao mostrou 22 documentos errados passando limpos em `--strict`, e 10 de 39 codigos com fixture. Cobrar por check em vez de por promessa e o unico jeito de a frase "o validador confere a forma" voltar a ser verdadeira.
+
+### Impacto
+
+- Cobranca nova em projeto que ja usa a estrutura: os AVISOs novos podem aparecer em `--strict` de projeto existente, e o usuario aceitou isso conscientemente. A nao retroatividade por data de adocao continua valendo onde ja valia (evidencia).
+- Exige versao nova da skill (2.6.0), porque muda o contrato publico de `CODIGOS` e o texto de `assets/AGENTS.md`. Trabalho em T-069, T-070 e T-071; o portao de cobertura por codigo esta em T-065 e deve entrar antes ou junto.
+- REVAL-1, REVAL-2 e REVAL-6 fecham como `resolvido`.
+
 ## 2026-09-03 - Arquivo de memoria do projeto se escreve por substituicao atomica
 
 ### Decisao

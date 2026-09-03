@@ -41,6 +41,38 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-03 - Claude (resposta de T-059)
+
+### Objetivo
+
+- Registrar a resposta do usuario a T-059 e desdobrar em trabalho.
+
+### O Que Foi Feito
+
+- Usuario aceitou item a item a proposta de niveis de REVAL-1 (seis ERRO, dez AVISO, dois so texto). T-059 concluida com a resposta transcrita; decisao formal em `docs/DECISIONS.md`; REVAL-1, REVAL-2 e REVAL-6 fechadas como `resolvido`.
+- Trabalho desdobrado por nivel: T-069 (ERRO), T-070 (AVISO), T-071 (texto do core). Os tres exigem versao 2.6.0 e dependem de T-065 para cada codigo novo nascer com fixture.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/CONSENSUS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- Em `docs/DECISIONS.md`: promessa do core sem check vira check com nivel declarado, ou texto honesto; codigo novo so entra com fixture.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum.
+
+### Pendencias
+
+- T-061 e T-067 seguem aguardando o usuario. Pela regra do bloco specs, T-065, T-069, T-070 e T-071 juntas mudam contrato e passam de tres tarefas: cabem numa spec 0007, se o usuario quiser.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, comecando por T-065 e depois T-069.
+- Motivo: sem o manifesto de cobertura, os checks novos nasceriam com o mesmo ponto cego que a revalidacao acabou de achar.
+
 ## 2026-09-03 - Claude Fable, com Grok, Codex, Gemini, GPT e Claude Opus (revalidacao adversarial da skill 2.5.1)
 
 ### Objetivo

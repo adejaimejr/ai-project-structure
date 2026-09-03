@@ -135,9 +135,9 @@ As entradas anteriores a 2026-09-03 (e as duas rodadas de P-7/P-8 e P-9 da spec 
 
 **Achado:** REVAL-1
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** usuario decide, item a item, quais promessas viram check (com nivel) e quais viram texto honesto no proprio bloco core. Registro em T-059.
+**Resolvido em:** 2026-09-03, proposta aceita item a item pelo usuario (T-059); decisao em `docs/DECISIONS.md`, conserto em T-069, T-070 e T-071.
 
 **Metodo:** pareceres-independentes
 
@@ -190,9 +190,9 @@ Nao verificavel por desenho (e o core ja admite parte disso): ordem de leitura, 
 
 **Achado:** REVAL-2
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** usuario calibra niveis (junto com REVAL-1, em T-059); qualquer agente conserta os dois tracebacks e o codigo morto (T-064).
+**Resolvido em:** 2026-09-03, niveis decididos em T-059 (decisao em `docs/DECISIONS.md`, conserto em T-069 e T-070); tracebacks e codigo morto em T-064.
 
 **Metodo:** pareceres-independentes
 
@@ -366,9 +366,9 @@ Efeitos colaterais achados pelo caminho, os dois de suspeita do Codex e confirma
 
 **Achado:** REVAL-6
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** qualquer agente aplica os consertos de texto (T-063); usuario decide o nivel de `CONVENCOES-DATA-INVALIDA` em T-059.
+**Resolvido em:** 2026-09-03, `CONVENCOES-DATA-INVALIDA` sobe para AVISO por T-059 (T-070); consertos de texto em T-063.
 
 **Metodo:** pareceres-independentes
 

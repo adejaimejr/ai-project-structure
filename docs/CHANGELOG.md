@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (T-059 respondida)
+
+- Usuario aceitou item a item os niveis propostos em REVAL-1. Decisao em `docs/DECISIONS.md`; T-069 a T-071 abertas para a 2.6.0; REVAL-1, REVAL-2 e REVAL-6 resolvidas.
+
 ## 2026-09-03 (revalidacao adversarial da skill 2.5.1)
 
 - Sete superficies atacadas por quatro familias de modelo, 24 mutacoes no portao dos evals (16 cegas), 70 itens confirmados no codigo, registrados como REVAL-1 a REVAL-7 em `docs/CONSENSUS.md`. Consertos sem bump em `evals/`, `install.sh` e README da skill (T-068); o resto virou T-059 a T-067. Material bruto em `docs/archive/revalidacao-2026-09-03/`.

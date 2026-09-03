@@ -216,6 +216,26 @@ A regra que sai disso: quando a violacao de uma restricao **passa despercebida n
 
 E nao custa: na matriz refeita, com a restricao no prompt, o consumo **caiu** em todas as ferramentas que rodaram, uma delas pela metade. Dizer a restricao antes evita o agente explorar um caminho que seria descartado depois.
 
+### O Que Vive No Prompt E O Que Vive No Bloco
+
+Revisao item a item feita em 2026-09-03, com um criterio so: **a regra vai para o prompt quando a violacao dela deixa o portao verde do mesmo jeito.** O resto fica no bloco, que existe para quem le.
+
+No prompt, porque o portao nao pega:
+
+1. trabalhe so na tarefa indicada;
+2. nao mova a tarefa nem escreva evidencia;
+3. faltou contexto obrigatorio, pergunte e pare;
+4. nao apague o que falha;
+5. nao edite `AGENTS.md`, `SESSION.md`, `MEMORY.md`, `DECISIONS.md` nem specs.
+
+So no bloco, de proposito:
+
+- **descricao do ciclo, tentativas e exit codes**: o agente nao tem como violar, e repetir isso custaria contexto em toda tentativa;
+- **"tarefa sem `(verifica:)` nao e elegivel"**: garantido em codigo pelo `loop_task.py check`, antes de o agente ser chamado. Regra que o codigo enforca nao precisa de boa vontade;
+- **"fecha so com exit 0", "nunca evidencia `revisao-manual`"**: descrevem o que o **loop** escreve. A parte que o agente poderia violar ja esta no item 2.
+
+O item 5 foi o unico buraco que a revisao encontrou. Em nove rodadas de bancada nenhum agente havia tocado em arquivo de memoria, entao o risco era teorico; entrou mesmo assim, porque o pior caso e um agente afrouxar em `AGENTS.md` a regra que o restringe, e isso nao aparece em portao nenhum.
+
 ### A Evidencia Vale O Que O Portao Vale
 
 Isto precisa estar dito com todas as letras: a evidencia prova que **o comando declarado passou**, e nada alem disso. Numa bancada com tres ferramentas, duas entregaram implementacao com bug numa regra de borda que a suite de testes nao cobria. O portao ficou verde, a evidencia foi escrita com lastro real de exit code, e o bug foi junto.

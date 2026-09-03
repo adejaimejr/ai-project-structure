@@ -105,6 +105,11 @@ terminar. Ele decide se o trabalho vale:
 Nao mova a tarefa em docs/TASKS.md e nao escreva evidencia: quem faz isso e o
 loop, depois de rodar o portao.
 
+Nao edite AGENTS.md, docs/SESSION.md, docs/MEMORY.md, docs/DECISIONS.md nem
+nada em docs/specs/. Sao a memoria e as regras do projeto, e quem escreve neles
+e a pessoa, depois de ler o relatorio da rodada. Editar AGENTS.md e o pior
+caso: e onde estao as regras que voce esta seguindo agora.
+
 Se faltar contexto obrigatorio para decidir alguma coisa, NAO invente e NAO
 escolha por inferencia plausivel. Escreva a pergunta, em uma frase, no arquivo
 $PROJETO/$ARQUIVO_PERGUNTA e pare imediatamente.

@@ -126,6 +126,13 @@ declarativos de `CONSENSUS.md`. A cobranca de evidencia depende do marcador
 `(convencoes-2-2-0-desde: AAAA-MM-DD)` no `TASKS.md` do projeto: sem ele, nada e
 cobrado, e nenhuma linha anterior a essa data e cobrada.
 
+Da versao 2.4.0 em diante checa tambem o formato de achado em `CONSENSUS.md`
+(AVISO): entrada que declara `**Achado:**` sem identificador, sem
+`**Escapou de verificacao:**` ou com valor fora de `sim | nao`, e achado que
+declarou `sim` sem a secao "Por Que Nada Pegou Antes". A partir da quarta
+rodada, a entrada precisa de `**Pendente da rodada anterior:**`. Entrada de
+debate nao e afetada: os checks novos so valem para quem declarar `**Achado:**`.
+
 ## Verificador do repositorio
 
 ```bash

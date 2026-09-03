@@ -62,6 +62,14 @@
       "files": [
         "fixtures/aguardando-project"
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "Valida estes dois projetos e me explica por que um deles reclama do consenso.",
+      "expected_output": "Rodando com o diretorio de trabalho em evals/fixtures/achado-project (ou copia dele). A skill roda python3 <dir-da-skill>/scripts/validate_structure.py em cada um dos dois casos e percebe que os checks de achado sao AVISO: sem --strict os dois saem 0, entao ela repete com --strict, ou explica ao usuario por que o exit code nao separa os casos. Em 'valido' nao ha problema e o exit code e 0 tambem em --strict: o achado N10 declara '**Achado:** N10' e '**Escapou de verificacao:** sim', traz a secao 'Por Que Nada Pegou Antes' e, por estar na rodada 5, declara '**Pendente da rodada anterior:**'; o achado N11 declarou 'nao' e por isso nao precisa da secao. Em 'invalido' saem 5 avisos e o exit code e 1 com --strict: achado sem '**Escapou de verificacao:**', achado que declarou 'sim' sem a secao, rodada 5 sem '**Pendente da rodada anterior:**', '**Achado:**' sem identificador, e '**Escapou de verificacao:** talvez' fora de sim | nao. A skill explica que a primeira entrada dos dois arquivos e um debate comum e nao recebe nenhuma cobranca nova, porque o formato de achado so vale para quem declara '**Achado:**', e sugere as correcoes sem aplica-las sem pedido.",
+      "files": [
+        "fixtures/achado-project"
+      ]
     }
   ]
 }

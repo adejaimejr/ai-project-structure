@@ -2,6 +2,18 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.4.0 - 2026-09-03
+
+`CONSENSUS.md` deixa de servir so para debate e passa a registrar **achado**, que e o que o uso real produziu. Desenho e decisoes na spec `docs/specs/0005-consenso-para-achados.md` do repositorio-fonte.
+
+- **Formato de achado** no bloco core e no template de `CONSENSUS.md`. Entrada que declara `**Achado:** <identificador>` e tratada como achado, com `Status` e `Proximo passo` proprios, disposicao de quem registrou e revalidacao por outro modelo. O identificador e livre, amarrado a unidade de trabalho do projeto: o validador confere que o campo existe e tem valor, e nunca opina sobre o valor.
+- **`**Escapou de verificacao:** sim | nao`** no achado, e a secao `Por Que Nada Pegou Antes` obrigatoria quando a declaracao for `sim`, com o que passou verde e o mecanismo do ponto cego. E o que transforma defeito escapado em conserto de portao, em vez de anedota.
+- **O teto de tres rodadas saiu.** Ele foi escrito sem evidencia, e o uso real chegou a sete revalidacoes numa unidade so sem que isso fosse fracasso. No lugar dele, da quarta rodada em diante a entrada declara `**Pendente da rodada anterior:**`, dizendo o que a anterior deixou em aberto. O proposito original, evitar rodada por cerimonia, sobrevive na exigencia de justificar a continuidade.
+- **Aviso do ponto cego da validacao cruzada no bloco core**, em duas linhas: rodada verde e ausencia de objecao, nao prova de que funciona. Antes ele so existia em `references/loop.md`, que quem usa consenso sem usar loop nunca le.
+- `validate_structure.py`: checks novos do formato de achado, todos AVISO e todos opt-in. A entrada opta pelo formato ao declarar `**Achado:**`, entao projeto que nunca registra achado nao recebe nenhuma cobranca nova, e entrada de debate segue valendo como esta. A regra de rodada trocou de dono: acima de tres, o que se cobra deixou de ser `**Proximo passo:**` e passou a ser `**Pendente da rodada anterior:**`.
+- Fixture `evals/fixtures/achado-project`, com par valido e invalido. A primeira entrada dos dois e a mesma entrada de debate, de proposito: e o controle que prova que nenhum aviso novo encosta em quem nao declarou achado. Como os checks sao AVISO, a fixture roda em `--strict`, senao os dois casos sairiam 0 e nao provariam nada.
+- Marcadores dos tres blocos gerenciados atualizados para v2.4.0.
+
 ## 2.3.0 - 2026-09-02
 
 Modulo de loop: a estrutura passa a poder executar uma tarefa verificavel, nao so descreve-la. Desenho e decisoes na spec `docs/specs/0004-modulo-de-loop.md` do repositorio-fonte.

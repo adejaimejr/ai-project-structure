@@ -50,6 +50,8 @@ PRIORITIES = {"alta", "media", "baixa"}
 EVIDENCE_TYPES = {"comando", "revisao-manual", "conferencia"}
 CONSENSUS_METHODS = {"pareceres-independentes", "debate-aberto"}
 CONSENSUS_EXPOSURE = {"sim", "nao"}
+CONSENSUS_ESCAPOU = {"sim", "nao"}
+ACHADO_SECAO_ESCAPE = "Por Que Nada Pegou Antes"
 
 MARKER_RE = re.compile(
     r"<!--\s*ai-project-structure:(core|specs):(start|end)(?:\s+v(\S+))?\s*-->"
@@ -71,7 +73,10 @@ EVIDENCE_TYPE_RE = re.compile(r"\btipo\s*=\s*([^;]+)")
 ROTATION_MAX_ENTRIES = 20
 ROTATION_MAX_BYTES = 30 * 1024
 BLOCKED_MAX_DAYS = 30
-CONSENSUS_MAX_ROUNDS = 3
+# Nao e teto: da rodada seguinte a esta, a entrada precisa declarar o que a
+# rodada anterior deixou em aberto. O teto de 3 da 2.2.0 foi escrito sem
+# evidencia e o uso real chegou a sete revalidacoes sem que isso fosse fracasso.
+CONSENSUS_ROUNDS_SEM_PENDENCIA = 3
 
 
 def normalize(text):
@@ -273,16 +278,60 @@ def check_consensus_declaration(title, body, report):
     if not m:
         report.aviso(
             rel,
-            f"Entrada '{title}' com '**Rodada:** {rodada}' fora do formato "
-            f"'N de {CONSENSUS_MAX_ROUNDS}'.",
+            f"Entrada '{title}' com '**Rodada:** {rodada}' fora do formato 'N de N'.",
         )
-    elif int(m.group(1)) > CONSENSUS_MAX_ROUNDS and not re.search(
-        r"\*\*Pr[oó]ximo passo:\*\*", body
-    ):
+    elif int(m.group(1)) > CONSENSUS_ROUNDS_SEM_PENDENCIA and not (
+        field_value(body, "Pendente da rodada anterior") or ""
+    ).strip():
         report.aviso(
             rel,
-            f"Entrada '{title}' passou do teto de {CONSENSUS_MAX_ROUNDS} rodadas "
-            "sem '**Proximo passo:**' escalando para o usuario.",
+            f"Entrada '{title}' esta na rodada {m.group(1)} sem "
+            "'**Pendente da rodada anterior:**' dizendo o que a anterior deixou "
+            "em aberto.",
+        )
+
+
+def check_consensus_achado(title, body, report):
+    """Formato de achado (2.4.0), cobrado so de quem declara '**Achado:**'.
+
+    Entrada de debate nao ganha cobranca nova: sem o campo, esta funcao sai
+    sem escrever nada. O identificador e livre (DEC-002 da spec 0005), entao o
+    validador confere presenca e valor nao vazio, nunca o valor em si."""
+    rel = "docs/CONSENSUS.md"
+    achado = field_value(body, "Achado")
+    if achado is None:
+        return
+    if not achado.strip():
+        report.aviso(
+            rel,
+            f"Entrada '{title}' declara '**Achado:**' sem identificador. "
+            "O identificador e livre, mas precisa existir para dar para "
+            "referenciar o achado depois.",
+        )
+    escapou = field_value(body, "Escapou de verificacao")
+    if escapou is None:
+        report.aviso(
+            rel,
+            f"Achado '{title}' sem linha '**Escapou de verificacao:**' "
+            f"({' | '.join(sorted(CONSENSUS_ESCAPOU))}).",
+        )
+        return
+    if normalize(escapou) not in CONSENSUS_ESCAPOU:
+        report.aviso(
+            rel,
+            f"Achado '{title}' com '**Escapou de verificacao:** {escapou}' fora "
+            f"do conjunto ({' | '.join(sorted(CONSENSUS_ESCAPOU))}).",
+        )
+        return
+    if normalize(escapou) != "sim":
+        return
+    headings = [normalize(h) for h in re.findall(r"^#{3,4} (.+)$", body, re.MULTILINE)]
+    if normalize(ACHADO_SECAO_ESCAPE) not in headings:
+        report.aviso(
+            rel,
+            f"Achado '{title}' declarou '**Escapou de verificacao:** sim' e nao "
+            f"tem a secao '{ACHADO_SECAO_ESCAPE}', com o que passou verde e o "
+            "mecanismo do ponto cego.",
         )
 
 
@@ -298,6 +347,9 @@ def check_consensus(root, report, adopted=None):
         entry_date = parse_date(title[:10])
         if adopted is not None and entry_date is not None and entry_date >= adopted:
             check_consensus_declaration(title, body, report)
+        # O formato de achado nao depende da data de adocao: a entrada opta por
+        # ele ao declarar '**Achado:**', e quem nunca declara nunca e cobrado.
+        check_consensus_achado(title, body, report)
         status_match = re.search(r"\*\*Status:\*\*\s*(.+)$", body, re.MULTILINE)
         if not status_match:
             report.aviso(

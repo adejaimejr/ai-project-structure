@@ -1,6 +1,6 @@
 ---
 name: ai-project-structure
-version: "2.3.0"
+version: "2.4.0"
 description: Use sempre que o usuario quiser iniciar um projeto novo de IA, criar a estrutura inicial de um repositorio multiagente, ou fazer scaffold de um projeto Markdown que sera tocado por varias IAs. Dispare mesmo que o usuario nao mencione a skill por nome - basta o pedido envolver frases como "inicia projeto novo", "cria projeto", "scaffold projeto", "estrutura inicial", "novo repo de IA", "inicia projeto de IA", "monta a base do projeto", "cria a pasta do projeto", ou qualquer pedido para preparar um diretorio com AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ (SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS, etc). Use tambem quando o usuario quiser converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ativar o modulo de specs (docs/specs/) em um projeto existente, ou ativar, rodar e configurar o modulo de loop (perfis de modelo e esforco por intencao e ferramenta). Esta skill cria os arquivos de fato, nao apenas explica como criar.
 ---
 
@@ -20,6 +20,12 @@ A partir da versao 2.2.0 a estrutura tambem cobra que o trabalho seja verificave
 - toda tarefa concluida em `TASKS.md` carrega uma sub-linha `Evidencia:`, e a tarefa aberta pode declarar antes como sera verificada com `(verifica: <comando>)`;
 - tarefa travada por pergunta ao usuario vai para a secao `## Aguardando Usuario`, com a pergunta registrada e um campo para a resposta;
 - cada entrada de `CONSENSUS.md` declara `Metodo`, `Exposicao previa a outras posicoes` e `Rodada`, para que consenso fraco nao fique parecido com consenso forte.
+
+A partir da versao 2.4.0, `CONSENSUS.md` deixa de servir so para debate:
+
+- entrada que declara `**Achado:** <identificador>` e um **achado**, com disposicao de quem registrou e revalidacao por outro modelo. O identificador e livre; o validador confere que o campo existe e tem valor;
+- achado que declarou `**Escapou de verificacao:** sim` traz a secao `Por Que Nada Pegou Antes`, que transforma defeito escapado em conserto de portao;
+- o teto de tres rodadas saiu. Da quarta rodada em diante a entrada declara `**Pendente da rodada anterior:**`.
 
 ## Fluxo
 
@@ -177,7 +183,7 @@ No final, liste de forma curta:
 
 - caminho absoluto do destino;
 - nivel escolhido (completa ou minimal) e se o modulo de specs foi ativado;
-- versao da estrutura: 2.3.0;
+- versao da estrutura: 2.4.0;
 - arquivos criados (em arvore);
 - proximo passo sugerido: preencher os demais campos de `PROJECT_CONTEXT.md` e adicionar tarefas iniciais em `TASKS.md`;
 - oferta: "quer validar a estrutura? `python3 <dir-desta-skill>/scripts/validate_structure.py <destino>`".

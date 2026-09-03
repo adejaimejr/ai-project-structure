@@ -4,7 +4,7 @@ Registro cronologico inverso das sessoes de IA.
 
 Sempre adicione a sessao mais recente no topo.
 
-As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`. Este arquivo mantem as 6 mais recentes.
+As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`. Este arquivo mantem as 7 mais recentes.
 
 ## Modelo Para Nova Sessao
 
@@ -40,6 +40,46 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Agente sugerido (ou "qualquer agente"): 
 - Motivo: 
 ```
+
+## 2026-09-03 - Claude (skill 2.4.0, consenso que serve para achado)
+
+### Objetivo
+
+- Implementar a spec 0005: `CONSENSUS.md` passa a registrar achado, e nao so debate.
+
+### O Que Foi Feito
+
+- T-046: bloco core em v2.4.0 com tres mudancas. `### Achado` (identificador, disposicao, revalidacao), `### Ponto Cego Da Validacao Cruzada` em duas linhas, e o teto de rodadas trocado pela exigencia de `**Pendente da rodada anterior:**` acima de tres. Editado so no `assets/AGENTS.md` e propagado byte a byte para a raiz por script.
+- DEC-008 fechou a mitigacao que DEC-002 deixou para a implementacao: o campo chama-se `**Achado:**` e o valor dele **e** o identificador. Um campo so marca e identifica, em vez de dois que podem discordar entre si.
+- T-047: checks no validador, todos AVISO e todos opt-in. Antes de trocar a regra de rodada, conferido o que quebrava: a unica entrada real com `Rodada` na raiz e `2 de 3`, abaixo do limiar, e nenhuma fixture declarava rodada. So a mensagem de formato e o texto dos templates dependiam do teto.
+- T-048: fixture `achado-project`, com a mesma entrada de debate abrindo os dois lados como controle. Foi ao escrever essa fixture que apareceu o achado do dia, abaixo.
+- T-049: dogfood, CHANGELOGs, e reinstalacao com paridade conferida nos tres destinos globais.
+- **Achado `0005-A1`, primeiro achado registrado neste repositorio, e sobre o proprio repositorio.** O padrao de fixture herdado da 2.2.0 (par `valido`/`invalido` com exit code esperado no `FIXTURES`) so funciona porque todo check daquela versao era ERRO. Os checks de achado sao AVISO, entao o par teria os dois lados em exit 0 e a suite reportaria `[OK] fixture achado-project/invalido: exit 0 (esperado 0)`: verde, sem provar nada. Corrigido com `verificar_achado`, que roda os dois lados em `--strict`, conta os avisos e confere que nenhum cita a entrada de debate.
+- O conserto de portao que sobrou do achado virou T-050: fazer o `verify_repository.py` recusar um par cujos dois lados declarem o mesmo exit code, em vez de depender de quem escrever a proxima fixture lembrar disso.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `assets/AGENTS.md`, `assets/docs/CONSENSUS.md`, `assets/partials/AGENTS-specs-block.md`, `assets/partials/AGENTS-loop-block.md`, `SKILL.md`, `CHANGELOG.md`, `README.md`, `references/atualizacao.md`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/evals.json`, `evals/fixtures/achado-project/` (novo).
+- Projeto: `AGENTS.md`, `docs/CONSENSUS.md`, `docs/DECISIONS.md`, `docs/MEMORY.md`, `docs/TASKS.md`, `docs/CHANGELOG.md`, `docs/SESSION.md`, `docs/specs/0005-consenso-para-achados.md`.
+
+### Decisoes Tomadas
+
+- DEC-008 na spec 0005: o campo do identificador de achado e `**Achado:**`, com o identificador como valor.
+- Em `docs/DECISIONS.md`: fixture cujo caso invalido produz apenas AVISO roda em `--strict` e confere **quais** avisos sairam, nunca so quantos exit codes bateram.
+
+### Aprendizados Para MEMORY.md
+
+- Check novo que e AVISO nao separa fixture pelo exit code. Promovido, com ponteiro para o achado `0005-A1` e para a decisao.
+
+### Pendencias
+
+- O achado `0005-A1` esta com `**Status:** aberto` de proposito: a disposicao dele nao passou por ninguem alem de quem a escreveu, e a secao `### Revalidacao` esta com `(A preencher.)`. Fechar o status depende de um modelo distinto, ou do usuario, olhar a disposicao.
+- Observacao de desenho, sem tarefa: o achado herdou `**Metodo:**` e `**Exposicao previa a outras posicoes:**`, que nasceram para debate. Num achado de um modelo so, a resposta honesta e `pareceres-independentes` com `nao`, o que e verdade mas soa estranho. Nao virou tarefa porque e n=1 e a forma pode encaixar melhor depois de alguns achados reais.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): um modelo distinto do Claude, e depois qualquer agente para T-050.
+- Motivo: o achado `0005-A1` esta aberto esperando revalidacao independente, e revalidar a propria disposicao com o mesmo modelo e exatamente o que os campos de independencia existem para denunciar.
 
 ## 2026-09-03 - Claude, Codex, Grok e DeepSeek (bancadas de uso real do loop)
 

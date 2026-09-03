@@ -2,6 +2,16 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (skill v2.4.0)
+
+- `CONSENSUS.md` deixa de servir so para debate: entrada que declara `**Achado:** <identificador>` e um achado, com `Status` e `Proximo passo` proprios, disposicao de quem registrou e revalidacao por outro modelo. Identificador livre, conferido por presenca e valor nao vazio.
+- `**Escapou de verificacao:** sim | nao` no achado, com a secao "Por Que Nada Pegou Antes" obrigatoria quando for `sim`.
+- Teto de tres rodadas removido. Da quarta em diante, a entrada declara `**Pendente da rodada anterior:**`.
+- Aviso do ponto cego da validacao cruzada no bloco core, em duas linhas. Antes so existia em `references/loop.md`.
+- `validate_structure.py` com os checks do formato de achado, todos AVISO e todos opt-in; fixture `achado-project` e eval 10; `verify_repository.py` de 33 para 40 verificacoes, incluindo o orcamento de linhas do aviso no bloco core.
+- Bloco core, templates e marcadores dos tres blocos em v2.4.0.
+- Dogfood: primeiro achado do repositorio registrado em `docs/CONSENSUS.md` (`0005-A1`), sobre o proprio padrao de fixture, com a decisao correspondente em `docs/DECISIONS.md`.
+
 ## 2026-09-02 (skill v2.3.0 publicada)
 
 - 2.3.0 publicada no GitHub e instalada nos tres destinos globais, apos duas bancadas com agentes reais. Paridade conferida por `diff -rq`; `evals/`, `install.sh`, `README.md` e `CHANGELOG.md` seguem so na fonte canonica, como esperado.

@@ -1,6 +1,6 @@
 # Spec 0005 - Consenso que serve para achado, e nao so para debate
 
-**Status:** Definida
+**Status:** Concluida
 **Criada em:** 2026-09-03
 **Definida em:** 2026-09-03 (apos o usuario responder P-1 a P-6; as respostas viraram DEC-002 a DEC-007)
 **Esforco:** M, quatro lacunas independentes no mesmo modulo. Depende de respostas do usuario antes de virar `Definida`.
@@ -64,6 +64,8 @@ Julgados na mao, sem runner hoje:
 - DEC-007 (P-5, decidida pelo usuario em 2026-09-03): a secao "Por Que Nada Pegou Antes" e obrigatoria **quando o achado escapou de verificacao existente**, e dispensada quando a propria validacao o pegou de primeira. Para isso ser verificavel sem julgar merito, o achado declara `**Escapou de verificacao:** sim | nao`, no mesmo padrao dos campos de independencia da 2.2.0: o validador cobra a secao quando a declaracao for `sim`.
 - DEC-003 (P-6, decidida pelo usuario em 2026-09-03): o aviso sobre o ponto cego da validacao cruzada vai para o **bloco core**, e nao so para o template de `CONSENSUS.md`. Motivo: quem mais precisa do aviso e quem confia em varias rodadas, e essa confianca se forma antes de a pessoa abrir o template. Consequencia aceita: todo projeto paga a leitura, inclusive quem nunca usa consenso, entao o texto tem de ser curto o bastante para justificar o custo permanente.
 
+- DEC-008 (decisao de implementacao, 2026-09-03, fechando a mitigacao que DEC-002 deixou em aberto): o campo fixo que declara o identificador do achado chama-se **`**Achado:**`**, e o valor dele **e** o identificador (ex: `**Achado:** N10`). Motivo: o proprio criterio de aceite ja usava a presenca de `**Achado:**` como gatilho para tratar a entrada como achado, entao um campo so faz as duas coisas, marcar e identificar, em vez de dois campos que podem discordar entre si. O validador confere que o campo existe e que o valor nao esta vazio, e nunca opina sobre o valor, que e o limite que DEC-002 fixou.
+
 ## Tarefas
 
 - T-046: bloco core v2.4.0, template de CONSENSUS.md com o modelo de achado, e o aviso do ponto cego
@@ -77,5 +79,6 @@ Julgados na mao, sem runner hoje:
 
 ## Evidencia De Conclusao
 
-- Verificacao: (A preencher.)
-- Resultado: (A preencher.)
+- Verificacao: `python3 docs/skills/ai-project-structure/evals/verify_repository.py`, `python3 docs/skills/ai-project-structure/evals/test_loop.py` e `python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict`, apos as quatro tarefas e apos a reinstalacao nos tres destinos globais.
+- Resultado: `verify_repository.py` exit 0 com 40 de 40 (eram 33 na 2.3.0; os 7 novos sao o orcamento de linhas do aviso do ponto cego, os dois lados de `achado-project` no `FIXTURES`, os dois lados em `--strict`, a contagem de avisos e o controle da entrada de debate). `test_loop.py` 55 de 55. `validate_structure.py . --strict` exit 0, sem erro e sem aviso. `./install.sh` propagou a 2.4.0 e `diff -rq` contra os tres destinos globais acusou apenas `evals/`, `install.sh`, `README.md` e `CHANGELOG.md`, que nao sao distribuidos, com `version: "2.4.0"` nos tres `SKILL.md` instalados.
+- Criterio julgado na mao: a secao "Por Que Nada Pegou Antes" do achado `0005-A1`, o primeiro registrado neste repositorio, analisa o mecanismo do ponto cego (a hipotese "o exit code separa os dois lados" ficou implicita no padrao de fixture herdado da 2.2.0, quando todo check era ERRO) em vez de repetir "nada a declarar", e propoe conserto de portao, que virou T-050.

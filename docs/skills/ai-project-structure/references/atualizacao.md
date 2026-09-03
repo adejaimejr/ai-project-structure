@@ -79,8 +79,16 @@ Ao atualizar um projeto que vem de 2.1.0 ou anterior:
 - adicione a secao `## Aguardando Usuario` em `docs/TASKS.md`, entre "Proximas Tarefas" e "Concluidas", se ainda nao existir;
 - adicione ao cabecalho de `docs/TASKS.md` o marcador `(convencoes-2-2-0-desde: AAAA-MM-DD)` com a **data da atualizacao**, nunca uma data anterior;
 - **nao escreva evidencia em tarefa ja concluida.** A regra nao e retroativa: linha antiga fica como esta, e o validador nao a cobra. Inventar evidencia para historico transforma registro em alegacao falsa;
-- **nao preencha os campos declarativos de consenso em entradas antigas** de `docs/CONSENSUS.md` pelo mesmo motivo. Da proxima entrada em diante, use `**Metodo:**`, `**Exposicao previa a outras posicoes:**` e `**Rodada:** N de 3`;
+- **nao preencha os campos declarativos de consenso em entradas antigas** de `docs/CONSENSUS.md` pelo mesmo motivo. Da proxima entrada em diante, use `**Metodo:**`, `**Exposicao previa a outras posicoes:**` e `**Rodada:** N de N`;
 - procure tarefas que **ja estavam paradas esperando o usuario** e ofereca mover cada uma para a secao nova. Sem isso a secao nasce vazia e a convencao nao pega no projeto. Use a pergunta e a data que ja estao escritas na tarefa: se a tarefa nao diz qual e a pergunta, **pergunte ao usuario**, nao deduza. Recusado, a tarefa fica onde esta.
+
+## 7c. ADOTAR AS CONVENCOES 2.4.0
+
+Ao atualizar um projeto que vem de 2.3.0 ou anterior:
+
+- acrescente ao `docs/CONSENSUS.md` do destino as secoes "Achado", "Ponto Cego Da Validacao Cruzada" e "Modelo De Achado" do template, **preservando os registros existentes**;
+- **nao converta entrada antiga em achado.** Entrada que ja esta escrita como debate continua debate: o formato de achado vale da proxima entrada em diante, e o validador so cobra os campos novos de quem declarar `**Achado:**`;
+- o teto de tres rodadas saiu. Entrada antiga com `**Rodada:** N de 3` fica como esta; da proxima em diante use `N de N`, e da quarta rodada em diante declare `**Pendente da rodada anterior:**`.
 
 ## 8. REGISTRAR
 

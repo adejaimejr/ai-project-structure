@@ -20,6 +20,22 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-09-03 - Fixture de check AVISO roda em --strict e confere quais avisos sairam
+
+### Decisao
+
+- Par de fixture `valido`/`invalido` cujo caso invalido produz apenas AVISO nao e verificado pelo exit code sem `--strict`: o par roda com a flag, e o check **conta** os avisos e confere que eles caem na entrada certa.
+- O dicionario `FIXTURES` de `verify_repository.py` continua cobrindo esse par, mas como guarda de regressao ("nao virou ERRO por acidente"), nunca como prova de que o caso invalido acusa alguma coisa.
+
+### Motivo
+
+- Achado `0005-A1`, registrado em `docs/CONSENSUS.md`. O padrao de fixture do repositorio nasceu na 2.2.0, quando todo check novo era ERRO, entao "o exit code separa os dois lados" ficou implicito no padrao em vez de escrito. Os checks de achado da 2.4.0 sao AVISO por decisao da spec 0005, e quebram essa hipotese sem que nada acuse: os dois lados sairiam 0 e a suite reportaria um check verde que nao prova nada.
+
+### Impacto
+
+- `verify_repository.py` ganhou `verificar_achado`, com os dois lados em `--strict`, contagem de avisos e conferencia de que a entrada de debate de controle nunca e citada.
+- Fica aberto o conserto geral, em `TASKS.md`: fazer o proprio `verify_repository.py` recusar um par cujos dois lados declarem o mesmo exit code esperado, em vez de depender de quem escrever a proxima fixture lembrar disso.
+
 ## 2026-04-25 - Estrutura multiagente com raiz minima
 
 ### Decisao

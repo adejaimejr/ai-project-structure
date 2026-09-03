@@ -7,11 +7,14 @@ Uso:
 Confere, em um comando so:
 
 1. a raiz passa em `validate_structure.py --strict`;
-2. os fixtures de `evals/` retornam os exit codes esperados;
+2. os fixtures de `evals/` retornam os exit codes esperados, e o par
+   `achado-project` acusa exatamente os avisos do formato de achado sem
+   encostar na entrada de debate;
 3. os blocos gerenciados da raiz continuam identicos aos de `assets/`
    (bloco core, bloco specs e as duas pontes);
 4. os templates de `TASKS.md` e `CONSENSUS.md` carregam as convencoes da
    versao atual, e o dogfood da raiz adotou as mesmas;
+4b. o aviso do ponto cego cabe no orcamento de linhas do bloco core;
 5. a versao e a mesma no `SKILL.md`, nos marcadores e no `CHANGELOG.md`;
 6. `evals.json` tem a estrutura esperada e os `files` resolvem;
 6b. os scripts distribuidos compilam, e a bateria do modulo de loop passa;
@@ -48,6 +51,14 @@ ASSETS = SKILL / "assets"
 NAO_DISTRIBUIDO = {"evals", "install.sh", "README.md", "CHANGELOG.md"}
 IGNORADOS = {"__pycache__", ".DS_Store"}
 
+# Criterio de aceite da spec 0005: o aviso do ponto cego e permanente no bloco
+# core, entao todo projeto paga a leitura dele. Quatro linhas e o teto.
+AVISO_PONTO_CEGO_MAX_LINHAS = 4
+AVISO_PONTO_CEGO_RE = re.compile(
+    r"^### Ponto Cego Da Validacao Cruzada\s*$(.*?)(?=^#{2,3} |\Z)",
+    re.MULTILINE | re.DOTALL,
+)
+
 CORE_RE = re.compile(
     r"<!--\s*ai-project-structure:core:start.*?ai-project-structure:core:end\s*-->",
     re.DOTALL,
@@ -63,15 +74,26 @@ LOOP_RE = re.compile(
 VERSION_RE = re.compile(
     r"ai-project-structure:(?:core|specs|loop):start\s+v(\d+\.\d+\.\d+)")
 
-# Fixture -> exit code esperado. broken-project tem 2 erros conhecidos,
-# v1-project e uma estrutura pre-marcadores (passa com INFO) e
-# aguardando-project traz o par valido/invalido da secao "Aguardando Usuario".
+# Fixture -> exit code esperado sem --strict. broken-project tem 2 erros
+# conhecidos, v1-project e uma estrutura pre-marcadores (passa com INFO),
+# aguardando-project traz o par valido/invalido da secao "Aguardando Usuario" e
+# achado-project o par do formato de achado. Os checks de achado sao AVISO, e
+# nao ERRO, entao o caso invalido dele so muda de exit code com --strict:
+# verificar_achado cobre isso.
 FIXTURES = {
     "broken-project": 1,
     "v1-project": 0,
     "aguardando-project/valido": 0,
     "aguardando-project/invalido": 1,
+    "achado-project/valido": 0,
+    "achado-project/invalido": 0,
 }
+
+# Titulo da entrada de debate presente nos dois casos de achado-project. Nenhum
+# aviso pode cita-la: e o controle do criterio "projeto que nunca registra
+# achado nao recebe nenhum aviso novo".
+DEBATE_CONTROLE = "Escolha do formato de data na API"
+AVISOS_ACHADO_ESPERADOS = 5
 
 
 class Resultado:
@@ -138,6 +160,41 @@ def verificar_fixtures(res, verbose):
             print(out)
 
 
+def verificar_achado(res, verbose):
+    """Formato de achado: o caso valido passa limpo e o invalido acusa os cinco.
+
+    Roda com --strict porque os checks de achado sao AVISO: sem a flag, os dois
+    casos sairiam 0 e a fixture nao provaria nada."""
+    base = EVALS / "fixtures" / "achado-project"
+    if not base.is_dir():
+        res.check(False, "fixture achado-project", "diretorio nao encontrado")
+        return
+
+    code, _ = rodar_validador(base / "valido", strict=True)
+    res.check(code == 0, "achado-project/valido em --strict", f"exit {code} (esperado 0)")
+
+    code, out = rodar_validador(base / "invalido", strict=True)
+    if not res.check(code == 1, "achado-project/invalido em --strict",
+                     f"exit {code} (esperado 1)"):
+        if verbose:
+            print(out)
+        return
+    avisos = [l for l in out.splitlines() if "[AVISO]" in l]
+    res.check(
+        len(avisos) == AVISOS_ACHADO_ESPERADOS,
+        f"achado-project/invalido com {AVISOS_ACHADO_ESPERADOS} avisos",
+        f"{len(avisos)} avisos",
+    )
+    culpados = [l.strip() for l in avisos if DEBATE_CONTROLE in l]
+    res.check(
+        not culpados,
+        "entrada de debate nao dispara aviso novo",
+        "; ".join(culpados),
+    )
+    if verbose and (culpados or len(avisos) != AVISOS_ACHADO_ESPERADOS):
+        print(out)
+
+
 def verificar_blocos(res):
     raiz = read(ROOT / "AGENTS.md")
     template = read(ASSETS / "AGENTS.md")
@@ -161,6 +218,17 @@ def verificar_blocos(res):
         res.check(
             read(ROOT / ponte) == read(ASSETS / ponte),
             f"ponte {ponte} identica ao template",
+        )
+
+    m = AVISO_PONTO_CEGO_RE.search(core_template or "")
+    if m is None:
+        res.check(False, "aviso do ponto cego no bloco core", "secao nao encontrada")
+    else:
+        linhas = [l for l in m.group(1).splitlines() if l.strip()]
+        res.check(
+            len(linhas) <= AVISO_PONTO_CEGO_MAX_LINHAS,
+            f"aviso do ponto cego em ate {AVISO_PONTO_CEGO_MAX_LINHAS} linhas",
+            f"{len(linhas)} linhas",
         )
 
     # O modulo de loop pode nao estar ativado aqui; o partial existe de qualquer jeito.
@@ -220,7 +288,9 @@ def verificar_convencoes(res):
         "TASKS.md da raiz com a data de adocao preenchida",
     )
 
-    campos = ("**Metodo:**", "**Exposicao previa a outras posicoes:**", "**Rodada:**")
+    campos = ("**Metodo:**", "**Exposicao previa a outras posicoes:**", "**Rodada:**",
+              "**Achado:**", "**Escapou de verificacao:**",
+              "**Pendente da rodada anterior:**", "Por Que Nada Pegou Antes")
     for rotulo, path in (("template", ASSETS / "docs" / "CONSENSUS.md"),
                          ("raiz", ROOT / "docs" / "CONSENSUS.md")):
         texto = read(path)
@@ -391,6 +461,7 @@ def main(argv=None):
     res = Resultado()
     verificar_raiz(res, args.verbose)
     verificar_fixtures(res, args.verbose)
+    verificar_achado(res, args.verbose)
     verificar_blocos(res)
     verificar_versao(res)
     verificar_convencoes(res)

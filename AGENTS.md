@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- ai-project-structure:core:start v2.3.0 -->
+<!-- ai-project-structure:core:start v2.4.0 -->
 <!-- Bloco gerenciado pela skill ai-project-structure. Nao edite dentro dos
      marcadores: atualizacoes da skill podem substituir este bloco (sempre com
      confirmacao). Regras especificas deste projeto vao na secao
@@ -179,11 +179,24 @@ Consenso so vale como segunda opiniao se as posicoes forem independentes. Modelo
 
 - `**Metodo:** pareceres-independentes | debate-aberto`
 - `**Exposicao previa a outras posicoes:** sim | nao`
-- `**Rodada:** N de 3`
+- `**Rodada:** N de N`
 
-Na rodada 1, cada modelo preenche apenas a propria secao, sem ler as demais. Da rodada 2 em diante a exposicao previa e esperada e deve ser declarada como `sim`. Tres rodadas sem convergencia e o teto: escale para o usuario em vez de abrir a quarta.
+Na rodada 1, cada modelo preenche apenas a propria secao, sem ler as demais. Da rodada 2 em diante a exposicao previa e esperada e deve ser declarada como `sim`. Nao ha teto de rodadas: trabalho dificil chega a muitas revalidacoes sem que isso seja fracasso. Da quarta rodada em diante, a entrada declara `**Pendente da rodada anterior:**` dizendo o que a rodada anterior deixou em aberto, para que rodada por cerimonia fique visivel.
 
-Os tres campos sao autodeclarados. O validador checa presenca e valor permitido, **nunca veracidade**: nenhum script prova que um modelo nao leu a posicao do outro. O ganho e rastreabilidade, nao garantia.
+Os campos sao autodeclarados. O validador checa presenca e valor permitido, **nunca veracidade**: nenhum script prova que um modelo nao leu a posicao do outro, nem julga se a pendencia declarada justifica mais uma rodada. O ganho e rastreabilidade, nao garantia.
+
+### Achado
+
+Nem todo uso de `CONSENSUS.md` e debate. Quando a validacao cruzada encontra um defeito, risco ou lacuna, isso e um **achado**, e vira entrada propria, com `**Status:**` e `**Proximo passo:**` proprios:
+
+- `**Achado:** <identificador>` declara e identifica o achado. O identificador e livre, amarrado a unidade de trabalho do projeto (`N10`, `API-3`, o que o projeto ja usar): o validador confere que o campo existe e tem valor, nunca opina sobre o valor. Sem ele nao da para escrever "revalidacao do N10" nem saber se um achado ficou esquecido.
+- `**Escapou de verificacao:** sim | nao` diz se a verificacao que ja existia deixou o achado passar. Declarou `sim`? A entrada traz a secao `### Por Que Nada Pegou Antes`, com o que passou verde e qual foi o mecanismo do ponto cego.
+- A disposicao do achado e de quem o registra; a revalidacao dela e de outro modelo, e conta como rodada. Achado so vira tarefa em `TASKS.md` **depois** de a disposicao concluir que ha trabalho, e a tarefa cita o achado na linha.
+
+### Ponto Cego Da Validacao Cruzada
+
+Rodada verde e ausencia de objecao, nao prova de que funciona. Modelos que leem o mesmo texto herdam o mesmo ponto cego, e defeito que so existe em contexto de execucao real sobrevive a N rodadas de leitura.
+Por isso N rodadas verdes nao valem confianca proporcional a N. Quando um achado escapa da verificacao que ja existia, o conserto e no portao, nao so no achado: e para isso que serve `### Por Que Nada Pegou Antes`.
 
 ### Regra De Desempate
 
@@ -224,7 +237,7 @@ Antes de finalizar, confira:
 
 <!-- ai-project-structure:core:end -->
 
-<!-- ai-project-structure:specs:start v2.3.0 -->
+<!-- ai-project-structure:specs:start v2.4.0 -->
 ## Specs (Modulo Opcional Ativo)
 
 Crie uma spec em `docs/specs/` quando o trabalho for tamanho-feature:
@@ -247,7 +260,7 @@ Regras:
 O modelo de spec esta em `docs/specs/README.md`.
 <!-- ai-project-structure:specs:end -->
 
-<!-- ai-project-structure:loop:start v2.3.0 -->
+<!-- ai-project-structure:loop:start v2.4.0 -->
 ## Loop (Modulo Opcional Ativo)
 
 Este projeto pode executar uma tarefa sem supervisao, pelo `loop.sh` da skill. O ciclo e sempre o mesmo: pega **uma** tarefa que declarou `(verifica: <comando>)`, trabalha, roda o comando declarado e usa a saida da falha como contexto da tentativa seguinte. Ate 3 tentativas.

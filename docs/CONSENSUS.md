@@ -62,9 +62,119 @@ Nao use para decisoes simples ou tarefas obvias.
 - 
 ```
 
+## Achado
+
+Nem todo uso deste arquivo e debate. Quando a validacao cruzada encontra um defeito, risco ou lacuna, isso e um **achado**, e vira entrada propria, com `**Status:**` e `**Proximo passo:**` proprios.
+
+- `**Achado:**` traz o identificador do achado. Ele e livre, amarrado a unidade de trabalho do projeto (`N10`, `API-3`, o que o projeto ja usar): o validador confere que o campo existe e tem valor, e nunca opina sobre o valor.
+- `**Escapou de verificacao:**` `sim` ou `nao`, dizendo se a verificacao que ja existia deixou o achado passar. Declarou `sim`? A entrada traz a secao `### Por Que Nada Pegou Antes`.
+- A disposicao do achado e de quem o registra; a revalidacao dela e de outro modelo, e conta como rodada.
+- Achado so vira tarefa em `TASKS.md` depois de a disposicao concluir que ha trabalho, e a tarefa cita o achado na linha.
+
+Nao ha teto de rodadas. Da quarta rodada em diante a entrada declara `**Pendente da rodada anterior:**`, dizendo o que a rodada anterior deixou em aberto.
+
+## Ponto Cego Da Validacao Cruzada
+
+Rodada verde e ausencia de objecao, nao prova de que funciona. Modelos que leem o mesmo texto herdam o mesmo ponto cego, e defeito que so existe em contexto de execucao real sobrevive a N rodadas de leitura.
+
+## Modelo De Achado
+
+```md
+## AAAA-MM-DD - Titulo curto do achado
+
+**Achado:** <identificador livre, ex: N10>
+
+**Status:** aberto | resolvido | arquivado
+
+**Proximo passo:** (preencher quando o status for `aberto`, com dono claro)
+
+**Metodo:** pareceres-independentes | debate-aberto
+
+**Exposicao previa a outras posicoes:** sim | nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim | nao
+
+**Pendente da rodada anterior:** (obrigatorio da rodada 4 em diante)
+
+### Contexto
+
+- 
+
+### O Que Foi Encontrado
+
+- 
+
+### Disposicao
+
+- (o que quem registrou o achado decidiu fazer, e por que)
+
+### Revalidacao
+
+- (modelo distinto avaliando a disposicao acima, nao o achado em si)
+
+### Por Que Nada Pegou Antes
+
+(obrigatoria quando `**Escapou de verificacao:**` for `sim`; corte a secao quando for `nao`)
+
+- O que passou verde: 
+- Mecanismo do ponto cego: 
+- Conserto de portao proposto: 
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- 
+```
+
 ## Registros
 
 Os debates de 2026-04-25 foram rotacionados para `docs/archive/CONSENSUS-2026.md`.
+
+## 2026-09-03 - Par de fixture nao separa nada quando o check novo e AVISO
+
+**Achado:** 0005-A1
+
+**Status:** aberto
+
+**Proximo passo:** o usuario, ou um modelo distinto, revalida a disposicao abaixo. Primeiro achado registrado neste repositorio, entao a disposicao ainda nao passou por ninguem alem de quem a escreveu.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Primeiro uso do formato de achado neste repositorio, no dogfood da 2.4.0 (T-049), sobre trabalho da propria T-048.
+- O repositorio tem um unico padrao de fixture, herdado da 2.2.0: um par `valido`/`invalido` declarado no dicionario `FIXTURES` de `verify_repository.py`, com o exit code esperado de cada lado. Ele funciona porque todo check daquela versao era ERRO, e ERRO muda o exit code.
+
+### O Que Foi Encontrado
+
+- Os checks de achado da 2.4.0 sao AVISO, por decisao da spec: a forma e verificavel, o merito nao. Sem `--strict`, aviso nao muda exit code.
+- Consequencia: a fixture `achado-project`, escrita no padrao existente, teria `invalido: 0` e `valido: 0` no `FIXTURES`, e `verify_repository.py` imprimiria `[OK] fixture achado-project/invalido: exit 0 (esperado 0)`. Verde, e sem provar nada: os cinco avisos poderiam nunca ter disparado, ou disparar na entrada errada, e o check passaria igual.
+
+### Disposicao
+
+- A fixture continua no `FIXTURES` (que cobre a regressao de "nao virou ERRO por acidente"), e ganhou `verificar_achado` ao lado: roda os dois lados com `--strict`, exige exit 0 no valido e exit 1 no invalido, **conta** os avisos e confere que nenhum deles cita a entrada de debate que abre os dois arquivos.
+- A contagem e a checagem do controle sao o que faltava: sem elas, o par mede presenca de aviso, nao qual aviso.
+
+### Revalidacao
+
+- (A preencher.) Ninguem alem de quem registrou olhou esta disposicao ate agora.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: nada, e a nuance importa. O defeito nunca chegou a ser commitado, porque apareceu ao escrever a fixture. O que escapa aqui e outra coisa: **nenhuma verificacao existente teria notado**, e o mecanismo de fixture nao tem como reclamar de um par que nao separa. Se a fixture tivesse sido escrita no padrao herdado, a suite reportaria 36 de 36 com um check inutil dentro.
+- Mecanismo do ponto cego: o padrao de fixture foi desenhado quando todo check novo era ERRO, e o exit code separava os casos por construcao. A hipotese "o exit code separa" ficou implicita no padrao em vez de escrita, e um check AVISO a quebra sem que nada acuse.
+- Conserto de portao proposto: `verificar_achado` ja cobre este par. O conserto geral, que continua em aberto, seria `verify_repository.py` recusar um par `valido`/`invalido` cujos dois lados declarem o mesmo exit code esperado, em vez de depender de quem escreve a proxima fixture lembrar disso.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Fixture cujo caso invalido produz apenas AVISO nao prova nada pelo exit code sem `--strict`: ela roda com a flag e confere quais avisos sairam, nunca so quantos exit codes bateram.
 
 ## 2026-09-02 - Revisao da spec 0003 (skill 2.2.0) por modelo distinto
 

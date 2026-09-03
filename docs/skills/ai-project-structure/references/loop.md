@@ -117,7 +117,9 @@ Quando os perfis de executar tiverem degraus (`executar`, `executar-dificil`, `e
 
 Suba **so quando algum destes valer**, e diga qual:
 
-1. **A rodada anterior falhou.** Sobe um degrau. E o unico sinal com evidencia de verdade, e o mais forte de todos: em vez de adivinhar dificuldade, voce ja sabe que o degrau anterior nao deu. O loop **nao registra fracasso em lugar nenhum**, de proposito, entao esse sinal vem do usuario ou do historico da conversa, nunca do `TASKS.md`.
+1. **A rodada anterior falhou.** Sobe um degrau. E o unico sinal com evidencia de verdade, e o mais forte de todos: em vez de adivinhar dificuldade, voce ja sabe que o degrau anterior nao deu.
+
+   O loop **nao registra fracasso em lugar nenhum**, por decisao registrada. Entao esse sinal so existe dentro da conversa em que a rodada aconteceu: em sessao nova, ele desaparece. Nao trate silencio como prova de que nunca falhou. Proponha o degrau base dizendo **"nao tenho registro de rodada anterior"**, e nao "e a primeira rodada", e deixe uma porta aberta em meia linha: se ja tentou antes, o usuario corrige e voce sobe.
 2. **Duas rodadas ja falharam.** Sobe para `executar-muito-dificil`, e diga tambem que talvez o problema nao seja esforco: tarefa que falha duas vezes costuma estar mal especificada ou grande demais para uma rodada.
 3. **O usuario disse que e dificil.** Vale mais que qualquer leitura sua da tarefa.
 4. **A tarefa mexe em varias partes ao mesmo tempo** e ainda tem regra de borda ou contrato para respeitar. Nao basta "tem suite" nem "e comportamento novo": isso vale para quase toda tarefa de codigo e nao separa nada.

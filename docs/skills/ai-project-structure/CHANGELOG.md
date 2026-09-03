@@ -2,7 +2,7 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
-## 2.3.0 - 2026-09-02 (em construcao)
+## 2.3.0 - 2026-09-02
 
 Modulo de loop: a estrutura passa a poder executar uma tarefa verificavel, nao so descreve-la. Desenho e decisoes na spec `docs/specs/0004-modulo-de-loop.md` do repositorio-fonte.
 

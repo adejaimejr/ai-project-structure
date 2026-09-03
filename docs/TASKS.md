@@ -30,7 +30,7 @@ Modelo de linha concluida:
 
 ## Proximas Tarefas
 
-- T-023: Dogfood: ativar o modulo neste repositorio e rodar o loop numa tarefa real com `(verifica:)`, conferindo que a evidencia escrita bate com a saida do comando. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
+
 
 
 
@@ -40,6 +40,10 @@ Modelo de linha concluida:
 
 ## Concluidas
 
+- 2026-09-02 T-023: Dogfood: modulo de loop ativado neste repositorio e rodada real executada com o Codex na T-025. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
+  - Evidencia: tipo=comando; procedimento=portao de ativacao conferido em "Testes E Validacao" de `QUALITY.md` (dois comandos executaveis), bloco `loop` inserido no `AGENTS.md` entre `specs:end` e "Regras Do Projeto", T-025 aberta com portao que falhava de proposito (`git check-ignore -q .loop-pergunta`, exit 1 antes), `loop.sh --tarefa T-025 --agente "codex exec -s workspace-write"` rodado, e `python3 docs/skills/ai-project-structure/evals/verify_repository.py` depois; resultado=portao verde na tentativa 1, tarefa fechada pelo loop com `Evidencia: tipo=comando; resultado=exit 0`, e o Codex declarou por conta propria "nao alterei docs/TASKS.md nem escrevi evidencia", que e a regra do bloco sendo obedecida por um modelo sem contexto desta implementacao; verificador exit 0 com 33 de 33, agora com "bloco loop identico ao partial da skill" no caminho ativado
+- 2026-09-02 T-025: Adicionar `.loop-pergunta` ao `.gitignore`. O arquivo e o sinal de falta de contexto do modulo de loop; ele e apagado assim que lido, mas sobra se uma rodada for interrompida, e nao deve entrar em commit. (prioridade: baixa) (verifica: git check-ignore -q .loop-pergunta)
+  - Evidencia: tipo=comando; procedimento=git check-ignore -q .loop-pergunta; resultado=exit 0; (sem saida)
 - 2026-09-02 T-022: `evals/test_loop.py`, a bateria duravel do modulo de loop com agente falso. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
   - Evidencia: tipo=comando; procedimento=as duas baterias que existiam so no scratchpad viraram um arquivo em `evals/`, que o `install.sh` nao distribui, cobrindo os dois scripts em 47 verificacoes sem nenhuma chamada de modelo, e depois `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=47 de 47 na bateria e verificador exit 0 com 33 de 33, ja rodando a bateria por dentro
 - 2026-09-02 T-021: `verify_repository.py` cobrindo o bloco `loop`, o bit de execucao do `loop.sh`, a compilacao dos tres scripts distribuidos e a bateria do modulo. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)

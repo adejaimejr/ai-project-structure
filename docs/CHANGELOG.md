@@ -2,6 +2,14 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-02 (skill v2.3.0)
+
+- Modulo opcional de loop: a estrutura passa a poder executar uma tarefa verificavel, nao so descreve-la. `references/loop.md`, `assets/partials/AGENTS-loop-block.md`, marcadores `loop` e os scripts `loop.sh` e `loop_task.py`. Nunca entra no scaffold.
+- Portao de ativacao: so pode ser ativado em projeto com comando executavel em "Testes E Validacao" de `QUALITY.md`.
+- Limite do que a automacao escreve: fecha tarefa apenas com `(verifica:)` declarado e exit 0, colando a saida real como `Evidencia: tipo=comando`. Nunca escreve evidencia de tipo nao comprovado, e nao toca `SESSION.md`, `MEMORY.md`, `DECISIONS.md`, `AGENTS.md` nem specs. Falta de contexto vira pergunta em `Aguardando Usuario`.
+- `evals/test_loop.py` (47 verificacoes com agente falso) e `verify_repository.py` de 26 para 33 verificacoes.
+- Dogfood: modulo ativado neste repositorio e rodada real executada com o Codex.
+
 ## 2026-09-02 (skill v2.2.0)
 
 - Evidencia de fechamento obrigatoria em tarefa concluida, marcador `(verifica: <comando>)` opcional em tarefa aberta, secao `## Aguardando Usuario` em `TASKS.md` e campos declarativos (`Metodo`, `Exposicao previa a outras posicoes`, `Rodada`) em `CONSENSUS.md`. Bloco core e templates em v2.2.0.

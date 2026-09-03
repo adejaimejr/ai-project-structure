@@ -1,8 +1,9 @@
 # Spec 0004 - Modulo de loop (skill 2.3.0)
 
-**Status:** Definida
+**Status:** Concluida
 **Criada em:** 2026-09-02
 **Definida em:** 2026-09-02 (apos o usuario responder P-1 a P-8; as respostas viraram DEC-001 a DEC-008)
+**Concluida em:** 2026-09-02
 **Esforco:** M. Ficou M, e nao G, porque as respostas cortaram worktree, notificacao, teto de custo e automacao de consenso.
 
 ## Problema E Resultado Esperado
@@ -92,5 +93,9 @@ Desta spec, todas decididas pelo usuario em 2026-09-02:
 
 ## Evidencia De Conclusao
 
-- Verificacao: (A preencher.)
-- Resultado: (A preencher.)
+- Verificacao: `python3 docs/skills/ai-project-structure/evals/verify_repository.py`
+- Resultado: exit 0, 33 de 33 verificacoes, incluindo "bloco loop identico ao partial da skill" (caminho ativado, depois do dogfood), "bateria do modulo de loop: 47/47", os tres scripts distribuidos compilando e os tres destinos identicos.
+- Verificacao: `python3 docs/skills/ai-project-structure/evals/test_loop.py`
+- Resultado: 47 de 47, cobrindo os quatro caminhos do `loop.sh` (tarefa sem portao, portao verde, portao vermelho ate esgotar com a realimentacao conferida no prompt da tentativa seguinte, e falta de contexto) e os tres subcomandos do `loop_task.py`. Sem nenhuma chamada de modelo.
+- Rodada real: `loop.sh --tarefa T-025 --agente "codex exec -s workspace-write"` neste repositorio, com portao que falhava antes (`git check-ignore -q .loop-pergunta`, exit 1) e passou depois. O loop fechou T-025 com `Evidencia: tipo=comando; resultado=exit 0`, e o Codex reportou que nao tocou em `docs/TASKS.md` nem escreveu evidencia: a regra do bloco foi obedecida por um modelo que nao participou desta implementacao.
+- Limitacao conhecida: a rodada real foi feita com uma ferramenta so (Codex CLI). O `--agente` e neutro por construcao, mas `claude -p` e `gemini -p` nao foram exercitados nesta versao.

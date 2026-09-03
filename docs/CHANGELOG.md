@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (skill v2.5.0 publicada)
+
+- 2.5.0 empurrada para o GitHub (`e70bd7c..28681fd`) e instalada nos tres destinos globais. Paridade conferida por `diff -rq`: so `evals/`, `install.sh`, `README.md` e `CHANGELOG.md` ficam de fora, como esperado, e os tres `SKILL.md` instalados declaram `version: "2.5.0"`. A flag `--codigos` chegou nos tres.
+
 ## 2026-09-03 (skill v2.5.0)
 
 - Identificador estavel por diagnostico em `validate_structure.py`: os 39 diagnosticos ganharam codigo, e o codigo virou contrato publico. A redacao da mensagem pode melhorar; o codigo so muda em mudanca de versao.

@@ -415,9 +415,9 @@ Efeitos colaterais achados pelo caminho, os dois de suspeita do Codex e confirma
 
 **Achado:** REVAL-7
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** usuario decide se `install.sh` deve avisar antes de sobrescrever destino editado e se deve virar copia atomica (T-067).
+**Resolvido em:** 2026-09-03, T-067 respondida pelo usuario (aviso e confirmacao quando o destino diverge); decisao em `docs/DECISIONS.md`, conserto em T-073.
 
 **Metodo:** pareceres-independentes
 

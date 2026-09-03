@@ -20,6 +20,21 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-09-03 - install.sh avisa e pede confirmacao quando o destino diverge da fonte
+
+### Decisao
+
+- Antes de sobrescrever, o `install.sh` compara o destino existente com o que a fonte distribui e, se houver arquivo diferente ou extra, lista e pede confirmacao. Sem terminal interativo, recusa, salvo flag explicita para script. Destino inexistente ou identico segue sem pergunta.
+- Nao adotados: copia por diretorio temporario trocado no fim, e apagar o destino inteiro antes de copiar.
+
+### Motivo
+
+- Escolha do usuario em 2026-09-03 (T-067). A revalidacao (REVAL-7) mostrou edicao local sobrescrita sem aviso e arquivo extra sobrevivendo; a promessa "sobrescreve com seguranca" precisa de uma pergunta antes, nao de mais mecanica.
+
+### Impacto
+
+- So `install.sh`, nao distribuido: sem bump. `verify_repository.py` continua instalando em pasta temporaria limpa, sem prompt. Trabalho em T-073.
+
 ## 2026-09-03 - Parenteses no comando do marcador verifica nao sao suportados; --seco nao grava agente
 
 ### Decisao

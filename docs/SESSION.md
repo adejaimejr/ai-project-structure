@@ -41,17 +41,18 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
-## 2026-09-03 - Claude (respostas de T-059 e T-061)
+## 2026-09-03 - Claude (respostas de T-059, T-061 e T-067)
 
 ### Objetivo
 
-- Registrar as respostas do usuario a T-059 e T-061 e desdobrar em trabalho.
+- Registrar as respostas do usuario a T-059, T-061 e T-067 e desdobrar em trabalho.
 
 ### O Que Foi Feito
 
 - Usuario aceitou item a item a proposta de niveis de REVAL-1 (seis ERRO, dez AVISO, dois so texto). T-059 concluida com a resposta transcrita; decisao formal em `docs/DECISIONS.md`; REVAL-1, REVAL-2 e REVAL-6 fechadas como `resolvido`.
 - Trabalho desdobrado por nivel: T-069 (ERRO), T-070 (AVISO), T-071 (texto do core). Os tres exigem versao 2.6.0 e dependem de T-065 para cada codigo novo nascer com fixture.
 - T-061 respondida em seguida: opcao (c), parenteses no comando do marcador verifica nao sao suportados e o validador acusa (T-072), e `--seco` deixa de gravar `agente=` (item em T-060). REVAL-3 fechada como `resolvido`.
+- T-067 respondida: `install.sh` avisa e pede confirmacao quando o destino diverge (T-073, sem bump). REVAL-7 fechada como `resolvido`. Das sete entradas, so REVAL-4 continua aberta, esperando T-065.
 
 ### Arquivos Criados Ou Alterados
 
@@ -67,7 +68,7 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 ### Pendencias
 
-- T-067 segue aguardando o usuario. Pela regra do bloco specs, T-065, T-069, T-070 e T-071 juntas mudam contrato e passam de tres tarefas: cabem numa spec 0007, se o usuario quiser.
+- Nenhuma tarefa da revalidacao aguarda o usuario; sobra T-053 (spec 0006). Pela regra do bloco specs, T-065, T-069, T-070 e T-071 juntas mudam contrato e passam de tres tarefas: cabem numa spec 0007, se o usuario quiser.
 
 ### Proximo Passo Recomendado
 

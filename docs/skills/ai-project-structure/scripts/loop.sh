@@ -24,6 +24,7 @@
 #   1  erro de uso, ou tarefa nao elegivel (sem `(verifica:)`, ja concluida, inexistente)
 #   2  portao falhou em todas as tentativas; nada foi movido, nada foi escrito
 #   3  o agente sinalizou falta de contexto; a tarefa foi para "Aguardando Usuario"
+#   4  o agente falhou e nao mexeu em nada; provavelmente esta mal configurado
 #
 # O que este script NUNCA faz: escolher a tarefa sozinho, fechar tarefa sem
 # comando declarado, escrever evidencia de tipo nao comprovado por comando, ou
@@ -120,8 +121,23 @@ $FALHA_ANTERIOR"
   if [ "$SECO" -eq 1 ]; then
     echo "(modo seco: agente nao chamado)"
   else
-    ( cd "$PROJETO" && "${AGENTE_ARGS[@]}" "$PROMPT" ) || \
-      echo "[AVISO] o agente saiu com codigo diferente de zero; o portao decide mesmo assim."
+    MARCA="$TMP/marca-$n"; : > "$MARCA"
+    AGENTE_CODIGO=0
+    ( cd "$PROJETO" && "${AGENTE_ARGS[@]}" "$PROMPT" ) || AGENTE_CODIGO=$?
+    # Agente que falhou E nao mexeu em nada nunca rodou de verdade. Insistir
+    # so queima tentativa e portao; o problema esta no comando, nao na tarefa.
+    if [ "$AGENTE_CODIGO" -ne 0 ]; then
+      MEXEU="$(find "$PROJETO" -type f -newer "$MARCA" -not -path '*/.git/*' -print -quit 2>/dev/null)"
+      if [ -z "$MEXEU" ]; then
+        echo
+        echo "[ERRO] o agente saiu com codigo $AGENTE_CODIGO e nao alterou nenhum arquivo." >&2
+        echo "Provavelmente o comando de --agente esta incompleto para uso nao" >&2
+        echo "supervisionado. Veja a tabela de comandos por ferramenta em" >&2
+        echo "references/loop.md. Parando antes de queimar as outras tentativas." >&2
+        exit 4
+      fi
+      echo "[AVISO] o agente saiu com codigo $AGENTE_CODIGO, mas alterou arquivos; o portao decide."
+    fi
   fi
 
   if [ -f "$SINAL" ]; then

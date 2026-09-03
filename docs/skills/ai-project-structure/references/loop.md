@@ -41,6 +41,26 @@ loop.sh --tarefa T-042 --agente "codex exec" --tentativas 5
 loop.sh --tarefa T-042 --agente "gemini -p" --projeto /caminho/do/projeto
 ```
 
+### Comandos Por Ferramenta
+
+Rodar sem supervisao nao e o modo padrao de nenhuma CLI: cada uma pede flags proprias para aprovar edicoes sozinha. Estes foram exercitados de verdade:
+
+| Ferramenta | `--agente` |
+|---|---|
+| Claude Code | `claude -p --permission-mode bypassPermissions` |
+| Codex CLI | `codex exec -s workspace-write --skip-git-repo-check` |
+| Gemini CLI | `gemini --approval-mode yolo --skip-trust -p` |
+| Grok | `grok --always-approve -p` |
+
+Duas armadilhas que custam uma rodada inteira quando passam batido:
+
+- `codex exec` **recusa rodar fora de um repositorio git** sem `--skip-git-repo-check`. Projeto de conteudo sem git cai nisso.
+- `gemini` recusa rodar em diretorio nao confiavel sem `--skip-trust` (ou `GEMINI_CLI_TRUST_WORKSPACE=true`).
+
+Nas ferramentas em que a flag de prompt recebe um valor, como `grok -p` e `gemini -p`, deixe a flag **por ultimo**: o `loop.sh` acrescenta o prompt como ultimo argumento, entao ele vira o valor dela.
+
+Acrescentar `--output-format json` no Claude ou no Grok faz a saida trazer tokens e custo da rodada. O `loop.sh` nao le esses numeros; eles ficam no relatorio para voce.
+
 - `--tarefa` (obrigatorio): o `T-NNN`.
 - `--agente` (obrigatorio): comando headless da ferramenta que voce usa. O script nao assume nenhuma. O prompt entra como ultimo argumento. Argumento com espaco dentro de aspas nao e suportado.
 - `--tentativas` (padrao 3).
@@ -84,6 +104,14 @@ A evidencia e sempre uma sub-linha so:
 - AAAA-MM-DD T-042: Descricao da tarefa. (verifica: pytest -q)
   - Evidencia: tipo=comando; procedimento=pytest -q; resultado=exit 0; 42 passed in 3.10s
 ```
+
+### A Evidencia Vale O Que O Portao Vale
+
+Isto precisa estar dito com todas as letras: a evidencia prova que **o comando declarado passou**, e nada alem disso. Numa bancada com tres ferramentas, duas entregaram implementacao com bug numa regra de borda que a suite de testes nao cobria. O portao ficou verde, a evidencia foi escrita com lastro real de exit code, e o bug foi junto.
+
+Isso nao e defeito do loop: e o loop cumprindo exatamente o que promete. A licao e sobre o portao, nao sobre a automacao. Portao fraco automatizado continua fraco, so que mais rapido. Antes de declarar `(verifica:)` numa tarefa, pergunte se aquele comando falharia caso o trabalho saisse errado.
+
+### Formato Do Campo `resultado`
 
 `resultado` recebe o exit code e a saida real do comando, com espacos colapsados para caber em uma linha. Saida longa e cortada pelo comeco, preservando o fim, que e onde suite de teste costuma imprimir o placar; quando isso acontece o corte fica declarado no proprio campo, em vez de escondido.
 

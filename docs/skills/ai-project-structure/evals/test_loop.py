@@ -76,6 +76,21 @@ AGENTE_NORMAL = """#!/usr/bin/env bash
 printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
 """
 
+AGENTE_QUEBRADO = """#!/usr/bin/env bash
+# agente mal configurado: falha e nao mexe em nada, como uma CLI que recusa
+# rodar sem a flag certa
+printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
+echo "erro: flag obrigatoria ausente" >&2
+exit 1
+"""
+
+AGENTE_QUEBRADO_MAS_TRABALHOU = """#!/usr/bin/env bash
+# falha, mas deixou trabalho feito: o portao e quem decide
+printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
+echo "trabalho parcial" > "$PWD/rascunho.txt"
+exit 1
+"""
+
 AGENTE_SEM_CONTEXTO = """#!/usr/bin/env bash
 printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
 echo "Qual banco de dados o projeto usa? Nao ha nada em STACK.md nem em ARCHITECTURE.md." \\
@@ -253,6 +268,29 @@ def testar_loop(res):
         code, out = rodar_loop(root, agente, log, extra=("--tentativas", "5"))
         res.check(code == 2 and len(prompts(log)) == 5, "C2: --tentativas 5 chama 5 vezes",
                   f"exit {code}, {len(prompts(log))} chamadas")
+
+    # E: agente falhou e nao mexeu em nada; parar em vez de queimar tentativa
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        agente = agente_falso(tmp, AGENTE_QUEBRADO)
+        log = Path(tmp) / "prompts.txt"
+        code, out = rodar_loop(root, agente, log)
+        res.check(code == 4, "E: agente quebrado sai 4", f"exit {code}")
+        res.check(len(prompts(log)) == 1, "E: parou na primeira tentativa",
+                  f"{len(prompts(log))} chamadas")
+        res.check("nao alterou nenhum arquivo" in out, "E: diz que o agente nao mexeu em nada")
+        res.check("Evidencia:" not in (root / "docs" / "TASKS.md").read_text(encoding="utf-8"),
+                  "E: nenhuma evidencia escrita")
+
+    # F: agente falhou mas trabalhou; o portao decide, o loop nao aborta
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp, "exit 1\n")
+        agente = agente_falso(tmp, AGENTE_QUEBRADO_MAS_TRABALHOU)
+        log = Path(tmp) / "prompts.txt"
+        code, out = rodar_loop(root, agente, log)
+        res.check(code == 2, "F: agente que falhou mas mexeu segue ate o portao", f"exit {code}")
+        res.check(len(prompts(log)) == 3, "F: as 3 tentativas foram usadas",
+                  f"{len(prompts(log))} chamadas")
 
     # D: agente sinaliza falta de contexto
     with tempfile.TemporaryDirectory() as tmp:

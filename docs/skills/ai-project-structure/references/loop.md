@@ -109,6 +109,50 @@ Com os perfis registrados, voce pede em linguagem natural ("roda o loop na T-042
 
 O `loop.sh` continua sem saber o que e perfil: ele recebe uma string de `--agente` e obedece. Quem traduz intencao em comando e o agente do chat, lendo a sua memoria. Assim a escolha de modelo nunca entra no codigo da skill, que nao tem como acompanhar o catalogo de tres fornecedores.
 
+## Configurar Os Perfis
+
+Dispare este fluxo quando o usuario pedir para ver, trocar ou criar perfil: "configura os perfis do loop", "quero mudar o modelo que o loop usa", "que modelo o loop esta usando", "o loop esta rodando com o que".
+
+### 1. Mostre o que existe hoje
+
+Leia `docs/MEMORY.md`, secao `## User`, e liste em tabela: intencao, ferramenta e comando. Mostre antes de perguntar qualquer coisa; muita vez o usuario so quer conferir e a conversa acaba aqui.
+
+Sem nenhum perfil registrado, diga isso e va direto para o passo 3.
+
+### 2. Pergunte o que mudar
+
+```text
+**1. O que voce quer fazer?**
+   1. Trocar modelo ou esforco de um perfil que ja existe
+   2. Criar perfil para outra intencao ou outra ferramenta
+   3. Remover um perfil
+   4. So conferir, nao mudar nada
+```
+
+Uma pergunta de cada vez, com opcoes numeradas, como no resto da skill. Resposta livre sempre vale.
+
+### 3. Confirme os valores na ferramenta antes de gravar
+
+**Nunca grave nome de modelo ou nivel de esforco que voce nao viu a CLI aceitar.** Nome de modelo envelhece rapido e perfil quebrado so aparece na hora da rodada, quando ja custou tempo. Onde conferir hoje:
+
+| Ferramenta | Modelos | Esforco |
+|---|---|---|
+| Claude Code | `claude --help`, em `--model` (aceita alias como `fable`, `opus`, `sonnet`, ou nome completo) | `claude --help`, em `--effort` |
+| Codex CLI | `~/.codex/models_cache.json` | chave `model_reasoning_effort` em `~/.codex/config.toml`, passavel por `-c` |
+| Grok | `grok --help`, em `--model` | `grok --help`, em `--reasoning-effort` |
+
+Esses caminhos sao detalhe interno de cada ferramenta e podem mudar. Se nao achar, **pergunte ao usuario** em vez de chutar. Ferramenta que nao estiver instalada nao ganha perfil: diga que nao esta e siga.
+
+### 4. Mostre o comando montado e confirme
+
+Monte a string inteira de `--agente`, incluindo as flags de permissao que a ferramenta exige para rodar sem supervisao (ver a tabela de comandos acima), e mostre antes de escrever. Perfil errado que so aparece na rodada custa uma tarefa.
+
+### 5. Grave
+
+Escreva em `docs/MEMORY.md`, secao `## User`. Trocando um perfil, **substitua a linha antiga** em vez de acrescentar outra: dois perfis para a mesma intencao e ferramenta viram ambiguidade na proxima chamada. Anote a data e como voce conferiu os nomes.
+
+Se a mudanca for relevante, registre em `docs/SESSION.md`.
+
 ## Como O Agente Pede Ajuda
 
 A regra "Nunca Inferir" manda perguntar quando falta contexto, e numa rodada de loop nao ha com quem falar. O protocolo e um arquivo:

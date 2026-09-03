@@ -1,7 +1,7 @@
 ---
 name: ai-project-structure
 version: "2.3.0"
-description: Use sempre que o usuario quiser iniciar um projeto novo de IA, criar a estrutura inicial de um repositorio multiagente, ou fazer scaffold de um projeto Markdown que sera tocado por varias IAs. Dispare mesmo que o usuario nao mencione a skill por nome - basta o pedido envolver frases como "inicia projeto novo", "cria projeto", "scaffold projeto", "estrutura inicial", "novo repo de IA", "inicia projeto de IA", "monta a base do projeto", "cria a pasta do projeto", ou qualquer pedido para preparar um diretorio com AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ (SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS, etc). Use tambem quando o usuario quiser converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ou ativar o modulo de specs (docs/specs/) em um projeto existente. Esta skill cria os arquivos de fato, nao apenas explica como criar.
+description: Use sempre que o usuario quiser iniciar um projeto novo de IA, criar a estrutura inicial de um repositorio multiagente, ou fazer scaffold de um projeto Markdown que sera tocado por varias IAs. Dispare mesmo que o usuario nao mencione a skill por nome - basta o pedido envolver frases como "inicia projeto novo", "cria projeto", "scaffold projeto", "estrutura inicial", "novo repo de IA", "inicia projeto de IA", "monta a base do projeto", "cria a pasta do projeto", ou qualquer pedido para preparar um diretorio com AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ (SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS, etc). Use tambem quando o usuario quiser converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ativar o modulo de specs (docs/specs/) em um projeto existente, ou ativar, rodar e configurar o modulo de loop (perfis de modelo e esforco por intencao e ferramenta). Esta skill cria os arquivos de fato, nao apenas explica como criar.
 ---
 
 # AI Project Structure
@@ -223,6 +223,8 @@ Quando o usuario pedir para rodar o loop em uma tarefa (ex: "roda o loop na T-04
 5. **Rode e reporte** o que aconteceu, traduzindo o exit code: 0 fechou com evidencia, 2 o portao falhou em todas as tentativas, 3 a tarefa foi para "Aguardando Usuario" com uma pergunta, 4 o comando do agente esta mal configurado. Em 3, mostre a pergunta que ficou registrada.
 
 A tabela de comandos por ferramenta, as armadilhas de flag e o formato dos perfis estao em `references/loop.md`.
+
+**Configurar os perfis**: quando o usuario pedir para ver, trocar ou criar perfil ("configura os perfis do loop", "que modelo o loop esta usando", "quero trocar o modelo"), siga a secao "Configurar Os Perfis" de `references/loop.md`. Ela mostra o que existe hoje, pergunta o que mudar com opcoes numeradas e confirma os nomes de modelo na propria CLI antes de gravar.
 
 ## Ativar O Modulo De Loop
 

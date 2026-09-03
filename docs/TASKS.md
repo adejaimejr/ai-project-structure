@@ -30,8 +30,6 @@ Modelo de linha concluida:
 
 ## Proximas Tarefas
 
-- T-021: `verify_repository.py` cobrindo o bloco `loop` e o partial com a mesma paridade de `core` e `specs`, e versao 2.3.0 coerente entre `SKILL.md`, marcadores e `CHANGELOG.md`. (prioridade: alta) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
-- T-022: Evals e fixtures do modulo: ativacao recusada sem comando real, ativacao aceita, scaffold sem vestigio do modulo, e o comportamento do `loop.sh` exercitado com agente falso nos quatro caminhos (portao passa, portao falha 3x, tarefa sem `(verifica:)`, falta de contexto). (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
 - T-023: Dogfood: ativar o modulo neste repositorio e rodar o loop numa tarefa real com `(verifica:)`, conferindo que a evidencia escrita bate com a saida do comando. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
 
 
@@ -42,6 +40,10 @@ Modelo de linha concluida:
 
 ## Concluidas
 
+- 2026-09-02 T-022: `evals/test_loop.py`, a bateria duravel do modulo de loop com agente falso. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
+  - Evidencia: tipo=comando; procedimento=as duas baterias que existiam so no scratchpad viraram um arquivo em `evals/`, que o `install.sh` nao distribui, cobrindo os dois scripts em 47 verificacoes sem nenhuma chamada de modelo, e depois `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=47 de 47 na bateria e verificador exit 0 com 33 de 33, ja rodando a bateria por dentro
+- 2026-09-02 T-021: `verify_repository.py` cobrindo o bloco `loop`, o bit de execucao do `loop.sh`, a compilacao dos tres scripts distribuidos e a bateria do modulo. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
+  - Evidencia: tipo=comando; procedimento=paridade do bloco `loop` condicional (o partial e sempre conferido; a raiz so quando o modulo estiver ativado), `loop` somado a checagem de versao dos marcadores, `bash -n` e `py_compile` nos scripts distribuidos, e `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=exit 0, de 26 para 33 verificacoes, incluindo "bateria do modulo de loop: 47/47" e "bloco loop nao ativado na raiz", que e o estado esperado ate T-023
 - 2026-09-02 T-020: `scripts/loop.sh` neutro e `scripts/loop_task.py`, que faz toda edicao de `TASKS.md` reusando o parser do validador. (spec: 0004-modulo-de-loop)
   - Evidencia: tipo=comando; procedimento=duas baterias em projetos descartaveis, uma para o helper (elegibilidade, fecho, bloqueio, tarefa dentro de cerca, portao vermelho recusado, integridade do historico) e outra para os quatro caminhos do `loop.sh` com agente falso (tarefa sem portao, portao verde, portao vermelho 3x com realimentacao conferida no prompt da tentativa 2, e falta de contexto), mais `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=23 de 23 no helper e 22 de 22 no loop, verificador exit 0 com 26 de 26, e `validate_structure.py --strict` exit 0 nos projetos depois de cada rodada
 - 2026-09-02 T-019: Bloco de loop, `assets/partials/AGENTS-loop-block.md`, `references/loop.md`, marcadores dos tres blocos em v2.3.0 e fluxo de ativacao no `SKILL.md` com o portao de `QUALITY.md`. (spec: 0004-modulo-de-loop)

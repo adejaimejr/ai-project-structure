@@ -26,6 +26,7 @@ ai-project-structure/
 ├── evals/
 │   ├── evals.json      # suite local de teste da skill (nao vai para a instalacao)
 │   ├── verify_repository.py    # prova a integridade deste repositorio
+│   ├── test_loop.py    # bateria do modulo de loop, com agente falso
 │   └── fixtures/       # projetos de teste (v1-project, broken-project, aguardando-project)
 ├── CHANGELOG.md        # historico de versoes da skill
 ├── install.sh          # instalador para as tres ferramentas

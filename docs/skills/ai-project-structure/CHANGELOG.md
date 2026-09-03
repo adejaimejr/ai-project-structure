@@ -12,6 +12,7 @@ Modulo de loop: a estrutura passa a poder executar uma tarefa verificavel, nao s
 - `scripts/loop.sh`: orquestra uma rodada. Uma tarefa, ate 3 tentativas, com a saida do portao voltando como contexto da tentativa seguinte. Exit codes distintos por caminho (0 fechou, 1 nao elegivel, 2 portao falhou, 3 aguardando usuario).
 - `scripts/loop_task.py`: toda edicao de `TASKS.md` passa por aqui, reusando o parser do `validate_structure.py`. Um parser so no projeto, em vez de dois divergindo.
 - Protocolo de falta de contexto por arquivo (`.loop-pergunta`), nao por linha sentinela no stdout: cada ferramenta formata saida de um jeito, e arquivo existe ou nao existe.
+- `evals/test_loop.py`: 47 verificacoes do modulo com agente falso, sem nenhuma chamada de modelo. Roda em segundos e entrou no `verify_repository.py`, que passou a conferir tambem o bloco `loop`, o bit de execucao do `loop.sh` e se os tres scripts distribuidos compilam.
 - Marcadores dos tres blocos gerenciados atualizados para v2.3.0. Eles andam juntos mesmo quando o conteudo de um bloco nao muda, porque o marcador diz qual versao da skill escreveu aquele bloco.
 
 ## 2.2.0 - 2026-09-02

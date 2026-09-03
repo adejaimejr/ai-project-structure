@@ -14,6 +14,7 @@ Confere, em um comando so:
    versao atual, e o dogfood da raiz adotou as mesmas;
 5. a versao e a mesma no `SKILL.md`, nos marcadores e no `CHANGELOG.md`;
 6. `evals.json` tem a estrutura esperada e os `files` resolvem;
+6b. os scripts distribuidos compilam, e a bateria do modulo de loop passa;
 7. nenhum travessao (U+2014) em arquivo versionado;
 8. `install.sh` em destino temporario produz tres destinos identicos entre si
    e identicos a fonte canonica, tirando o que nao e distribuido.
@@ -55,7 +56,12 @@ SPECS_RE = re.compile(
     r"<!--\s*ai-project-structure:specs:start.*?ai-project-structure:specs:end\s*-->",
     re.DOTALL,
 )
-VERSION_RE = re.compile(r"ai-project-structure:(?:core|specs):start\s+v(\d+\.\d+\.\d+)")
+LOOP_RE = re.compile(
+    r"<!--\s*ai-project-structure:loop:start.*?ai-project-structure:loop:end\s*-->",
+    re.DOTALL,
+)
+VERSION_RE = re.compile(
+    r"ai-project-structure:(?:core|specs|loop):start\s+v(\d+\.\d+\.\d+)")
 
 # Fixture -> exit code esperado. broken-project tem 2 erros conhecidos,
 # v1-project e uma estrutura pre-marcadores (passa com INFO) e
@@ -157,6 +163,16 @@ def verificar_blocos(res):
             f"ponte {ponte} identica ao template",
         )
 
+    # O modulo de loop pode nao estar ativado aqui; o partial existe de qualquer jeito.
+    loop_partial = read(ASSETS / "partials" / "AGENTS-loop-block.md").strip()
+    res.check(bool(LOOP_RE.search(loop_partial)), "partial do bloco loop com marcadores pareados")
+    loop_raiz = bloco(raiz, LOOP_RE)
+    if loop_raiz is None:
+        res.check(True, "bloco loop nao ativado na raiz", "esperado enquanto T-023 nao rodar")
+    else:
+        res.check(loop_raiz.strip() == loop_partial,
+                  "bloco loop identico ao partial da skill")
+
 
 def verificar_versao(res):
     frontmatter = read(SKILL / "SKILL.md")
@@ -167,7 +183,8 @@ def verificar_versao(res):
 
     marcadores = set()
     for path in (ROOT / "AGENTS.md", ASSETS / "AGENTS.md",
-                 ASSETS / "partials" / "AGENTS-specs-block.md"):
+                 ASSETS / "partials" / "AGENTS-specs-block.md",
+                 ASSETS / "partials" / "AGENTS-loop-block.md"):
         marcadores.update(VERSION_RE.findall(read(path)))
     res.check(
         marcadores == {versao},
@@ -238,6 +255,36 @@ def verificar_evals_json(res):
             if not (EVALS / rel).exists():
                 problemas.append(f"eval {ev['id']} aponta para {rel}, que nao existe")
     res.check(not problemas, f"{len(evals)} evals coerentes", "; ".join(problemas))
+
+
+def verificar_scripts(res, verbose):
+    """Os scripts distribuidos precisam ao menos compilar antes de sair daqui."""
+    for rel, cmd in (
+        ("scripts/validate_structure.py", [sys.executable, "-m", "py_compile"]),
+        ("scripts/loop_task.py", [sys.executable, "-m", "py_compile"]),
+        ("scripts/loop.sh", ["bash", "-n"]),
+    ):
+        caminho = SKILL / rel
+        if not caminho.is_file():
+            res.check(False, f"{rel} existe", "arquivo ausente")
+            continue
+        p = subprocess.run(cmd + [str(caminho)], capture_output=True, text=True)
+        res.check(p.returncode == 0, f"{rel} compila", p.stderr.strip()[:120])
+    executavel = os.access(SKILL / "scripts" / "loop.sh", os.X_OK)
+    res.check(executavel, "loop.sh com bit de execucao")
+
+
+def verificar_testes_do_loop(res, verbose):
+    """Bateria do modulo de loop, com agente falso: sem chamada de modelo."""
+    teste = EVALS / "test_loop.py"
+    if not teste.is_file():
+        res.check(False, "evals/test_loop.py existe", "arquivo ausente")
+        return
+    p = subprocess.run([sys.executable, str(teste)], capture_output=True, text=True)
+    resumo = next((l for l in p.stdout.splitlines() if "verificacoes passaram" in l), "")
+    res.check(p.returncode == 0, "bateria do modulo de loop", resumo.strip())
+    if p.returncode != 0 and verbose:
+        print(p.stdout)
 
 
 def arquivos_versionados():
@@ -348,6 +395,8 @@ def main(argv=None):
     verificar_versao(res)
     verificar_convencoes(res)
     verificar_evals_json(res)
+    verificar_scripts(res, args.verbose)
+    verificar_testes_do_loop(res, args.verbose)
     verificar_travessao(res)
     verificar_install(res, args.verbose)
     res.print()

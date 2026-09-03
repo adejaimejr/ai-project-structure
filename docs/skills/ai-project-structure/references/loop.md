@@ -124,7 +124,13 @@ Na duvida entre dois degraus, **proponha o mais baixo**. O loop tem tentativas, 
 
 Nao invente rubrica com pontuacao. Isso e julgamento declarado, nao medicao: diga o sinal que voce usou e deixe o usuario discordar em uma palavra.
 
-**Degrau que nao existe naquela ferramenta nao vira degrau parecido em silencio.** As escadas nao sao iguais: uma ferramenta pode terminar antes da outra, e o rotulo da interface quase nunca e o valor que a CLI aceita. Quando o degrau proposto nao existir na ferramenta escolhida, diga qual e o teto dela e ofereca a escolha: ficar no teto, ou rodar a tarefa em outra ferramenta que va mais alto. Rebaixar calado faz o usuario achar que pediu esforco maximo e recebeu outra coisa.
+**Degrau que nao existe naquela ferramenta nao vira degrau parecido em silencio.** As escadas nao sao iguais: uma ferramenta pode terminar antes da outra, e o rotulo da interface quase nunca e o valor que a CLI aceita.
+
+Duas saidas legitimas, e uma proibida:
+
+- O usuario ja decidiu antes que aquele degrau aponta para o teto da ferramenta, e isso esta escrito no perfil. Ai use, **e avise que e o teto**: "no Grok isso ja e o maximo".
+- Nao ha decisao registrada. Ai diga qual e o teto e ofereca a escolha: ficar nele, ou rodar em outra ferramenta que va mais alto.
+- Proibido: escolher o degrau parecido sem falar nada. O usuario acharia que pediu esforco maximo e recebeu outra coisa, sem nada no registro dizendo isso.
 
 ## Configurar Os Perfis
 

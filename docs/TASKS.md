@@ -40,6 +40,8 @@ Modelo de linha concluida:
 
 ## Concluidas
 
+- 2026-09-02 T-031: Degrau mais alto do Grok aponta para o teto da ferramenta, por decisao do usuario, com o aviso obrigatorio. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
+  - Evidencia: tipo=comando; procedimento=`Grok, executar-muito-dificil` gravado em `docs/MEMORY.md` com o mesmo comando de `executar-dificil` e a razao registrada, e a regra de `references/loop.md` reescrita com as duas saidas legitimas e a proibida; depois `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=exit 0 com 33 de 33
 - 2026-09-02 T-030: Escada de esforco do Grok confirmada e regra de degrau inexistente. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
   - Evidencia: tipo=comando; procedimento=menu do Grok conferido contra as strings do binario, que so trazem `low`, `medium`, `high` e `xhigh`; dois degraus gravados para o Grok em `docs/MEMORY.md` com a anotacao de que ele nao tem o terceiro; regra escrita em `references/loop.md` proibindo rebaixar degrau em silencio; depois `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=exit 0 com 33 de 33
 - 2026-09-02 T-029: Degraus de esforco nos perfis de executar, regra de escolha do degrau e mapeamento entre rotulo de interface e valor de CLI. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)

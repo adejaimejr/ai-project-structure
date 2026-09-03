@@ -8,7 +8,7 @@ e o validador oficial da estrutura.
 
 Uso:
     loop_task.py check     <projeto> <T-NNN>
-    loop_task.py fechar    <projeto> <T-NNN> --comando <cmd> --saida <arquivo> [--codigo N]
+    loop_task.py fechar    <projeto> <T-NNN> --saida <arquivo> [--codigo N] [--agente CMD]
     loop_task.py bloquear  <projeto> <T-NNN> --pergunta <arquivo>
 
 `check` imprime o comando declarado em `(verifica:)` e sai 0 quando a tarefa
@@ -184,9 +184,13 @@ def cmd_fechar(args):
         )
     saida = Path(args.saida).read_text(encoding="utf-8") if args.saida else ""
     hoje = date.today().isoformat()
+    # `agente` e fato conhecido com certeza: foi o loop que invocou aquele
+    # comando. Registrar nao e alegacao sobre qualidade, e rastreabilidade de
+    # quem produziu o trabalho.
+    agente = f"agente={V.squeeze(args.agente)}; " if args.agente else ""
     novas = [
         f"- {hoje} {linha}",
-        f"  - Evidencia: tipo=comando; procedimento={comando}; "
+        f"  - Evidencia: tipo=comando; {agente}procedimento={comando}; "
         f"resultado={resumir_saida(saida, args.codigo)}",
     ]
     restante = linhas[:inicio] + linhas[fim:]
@@ -238,6 +242,7 @@ def main(argv=None):
     p.add_argument("tarefa")
     p.add_argument("--saida", help="Arquivo com a saida do comando.")
     p.add_argument("--codigo", type=int, default=0, help="Exit code do comando.")
+    p.add_argument("--agente", help="Comando do agente que fez o trabalho, para rastreabilidade.")
     p.set_defaults(func=cmd_fechar)
 
     p = sub.add_parser("bloquear", help="Move para Aguardando Usuario com a pergunta.")

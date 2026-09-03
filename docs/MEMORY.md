@@ -69,7 +69,14 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
 
 ### User
 
-- 
+- Perfis de loop, por intencao e ferramenta. Registrados em 2026-09-02 a pedido do usuario, para nao ter que digitar o comando na hora de chamar o `loop.sh`:
+  - Claude, planejar: `claude -p --permission-mode bypassPermissions --model fable --effort max`
+  - Claude, executar: `claude -p --permission-mode bypassPermissions --model opus --effort high`. Use `--effort xhigh` quando a tarefa for dificil; os niveis sao low, medium, high, xhigh e max.
+  - Codex, planejar: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-sol -c model_reasoning_effort="high"`
+  - Codex, executar: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="high"`
+  - Grok, executar: `grok --always-approve -m grok-4.6 --effort high -p`. O usuario ainda nao tem plano no Grok; ate ter, roda em credito.
+- Nome de modelo envelhece rapido. Os acima foram conferidos em 2026-09-02 contra `claude --help` (aliases `fable`, `opus`, `sonnet`) e `~/.codex/models_cache.json` (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`). Confira de novo antes de confiar.
+- O usuario usa Claude e Codex por assinatura, e pretende assinar o Grok. O custo em dolar que as CLIs imprimem e preco de tabela da API e nao corresponde ao que ele paga.
 
 ### Feedback
 

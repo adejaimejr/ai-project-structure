@@ -59,7 +59,11 @@ Duas armadilhas que custam uma rodada inteira quando passam batido:
 
 Nas ferramentas em que a flag de prompt recebe um valor, como `grok -p` e `gemini -p`, deixe a flag **por ultimo**: o `loop.sh` acrescenta o prompt como ultimo argumento, entao ele vira o valor dela.
 
-Acrescentar `--output-format json` no Claude ou no Grok faz a saida trazer tokens e custo da rodada. O `loop.sh` nao le esses numeros; eles ficam no relatorio para voce.
+Acrescentar `--output-format json` no Claude ou no Grok faz a saida trazer os tokens da rodada. O `loop.sh` nao le esses numeros; eles ficam no relatorio para voce.
+
+Cuidado com o campo de custo em dolar: o Claude marca `"costBasis": "list"`, ou seja, preco de tabela da API calculado a partir dos tokens. Quem usa assinatura nao paga aquilo; o numero serve para comparar consumo entre rodadas, nao para prever fatura. O que vale acompanhar sob assinatura e token, turno e tempo.
+
+O modelo e o esforco tambem entram por aqui, e cada CLI tem a propria flag (`--model`, `-m`, `--reasoning-effort`). Sem flag, cada ferramenta usa o padrao dela, que muda com o tempo: numa mesma bancada o Claude rodou em `claude-fable-5-1`, o Codex em `gpt-5.6-terra` com esforco `high` e o Grok em `grok-4.6`, nenhum deles escolhido por quem chamou.
 
 - `--tarefa` (obrigatorio): o `T-NNN`.
 - `--agente` (obrigatorio): comando headless da ferramenta que voce usa. O script nao assume nenhuma. O prompt entra como ultimo argumento. Argumento com espaco dentro de aspas nao e suportado.
@@ -81,6 +85,29 @@ Qualquer caminho diferente de sucesso sai diferente de zero, o que deixa a compo
 ```bash
 loop.sh --tarefa T-042 --agente "claude -p" && say pronto
 ```
+
+## Perfis: Nao Digite O Comando Toda Vez
+
+Ninguem quer escrever `--agente "claude -p --permission-mode bypassPermissions --model X --effort max"` na hora de rodar uma tarefa. E o comando muda conforme a intencao: planejar e executar pedem modelo e esforco diferentes, e cada ferramenta tem os proprios.
+
+A solucao nao e mais um arquivo de configuracao. E a memoria do projeto, usada para o que ela ja serve: `docs/MEMORY.md`, secao `## User`, e onde ficam as preferencias de quem toca o projeto. Registre os perfis la, uma vez:
+
+```md
+## User
+
+- Perfis de loop, por intencao e ferramenta:
+  - Claude, executar: `claude -p --permission-mode bypassPermissions --model <modelo> --effort high`
+  - Claude, planejar: `claude -p --permission-mode bypassPermissions --model <modelo> --effort max`
+  - Codex, executar: `codex exec -s workspace-write --skip-git-repo-check -m <modelo>`
+  - Codex, planejar: `codex exec -s workspace-write --skip-git-repo-check -m <modelo>`
+  - Grok, executar: `grok --always-approve -m <modelo> --effort high -p`
+```
+
+Use o nome de modelo que a **sua** CLI aceita hoje; confira no `--help` dela. Nome de modelo envelhece rapido, e por isso ele fica na sua memoria de projeto, nao dentro da skill.
+
+Com os perfis registrados, voce pede em linguagem natural ("roda o loop na T-042 para executar") e o agente do chat monta a chamada, mostra antes de rodar e executa. O fluxo esta em "Rodar Uma Tarefa Com O Loop", no `SKILL.md`.
+
+O `loop.sh` continua sem saber o que e perfil: ele recebe uma string de `--agente` e obedece. Quem traduz intencao em comando e o agente do chat, lendo a sua memoria. Assim a escolha de modelo nunca entra no codigo da skill, que nao tem como acompanhar o catalogo de tres fornecedores.
 
 ## Como O Agente Pede Ajuda
 

@@ -157,7 +157,9 @@ $FALHA_ANTERIOR"
   echo "--- portao saiu com codigo $CODIGO"
 
   if [ "$CODIGO" -eq 0 ]; then
-    python3 "$HELPER" fechar "$PROJETO" "$TAREFA" --saida "$TMP/saida.txt" --codigo 0 || exit 1
+    python3 "$HELPER" fechar "$PROJETO" "$TAREFA" \
+      --saida "$TMP/saida.txt" --codigo 0 \
+      ${AGENTE:+--agente "$AGENTE"} || exit 1
     echo
     echo "Portao verde na tentativa $n. Tarefa fechada com evidencia de comando."
     echo "A entrada de SESSION.md continua sendo sua: o loop nao escreve la."

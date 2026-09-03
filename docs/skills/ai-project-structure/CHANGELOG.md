@@ -15,6 +15,8 @@ Modulo de loop: a estrutura passa a poder executar uma tarefa verificavel, nao s
 - `evals/test_loop.py`: 47 verificacoes do modulo com agente falso, sem nenhuma chamada de modelo. Roda em segundos e entrou no `verify_repository.py`, que passou a conferir tambem o bloco `loop`, o bit de execucao do `loop.sh` e se os tres scripts distribuidos compilam.
 - Exit 4 novo: agente que sai com codigo diferente de zero e nao altera nenhum arquivo encerra a rodada na hora, em vez de queimar as tentativas restantes. Veio de bancada real, onde duas ferramentas mal configuradas fizeram o loop insistir tres vezes e reportar "portao falhou" quando o problema era o comando de `--agente`.
 - `references/loop.md` ganhou a tabela de comandos por ferramenta (Claude, Codex, Gemini e Grok), as duas armadilhas que custam uma rodada (`--skip-git-repo-check` no Codex fora de repo git, `--skip-trust` no Gemini) e a secao "A Evidencia Vale O Que O Portao Vale".
+- A evidencia escrita pelo loop passa a registrar `agente=<comando>`: quem fechou a tarefa, nao so que o portao passou.
+- Chamada assistida: `SKILL.md` ganhou "Rodar Uma Tarefa Com O Loop". O usuario pede em linguagem natural e o agente do chat monta o comando, lendo os perfis por intencao e ferramenta que ficam em `docs/MEMORY.md`, secao `## User`. Nome de modelo e flag de esforco nunca entram na skill: eles envelhecem, e a memoria do projeto e o lugar deles.
 - Marcadores dos tres blocos gerenciados atualizados para v2.3.0. Eles andam juntos mesmo quando o conteudo de um bloco nao muda, porque o marcador diz qual versao da skill escreveu aquele bloco.
 
 ## 2.2.0 - 2026-09-02

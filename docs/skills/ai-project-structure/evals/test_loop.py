@@ -182,9 +182,12 @@ def testar_helper(res):
         code, out = rodar_helper("fechar", str(root), "T-019", "--saida", str(saida), "--codigo", "1")
         res.check(code == 1 and "recusa escrever evidencia" in out,
                   "fechar recusa portao vermelho", out[:70])
-        code, out = rodar_helper("fechar", str(root), "T-019", "--saida", str(saida), "--codigo", "0")
+        code, out = rodar_helper("fechar", str(root), "T-019", "--saida", str(saida),
+                                 "--codigo", "0", "--agente", "codex exec -m gpt-5.6-terra")
         texto = (root / "docs" / "TASKS.md").read_text(encoding="utf-8")
         concluidas = texto.split("## Concluidas")[1]
+        res.check("agente=codex exec -m gpt-5.6-terra" in concluidas,
+                  "evidencia registra o agente que fez o trabalho")
         res.check(code == 0, "fechar aceita portao verde", out)
         res.check("T-019" in concluidas, "tarefa foi para Concluidas")
         res.check("Evidencia: tipo=comando" in concluidas, "evidencia com tipo=comando")
@@ -237,6 +240,7 @@ def testar_loop(res):
         res.check(code == 0, "B: portao verde sai 0", f"exit {code}")
         res.check("T-019" in concluidas, "B: tarefa foi para Concluidas")
         res.check("resultado=exit 0; portao-verde" in concluidas, "B: evidencia com a saida real")
+        res.check(f"agente={agente.name}" in concluidas, "B: loop.sh repassa o agente para a evidencia")
         res.check(len(prompts(log)) == 1, "B: agente chamado uma vez")
         res.check("2026-08-10 T-001" in texto, "B: historico intocado")
         res.check(validar(root) == 0, "B: validador --strict exit 0 depois da rodada")

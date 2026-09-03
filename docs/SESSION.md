@@ -41,6 +41,43 @@ As entradas anteriores a 2026-09-02 foram rotacionadas para `docs/archive/SESSIO
 - Motivo: 
 ```
 
+## 2026-09-02 - Claude (rastreabilidade do agente e chamada assistida)
+
+### Objetivo
+
+- Registrar na evidencia quem fez o trabalho, e tirar do usuario a tarefa de digitar o comando do loop.
+
+### O Que Foi Feito
+
+- Correcao de leitura minha, apontada pelo usuario: os valores em dolar das CLIs sao preco de tabela da API. O JSON do Claude declara `"costBasis": "list"`. Quem usa assinatura nao paga aquilo, entao a tabela de custo da bancada estava mal rotulada. Corrigido na spec 0004, em `references/loop.md` e na entrada de sessao da bancada.
+- Confusor da bancada tambem registrado: nenhum modelo foi fixado nas rodadas, entao a comparacao misturava ferramenta, modelo e esforco.
+- `agente=<comando>` na evidencia, entre `tipo=` e `procedimento=`. O loop sabe o comando com certeza, porque foi ele que invocou; registrar e fato, nao alegacao, e respeita DEC-001.
+- Chamada assistida: o usuario pede em linguagem natural e o agente do chat monta o comando. Os perfis por intencao e ferramenta vivem em `docs/MEMORY.md`, secao `## User`, que ja e o lugar de preferencia de quem toca o projeto. Nenhum arquivo de configuracao novo.
+- Perfis do usuario gravados com strings verificadas, nao inventadas: `claude --help` confirma os aliases `fable`, `opus` e `sonnet` e os niveis de `--effort`; `~/.codex/models_cache.json` confirma `gpt-5.6-sol` e `gpt-5.6-terra`; `~/.codex/config.toml` confirma a chave `model_reasoning_effort`.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `scripts/loop_task.py`, `scripts/loop.sh`, `SKILL.md`, `references/loop.md`, `CHANGELOG.md`, `evals/test_loop.py`.
+- Projeto: `docs/MEMORY.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/specs/0004-modulo-de-loop.md`.
+
+### Decisoes Tomadas
+
+- DEC-015: `agente=` na evidencia.
+- DEC-016: escolha de modelo fica no usuario, com perfis em `MEMORY.md`, e nunca na linha de tarefa nem dentro da skill.
+
+### Aprendizados Para MEMORY.md
+
+- Perfis de loop e a natureza do custo sob assinatura foram promovidos para `MEMORY.md`, secao `## User`.
+
+### Pendencias
+
+- Publicar a 2.3.0 e reinstalar nos tres destinos, que seguem na 2.2.0. Decisao do usuario.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario.
+- Motivo: o que faltava responder por teste ja foi respondido. O resto e decisao de publicar.
+
 ## 2026-09-02 - Claude, Codex e Grok (bancada multi-ferramenta do loop)
 
 ### Objetivo
@@ -52,7 +89,7 @@ As entradas anteriores a 2026-09-02 foram rotacionadas para `docs/archive/SESSIO
 - Subprojeto `slugkit` montado quatro vezes, identico: portao real (`python3 test_slugify.py`) falhando no inicio, T-001 bem especificada e T-002 deliberadamente sem contexto.
 - T-001: Claude, Codex e Grok fecharam com portao verde na tentativa 1. Gemini nao rodou, por `IneligibleTierError` da conta, nao por defeito do modulo.
 - T-002 foi o teste que importava: chutar o limite padrao passaria no portao, porque a suite nao cobre isso. Os tres escreveram `.loop-pergunta` e pararam. O bloco de loop no `AGENTS.md` segurou a regra "Nunca Inferir" sob incentivo contrario.
-- Custos: Claude USD 1,04 e USD 1,00 nas duas tarefas; Grok USD 0,25 e USD 0,14; Codex reporta so tokens (23.958 e 16.817). O grosso do custo do Claude e cache read, quase 300k tokens.
+- Consumo: Claude 295k de cache read na primeira tarefa e 233k na segunda; Grok 193k e 155k tokens; Codex 23.958 e 16.817 tokens. Os valores em dolar que as CLIs imprimem sao preco de tabela da API (`costBasis: list` no Claude), nao o que se paga em assinatura: servem para comparar rodadas, nao para prever fatura.
 - Dois defeitos achados e corrigidos: o loop insistia com agente que nunca executou (virou exit 4, com teste novo), e as flags por ferramenta nao estavam documentadas (viraram tabela em `references/loop.md`).
 - Duas das tres implementacoes de T-001 tinham bug numa regra de borda que a suite nao cobria, e o loop fechou as duas com evidencia legitima. Registrado como limitacao central do desenho: a evidencia vale o que o portao vale.
 

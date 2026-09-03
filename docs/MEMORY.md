@@ -82,7 +82,8 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
   - Grok, executar: `grok --always-approve -m grok-4.6 --effort high -p`
   - Grok, executar-dificil: `grok --always-approve -m grok-4.6 --effort xhigh -p`
   - Grok, executar-muito-dificil: `grok --always-approve -m grok-4.6 --effort xhigh -p`. **E o mesmo comando de `executar-dificil`, por decisao do usuario em 2026-09-02**: a escada do Grok termina em `xhigh` (a interface chama de "Extra High"; confirmado no menu e nas strings do binario, que so trazem `low`, `medium`, `high` e `xhigh`), e ficar sem opcao no degrau mais alto era pior que repetir o teto. Ao cair nesse degrau no Grok, **diga que ja e o teto da ferramenta** e ofereca outra se a tarefa parecer precisar de mais.
-  - O usuario ainda nao tem plano no Grok; ate ter, roda em credito.
+  - ~~O usuario ainda nao tem plano no Grok; ate ter, roda em credito.~~ (substituido em 2026-09-03)
+  - O usuario assinou o Grok em 2026-09-03 e ele passou a ser chamavel como as demais ferramentas. Ate essa data, as tres tentativas de rodada completa bateram no limite do plano free e sairam com exit 4, entao **nao existe bancada completa do Grok anterior a assinatura**: o que estiver registrado sobre ele antes disso e sobre a escada de esforco e o nome do modelo, nunca sobre desfecho de rodada.
   - opencode, planejar: `opencode run --auto -m deepseek/deepseek-v4-pro`
   - opencode, executar: `opencode run --auto -m deepseek/deepseek-v4-flash`
   - opencode, executar-dificil: `opencode run --auto -m deepseek/deepseek-v4-flash`. Mesmo modelo do degrau base, por decisao do usuario em 2026-09-03: o `flash` deu conta da mesma tarefa que o `pro` na validacao, entao subir de modelo cedo demais so encarece.

@@ -131,6 +131,107 @@ Rodada verde e ausencia de objecao, nao prova de que funciona. Modelos que leem 
 
 Os debates de 2026-04-25 foram rotacionados para `docs/archive/CONSENSUS-2026.md`.
 
+## 2026-09-03 - As seis perguntas da spec 0006 (automacao do consenso)
+
+**Status:** aberto
+
+**Proximo passo:** o usuario decide P-4 e P-5, onde as duas posicoes divergem, e decide se vale rodar o Grok antes disso. As outras quatro convergiram e estao prontas para virar DEC na spec 0006 assim que ele ratificar.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+### Contexto
+
+Primeira vez que este projeto roda uma rodada de consenso de verdade cega, e ela e sobre a spec que quer automatizar exatamente isso. Foi feita na mao, que e o Problema 2 da propria spec.
+
+Como a cegueira foi obtida, para ela ser conferivel e nao so declarada:
+
+- A posicao do Claude foi escrita **antes** de qualquer agente rodar e selada em arquivo fora do repositorio. Escrever depois seria `debate-aberto` disfarcado de parecer independente.
+- Claude e Codex receberam o **mesmo** arquivo de prompt, e rodaram em processos separados, com as saidas em arquivos distintos fora do repositorio. Nenhum dos dois teve como ler a saida do outro.
+- Comando do Codex: `codex exec -s read-only -m gpt-5.6-sol -c model_reasoning_effort="high"`. O sandbox `read-only` garante que ele nao escreveu nada; **nao** garante que ele nao leu nada, e essa distincao foi levantada pelo proprio Codex na critica dele.
+
+Limitacao declarada, e ela e material: o Claude e autor da spec e das perguntas, entao a posicao dele nao e independente do enquadramento. Isso nao da para consertar nesta rodada, so declarar.
+
+Segunda limitacao, apontada pelo Codex e aceita: o artefato bruto de cada agente ficou fora do repositorio e nao foi preservado. As posicoes abaixo sao resumo fiel, conferido, mas resumo. E exatamente o que a resposta dele a P-1 diz que nao deveria acontecer.
+
+### Pergunta Ou Decisao
+
+As seis perguntas abertas de `docs/specs/0006-automacao-do-consenso.md`: o que a operacao entrega (P-1), se ela pode escrever em `CONSENSUS.md` (P-2), que isolamento garantir (P-3), se cobre debate, achado ou os dois (P-4), quantos agentes e quem escolhe (P-5), e se a rodada 1 cega e obrigatoria por construcao (P-6).
+
+### Posicao Do Claude
+
+Selada antes das demais rodarem.
+
+- **P-1:** (b), a entrada montada com posicoes preenchidas e as secoes de julgamento em branco. (a) nao resolve o Problema 2, porque o custo que trava a segunda opiniao e o de transcrever e formatar, nao o de rodar o agente. (c) e onde apodrece: quem sintetiza acordo esta julgando, e vira participante nao declarado com poder de edicao sobre a fala dos outros. Criterio proposto: a operacao pode preencher qualquer campo cuja veracidade uma pessoa consiga conferir olhando o artefato bruto ao lado. A entrada precisa apontar para o bruto, nunca substitui-lo.
+- **P-2:** sim, com excecao declarada, e nao por heranca automatica da DEC-019. A razao daquela decisao era "um agente so"; com N agentes isolados ela nao sobrevive. A excecao e estreita: escreve posicoes e campos declarativos, nao escreve julgamento, nunca escreve `Status: resolvido`. E os campos `Metodo`, `Exposicao previa` e `Rodada` passam a ser escritos **pela execucao**, com base no que ela fez, e nao copiados de um valor que o usuario digitou. E o unico jeito de eles pararem de ser autodeclarados.
+- **P-3:** (c), com discordancia do proprio enunciado: "sem acesso ao repositorio" e forte demais e prejudica a qualidade. A rodada de ontem foi boa porque o Codex leu o codigo e as fixtures; sem isso ele opinaria sobre um resumo meu, que e o acoplamento que se quer quebrar. Proposta: leitura do repositorio sim, escrita nao, posicoes dos outros nao, com isolamento por **ordem de escrita** (todos leem o estado anterior a rodada, e a rodada so escreve quando todos terminaram).
+- **P-4:** so debate na primeira versao, achado explicitamente fora. Motivo desconfortavel: existe **um** achado registrado neste repositorio e fui eu que escrevi ontem. Desenhar automacao para uma forma com n=1 e desenhar para o proprio palpite.
+- **P-5:** lista de perfis nomeada em `docs/MEMORY.md`, sem N fixo na ferramenta, dois a tres agentes por padrao. Agente que falha nao derruba a rodada, e a ausencia dele fica escrita: rodada com dois de tres respondendo e legitima, rodada que silencia o terceiro e mentira por omissao.
+- **P-6:** os dois modos, com a rodada 1 cega como padrao. O que importa e que o modo **determine** o valor de `Exposicao previa` em vez de o usuario digitar: passou as outras posicoes no prompt, sai `sim`; nao passou, sai `nao`.
+- **Onde achei a propria spec fraca:** P-3 mistura isolamento entre agentes com isolamento do repositorio, e as duas coisas nao andam juntas. E nenhuma pergunta cobre o caso de dois agentes concordarem por terem o mesmo vies de treino: isolamento por construcao nao produz independencia estatistica, e a spec fala como se produzisse.
+
+### Posicao Do Codex
+
+`gpt-5.6-sol`, esforco `high`, sandbox `read-only`.
+
+- **P-1:** alternativa combinada, recusando a exclusao da pergunta: preservar o material bruto de cada agente **e** gerar uma minuta deterministica, com posicoes reproduzidas sem resumo e campos de julgamento como `(A preencher.)`. O bruto da auditabilidade; a minuta elimina a transcricao feita pelo modelo criticado. Aceita perder: a entrada nao sai concluida, e os artefatos ocupam espaco.
+- **P-2:** sim, mas **so um orquestrador mecanico** pode escrever, por opcao explicita, registrando pergunta, posicoes literais, falhas, comandos, hashes, metodo, exposicao e rodada. Nao escreve entrada com menos de duas posicoes validas. Correcao direta ao Claude: "o fundamento nao e haver N agentes, mas separar os agentes opinantes do escritor deterministico". Aceita perder: complexidade do escritor, necessidade de append atomico, e entradas abertas acumuladas se a sintese humana nao acontecer.
+- **P-3:** alternativa as tres opcoes: sessao nova e snapshot privado, imutavel e identico dos insumos autorizados, com o snapshot da rodada 1 excluindo as posicoes da rodada, e os resultados fora do alcance dos demais ate todos terminarem. "Sandbox somente-leitura impede escrita, nao leitura." Manifesto e hashes para conferir quais insumos entraram. Aceita perder: portabilidade e simplicidade.
+- **P-4:** **os dois**, sobre um coletor comum e dois renderizadores. Em achado, revalidar **somente uma disposicao ja existente**, sem criar o achado nem decidir a disposicao. Fazer so debate ignora o unico caso doloroso observado; fazer so achado entrega ferramenta especializada demais. Aceita perder: entrega inicial maior e mais lenta, com fixtures proprias para dois formatos.
+- **P-5:** N derivado de lista explicita **por chamada**, aprovada pelo usuario antes de executar, sem N padrao oculto, exigindo ao menos duas configuracoes distintas de ferramenta ou modelo. Grupos nomeados em `MEMORY.md` sao conveniencia resolvida pelo agente de chat: "o executor nao deve interpretar Markdown nem escolher modelos". A lista explicita ja funciona como teto local de custo. Aceita perder: a conveniencia da rodada automatica com revisores padrao.
+- **P-6:** os dois modos, rodada 1 obrigatoriamente cega por construcao, rodada 2 em diante em modo explicito recebendo os artefatos indicados. A operacao **nunca deduz** sozinha o numero da rodada nem quais posicoes anteriores fornecer. Aceita perder: interface unica e permissiva.
+
+Criticas a spec, resumidas (as que mais mudam trabalho):
+
+1. **O reuso do `loop.sh` esta superestimado.** O conceito de comando neutro se reaproveita; o script pressupoe tarefa, mutacao de arquivos, portao, tentativas e `.loop-pergunta`. **Conferido no codigo antes de aceitar:** `loop.sh:145` decide se o agente fez algo com `find -type f -newer`, e um agente de parecer nao escreve nada no projeto, entao cairia no `exit 4` da DEC-014 sempre. A critica procede inteira.
+2. **A DEC-001 foi generalizada alem do que ela prova.** Um comando comprova exit code e bytes capturados; nao comprova qual modelo respondeu, se houve fallback, se a sessao era nova, nem se o isolamento existiu.
+3. **"N agentes" conflita com manter a forma atual fora do escopo.** O modelo de debate tem secoes nomeadas para Codex, Claude e Gemini, e o achado tem uma `Revalidacao` unica. Nenhum dos dois representa N arbitrario, falha individual, comandos, hashes ou varias revalidacoes. Ou a forma muda, ou o requisito encolhe para o que ja e representavel.
+4. O criterio de aceite "o artefato nao contem o texto das outras posicoes" **nao prova cegueira**: o agente pode ter lido e parafraseado. A evidencia teria de ser o manifesto do ambiente e a barreira de acesso.
+5. `Rodada: N de N` ficou fragil depois que o teto saiu: em entrada aberta o total futuro e desconhecido, e o validador so reconhece dois numeros sem conferir coerencia. A automacao nao deve inventar o denominador.
+6. Faltam da spec: politica de quando restam posicoes suficientes para a rodada existir; definicao de sessao realmente nova (cache de contexto pode vazar posicao mesmo com arquivos isolados); tratamento de saida hostil ou acidentalmente estrutural, porque colar resposta literal em `CONSENSUS.md` pode injetar headings e campos; localizacao, retencao e append atomico dos artefatos; e **risco de confidencialidade**, porque o mesmo snapshot vai para varios fornecedores externos e a lista de insumos e destinos precisa ser mostrada antes de executar.
+7. Correcao de enquadramento: P-1(c) **nao e fraude por natureza**. Sintese feita por agente separado, identificada como proposta e sujeita a decisao humana, pode ser legitima. Deixar fora desta versao e escolha de escopo, nao impossibilidade logica.
+
+O que declarou nao ter conseguido avaliar: nao executou as CLIs nem prototipou barreira de filesystem, entao nao confirmou quais ferramentas garantem o isolamento que recomenda; nao mediu qualidade, consumo nem taxa de falha com N agentes; e nao avaliou convergencia com o outro modelo, porque a resposta ficou oculta por construcao.
+
+### Posicao Do Grok
+
+**Nao consultado nesta rodada.** Duas tentativas, uma antes e outra depois de o usuario refazer o login, as duas recusadas com a mesma mensagem: `You've reached your free Grok Build usage limit for now. Get SuperGrok for much higher limits`. O `grok models` responde `You are logged in with grok.com` com `grok-4.6` disponivel, entao a sessao existe e o bloqueio e de cota, nao de autenticacao. O usuario assinou o Grok em 2026-09-03; a hipotese aberta e a assinatura nao cobrir o produto de CLI, que a propria mensagem chama de Grok Build.
+
+Consequencia para esta rodada: **duas posicoes, nao tres.** Onde as duas divergem, nao ha desempate por terceiro, e a regra de desempate manda o usuario decidir.
+
+### Pontos De Acordo
+
+Quatro das seis perguntas convergiram, e em duas delas os dois modelos rejeitaram as opcoes oferecidas pela pergunta, independentemente:
+
+- **P-1: convergencia forte.** Os dois recusaram a exclusao entre bruto e minuta. O Claude escreveu que "a entrada precisa apontar para o artefato bruto de cada agente, e nao substitui-lo"; o Codex recusou a pergunta e pediu os dois lado a lado. Mesma linha de corte nos dois: a operacao para onde comeca o julgamento.
+- **P-2: convergencia no resultado, com o Codex corrigindo o fundamento.** Os dois disseram sim com excecao estreita. O Claude justificou por "sao N agentes, e a razao da DEC-019 era um agente so"; o Codex mostrou que isso nao basta, porque o acoplamento volta se quem escreve for um dos opinantes ou um sintetizador livre. O que sustenta a excecao e o **escritor deterministico**, nao a cardinalidade. Correcao aceita.
+- **P-3: convergencia forte, e os dois disseram que a pergunta esta mal posta.** Ambos rejeitaram a escada (a)/(b)/(c) pelo mesmo motivo: o que precisa ser isolado sao as posicoes da rodada atual, nao o repositorio, porque tirar o repositorio degrada a qualidade sem comprar isolamento. O Codex acrescentou o que faltava: sandbox somente-leitura impede escrita e nao leitura, entao o isolamento tem de vir de snapshot e barreira de acesso, com manifesto e hashes.
+- **P-6: convergencia forte.** Os dois modos, rodada 1 cega por construcao, e o ponto que os dois fizeram com palavras diferentes: a execucao **determina** os campos declarativos em vez de o usuario digita-los, e a operacao nunca deduz sozinha rodada ou quais posicoes fornecer.
+
+Fora das perguntas, um acordo que nenhum dos dois foi solicitado a dar: os dois apontaram, sem combinar, que a spec trata isolamento por construcao como se produzisse independencia real, e nao produz.
+
+### Riscos E Tradeoffs
+
+- **A rodada tem n=2, e um dos dois escreveu a spec.** E menos independencia do que o formato sugere. Onde os dois concordam, concordam com o enquadramento de um deles.
+- **Convergencia nao e prova.** Os quatro acordos podem vir de vies compartilhado de treino, e o proprio Claude levantou isso na posicao dele. Ninguem mediu.
+- **A entrada bateu no defeito que a posicao do Codex descreve.** O campo `**Rodada:** 1 de 1` acima afirma um denominador que nao se sabe: se o Grok rodar depois, ainda e rodada 1. E o exemplo vivo da critica 5 dele, acontecendo no registro que a discute.
+- **O material bruto nao foi preservado**, contra o que a P-1 dos dois recomenda. Este registro e resumo conferido, nao artefato.
+- Quatro decisoes prontas para virar DEC ficam paradas ate o usuario ratificar. O custo de esperar e baixo; o de ratificar por conta propria seria transformar parecer de modelo em decisao de projeto, que e o que a regra de desempate proibe.
+
+### Consenso Final
+
+**Parcial.** Quatro perguntas convergiram (P-1, P-2, P-3, P-6) e estao prontas para virar decisao da spec 0006, com a redacao da P-2 seguindo o fundamento do Codex e nao o do Claude. Duas divergiram e sobem para o usuario:
+
+- **P-4, o que a primeira versao cobre.** Claude: so debate, porque existe um unico achado registrado e ele foi escrito pelo proprio Claude ontem, entao automatizar aquela forma e automatizar um palpite n=1. Codex: os dois, com coletor comum e dois renderizadores, porque a revalidacao de achado e o unico caso doloroso observado e deixa-la de fora entrega ferramenta que nao resolve o que motivou a spec. As duas posicoes usam **o mesmo fato** (existe um achado so, e ele doeu) para concluir o oposto.
+- **P-5, onde mora a lista de agentes.** Claude: lista nomeada em `docs/MEMORY.md`, no mesmo lugar dos perfis que ja existem. Codex: lista explicita por chamada, porque o executor nao deve interpretar Markdown nem escolher modelo, e `MEMORY.md` e preferencia resolvida pelo agente de chat, nao configuracao. Ponto de fato a favor do Codex, conferido: o `loop.sh` de hoje recebe `--agente` e obedece, sem ler `MEMORY.md`. Os dois concordam em pelo menos duas configuracoes distintas e em nenhum N padrao oculto.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+Nada ainda. As quatro convergencias viram `DEC-NNN` **na spec 0006**, nao em `DECISIONS.md`, porque sao decisoes locais de desenho dela. Duas delas podem subir para `DECISIONS.md` depois, se sobreviverem a implementacao: a excecao a DEC-019 por escritor deterministico, que muda uma decisao ja registrada do projeto, e a regra de que campo declarativo escrito por execucao vale mais que campo digitado, que vale para qualquer automacao futura e nao so para esta.
+
 ## 2026-09-03 - Par de fixture nao separa nada quando o check novo e AVISO
 
 **Achado:** 0005-A1
@@ -192,94 +293,3 @@ Residuo desta rodada: T-050 (reescrita), T-051 (desbloqueada em 2026-09-03, com 
 ### Decisao Para Registrar Em DECISIONS.md
 
 - Fixture cujo caso invalido produz apenas AVISO nao prova nada pelo exit code sem `--strict`: ela roda com a flag e confere quais avisos sairam, nunca so quantos exit codes bateram.
-
-## 2026-09-02 - Revisao da spec 0003 (skill 2.2.0) por modelo distinto
-
-**Status:** resolvido
-
-**Resolvido em:** 2026-09-02 (usuário ratificou as 6 mudanças do Codex e decidiu os 2 resíduos; spec 0003 passou para `Definida`).
-
-**Metodo:** debate-aberto
-
-**Exposicao previa a outras posicoes:** sim
-
-**Rodada:** 2 de 3
-
-### Contexto
-
-A spec `docs/specs/0003-tasks-verificaveis.md` foi escrita como PRD da skill 2.2.0 e submetida a validação por modelo distinto no Codex CLI, em duas rodadas: rodada 1 cega (proibida a leitura da spec, só os quatro problemas), rodada 2 adversarial com a spec à vista. Primeiro uso real da regra de rodada cega que a própria spec propõe.
-
-Proveniência: apenas a resposta da rodada 2 foi registrada aqui. A posição da rodada 1 do Codex está reconstruída a partir das referências que a rodada 2 faz a ela.
-
-### Pergunta Ou Decisao
-
-A spec 0003 deve passar para `Definida` como está?
-
-### Posicao Do Codex
-
-Veredito: passar para `Definida` **com mudanças**. Concorda com a direção geral (seção própria para tarefa parada, rodada cega no consenso, loop fora desta versão e fora do scaffold, comando único de integridade) e valida DEC-001, DEC-002, DEC-003 e DEC-005. Seis mudanças exigidas:
-
-1. **Evidência de fechamento obrigatória para toda tarefa em `Concluidas`**, mantendo `(verifica: <comando>)` opcional. Argumento: se a verificação for inteiramente opcional, o agente conclui justamente as tarefas menos verificadas sem consequência, preservando a lacuna que a spec quer fechar. Formato proposto atende conteúdo e produto sem exigir comando falso: `Evidencia: tipo=revisao-manual; procedimento=conferencia dos links; resultado=12 links validos`.
-2. **Evidência ausente em tarefa que declarou `(verifica:)` deve ser ERRO, não aviso.** Tarefa que declarou comando e foi movida para `Concluidas` sem resultado contradiz o próprio contrato; aviso não protege o estado concluído.
-3. **Renomear `## Bloqueadas` para `## Aguardando Usuario`.** `Bloqueadas` sugere também dependência técnica, fornecedor ou incidente, e o formato obrigatório de pergunta e resposta não serve para esses casos. Mantém `**Resposta:**` e a data de bloqueio.
-4. **Campos declarativos no registro de consenso**: `**Metodo:**`, `**Exposicao previa a outras posicoes:**`, `**Rodada:** N de 3`. O validador checaria presença, valor permitido e coerência do teto, e deve declarar explicitamente que não verifica a cegueira real.
-5. **Mover o comando de integridade para dentro da skill**, por exemplo `docs/skills/ai-project-structure/evals/verify_repository.py`. Criar `scripts/` na raiz viola a regra de raiz mínima. Comparar a raiz inteira com `assets/` por `diff` seria incorreto, porque a raiz contém estado real do projeto dogfood.
-6. **Corrigir caminhos e ampliar critérios de aceite.** A spec cita `scripts/validate_structure.py`, mas o validador está em `docs/skills/ai-project-structure/scripts/`.
-
-Respostas às quatro perguntas abertas: (1) `(verifica:)` opcional inclusive em projetos com código, porque código também tem tarefa de pesquisa, documentação e decisão sem comando honesto; a obrigatoriedade correta é a evidência ao concluir. (2) Evidência ausente após `(verifica:)` é ERRO. (3) A seção de espera não rotaciona; gera AVISO após 30 dias, porque tarefa antiga bloqueada é informação operacional ativa, não histórico. (4) A seção entra em todos os scaffolds; o custo é uma seção vazia e o benefício é regra única disponível desde a primeira pergunta bloqueante.
-
-Critérios de aceite que o Codex aponta como não verificáveis por comando: scaffold minimal e completa (exige rodar o fluxo de uma IA e responder à entrevista, sem runner automatizado de eval hoje); atualização 2.1.0 para 2.2.0 (`references/atualizacao.md` é instrução, não migrador executável); paridade dos três destinos após `install.sh` (verificável, mas hoje mutaria instalações locais, então deve rodar em destino temporário). Critérios faltantes que aponta: evidência obrigatória, ERRO de `(verifica:)` sem resultado, marcador com valor desconhecido, tarefa bloqueada válida retornando sucesso, os três campos de consenso, teto de três rodadas, paridade dos templates de `TASKS.md` e `CONSENSUS.md`, e atualização de projeto 2.1.0 com histórico sem transformar registros antigos em alegações falsas.
-
-### Posicao Do Claude
-
-Aceito as 6 mudanças. Duas delas são erro meu, e confirmei os dois no repositório:
-
-- **Raiz mínima:** `scripts/check.sh` na raiz viola a regra registrada em "Regras Do Projeto" do `AGENTS.md` e o checklist de `QUALITY.md` ("A raiz mantem apenas os arquivos Markdown de entrada dos agentes"). A exceção registrada cobre apenas `README.md`, `LICENSE` e `.gitignore`. Codex está certo.
-- **Caminho do validador:** a spec escreve `python3 scripts/validate_structure.py .`; o caminho real é `docs/skills/ai-project-structure/scripts/validate_structure.py`. Codex está certo.
-
-Acrescento uma razão a mais para a colocação do item 5, que o Codex não citou: `evals/` **não é distribuído**. `diff -rq` entre a fonte canônica e `~/.claude/skills/ai-project-structure` mostra `evals`, `install.sh`, `README.md` e `CHANGELOG.md` como presentes apenas na fonte. Um verificador em `scripts/` da skill seria instalado na máquina de todo usuário; em `evals/` fica restrito ao repositório. A colocação proposta está certa por dois motivos, não um.
-
-Onde o Codex leu errado: a spec **não** propõe comparar a raiz inteira com `assets/` por `diff`. Propõe diff do bloco `core` e das duas pontes. A crítica não se aplica, mas a sugestão embutida (definir paridade explícita também para os templates de `TASKS.md` e `CONSENSUS.md`) é válida e entra.
-
-Sobre o item 4, o Codex conserta DEC-004 melhor do que eu escrevi. Meu texto aceitava "prosa não enforçável" e parava aí; os campos declarativos não provam independência, mas tornam o grau de confiança observável, que era o problema 3 original. Correção aceita.
-
-Custo que o Codex não precificou no item 1: toda linha concluída passa a carregar sub-linha de evidência. Em projeto com centenas de tarefas, `TASKS.md` engorda rápido. Mitigado pela rotação opcional de "Concluidas" já prevista em `AGENTS.md`, mas a rotação deixa de ser opcional na prática.
-
-Consequência que nenhum dos dois tirou: a 0003 aumenta o número de contratos verificados por script **e** o número de contratos verificados na mão ao mesmo tempo (scaffold, atualização, evals). Sem runner de eval, a razão entre automático e manual pode piorar em vez de melhorar.
-
-### Posicao Do Gemini
-
-(Nao consultado nesta rodada.)
-
-### Pontos De Acordo
-
-- Evidência de fechamento obrigatória para toda tarefa concluída, com `(verifica: <comando>)` permanecendo opcional.
-- `(verifica:)` declarado e resultado ausente em `Concluidas` é ERRO.
-- Seção de espera com pergunta, resposta e data; sem rotação, com aviso por idade.
-- Consenso ganha campos declarativos de método, exposição prévia e rodada, com o validador checando presença e não veracidade.
-- Verificador de integridade dentro da skill, em `evals/`, nunca em `scripts/` na raiz.
-- Loop fora da 2.2.0 e fora do scaffold (DEC-003 mantida por ambos).
-- Sem check de `QUALITY.md` vazio nesta versão (DEC-005 mantida por ambos).
-
-### Riscos E Tradeoffs
-
-- **Peso de convenção.** A versão revisada adiciona mais ao bloco core do que a original (evidência obrigatória, três campos de consenso). Cada linha é lida por todo modelo, em todo projeto, para sempre.
-- **Teatro de conformidade.** Evidência obrigatória em projeto de conteúdo pode degenerar em `Evidencia: tipo=revisao-manual` colado sem conferência real. A regra fica verificável quanto à forma e não quanto ao conteúdo, que é a mesma limitação que ela pretende resolver.
-- **Autodeclaração no consenso.** `Exposicao previa: nao` é escrito pelo mesmo modelo cuja cegueira o campo afirma. O Codex reconhece isso; vale registrar que o campo aumenta a rastreabilidade e não a garantia.
-- **Verificação manual crescente.** Mais contratos, mesmo runner inexistente para evals.
-
-### Consenso Final
-
-Spec 0003 passa para `Definida` com as seis mudanças do Codex incorporadas. Os dois resíduos que nenhum dos dois modelos resolveu foram decididos pelo usuário em 2026-09-02:
-
-**R-1. Nome e escopo da seção de espera.** `Aguardando Usuario` (Codex) cobre só bloqueio humano e é semanticamente mais preciso; `Bloqueadas` (spec original) cobre mais casos, mas o formato pergunta e resposta não serve para bloqueio técnico, fornecedor ou release upstream.
-
-**Decisão do usuário:** adotar `## Aguardando Usuario` agora, com o formato `**Pergunta:**` / `**Resposta:**` / `(bloqueada: AAAA-MM-DD)`. Seção separada para bloqueio não humano só quando o primeiro caso real aparecer, com formato próprio. Motivo: não desenhar para caso que ainda não existe.
-
-**R-2. Retroatividade da evidência obrigatória.** Tornar a regra retroativa converteria as 15 linhas históricas de `docs/TASKS.md` deste repositório, e as de todo projeto que atualizar, em alegações sem evidência.
-
-**Decisão do usuário:** a regra vale apenas para tarefa concluída a partir da 2.2.0. O validador não cobra evidência de tarefa concluída antes da versão, e o fluxo de `references/atualizacao.md` não reescreve histórico.
-
-### Decisao Para Registrar Em DECISIONS.md
-
-Registrar em `docs/DECISIONS.md` como `2026-09-02 - Evidencia obrigatoria em tarefa, secao Aguardando Usuario e consenso declarado`, cobrindo: evidência de fechamento obrigatória para toda tarefa concluída a partir da 2.2.0, com `(verifica:)` permanecendo opcional; `(verifica:)` sem resultado em `Concluidas` como ERRO; seção `## Aguardando Usuario` sem rotação e com aviso por idade; campos declarativos de método, exposição prévia e rodada no consenso, checados quanto à presença e não quanto à veracidade; verificador de integridade em `evals/`, nunca em `scripts/` na raiz.

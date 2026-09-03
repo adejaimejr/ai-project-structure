@@ -14,7 +14,8 @@ Esta spec estava pre-registrada em dois lugares, os dois dizendo a mesma coisa: 
 
 - Problema 3: **quem transcreve a critica e o modelo criticado.** Naquela mesma rodada, quem escreveu a secao `Revalidacao` foi o Claude, resumindo a critica do Codex ao trabalho do Claude. A entrada declara a proveniencia e o resumo foi conferido no codigo antes de aceito, mas o acoplamento e exatamente do tipo que o consenso existe para evitar: a fidelidade da critica depende da boa fe de quem ela critica.
 
-- Problema 4: **ja existe um caminho de invocar agente no projeto, e o consenso nao usa.** O `loop.sh` resolveu a parte chata: `--agente` neutro, perfis por intencao em `docs/MEMORY.md`, exit codes distintos por caminho, protocolo de falta de contexto por arquivo. Consenso automatizado que invente o proprio jeito de chamar agente cria duas implementacoes da mesma coisa no mesmo repositorio, e elas divergem com o tempo.
+- Problema 4: **ja existe um caminho de invocar agente no projeto, e o consenso nao usa.** O `loop.sh` resolveu o conceito de comando de agente neutro (`--agente`), com os perfis por intencao vivendo em `docs/MEMORY.md` e resolvidos pelo agente de chat, nunca pelo script. Consenso automatizado que invente o proprio jeito de chamar agente cria duas implementacoes da mesma coisa no mesmo repositorio, e elas divergem com o tempo.
+  - **Correcao de 2026-09-03, apontada pelo Codex na rodada 1 e conferida no codigo antes de aceita:** a primeira redacao deste problema superestimava o reuso. O que se reaproveita e o conceito, nao o script. O `loop.sh` de hoje pressupoe tarefa, mutacao de arquivo, portao e tentativas, e em `loop.sh:145` ele decide se o agente fez alguma coisa com `find -type f -newer` no projeto. Um agente de parecer nao escreve nada, entao cairia no `exit 4` da DEC-014 em toda rodada. Reusar o script como esta nao funciona.
 
 - Resultado esperado 1: posicoes independentes **por construcao**, e nao por declaracao, com os campos da 2.2.0 passando a descrever um fato do processo em vez de uma promessa do modelo.
 - Resultado esperado 2: segunda opiniao barata o suficiente para ser o padrao em decisao de risco, e nao um esforco especial.
@@ -70,6 +71,8 @@ Herdadas, sem nova discussao, e listadas porque restringem o desenho desta spec:
 
 ## Perguntas Abertas
 
+Rodada 1 cega registrada em `docs/CONSENSUS.md`, entrada "2026-09-03 - As seis perguntas da spec 0006". Resultado: P-1, P-2, P-3 e P-6 convergiram entre Claude e Codex e esperam ratificacao do usuario; P-4 e P-5 divergiram e sobem para ele pela regra de desempate; P-7 nasceu da propria rodada. O Grok nao foi consultado, por limite de cota. **Nenhuma virou DEC ainda:** parecer de modelo nao e decisao de projeto.
+
 - **P-1. O que a operacao entrega no fim?** (a) so o material bruto por agente, em arquivos, e a pessoa monta a entrada de `CONSENSUS.md`; (b) a entrada montada com as posicoes preenchidas e as secoes de julgamento ("Pontos De Acordo", "Consenso Final") em branco; (c) a entrada inteira, incluindo os pontos de acordo. Trade-off: (c) e o que mais economiza tempo e e onde a fraude volta pela porta dos fundos, porque quem sintetiza acordo esta julgando. (a) e o mais conservador e o que menos reduz o custo do Problema 2.
 
 - **P-2. A automacao pode escrever em `CONSENSUS.md`?** A DEC-019 da 0004 proibiu o agente do loop, com motivo especifico: um agente so. Aqui sao N. Manter a proibicao por simetria, abrir excecao declarada para esta operacao, ou permitir a escrita apenas das secoes que nao envolvem julgamento (o que depende de P-1)?
@@ -81,6 +84,8 @@ Herdadas, sem nova discussao, e listadas porque restringem o desenho desta spec:
 - **P-5. Quantos agentes por rodada, e quem escolhe?** N fixo na ferramenta, N por chamada, ou uma lista de perfis nomeada em `docs/MEMORY.md` (ex: "revisores padrao: Codex e DeepSeek")? Lembrando que cada agente multiplica o consumo, e que a bancada mostrou uma ferramenta batendo limite de plano no meio de rodada.
 
 - **P-6. A rodada 1 cega e obrigatoria por construcao?** O bloco core diz que na rodada 1 cada modelo preenche so a propria secao, sem ler as demais, e que da rodada 2 em diante a exposicao previa e esperada e declarada como `sim`. Isso sugere dois modos de execucao. A automacao cobre so a rodada 1 cega, os dois modos, ou trata a rodada 2 como caso manual?
+
+- **P-7. A forma da entrada de `CONSENSUS.md` fica mesmo fora do escopo?** (pergunta nova, aberta pela rodada 1: o Codex mostrou uma contradicao que o Claude nao viu). O modelo de debate tem secoes nomeadas para Codex, Claude e Gemini, e o de achado tem uma `Revalidacao` unica. Nenhum dos dois representa N agentes arbitrarios, falha individual de um agente, comando executado, hash de insumo, ou varias revalidacoes. Entao "N agentes" e "nao mexer na forma" nao cabem juntos. Ou a forma muda nesta spec, ou o requisito encolhe para o que ja e representavel, e isso enfraquece o objetivo. Qual dos dois?
 
 ## Evidencia De Conclusao
 

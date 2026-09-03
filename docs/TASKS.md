@@ -39,7 +39,7 @@ Modelo de linha concluida:
 ## Aguardando Usuario
 
 - T-053: Responder as perguntas abertas da spec 0006 para ela poder virar `Definida`. (prioridade: media) (bloqueada: 2026-09-03) (spec: 0006-automacao-do-consenso)
-  - **Pergunta:** P-1 a P-6 em `docs/specs/0006-automacao-do-consenso.md`. As tres que mais mudam escopo: P-1, se a operacao entrega material bruto ou monta a entrada de `CONSENSUS.md`, porque montar acordo e julgar; P-2, se a proibicao da DEC-019 (agente nao escreve em `CONSENSUS.md`) continua valendo quando sao N agentes em vez de um; e P-4, se cobre debate, achado ou os dois.
+  - **Pergunta:** apos a rodada 1 cega de 2026-09-03 (registrada em `docs/CONSENSUS.md`), sobrou isto para o usuario: **ratificar** P-1, P-2, P-3 e P-6, onde Claude e Codex convergiram; **decidir** P-4 (cobre so debate ou tambem achado: as duas posicoes usam o mesmo fato, existe um unico achado registrado, para concluir o oposto) e P-5 (a lista de agentes vive em `docs/MEMORY.md` ou vem explicita por chamada); e **decidir P-7**, que nasceu da rodada: a forma da entrada de `CONSENSUS.md` fica mesmo fora do escopo, sendo que nem o modelo de debate nem o de achado representam N agentes, falha individual ou hash de insumo?
   - **Resposta:** (A preencher.)
 
 ## Concluidas

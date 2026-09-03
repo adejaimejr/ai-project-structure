@@ -2,6 +2,12 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (rodada de P-9 da spec 0006)
+
+- 3 de 3 no desenho de quando a minuta e escrita. O criterio que resolve o conflito entre DEC-003 e DEC-006: publicado e anterior, nao publicado e contemporaneo. As duas decisoes falavam de momentos diferentes, e faltava escolher o instante da gravacao.
+- Risco que a rodada expos e nao resolveu: o bruto pode conter segredo do repositorio, e preservar literal somado a versionar cria exfiltracao permanente para o historico do git.
+- Dois defeitos do codigo publicado viraram T-057 (escrita nao atomica em `TASKS.md`, prioridade alta) e T-058 (sem protecao de colisao no `loop.sh`).
+
 ## 2026-09-03 (rodada de P-7 e P-8 da spec 0006)
 
 - Rodada 1 cega sobre as duas perguntas restantes, primeiro uso da DEC-003: os agentes rodaram numa copia com a entrada da rodada anterior retida, e com uma nota dizendo que a omissao era proposital.

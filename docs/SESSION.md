@@ -41,6 +41,43 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-03 - Claude, Codex e Grok (rodada de P-9, o conflito entre DEC-003 e DEC-006)
+
+### Objetivo
+
+- Responder P-9, que nao e pergunta de desenho novo: e conflito entre duas decisoes ratificadas no mesmo dia.
+
+### O Que Foi Feito
+
+- **3 de 3 no desenho**, e o criterio que resolve o conflito veio do Grok: **publicado e anterior, nao publicado e contemporaneo**. A DEC-003 e a DEC-006 nunca se contradisseram; elas falavam de momentos diferentes, e faltava alguem escolher o instante da gravacao. Os tres classificaram o caso como **lacuna**, nao contradicao, e nenhum pediu para reverter decisao ratificada.
+- Desenho convergente: lock exclusivo por projeto na abertura, bruto e manifesto gravados assim que cada agente encerra fora do alcance dos demais, minuta escrita uma vez so no fim por substituicao atomica do arquivo inteiro, e interrupcao deixando o `CONSENSUS.md` byte a byte como estava.
+- **Argumento que sozinho ja proibe publicar cedo, e veio de uma decisao ratificada:** a DEC-005 tornou `N=1` valido, entao minuta a meio com 1 de 3 posicoes e **indistinguivel de uma corrida `N=1` concluida**. Nao e so vazamento, e ambiguidade de leitura. So o Grok fez essa ligacao.
+- **O risco mais grave da rodada nao tem solucao proposta por ninguem.** O Codex mostrou a armadilha inteira: o bruto pode conter segredo do repositorio; a DEC-001 exige preservar literal; a P-8 aponta para artefato versionado; e redigir automaticamente destruiria justamente a evidencia. As tres posicoes juntas nao produziram saida. Ficou escrito na spec como nao resolvido.
+- **Dois defeitos do codigo publicado apareceram como efeito colateral**, os dois conferidos antes de aceitos, e viraram T-057 e T-058: `loop_task.py:147` grava `TASKS.md` com `write_text` direto, que nao e atomico e pode rasgar o arquivo de memoria; e o `loop.sh` nao protege contra duas rodadas simultaneas, porque o sinal de pergunta tem nome fixo e o arranque apaga o leftover da rodada anterior.
+- Duas ressalvas de independencia registradas na entrada, as duas **contra** a forca desta rodada: quem descobriu o conflito foi o Grok, entao ele respondeu a propria pergunta, ainda que sem lembrar do argumento; e o enunciado que os tres leram e a transcricao que o Claude fez do achado dele. Se a transcricao estreitou o problema, os tres herdaram o estreitamento.
+
+### Arquivos Criados Ou Alterados
+
+- Projeto: `docs/CONSENSUS.md`, `docs/specs/0006-automacao-do-consenso.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma. O desenho de P-9 vira DEC-007 quando o usuario ratificar, e uma parte dele deve subir para `docs/DECISIONS.md`: escrever arquivo de memoria por substituicao atomica, nunca por escrita direta, porque isso vale para o `loop_task.py` ja publicado.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum novo. O que apareceu virou tarefa (T-057, T-058) por ser defeito de codigo, e nao licao reutilizavel.
+
+### Pendencias
+
+- T-053 acumula tres calibragens (P-7, P-8, P-9) mais a pergunta de segredo no bruto, que nenhuma rodada resolveu.
+- T-057 tem prioridade alta: e o unico dos defeitos abertos que pode **destruir** dado do usuario, e nao so reportar errado.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente para T-057, que nao depende de decisao nenhuma; o usuario para as calibragens.
+- Motivo: T-057 e conserto de duas linhas com risco real de perda de arquivo, e esta parado atras de decisoes de escopo que nao tem relacao com ele.
+
 ## 2026-09-03 - Claude, Codex e Grok (rodada 1 de P-7 e P-8)
 
 ### Objetivo
@@ -282,43 +319,3 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 - Agente sugerido (ou "qualquer agente"): qualquer agente, atacando T-051 e T-050 juntas.
 - Motivo: as duas dependem do mesmo desenho (identificador estavel de diagnostico), ja escolhido pelo usuario. Separadas, o oracle seria escrito duas vezes.
-
-## 2026-09-03 - Claude (skill 2.4.0, consenso que serve para achado)
-
-### Objetivo
-
-- Implementar a spec 0005: `CONSENSUS.md` passa a registrar achado, e nao so debate.
-
-### O Que Foi Feito
-
-- T-046: bloco core em v2.4.0 com tres mudancas. `### Achado` (identificador, disposicao, revalidacao), `### Ponto Cego Da Validacao Cruzada` em duas linhas, e o teto de rodadas trocado pela exigencia de `**Pendente da rodada anterior:**` acima de tres. Editado so no `assets/AGENTS.md` e propagado byte a byte para a raiz por script.
-- DEC-008 fechou a mitigacao que DEC-002 deixou para a implementacao: o campo chama-se `**Achado:**` e o valor dele **e** o identificador. Um campo so marca e identifica, em vez de dois que podem discordar entre si.
-- T-047: checks no validador, todos AVISO e todos opt-in. Antes de trocar a regra de rodada, conferido o que quebrava: a unica entrada real com `Rodada` na raiz e `2 de 3`, abaixo do limiar, e nenhuma fixture declarava rodada. So a mensagem de formato e o texto dos templates dependiam do teto.
-- T-048: fixture `achado-project`, com a mesma entrada de debate abrindo os dois lados como controle. Foi ao escrever essa fixture que apareceu o achado do dia, abaixo.
-- T-049: dogfood, CHANGELOGs, e reinstalacao com paridade conferida nos tres destinos globais.
-- **Achado `0005-A1`, primeiro achado registrado neste repositorio, e sobre o proprio repositorio.** O padrao de fixture herdado da 2.2.0 (par `valido`/`invalido` com exit code esperado no `FIXTURES`) so funciona porque todo check daquela versao era ERRO. Os checks de achado sao AVISO, entao o par teria os dois lados em exit 0 e a suite reportaria `[OK] fixture achado-project/invalido: exit 0 (esperado 0)`: verde, sem provar nada. Corrigido com `verificar_achado`, que roda os dois lados em `--strict`, conta os avisos e confere que nenhum cita a entrada de debate.
-- O conserto de portao que sobrou do achado virou T-050: fazer o `verify_repository.py` recusar um par cujos dois lados declarem o mesmo exit code, em vez de depender de quem escrever a proxima fixture lembrar disso.
-
-### Arquivos Criados Ou Alterados
-
-- Skill: `assets/AGENTS.md`, `assets/docs/CONSENSUS.md`, `assets/partials/AGENTS-specs-block.md`, `assets/partials/AGENTS-loop-block.md`, `SKILL.md`, `CHANGELOG.md`, `README.md`, `references/atualizacao.md`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/evals.json`, `evals/fixtures/achado-project/` (novo).
-- Projeto: `AGENTS.md`, `docs/CONSENSUS.md`, `docs/DECISIONS.md`, `docs/MEMORY.md`, `docs/TASKS.md`, `docs/CHANGELOG.md`, `docs/SESSION.md`, `docs/specs/0005-consenso-para-achados.md`.
-
-### Decisoes Tomadas
-
-- DEC-008 na spec 0005: o campo do identificador de achado e `**Achado:**`, com o identificador como valor.
-- Em `docs/DECISIONS.md`: fixture cujo caso invalido produz apenas AVISO roda em `--strict` e confere **quais** avisos sairam, nunca so quantos exit codes bateram.
-
-### Aprendizados Para MEMORY.md
-
-- Check novo que e AVISO nao separa fixture pelo exit code. Promovido, com ponteiro para o achado `0005-A1` e para a decisao.
-
-### Pendencias
-
-- O achado `0005-A1` esta com `**Status:** aberto` de proposito: a disposicao dele nao passou por ninguem alem de quem a escreveu, e a secao `### Revalidacao` esta com `(A preencher.)`. Fechar o status depende de um modelo distinto, ou do usuario, olhar a disposicao.
-- Observacao de desenho, sem tarefa: o achado herdou `**Metodo:**` e `**Exposicao previa a outras posicoes:**`, que nasceram para debate. Num achado de um modelo so, a resposta honesta e `pareceres-independentes` com `nao`, o que e verdade mas soa estranho. Nao virou tarefa porque e n=1 e a forma pode encaixar melhor depois de alguns achados reais.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): um modelo distinto do Claude, e depois qualquer agente para T-050.
-- Motivo: o achado `0005-A1` esta aberto esperando revalidacao independente, e revalidar a propria disposicao com o mesmo modelo e exatamente o que os campos de independencia existem para denunciar.

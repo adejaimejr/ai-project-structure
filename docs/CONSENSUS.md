@@ -131,6 +131,98 @@ Rodada verde e ausencia de objecao, nao prova de que funciona. Modelos que leem 
 
 Os debates de 2026-04-25 foram rotacionados para `docs/archive/CONSENSUS-2026.md`.
 
+## 2026-09-03 - P-9 da spec 0006: quando a minuta e escrita
+
+**Status:** aberto
+
+**Proximo passo:** o usuario ratifica o desenho, que teve 3 de 3, e decide as duas divergencias: se a retomada apos interrupcao e automatica ou exige palavra humana, e onde o bruto mora **durante** a rodada.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+### Contexto
+
+P-9 nao e pergunta de desenho novo: e **conflito entre duas decisoes ja ratificadas** no mesmo dia. A DEC-003 manda o agente nao ver posicoes contemporaneas; a DEC-006 manda o da rodada 2 ver as anteriores na integra; e nenhuma das duas escolheu o instante da gravacao.
+
+Duas ressalvas de independencia, as duas contra a forca desta rodada:
+
+- **Quem descobriu o conflito foi o Grok**, na rodada anterior. Reter aquela entrada fez ele responder sem lembrar do proprio argumento, o que preserva a cegueira do raciocinio, mas a spec que ele leu credita o achado a ele por nome. Ele sabia que a pergunta era dele.
+- **O enunciado e a transcricao que o Claude fez do achado do Grok.** Os tres responderam a versao de um dos tres. Se a transcricao estreitou o problema, os tres herdaram o estreitamento e nenhum tinha como perceber. E o Problema 3 da spec, agora na formulacao da pergunta em vez de na transcricao da resposta.
+
+Posicao do Claude selada antes dos dois rodarem. Codex em `codex exec -s read-only -m gpt-5.6-sol`, esforco `high`. Grok em `cursor-agent -p --mode ask --force --model cursor-grok-4.6-xhigh`. Copia do repositorio com o corpo da entrada de P-7 e P-8 retido, pela DEC-003.
+
+### Pergunta Ou Decisao
+
+Quando a minuta e escrita no `CONSENSUS.md`, e o que acontece com o material da rodada em caso de interrupcao e de colisao entre duas execucoes.
+
+### Posicao Do Claude
+
+Selada antes das demais.
+
+- **Tres artefatos, tres momentos.** Bruto de cada agente escrito assim que aquele agente termina, em diretorio nao visivel aos demais; manifesto incremental no mesmo lugar; minuta no `CONSENSUS.md` escrita **uma vez so**, no fim.
+- **O ponto que levantei:** o vazamento nao vem do momento, vem do lugar. Tratar "quando escrever" sem tratar "onde" leva a resposta cara e errada, que e segurar tudo em memoria ate o fim.
+- **Interrupcao:** repositorio fica intacto, diretorio de execucao fica com os brutos pagos. A proxima execucao **nao retoma sozinha**: reporta e para, com o precedente do `loop.sh`, que nao retoma rodada.
+- **Resolve ou adia:** admiti que **adia parcialmente**. Se o diretorio de execucao estiver dentro do projeto e o agente tiver leitura do repositorio, que a DEC-003 permite, ele pode ler o bruto de quem terminou antes. Ou o diretorio fica fora do projeto durante a rodada, ou a DEC-003 passa a excluir explicitamente o diretorio corrente. Preferi a primeira, porque depender de o agente respeitar pasta proibida e voltar a confiar no prompt.
+- **Decisao que muda:** nenhuma de valor; a **DEC-003 fica incompleta**, porque diz o que isolar e nao diz onde as posicoes moram durante a rodada. Isso e omissao, nao contradicao com a DEC-006.
+
+### Posicao Do Codex
+
+- **Barreira de rodada, em tres fases.** Antes de comecar: lock exclusivo por projeto, `run-id`, pacote de entrada imutavel por agente, e manifesto inicial numa **area persistente do orquestrador, fora do repositorio e inacessivel aos agentes**. Durante: nada em `CONSENSUS.md`, nada com posicao contemporanea em caminho visivel, e cada agente que termina tem stdout, stderr, exit code e metadados salvos na hora com arquivo temporario, `fsync` e rename atomico. No fim: manifesto selado, minuta gerada pela primeira vez, e publicacao.
+- **Ordem de publicacao, que so ele argumentou:** o bundle (`docs/consensus/runs/<run-id>/`) e publicado **antes** da entrada. Assim, interrupcao entre as duas deixa bundle sem entrada, que da para finalizar, e **nunca** deixa entrada apontando para evidencia inexistente.
+- **Interrupcao com retomada condicional:** se pergunta, modo, rodada, participantes, comandos e hashes dos insumos forem identicos, retoma o mesmo `run-id`, reusa as respostas completas e chama so quem falta. Se qualquer insumo diferir, recusa a retomada automatica. Saida parcial nunca vira posicao por inferencia.
+- **Colisao:** lock exclusivo por projeto durante **toda** a rodada, e nao so na escrita final. Segunda execucao falha rapido informando qual run esta ativo. Lock por arquivo nao pode ser recuperado so por idade: tem de conferir identidade do processo.
+- **Licoes que tirou do `loop.sh`, as tres conferidas aqui:** ele so muda o estado canonico depois do portao; o `TMP` com `trap 'rm -rf' EXIT` (linhas 86-87) serve para dado descartavel e nao para parecer ja pago; e o `.loop-pergunta` de nome global mostra por que arquivo temporario sem `run-id` nao serve para execucao concorrente.
+- **Risco novo, e e o mais grave da rodada:** o bruto pode conter segredo, credencial ou dado pessoal encontrado no repositorio. Como a DEC-001 exige preservacao literal e a P-8 aponta para artefato versionado, **redacao automatica alteraria justamente a evidencia que deveria ser conferivel**. Sem politica de dados sensiveis, consenso automatizado vira "mecanismo permanente de exfiltracao para o historico Git".
+
+### Posicao Do Grok
+
+- **Tres artefatos, tres momentos**, com a mesma estrutura, e uma frase que os outros dois nao escreveram: "a minuta em `CONSENSUS.md` nao e o unico arquivo que vaza".
+- **O corte que resolve o conflito:** **publicado = anterior; nao publicado = contemporaneo.** A DEC-003 e a DEC-006 falavam de momentos diferentes, e nenhuma tinha escolhido o instante da gravacao. Com esse criterio, enquanto a minuta desta rodada nao foi gravada, o contemporaneo ainda nao e anterior.
+- **Argumento que sozinho ja proibe publicar cedo, e que veio de uma decisao ratificada:** a DEC-005 tornou `N=1` valido. Entao **minuta a meio, com 1 de 3 posicoes, e indistinguivel de uma corrida `N=1` concluida**. Nao e so vazamento: e ambiguidade de leitura.
+- **Onde o bruto mora:** in-repo desde a volta de cada agente, fora do `.gitignore` como a P-8 exige, mas **fora da arvore em que os agentes da rodada corrente executam**. Ele nomeia o triangulo: P-8 manda o bruto sobreviver a sessao, a DEC-003 manda o colega nao ve-lo agora, e bruto so em `/tmp` perde trabalho na interrupcao, "o que ja aconteceu na rodada das seis perguntas".
+- **Interrupcao sem retomada automatica e sem descarte automatico:** cadeado presente faz a proxima execucao recusar e pedir `--retomar` ou `--descartar`. "`--descartar` e decisao humana: joga fora trabalho pago; o script nao infere isso." Se o sidecar ja tem os brutos e a minuta nao saiu, a retomada **monta a minuta a partir do bruto, sem nova chamada**.
+- **Sobre o `loop.sh`:** apontou que o paralelo certo e o `TASKS.md` so mudar no fecho, e o errado e a politica de leftover, porque "apagar leftover e perder trabalho" quando o leftover e parecer pago. E notou que o `loop.sh` **nao tem** protecao de colisao, entao dois loops na mesma tarefa correm em `TASKS.md`: "nao copiar o buraco".
+- **Risco novo, conferido aqui:** `loop_task.py` grava `TASKS.md` com `write_text` direto (linha 147), que nao e atomico, e crash no meio pode **rasgar o arquivo de memoria**. A spec nao lista arquivo de memoria partido.
+- **Alerta sobre o proprio check:** tratar diretorio de corrida incompleto como ERRO puniria interrupcao e vazaria cobranca para quem so teve uma corrida morta. Tem de ser AVISO, e so com o marcador de automacao.
+
+### Pontos De Acordo
+
+**3 de 3 no desenho.** As tres posicoes chegaram, separadamente, a mesma arquitetura:
+
+- **Tres artefatos com momentos diferentes**, e a minuta escrita **uma vez so, no fim**, por substituicao atomica do arquivo inteiro e nunca por append no meio do Markdown.
+- **Nada com posicao contemporanea em caminho que um agente ainda em curso consiga listar.** Os tres disseram, com palavras diferentes, que isolamento pedido no prompt nao fecha vazamento por filesystem.
+- **Interrupcao deixa o `CONSENSUS.md` byte a byte como estava.** Nunca meia rodada no repositorio.
+- **O bruto de quem ja respondeu nao pode ser descartado.** Chamada paga.
+- **Nenhuma das seis decisoes precisa ser revertida.** Os tres classificaram o conflito como **lacuna**, e nao contradicao: falta uma DEC nova sobre o instante da gravacao.
+- **Nenhum check de forma prova o momento da escrita.** Isso e teste de orquestrador, com agente falso, e os tres desenharam variacoes do mesmo teste: plantar token unico no bruto de um agente e conferir que o artefato do outro nao o contem.
+
+Convergencia 2 de 3, com o Claude fora: **lock exclusivo por projeto durante toda a rodada**. Codex e Grok pediram; o Claude so propos nome de diretorio a prova de colisao, que e mais fraco.
+
+### Riscos E Tradeoffs
+
+- **Divergencia 1, retomada.** Codex aceita retomada **automatica** quando pergunta, modo, rodada, participantes, comandos e hashes forem identicos. Claude e Grok exigem **palavra humana** (`--retomar` ou `--descartar`), com o Grok sendo explicito: descartar trabalho pago e decisao de pessoa. E 2 a 1 pela palavra humana, e a posicao do Codex e a que preserva mais trabalho automaticamente.
+- **Divergencia 2, onde o bruto mora durante a rodada.** Codex e Claude o mantem **fora do repositorio** ate o fim, e publicam no fecho. Grok o quer **in-repo desde o inicio**, fora da arvore de execucao, argumentando que a P-8 exige que ele sobreviva a sessao e que `/tmp` ja perdeu material nesta propria spec. As duas atendem a durabilidade; elas diferem em quanto confiam na separacao de arvore.
+- **O risco de segredo no bruto nao tem solucao proposta por ninguem.** O Codex mostrou a armadilha inteira: a DEC-001 exige literal, a P-8 exige versionado, e redigir automaticamente destruiria a evidencia. As tres posicoes juntas nao produziram saida para isso.
+- **A rodada tem n=3 e um enquadramento so**, e desta vez com agravante: o enunciado e a transcricao, feita por um dos tres, do achado de outro dos tres.
+- Dois defeitos de codigo ja publicado apareceram como efeito colateral: escrita nao atomica em `TASKS.md`, e ausencia de protecao de colisao no `loop.sh`. Nenhum dos dois e da spec 0006.
+
+### Consenso Final
+
+**O desenho tem 3 de 3 e esta pronto para virar DEC**, com o criterio operacional do Grok como o coracao dela: **publicado e anterior, nao publicado e contemporaneo**. A DEC-003 e a DEC-006 nunca se contradisseram; elas falavam de momentos diferentes, e faltava alguem escolher o instante da gravacao.
+
+Concretamente: lock exclusivo por projeto na abertura; bruto e manifesto gravados assim que cada agente encerra, em lugar que os agentes da rodada corrente nao alcancam; minuta escrita uma vez so, no fim, por substituicao atomica do arquivo inteiro; interrupcao deixando o repositorio intacto e o material pago preservado; e teste de orquestrador com token plantado, porque nenhum check de forma alcanca o momento da escrita.
+
+**Duas calibragens para o usuario:** retomada automatica com insumos identicos (Codex) ou palavra humana sempre (Claude e Grok, 2 a 1); e bruto fora do repositorio ate o fecho (Codex e Claude) ou in-repo fora da arvore de execucao (Grok).
+
+**Uma coisa que a rodada nao resolveu e ninguem deve fingir que resolveu:** o bruto pode conter segredo do repositorio, e a combinacao de "preservar literal" com "versionar" cria caminho de exfiltracao permanente para o historico. Isso precisa de decisao propria antes de qualquer linha de codigo.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+Nada ainda. Quando o usuario ratificar, isto vira DEC-007 na spec 0006. **Uma parte deve subir para `docs/DECISIONS.md`**: a regra de que arquivo de memoria do projeto se escreve por substituicao atomica, e nunca por escrita direta, porque ela vale para o `loop_task.py` que ja esta publicado e para qualquer automacao futura, e nao so para esta operacao.
+
 ## 2026-09-03 - P-7 e P-8 da spec 0006: forma da entrada e proveniencia
 
 **Status:** aberto

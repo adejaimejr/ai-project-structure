@@ -41,6 +41,50 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-03 - Claude, Codex, Grok e DeepSeek (bancadas de uso real do loop)
+
+### Objetivo
+
+- Usar o modulo de loop em tarefa de verdade, com a grade de perfis, e descobrir onde ele incomoda antes de confiar nele.
+
+### O Que Foi Feito
+
+- Grade de perfis fechada (T-038): `planejar` para Grok e opencode, e os degraus do DeepSeek remapeados a pedido do usuario. So o `grok-4.6` entrou, porque foi o unico exercitado; `--variant` saiu dos perfis DeepSeek por nao haver como confirmar efeito.
+- Bancada 3 (T-039), primeira em projeto que **nao e codigo**: manual em Markdown, portao proprio, sete problemas plantados em cinco arquivos. Serviu para testar uma promessa da estrutura que nunca tinha sido exercitada.
+- Achado principal: o agente fechou o portao **apagando** a frase que continha o link quebrado. Verde, informacao perdida. Em codigo isso salta aos olhos; em conteudo parece edicao. Virou a regra "Nao Apague O Que Falha".
+- Segundo achado (T-039): a regra de estimar dificuldade lendo a tarefa nunca acertou e foi removida. Somando as tres bancadas, quatro ferramentas e tarefas bem diferentes, todas terminaram verdes na primeira tentativa, varias no modelo mais barato. Sobrou escalar so por falha observada ou por pedido do usuario.
+- Matriz das quatro ferramentas (T-040), com consumo medido pela primeira vez. Resultado que inverte a leitura ingenua de exit code: a **unica** que fechou o portao foi a unica que destruiu informacao; as duas que sairam com exit 3 perguntando fizeram a coisa certa.
+- DEC-018, o achado com mais alcance do dia: a regra vivia no bloco do `AGENTS.md` e foi ignorada; movida para o prompt do `loop.sh`, sem mudar mais nada, o mesmo modelo passou a perguntar. Ler o `AGENTS.md` e escolha do agente; o prompt chega sempre.
+- Matriz refeita (T-041) confirmou, e o consumo **caiu** em todas as ferramentas, uma delas pela metade: dizer a restricao antes evita explorar caminho que seria descartado.
+- Revisao item a item do bloco (T-042) pelo criterio da DEC-018. Cinco restricoes precisam do prompt, tres podem ficar so no bloco, e o unico buraco encontrado foi a ausencia de qualquer instrucao impedindo o agente de editar `AGENTS.md` e os arquivos de memoria. Risco teorico (nenhuma das nove rodadas fez isso), fechado mesmo assim porque o pior caso e silencioso.
+- Variancia medida (T-043): Claude e Codex deterministicos nesta tarefa, tres de tres cada. DeepSeek com duas rodadas destrutivas antes da regra chegar ao prompt e zero em seis depois.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `scripts/loop.sh`, `references/loop.md`, `assets/partials/AGENTS-loop-block.md`, `CHANGELOG.md`, `README.md`.
+- Projeto: `AGENTS.md`, `docs/MEMORY.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/specs/0004-modulo-de-loop.md`.
+
+### Decisoes Tomadas
+
+- DEC-018 na spec 0004: restricao critica vai no prompt, nao so no bloco. Criterio para decidir: se a violacao deixa o portao verde do mesmo jeito, a regra precisa do prompt.
+- Escolha de degrau deixou de estimar dificuldade a priori.
+- Perfil do Grok e do opencode fechados, com o degrau mais alto do Grok apontando para o teto dele, avisado na hora.
+
+### Aprendizados Para MEMORY.md
+
+- Ponte so existe para ferramenta que nao le `AGENTS.md` sozinha; conferido contando referencias dentro dos binarios do Grok e do opencode. Promovido.
+- Comportamento do `deepseek-v4-flash` com a regra so no bloco. Promovido junto ao perfil dele.
+
+### Pendencias
+
+- Grok segue sem rodada completa: bateu limite do plano free nas tres tentativas, inclusive na ultima de hoje, que consumiu 22.503 tokens antes de a plataforma recusar. Depende de assinatura, entao nao vira tarefa: nenhum agente resolve isso.
+- A rodada de regressao do DeepSeek criou o documento ausente com placeholder honesto em vez de perguntar. E n=1 e nao pode ser atribuida a nenhuma mudanca especifica; fica como observacao, nao como conclusao.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, e de preferencia o proprio usuario usando o loop numa tarefa real dele.
+- Motivo: tres bancadas ja cobriram o que teste sintetico alcanca. O que falta descobrir agora so aparece em uso de verdade, com tarefa que importa e portao que ele mesmo escreveu.
+
 ## 2026-09-02 - Claude (fechamento da 2.3.0)
 
 ### Objetivo

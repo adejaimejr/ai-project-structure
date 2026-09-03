@@ -40,6 +40,8 @@ Modelo de linha concluida:
 
 ## Concluidas
 
+- 2026-09-02 T-036: Confirmado que o `opencode` chamando DeepSeek roda no loop, e registrado na tabela de ferramentas. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)
+  - Evidencia: tipo=comando; procedimento=`loop.sh --agente "opencode run --auto -m deepseek/deepseek-v4-pro --variant high"` num subprojeto `durakit` novo, seguido de conferencia independente (validador `--strict`, suite rodada fora do loop, e os casos que as regras determinam mas a suite nao cobre); resultado=portao verde na tentativa 1, evidencia com `agente=` completo, validador exit 0 e 3 de 3 nos casos extras; depois `python3 docs/skills/ai-project-structure/evals/verify_repository.py` exit 0 com 33 de 33
 - 2026-09-02 T-035: Fechamento da 2.3.0 registrado em `SESSION.md` e `MEMORY.md`, com rotacao do `SESSION.md`, que bateu 30KB de novo. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py)
   - Evidencia: tipo=comando; procedimento=entrada de fechamento em `SESSION.md`, tres fatos promovidos para `MEMORY.md` (versao fechada, Gemini inelegivel nesta maquina, e a evidencia valer o que o portao vale), e as 4 entradas mais antigas movidas para `docs/archive/SESSIONS-2026.md` com o indice atualizado; depois `python3 docs/skills/ai-project-structure/evals/verify_repository.py`; resultado=exit 0 com 33 de 33; SESSION.md de 31KB para 19KB (10 entradas para 6), archive de 16 para 20 entradas, nenhuma perdida
 - 2026-09-02 T-034: Bancada 2, validando com agentes reais o que mudou depois da primeira: perfis gravados, `agente=` na evidencia e exit 4. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)

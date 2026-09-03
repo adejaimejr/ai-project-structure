@@ -51,11 +51,16 @@ Rodar sem supervisao nao e o modo padrao de nenhuma CLI: cada uma pede flags pro
 | Codex CLI | `codex exec -s workspace-write --skip-git-repo-check` |
 | Gemini CLI | `gemini --approval-mode yolo --skip-trust -p` |
 | Grok | `grok --always-approve -p` |
+| opencode (qualquer provedor) | `opencode run --auto -m <provedor>/<modelo>` |
 
 Duas armadilhas que custam uma rodada inteira quando passam batido:
 
 - `codex exec` **recusa rodar fora de um repositorio git** sem `--skip-git-repo-check`. Projeto de conteudo sem git cai nisso.
 - `gemini` recusa rodar em diretorio nao confiavel sem `--skip-trust` (ou `GEMINI_CLI_TRUST_WORKSPACE=true`).
+
+O `opencode` merece nota propria porque nao esta preso a um fornecedor: `-m` recebe `provedor/modelo` (`deepseek/deepseek-v4-pro`, `openrouter/...`, e o que mais aparecer em `opencode models`), e `--variant high|max|minimal` da a escada de esforco. Exercitado com DeepSeek, portao verde na tentativa 1.
+
+Cuidado com o que voce esta gastando: quando o provedor entra por chave de API, e cobranca por token de verdade, e nao consumo de assinatura. Ai o valor em dolar e dinheiro, ao contrario do numero a preco de tabela que as CLIs de assinatura imprimem. `opencode stats` mostra o acumulado da instalacao, nao a rodada; para custo por rodada, use `--format json`.
 
 Nas ferramentas em que a flag de prompt recebe um valor, como `grok -p` e `gemini -p`, deixe a flag **por ultimo**: o `loop.sh` acrescenta o prompt como ultimo argumento, entao ele vira o valor dela.
 

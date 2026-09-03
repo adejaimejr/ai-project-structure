@@ -124,6 +124,8 @@ Na duvida entre dois degraus, **proponha o mais baixo**. O loop tem tentativas, 
 
 Nao invente rubrica com pontuacao. Isso e julgamento declarado, nao medicao: diga o sinal que voce usou e deixe o usuario discordar em uma palavra.
 
+**Degrau que nao existe naquela ferramenta nao vira degrau parecido em silencio.** As escadas nao sao iguais: uma ferramenta pode terminar antes da outra, e o rotulo da interface quase nunca e o valor que a CLI aceita. Quando o degrau proposto nao existir na ferramenta escolhida, diga qual e o teto dela e ofereca a escolha: ficar no teto, ou rodar a tarefa em outra ferramenta que va mais alto. Rebaixar calado faz o usuario achar que pediu esforco maximo e recebeu outra coisa.
+
 ## Configurar Os Perfis
 
 Dispare este fluxo quando o usuario pedir para ver, trocar ou criar perfil: "configura os perfis do loop", "quero mudar o modelo que o loop usa", "que modelo o loop esta usando", "o loop esta rodando com o que".

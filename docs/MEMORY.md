@@ -78,7 +78,10 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
   - Codex, executar: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="high"`
   - Codex, executar-dificil: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="xhigh"`
   - Codex, executar-muito-dificil: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="max"`
-  - Grok, executar: `grok --always-approve -m grok-4.6 --effort high -p`. O usuario ainda nao tem plano no Grok; ate ter, roda em credito. Os niveis de esforco aceitos pelo Grok nao foram confirmados, entao ele nao tem os tres degraus.
+  - Grok, executar: `grok --always-approve -m grok-4.6 --effort high -p`
+  - Grok, executar-dificil: `grok --always-approve -m grok-4.6 --effort xhigh -p`
+  - Grok **nao tem** `executar-muito-dificil`: a escada dele termina em `xhigh`, que a interface chama de "Extra High". Confirmado em 2026-09-02 no menu e nas strings do binario, que so trazem `low`, `medium`, `high` e `xhigh`. Quando a tarefa pedir o degrau mais alto, diga que o Grok para no `xhigh` e ofereca subir de ferramenta em vez de fingir que o degrau existe.
+  - O usuario ainda nao tem plano no Grok; ate ter, roda em credito.
   - Rotulo de interface nao e o valor da CLI. No Claude, "Extra" e `xhigh`. No Codex, o menu mostra Light, Medium, High, Extra High e Ultra, que sao `low`, `medium`, `high`, `xhigh` e `ultra`; o nivel `max` existe no catalogo e nao aparece nesse menu.
   - `ultra` do Codex nao e so mais esforco: o catalogo o descreve como "maximum reasoning with automatic task delegation", ou seja, ele abre subagentes, e a interface avisa que consome limite mais rapido. Por isso os perfis param em `max`: dentro de uma rodada de loop, com ate 3 tentativas e sem ninguem olhando, delegacao automatica multiplica consumo de plano sem aviso.
 - Nome de modelo e nivel de esforco envelhecem rapido. Os acima foram conferidos em 2026-09-02: `claude --help` da os aliases (`fable`, `opus`, `sonnet`) e os niveis (`low, medium, high, xhigh, max`); `~/.codex/models_cache.json` da os modelos e os niveis por modelo (`sol` e `terra` vao ate `ultra`). Confira de novo antes de confiar.

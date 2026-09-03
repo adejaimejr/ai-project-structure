@@ -1,4 +1,4 @@
-<!-- ai-project-structure:specs:start v2.4.0 -->
+<!-- ai-project-structure:specs:start v2.5.0 -->
 ## Specs (Modulo Opcional Ativo)
 
 Crie uma spec em `docs/specs/` quando o trabalho for tamanho-feature:

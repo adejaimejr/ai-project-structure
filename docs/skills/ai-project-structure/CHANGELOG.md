@@ -2,6 +2,16 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.5.0 - 2026-09-03
+
+Portao que so olha exit code nao prova nada. Esta versao troca isso por diagnostico com identidade. Veio da revalidacao do achado `0005-A1` pelo Codex, registrada em `docs/CONSENSUS.md` do repositorio-fonte.
+
+- **Identificador estavel por diagnostico.** Os 39 diagnosticos de `validate_structure.py` ganharam codigo (`ACHADO-SEM-ESCAPOU`, `TASK-ID-DUPLICADO`, `SPEC-STATUS-INVALIDO`, e assim por diante). O codigo e **contrato publico**: a redacao da mensagem pode melhorar quando quiser, o codigo so muda em mudanca de versao. Quem monta portao em cima do validador casa codigo, nunca fragmento de texto.
+- **Flag `--codigos`**: uma linha por diagnostico, `NIVEL|CODIGO|ARQUIVO|SUJEITO`, sem prosa. O `SUJEITO` e a tarefa, a entrada de consenso ou a spec de que o diagnostico fala, e e ele que denuncia aviso que passou a cair na entrada errada.
+- O relatorio humano passa a mostrar o codigo entre colchetes: `[AVISO] [ACHADO-SEM-ESCAPOU] ...`. `Report.add` recusa codigo que nao esteja declarado em `CODIGOS`, entao diagnostico sem identidade quebra na hora de escrever, e nao em producao.
+- **Oracle por fixture no `verify_repository.py`** (so no repositorio-fonte). O `FIXTURES` deixou de mapear nome para exit code e passou a declarar modo, exit esperado e o **conjunto exato** de diagnosticos. Diagnostico a mais reprova tanto quanto diagnostico a menos, e fixture sem oracle declarado e recusada em vez de virar aprovacao silenciosa. `verificar_achado` foi absorvida por esse mecanismo: um mecanismo, nao dois.
+- Efeito medido por mutacao: com a contagem de linhas antiga, uma regressao compensada (um aviso certo some, outro errado aparece, total igual) passava verde. Com o conjunto exato, ela reprova nomeando o que sumiu e o que sobrou. Aviso que muda de entrada, mesmo com codigo e contagem identicos, tambem reprova.
+
 ## 2.4.0 - 2026-09-03
 
 `CONSENSUS.md` deixa de servir so para debate e passa a registrar **achado**, que e o que o uso real produziu. Desenho e decisoes na spec `docs/specs/0005-consenso-para-achados.md` do repositorio-fonte.

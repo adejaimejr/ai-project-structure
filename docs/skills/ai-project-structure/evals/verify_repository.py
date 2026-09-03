@@ -7,9 +7,9 @@ Uso:
 Confere, em um comando so:
 
 1. a raiz passa em `validate_structure.py --strict`;
-2. os fixtures de `evals/` retornam os exit codes esperados, e o par
-   `achado-project` acusa exatamente os avisos do formato de achado sem
-   encostar na entrada de debate;
+2. cada fixture de `evals/` bate com o oracle declarado dela: modo, exit code
+   e o conjunto **exato** de diagnosticos (codigo, arquivo e sujeito), com
+   diagnostico a mais reprovando tanto quanto diagnostico a menos;
 3. os blocos gerenciados da raiz continuam identicos aos de `assets/`
    (bloco core, bloco specs e as duas pontes);
 4. os templates de `TASKS.md` e `CONSENSUS.md` carregam as convencoes da
@@ -74,26 +74,70 @@ LOOP_RE = re.compile(
 VERSION_RE = re.compile(
     r"ai-project-structure:(?:core|specs|loop):start\s+v(\d+\.\d+\.\d+)")
 
-# Fixture -> exit code esperado sem --strict. broken-project tem 2 erros
-# conhecidos, v1-project e uma estrutura pre-marcadores (passa com INFO),
-# aguardando-project traz o par valido/invalido da secao "Aguardando Usuario" e
-# achado-project o par do formato de achado. Os checks de achado sao AVISO, e
-# nao ERRO, entao o caso invalido dele so muda de exit code com --strict:
-# verificar_achado cobre isso.
+# Oracle por fixture. Exit code sozinho nao prova nada, e essa foi a licao do
+# achado `0005-A1`: um par cujos dois lados saem 0 fica verde sem exercitar
+# nada, e um par com exit codes diferentes tambem engana quando o 1 vem de um
+# erro alheio ao comportamento testado. Entao cada fixture declara:
+#
+#   strict        modo em que ela roda;
+#   exit          exit code esperado naquele modo;
+#   diagnosticos  o CONJUNTO EXATO de diagnosticos, no formato estavel do
+#                 `--codigos` do validador: NIVEL|CODIGO|ARQUIVO|SUJEITO.
+#
+# A comparacao e exata nos dois sentidos: diagnostico a menos reprova, e
+# diagnostico a mais tambem. Um aviso que passe a cair na entrada errada muda o
+# SUJEITO e quebra o portao, que era o buraco que a contagem de linhas deixava.
+# Fixture sem a chave `diagnosticos` e recusada: oracle ausente nao vira
+# aprovacao silenciosa.
 FIXTURES = {
-    "broken-project": 1,
-    "v1-project": 0,
-    "aguardando-project/valido": 0,
-    "aguardando-project/invalido": 1,
-    "achado-project/valido": 0,
-    "achado-project/invalido": 0,
+    "broken-project": {
+        "strict": False,
+        "exit": 1,
+        "diagnosticos": [
+            "ERRO|TASK-ID-DUPLICADO|docs/TASKS.md|T-001",
+            "ERRO|SPEC-STATUS-INVALIDO|docs/specs/0001-login.md|0001-login.md",
+        ],
+    },
+    "v1-project": {
+        "strict": False,
+        "exit": 0,
+        "diagnosticos": [
+            "INFO|ESTRUTURA-V1|AGENTS.md|",
+            "INFO|TASKS-FORMATO-V1|docs/TASKS.md|",
+        ],
+    },
+    "aguardando-project/valido": {"strict": True, "exit": 0, "diagnosticos": []},
+    "aguardando-project/invalido": {
+        "strict": False,
+        "exit": 1,
+        "diagnosticos": ["ERRO|AGUARDANDO-SEM-PERGUNTA|docs/TASKS.md|T-002"],
+    },
+    # Os checks de achado sao AVISO, nao ERRO: sem --strict os dois lados saem 0.
+    "achado-project/valido": {"strict": True, "exit": 0, "diagnosticos": []},
+    "achado-project/invalido": {
+        "strict": True,
+        "exit": 1,
+        "diagnosticos": [
+            "AVISO|ACHADO-SEM-ESCAPOU|docs/CONSENSUS.md|"
+            "2026-09-03 - Achado sem declarar se escapou",
+            "AVISO|CONSENSO-SEM-PENDENTE|docs/CONSENSUS.md|"
+            "2026-09-03 - Achado que escapou sem dizer por que nada pegou",
+            "AVISO|ACHADO-SEM-SECAO-PONTO-CEGO|docs/CONSENSUS.md|"
+            "2026-09-03 - Achado que escapou sem dizer por que nada pegou",
+            "AVISO|ACHADO-SEM-IDENTIFICADOR|docs/CONSENSUS.md|"
+            "2026-09-03 - Achado sem identificador e com valor invalido",
+            "AVISO|ACHADO-ESCAPOU-INVALIDO|docs/CONSENSUS.md|"
+            "2026-09-03 - Achado sem identificador e com valor invalido",
+        ],
+    },
 }
 
-# Titulo da entrada de debate presente nos dois casos de achado-project. Nenhum
-# aviso pode cita-la: e o controle do criterio "projeto que nunca registra
-# achado nao recebe nenhum aviso novo".
+# Titulo da entrada de debate que abre os dois lados de achado-project. Nenhum
+# diagnostico pode cita-la: e o controle do criterio "projeto que nunca registra
+# achado nao recebe nenhum aviso novo". A comparacao exata acima ja reprova um
+# diagnostico que caia nela; o check abaixo guarda o outro lado, que e alguem
+# "consertar" a falha declarando esse diagnostico como esperado.
 DEBATE_CONTROLE = "Escolha do formato de data na API"
-AVISOS_ACHADO_ESPERADOS = 5
 
 
 class Resultado:
@@ -120,10 +164,12 @@ def read(path):
     return Path(path).read_text(encoding="utf-8")
 
 
-def rodar_validador(caminho, strict=False):
+def rodar_validador(caminho, strict=False, codigos=False):
     cmd = [sys.executable, str(VALIDATOR), str(caminho)]
     if strict:
         cmd.append("--strict")
+    if codigos:
+        cmd.append("--codigos")
     p = subprocess.run(cmd, capture_output=True, text=True)
     return p.returncode, p.stdout
 
@@ -142,57 +188,69 @@ def verificar_raiz(res, verbose):
 
 
 def verificar_fixtures(res, verbose):
-    for nome, esperado in sorted(FIXTURES.items()):
+    """Cada fixture contra o oracle declarado dela: modo, exit e conjunto exato.
+
+    Um exit code que bate nao e evidencia de nada por si so. O que prova que a
+    fixture exercitou o que devia e o conjunto de diagnosticos, comparado nos
+    dois sentidos."""
+    for nome, oraculo in sorted(FIXTURES.items()):
         caminho = EVALS / "fixtures" / nome
         if not caminho.is_dir():
             res.check(False, f"fixture {nome}", "diretorio nao encontrado")
             continue
-        code, out = rodar_validador(caminho)
+        if "diagnosticos" not in oraculo:
+            res.check(
+                False,
+                f"fixture {nome} declara oracle",
+                "sem a chave 'diagnosticos'; exit code sozinho nao prova nada",
+            )
+            continue
+
+        strict = oraculo.get("strict", False)
+        modo = "--strict" if strict else "normal"
+        esperado_exit = oraculo["exit"]
+        code, out = rodar_validador(caminho, strict=strict, codigos=True)
         res.check(
-            code == esperado,
-            f"fixture {nome}",
-            f"exit {code} (esperado {esperado})",
+            code == esperado_exit,
+            f"fixture {nome} em {modo}",
+            f"exit {code} (esperado {esperado_exit})",
         )
-        if nome == "broken-project":
-            erros = out.count("[ERRO]")
-            res.check(erros == 2, "fixture broken-project com 2 erros", f"{erros} erros")
-        if code != esperado and verbose:
+
+        obtidos = sorted(l for l in out.splitlines() if l.strip())
+        esperados = sorted(oraculo["diagnosticos"])
+        faltando = [d for d in esperados if d not in obtidos]
+        sobrando = [d for d in obtidos if d not in esperados]
+        detalhe = []
+        if faltando:
+            detalhe.append("nao saiu: " + "; ".join(faltando))
+        if sobrando:
+            detalhe.append("saiu sem ser esperado: " + "; ".join(sobrando))
+        res.check(
+            obtidos == esperados,
+            f"fixture {nome} com {len(esperados)} diagnosticos exatos",
+            " | ".join(detalhe),
+        )
+        if verbose and (detalhe or code != esperado_exit):
             print(out)
 
 
-def verificar_achado(res, verbose):
-    """Formato de achado: o caso valido passa limpo e o invalido acusa os cinco.
+def verificar_controle_do_debate(res):
+    """O oracle de achado-project nao pode declarar diagnostico na entrada de debate.
 
-    Roda com --strict porque os checks de achado sao AVISO: sem a flag, os dois
-    casos sairiam 0 e a fixture nao provaria nada."""
-    base = EVALS / "fixtures" / "achado-project"
-    if not base.is_dir():
-        res.check(False, "fixture achado-project", "diretorio nao encontrado")
-        return
-
-    code, _ = rodar_validador(base / "valido", strict=True)
-    res.check(code == 0, "achado-project/valido em --strict", f"exit {code} (esperado 0)")
-
-    code, out = rodar_validador(base / "invalido", strict=True)
-    if not res.check(code == 1, "achado-project/invalido em --strict",
-                     f"exit {code} (esperado 1)"):
-        if verbose:
-            print(out)
-        return
-    avisos = [l for l in out.splitlines() if "[AVISO]" in l]
+    A comparacao exata ja reprova um diagnostico que caia nela. Este check guarda
+    o outro lado: alguem calar a falha declarando esse diagnostico como esperado."""
+    declarados = [
+        d
+        for nome, oraculo in FIXTURES.items()
+        if nome.startswith("achado-project/")
+        for d in oraculo.get("diagnosticos", [])
+        if DEBATE_CONTROLE in d
+    ]
     res.check(
-        len(avisos) == AVISOS_ACHADO_ESPERADOS,
-        f"achado-project/invalido com {AVISOS_ACHADO_ESPERADOS} avisos",
-        f"{len(avisos)} avisos",
+        not declarados,
+        "oracle de achado-project nao espera diagnostico na entrada de debate",
+        "; ".join(declarados),
     )
-    culpados = [l.strip() for l in avisos if DEBATE_CONTROLE in l]
-    res.check(
-        not culpados,
-        "entrada de debate nao dispara aviso novo",
-        "; ".join(culpados),
-    )
-    if verbose and (culpados or len(avisos) != AVISOS_ACHADO_ESPERADOS):
-        print(out)
 
 
 def verificar_blocos(res):
@@ -461,7 +519,7 @@ def main(argv=None):
     res = Resultado()
     verificar_raiz(res, args.verbose)
     verificar_fixtures(res, args.verbose)
-    verificar_achado(res, args.verbose)
+    verificar_controle_do_debate(res)
     verificar_blocos(res)
     verificar_versao(res)
     verificar_convencoes(res)

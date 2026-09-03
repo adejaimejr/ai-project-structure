@@ -78,6 +78,60 @@ BLOCKED_MAX_DAYS = 30
 # evidencia e o uso real chegou a sete revalidacoes sem que isso fosse fracasso.
 CONSENSUS_ROUNDS_SEM_PENDENCIA = 3
 
+# Identificador estavel de cada diagnostico. E contrato publico: a redacao da
+# mensagem pode mudar quando melhorar, o codigo so muda em mudanca de versao.
+# `Report.add` recusa codigo que nao esteja aqui, entao um erro de digitacao
+# quebra na hora em vez de virar diagnostico sem identidade.
+CODIGOS = {
+    # Arquivos e blocos gerenciados
+    "NUCLEO-AUSENTE",
+    "TRAVESSAO",
+    "PONTE-QUEBRADA",
+    "ESTRUTURA-V1",
+    "MARCADOR-DESPAREADO",
+    "MARCADOR-VERSAO-INVALIDA",
+    # SESSION.md
+    "SESSAO-SEM-HEADINGS",
+    # CONSENSUS.md, debate
+    "CONSENSO-CAMPO-AUSENTE",
+    "CONSENSO-CAMPO-INVALIDO",
+    "CONSENSO-RODADA-FORMATO",
+    "CONSENSO-SEM-PENDENTE",
+    "CONSENSO-SEM-STATUS",
+    "CONSENSO-STATUS-INVALIDO",
+    "CONSENSO-ABERTO-SEM-PROXIMO-PASSO",
+    # CONSENSUS.md, achado
+    "ACHADO-SEM-IDENTIFICADOR",
+    "ACHADO-SEM-ESCAPOU",
+    "ACHADO-ESCAPOU-INVALIDO",
+    "ACHADO-SEM-SECAO-PONTO-CEGO",
+    # Rotacao
+    "ROTACAO",
+    # TASKS.md
+    "TASK-ID-DUPLICADO",
+    "TASKS-FORMATO-V1",
+    "TASK-SEM-ID",
+    "TASK-PRIORIDADE-INVALIDA",
+    "TASK-BLOQUEADA-FORMATO",
+    "TASK-BLOQUEADA-ANTIGA",
+    "SPEC-REF-NAO-RESOLVE",
+    "AGUARDANDO-SEM-PERGUNTA",
+    # Evidencia de fechamento
+    "CONVENCOES-DATA-INVALIDA",
+    "EVIDENCIA-AUSENTE",
+    "EVIDENCIA-AUSENTE-COM-VERIFICA",
+    "EVIDENCIA-SEM-RESULTADO",
+    "EVIDENCIA-TIPO-INVALIDO",
+    # specs/
+    "SPEC-NOME-INVALIDO",
+    "SPEC-PREFIXO-DUPLICADO",
+    "SPEC-SEM-STATUS",
+    "SPEC-STATUS-INVALIDO",
+    "SPEC-TASK-INEXISTENTE",
+    "SPEC-CONCLUIDA-COM-PENDENTE",
+    "SPEC-CONCLUIDA-SEM-EVIDENCIA",
+}
+
 
 def normalize(text):
     """Minusculas sem acentos, para comparacao tolerante."""
@@ -100,35 +154,56 @@ def strip_fences(text):
 
 
 class Report:
+    """Diagnosticos do validador.
+
+    Cada diagnostico carrega um `codigo` estavel e um `sujeito` opcional (a
+    tarefa, a entrada ou a spec de que ele fala). O codigo e o **contrato
+    publico**: a redacao da mensagem pode melhorar a qualquer momento, o codigo
+    nao muda sem ser mudanca de versao. Quem escreve portao em cima da saida
+    deste script casa `--codigos`, nunca fragmento de texto."""
+
     def __init__(self):
-        self.items = {}  # arquivo -> [(nivel, mensagem)]
+        self.items = {}  # arquivo -> [(nivel, codigo, sujeito, mensagem)]
 
-    def add(self, level, file, message):
-        self.items.setdefault(file, []).append((level, message))
+    def add(self, level, file, code, message, subject=None):
+        if code not in CODIGOS:
+            raise ValueError(
+                f"Codigo de diagnostico desconhecido: {code!r}. "
+                "Todo diagnostico precisa estar declarado em CODIGOS."
+            )
+        self.items.setdefault(file, []).append((level, code, subject, message))
 
-    def erro(self, file, message):
-        self.add("ERRO", file, message)
+    def erro(self, file, code, message, subject=None):
+        self.add("ERRO", file, code, message, subject)
 
-    def aviso(self, file, message):
-        self.add("AVISO", file, message)
+    def aviso(self, file, code, message, subject=None):
+        self.add("AVISO", file, code, message, subject)
 
-    def info(self, file, message):
-        self.add("INFO", file, message)
+    def info(self, file, code, message, subject=None):
+        self.add("INFO", file, code, message, subject)
 
     def counts(self):
-        errors = sum(1 for msgs in self.items.values() for lvl, _ in msgs if lvl == "ERRO")
-        warnings = sum(1 for msgs in self.items.values() for lvl, _ in msgs if lvl == "AVISO")
-        return errors, warnings
+        flat = [lvl for msgs in self.items.values() for lvl, _, _, _ in msgs]
+        return flat.count("ERRO"), flat.count("AVISO")
 
     def print(self):
         if not self.items:
             print("Nenhum problema encontrado.")
         for file in sorted(self.items):
             print(f"\n{file}")
-            for level, message in self.items[file]:
-                print(f"  [{level}] {message}")
+            for level, code, _, message in self.items[file]:
+                print(f"  [{level}] [{code}] {message}")
         errors, warnings = self.counts()
         print(f"\nResumo: {errors} erros, {warnings} avisos.")
+
+    def print_codigos(self):
+        """Saida legivel por maquina, uma linha por diagnostico.
+
+        Formato: NIVEL|CODIGO|ARQUIVO|SUJEITO. Sem prosa de proposito: e o que
+        um portao deve casar, e nada aqui muda quando a mensagem muda."""
+        for file in sorted(self.items):
+            for level, code, subject, _ in self.items[file]:
+                print(f"{level}|{code}|{file}|{subject or ''}")
 
 
 def read(path):
@@ -154,7 +229,7 @@ def split_entries(clean_text):
 def check_core_files(root, report):
     for rel in CORE_FILES:
         if not (root / rel).is_file():
-            report.erro(rel, "Arquivo do nucleo ausente.")
+            report.erro(rel, "NUCLEO-AUSENTE", "Arquivo do nucleo ausente.", rel)
 
 
 def check_em_dash(root, report):
@@ -174,6 +249,7 @@ def check_em_dash(root, report):
             rel = path.relative_to(root).as_posix()
             report.erro(
                 rel,
+                "TRAVESSAO",
                 f"Contem travessao (em dash, U+2014) {count}x; proibido pela regra "
                 "do projeto. Use dois-pontos, virgula, parenteses ou hifen simples.",
             )
@@ -183,7 +259,10 @@ def check_bridges(root, report):
     for rel in ("CLAUDE.md", "GEMINI.md"):
         text = read(root / rel)
         if text is not None and "AGENTS.md" not in text:
-            report.aviso(rel, "Arquivo-ponte nao menciona AGENTS.md (ponte quebrada?).")
+            report.aviso(
+                rel, "PONTE-QUEBRADA",
+                "Arquivo-ponte nao menciona AGENTS.md (ponte quebrada?).",
+            )
 
 
 def check_markers(root, report):
@@ -201,6 +280,7 @@ def check_markers(root, report):
     if not found:
         report.info(
             "AGENTS.md",
+            "ESTRUTURA-V1",
             "Estrutura v1 detectada (sem bloco gerenciado). "
             "Rode a skill ai-project-structure para atualizar.",
         )
@@ -210,16 +290,20 @@ def check_markers(root, report):
         if len(starts) != 1 or ends != 1:
             report.erro(
                 "AGENTS.md",
+                "MARCADOR-DESPAREADO",
                 f"Marcadores do bloco '{block}' despareados "
                 f"({len(starts)} start, {ends} end). Esperado exatamente 1 de cada.",
+                block,
             )
             continue
         version = starts[0]
         if not version or not re.fullmatch(r"v?\d+\.\d+\.\d+", version):
             report.erro(
                 "AGENTS.md",
+                "MARCADOR-VERSAO-INVALIDA",
                 f"Versao ausente ou invalida no marcador do bloco '{block}' "
                 f"(esperado ex: 'v2.0.0', encontrado: {version!r}).",
+                block,
             )
 
 
@@ -238,7 +322,9 @@ def check_session(root, report):
         if missing:
             report.aviso(
                 "docs/SESSION.md",
+                "SESSAO-SEM-HEADINGS",
                 f"Entrada '{title}' sem os headings: {', '.join(missing)}.",
+                title,
             )
     check_rotation(root / "docs" / "SESSION.md", len(entries), report)
 
@@ -264,12 +350,17 @@ def check_consensus_declaration(title, body, report):
     ):
         value = field_value(body, label)
         if value is None:
-            report.aviso(rel, f"Entrada '{title}' sem linha '**{label}:**'.")
+            report.aviso(
+                rel, "CONSENSO-CAMPO-AUSENTE",
+                f"Entrada '{title}' sem linha '**{label}:**'.", title,
+            )
         elif normalize(value) not in allowed:
             report.aviso(
                 rel,
+                "CONSENSO-CAMPO-INVALIDO",
                 f"Entrada '{title}' com '**{label}:** {value}' fora do conjunto "
                 f"({' | '.join(sorted(allowed))}).",
+                title,
             )
     rodada = field_value(body, "Rodada")
     if rodada is None:
@@ -278,16 +369,20 @@ def check_consensus_declaration(title, body, report):
     if not m:
         report.aviso(
             rel,
+            "CONSENSO-RODADA-FORMATO",
             f"Entrada '{title}' com '**Rodada:** {rodada}' fora do formato 'N de N'.",
+            title,
         )
     elif int(m.group(1)) > CONSENSUS_ROUNDS_SEM_PENDENCIA and not (
         field_value(body, "Pendente da rodada anterior") or ""
     ).strip():
         report.aviso(
             rel,
+            "CONSENSO-SEM-PENDENTE",
             f"Entrada '{title}' esta na rodada {m.group(1)} sem "
             "'**Pendente da rodada anterior:**' dizendo o que a anterior deixou "
             "em aberto.",
+            title,
         )
 
 
@@ -304,23 +399,29 @@ def check_consensus_achado(title, body, report):
     if not achado.strip():
         report.aviso(
             rel,
+            "ACHADO-SEM-IDENTIFICADOR",
             f"Entrada '{title}' declara '**Achado:**' sem identificador. "
             "O identificador e livre, mas precisa existir para dar para "
             "referenciar o achado depois.",
+            title,
         )
     escapou = field_value(body, "Escapou de verificacao")
     if escapou is None:
         report.aviso(
             rel,
+            "ACHADO-SEM-ESCAPOU",
             f"Achado '{title}' sem linha '**Escapou de verificacao:**' "
             f"({' | '.join(sorted(CONSENSUS_ESCAPOU))}).",
+            title,
         )
         return
     if normalize(escapou) not in CONSENSUS_ESCAPOU:
         report.aviso(
             rel,
+            "ACHADO-ESCAPOU-INVALIDO",
             f"Achado '{title}' com '**Escapou de verificacao:** {escapou}' fora "
             f"do conjunto ({' | '.join(sorted(CONSENSUS_ESCAPOU))}).",
+            title,
         )
         return
     if normalize(escapou) != "sim":
@@ -329,9 +430,11 @@ def check_consensus_achado(title, body, report):
     if normalize(ACHADO_SECAO_ESCAPE) not in headings:
         report.aviso(
             rel,
+            "ACHADO-SEM-SECAO-PONTO-CEGO",
             f"Achado '{title}' declarou '**Escapou de verificacao:** sim' e nao "
             f"tem a secao '{ACHADO_SECAO_ESCAPE}', com o que passou verde e o "
             "mecanismo do ponto cego.",
+            title,
         )
 
 
@@ -353,22 +456,27 @@ def check_consensus(root, report, adopted=None):
         status_match = re.search(r"\*\*Status:\*\*\s*(.+)$", body, re.MULTILINE)
         if not status_match:
             report.aviso(
-                "docs/CONSENSUS.md", f"Entrada '{title}' sem linha '**Status:**'."
+                "docs/CONSENSUS.md", "CONSENSO-SEM-STATUS",
+                f"Entrada '{title}' sem linha '**Status:**'.", title,
             )
             continue
         status = normalize(status_match.group(1))
         if status not in CONSENSUS_STATUSES:
             report.aviso(
                 "docs/CONSENSUS.md",
+                "CONSENSO-STATUS-INVALIDO",
                 f"Entrada '{title}' com Status invalido: '{status_match.group(1).strip()}' "
                 "(esperado: aberto | resolvido | arquivado).",
+                title,
             )
         elif status == "aberto" and not re.search(
             r"\*\*Pr[oó]ximo passo:\*\*", body
         ):
             report.aviso(
                 "docs/CONSENSUS.md",
+                "CONSENSO-ABERTO-SEM-PROXIMO-PASSO",
                 f"Entrada '{title}' esta aberta sem '**Proximo passo:**' com dono.",
+                title,
             )
     check_rotation(root / "docs" / "CONSENSUS.md", len(entries), report)
 
@@ -382,6 +490,7 @@ def check_rotation(path, entry_count, report):
     if entry_count > ROTATION_MAX_ENTRIES or size > ROTATION_MAX_BYTES:
         report.aviso(
             rel,
+            "ROTACAO",
             f"Arquivo com {entry_count} entradas e {size // 1024}KB; "
             "considere rotacionar as mais antigas para docs/archive/ "
             "(regra em AGENTS.md).",
@@ -491,12 +600,16 @@ def check_tasks(root, report):
     seen = set()
     for tid in all_ids:
         if tid in seen:
-            report.erro("docs/TASKS.md", f"ID duplicado: T-{tid}.")
+            report.erro(
+                "docs/TASKS.md", "TASK-ID-DUPLICADO",
+                f"ID duplicado: T-{tid}.", f"T-{tid}",
+            )
         seen.add(tid)
     # Check 8: formato v1 vs misto
     if any_line and not all_ids and lines_without_id:
         report.info(
             "docs/TASKS.md",
+            "TASKS-FORMATO-V1",
             "Nenhuma tarefa usa ID T-NNN (formato v1). "
             "A skill pode migrar os IDs no fluxo de atualizacao.",
         )
@@ -504,7 +617,9 @@ def check_tasks(root, report):
         for sec, line in lines_without_id:
             report.aviso(
                 "docs/TASKS.md",
+                "TASK-SEM-ID",
                 f"Tarefa sem ID T-NNN na secao '{sec}': \"{line[:60]}\".",
+                sec,
             )
     # Check 9: refs de spec resolvem (so em linhas de tarefa; ignora o
     # placeholder NNNN usado na documentacao de formato do proprio template)
@@ -520,7 +635,9 @@ def check_tasks(root, report):
                 if not (root / "docs" / "specs" / f"{ref}.md").is_file():
                     report.erro(
                         "docs/TASKS.md",
+                        "SPEC-REF-NAO-RESOLVE",
                         f"Referencia '(spec: {ref})' nao resolve para docs/specs/{ref}.md.",
+                        ref,
                     )
     check_markers_values(sections, report)
     check_waiting(sections, report)
@@ -546,8 +663,10 @@ def check_markers_values(sections, report):
             if m and normalize(m.group(1)) not in PRIORITIES:
                 report.aviso(
                     "docs/TASKS.md",
+                    "TASK-PRIORIDADE-INVALIDA",
                     f"{label} com '(prioridade: {m.group(1).strip()})' fora do "
                     "conjunto conhecido (alta | media | baixa).",
+                    label,
                 )
             m = BLOCKED_RE.search(line)
             if m:
@@ -555,24 +674,30 @@ def check_markers_values(sections, report):
                 if blocked is None:
                     report.aviso(
                         "docs/TASKS.md",
+                        "TASK-BLOQUEADA-FORMATO",
                         f"{label} com '(bloqueada: {m.group(1).strip()})' fora do "
                         "formato AAAA-MM-DD.",
+                        label,
                     )
                 else:
                     days = (today - blocked).days
                     if days > BLOCKED_MAX_DAYS:
                         report.aviso(
                             "docs/TASKS.md",
+                            "TASK-BLOQUEADA-ANTIGA",
                             f"{label} bloqueada ha {days} dias (limite: "
                             f"{BLOCKED_MAX_DAYS}). Cobre a resposta ou feche a tarefa.",
+                            label,
                         )
             for evidence in evidence_lines(task):
                 m = EVIDENCE_TYPE_RE.search(evidence)
                 if m and normalize(m.group(1)) not in EVIDENCE_TYPES:
                     report.aviso(
                         "docs/TASKS.md",
+                        "EVIDENCIA-TIPO-INVALIDO",
                         f"{label} com 'tipo={m.group(1).strip()}' na evidencia, fora "
                         "do conjunto conhecido (comando | revisao-manual | conferencia).",
+                        label,
                     )
 
 
@@ -585,8 +710,10 @@ def check_waiting(sections, report):
         if not any(normalize(s).startswith("**pergunta:**") for s in task["sub"]):
             report.erro(
                 "docs/TASKS.md",
+                "AGUARDANDO-SEM-PERGUNTA",
                 f"{task_label(line)} esta em 'Aguardando Usuario' sem a sub-linha "
                 "'**Pergunta:**'. Sem a pergunta registrada, a espera nao e verificavel.",
+                task_label(line),
             )
 
 
@@ -602,6 +729,7 @@ def check_evidence(root, sections, report):
     if declared and adopted is None:
         report.info(
             "docs/TASKS.md",
+            "CONVENCOES-DATA-INVALIDA",
             "Marcador '(convencoes-2-2-0-desde:)' sem data valida; preencha com a "
             "data de adocao para que a evidencia de fechamento passe a ser cobrada.",
         )
@@ -618,15 +746,19 @@ def check_evidence(root, sections, report):
             if not evidences:
                 report.erro(
                     "docs/TASKS.md",
+                    "EVIDENCIA-AUSENTE-COM-VERIFICA",
                     f"{label} declarou '(verifica: {command})' e foi concluida sem "
                     "sub-linha 'Evidencia:' com o resultado desse comando.",
+                    label,
                 )
             elif "resultado=" not in normalize(joined) or command not in joined:
                 report.erro(
                     "docs/TASKS.md",
+                    "EVIDENCIA-SEM-RESULTADO",
                     f"{label} declarou '(verifica: {command})', mas a evidencia nao "
                     "registra o resultado desse comando (esperado 'resultado=' "
                     "citando o comando declarado).",
+                    label,
                 )
             continue
         if evidences or adopted is None:
@@ -636,8 +768,10 @@ def check_evidence(root, sections, report):
         if done_date is not None and done_date >= adopted:
             report.aviso(
                 "docs/TASKS.md",
+                "EVIDENCIA-AUSENTE",
                 f"{label} concluida sem sub-linha 'Evidencia:' "
                 "(tipo=; procedimento=; resultado=).",
+                label,
             )
 
 
@@ -666,14 +800,18 @@ def check_specs(root, report, task_ids, done_ids):
         if not m:
             report.aviso(
                 rel,
+                "SPEC-NOME-INVALIDO",
                 "Nome fora do padrao NNNN-slug.md (ex: 0001-login-social.md).",
+                path.name,
             )
         else:
             prefix = m.group(1)
             if prefix in prefixes:
                 report.erro(
                     rel,
+                    "SPEC-PREFIXO-DUPLICADO",
                     f"Prefixo {prefix} duplicado (ja usado por {prefixes[prefix]}).",
+                    path.name,
                 )
             prefixes[prefix] = path.name
         text = read(path)
@@ -684,14 +822,16 @@ def check_specs(root, report, task_ids, done_ids):
         status_match = re.search(r"\*\*Status:\*\*\s*(.+)$", clean, re.MULTILINE)
         status = None
         if not status_match:
-            report.erro(rel, "Spec sem linha '**Status:**'.")
+            report.erro(rel, "SPEC-SEM-STATUS", "Spec sem linha '**Status:**'.", path.name)
         else:
             status = normalize(status_match.group(1))
             if status not in SPEC_STATUSES:
                 report.erro(
                     rel,
+                    "SPEC-STATUS-INVALIDO",
                     f"Status invalido: '{status_match.group(1).strip()}' (esperado: "
                     "Rascunho | Definida | Em andamento | Concluida | Cancelada).",
+                    path.name,
                 )
         # Check 12: T-IDs da secao Tarefas existem
         tasks_section = re.search(
@@ -702,8 +842,10 @@ def check_specs(root, report, task_ids, done_ids):
             if tid not in task_ids and tid not in archived:
                 report.erro(
                     rel,
+                    "SPEC-TASK-INEXISTENTE",
                     f"T-{tid} listado na spec nao existe em docs/TASKS.md "
                     "nem em docs/archive/TASKS-*.md.",
+                    f"T-{tid}",
                 )
         # Check 13: spec concluida coerente
         if status == "concluida":
@@ -715,9 +857,11 @@ def check_specs(root, report, task_ids, done_ids):
             if pending:
                 report.aviso(
                     rel,
+                    "SPEC-CONCLUIDA-COM-PENDENTE",
                     "Spec Concluida com tarefas fora de 'Concluidas' em TASKS.md: "
                     + ", ".join(f"T-{t}" for t in pending)
                     + ".",
+                    path.name,
                 )
             evidence = re.search(
                 r"^## Evidencia De Conclusao\s*$(.*?)(?=^## |\Z)",
@@ -726,7 +870,9 @@ def check_specs(root, report, task_ids, done_ids):
             )
             if not evidence or "(a preencher" in normalize(evidence.group(1)):
                 report.aviso(
-                    rel, "Spec Concluida sem 'Evidencia De Conclusao' preenchida."
+                    rel, "SPEC-CONCLUIDA-SEM-EVIDENCIA",
+                    "Spec Concluida sem 'Evidencia De Conclusao' preenchida.",
+                    path.name,
                 )
 
 
@@ -818,6 +964,12 @@ def main(argv=None):
         action="store_true",
         help="Mostra projecao read-only de tarefas e specs; nao valida nem altera nada.",
     )
+    parser.add_argument(
+        "--codigos",
+        action="store_true",
+        help="Saida legivel por maquina (NIVEL|CODIGO|ARQUIVO|SUJEITO), uma linha "
+             "por diagnostico, sem prosa. E o que um portao deve casar.",
+    )
     args = parser.parse_args(argv)
 
     root = Path(args.caminho).resolve()
@@ -829,7 +981,8 @@ def main(argv=None):
         show_progress(root)
         return 0
 
-    print(f"Validando estrutura em: {root}")
+    if not args.codigos:
+        print(f"Validando estrutura em: {root}")
     report = Report()
     check_core_files(root, report)
     check_em_dash(root, report)
@@ -839,7 +992,10 @@ def main(argv=None):
     check_consensus(root, report, adoption_date(root)[0])
     task_ids, done_ids = check_tasks(root, report)
     check_specs(root, report, task_ids, done_ids)
-    report.print()
+    if args.codigos:
+        report.print_codigos()
+    else:
+        report.print()
 
     errors, warnings = report.counts()
     if errors or (args.strict and warnings):

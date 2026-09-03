@@ -2,6 +2,13 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (skill v2.5.0)
+
+- Identificador estavel por diagnostico em `validate_structure.py`: os 39 diagnosticos ganharam codigo, e o codigo virou contrato publico. A redacao da mensagem pode melhorar; o codigo so muda em mudanca de versao.
+- Flag `--codigos`: `NIVEL|CODIGO|ARQUIVO|SUJEITO`, uma linha por diagnostico. O sujeito e a tarefa, entrada ou spec de que ele fala, e e o que denuncia aviso que passou a cair na entrada errada.
+- `verify_repository.py` passou a exigir oracle por fixture (modo, exit e conjunto exato de diagnosticos), com fixture sem oracle recusada. De 40 para 42 verificacoes. `verificar_achado` absorvida pelo mecanismo geral.
+- Veio da rodada 2 do achado `0005-A1`, que mostrou que contar linhas `[AVISO]` aceita regressao compensada. Provado por mutacao: com a contagem antiga passava verde, com o conjunto exato reprova.
+
 ## 2026-09-03 (skill v2.4.0)
 
 - `CONSENSUS.md` deixa de servir so para debate: entrada que declara `**Achado:** <identificador>` e um achado, com `Status` e `Proximo passo` proprios, disposicao de quem registrou e revalidacao por outro modelo. Identificador livre, conferido por presenca e valor nao vazio.

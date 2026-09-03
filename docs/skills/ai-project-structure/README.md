@@ -111,7 +111,15 @@ em `evals/<skill>.prompts.csv`, executar `codex exec --json` e gravar traces JSO
 python3 scripts/validate_structure.py <caminho-do-projeto>            # relatorio + exit code
 python3 scripts/validate_structure.py <caminho-do-projeto> --strict   # avisos tambem falham
 python3 scripts/validate_structure.py <caminho-do-projeto> --progress # projecao read-only de tarefas e specs
+python3 scripts/validate_structure.py <caminho-do-projeto> --codigos  # uma linha por diagnostico, legivel por maquina
 ```
+
+Da versao 2.5.0 em diante todo diagnostico carrega um **codigo estavel**
+(`ACHADO-SEM-ESCAPOU`, `TASK-ID-DUPLICADO`, ...), mostrado no relatorio como
+`[AVISO] [CODIGO] mensagem`. O codigo e contrato publico: a redacao da mensagem
+pode mudar quando melhorar, o codigo so muda em mudanca de versao. `--codigos`
+troca o relatorio por `NIVEL|CODIGO|ARQUIVO|SUJEITO`, uma linha por
+diagnostico, que e o que usar para montar portao.
 
 Checa: arquivos do nucleo, pontes, marcadores do bloco gerenciado, formato das
 entradas de SESSION/CONSENSUS, limites de rotacao, IDs `T-NNN`, coerencia do

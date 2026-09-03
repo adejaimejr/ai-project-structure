@@ -1,6 +1,6 @@
 ---
 name: ai-project-structure
-version: "2.4.0"
+version: "2.5.0"
 description: Use sempre que o usuario quiser iniciar um projeto novo de IA, criar a estrutura inicial de um repositorio multiagente, ou fazer scaffold de um projeto Markdown que sera tocado por varias IAs. Dispare mesmo que o usuario nao mencione a skill por nome - basta o pedido envolver frases como "inicia projeto novo", "cria projeto", "scaffold projeto", "estrutura inicial", "novo repo de IA", "inicia projeto de IA", "monta a base do projeto", "cria a pasta do projeto", ou qualquer pedido para preparar um diretorio com AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ (SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS, etc). Use tambem quando o usuario quiser converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ativar o modulo de specs (docs/specs/) em um projeto existente, ou ativar, rodar e configurar o modulo de loop (perfis de modelo e esforco por intencao e ferramenta). Esta skill cria os arquivos de fato, nao apenas explica como criar.
 ---
 
@@ -183,7 +183,7 @@ No final, liste de forma curta:
 
 - caminho absoluto do destino;
 - nivel escolhido (completa ou minimal) e se o modulo de specs foi ativado;
-- versao da estrutura: 2.4.0;
+- versao da estrutura: 2.5.0;
 - arquivos criados (em arvore);
 - proximo passo sugerido: preencher os demais campos de `PROJECT_CONTEXT.md` e adicionar tarefas iniciais em `TASKS.md`;
 - oferta: "quer validar a estrutura? `python3 <dir-desta-skill>/scripts/validate_structure.py <destino>`".
@@ -207,7 +207,7 @@ Se o destino ja parece ser um projeto desta estrutura (ja tem `AGENTS.md` e `doc
 Para projeto que ja usa esta estrutura:
 
 - **Atualizar** para a versao atual da skill (v1 → v2, ou v2 → v2.x): siga `references/atualizacao.md`. O fluxo detecta a versao pelos marcadores em `AGENTS.md`, mostra diff por bloco e nunca sobrescreve sem confirmacao por item.
-- **Validar**: rode `python3 <dir-desta-skill>/scripts/validate_structure.py <projeto>` e reporte o resultado. `--strict` trata avisos como falha.
+- **Validar**: rode `python3 <dir-desta-skill>/scripts/validate_structure.py <projeto>` e reporte o resultado. `--strict` trata avisos como falha. `--codigos` troca o relatorio por uma linha por diagnostico (`NIVEL|CODIGO|ARQUIVO|SUJEITO`): e o que usar para montar portao, porque o codigo e estavel e a redacao da mensagem nao.
 
 ## Criar Spec Ou Ativar O Modulo Em Projeto Existente
 

@@ -2,7 +2,152 @@
 
 Entradas antigas de `docs/SESSION.md`, rotacionadas em 2026-09-02 pela regra de "Rotacao De Arquivos" do `AGENTS.md`.
 
-Cobre de 2026-04-25 (criacao da estrutura multiagente e validacao por tri-consenso) a 2026-09-02 (planejamento e implementacao da skill 2.2.0, e as primeiras etapas da 2.3.0). Ordem cronologica inversa, igual a do arquivo principal.
+Cobre de 2026-04-25 (criacao da estrutura multiagente e validacao por tri-consenso) a 2026-09-02 (publicacao da skill 2.3.0, com o modulo de loop e as duas primeiras bancadas). Ordem cronologica inversa, igual a do arquivo principal. Rotacionado de novo em 2026-09-03.
+
+## 2026-09-02 - Claude, Codex e Grok (bancada multi-ferramenta do loop)
+
+### Objetivo
+
+- Rodar o modulo de loop com varias ferramentas num subprojeto real, medir custo e descobrir o que quebra fora do teste com agente falso.
+
+### O Que Foi Feito
+
+- Subprojeto `slugkit` montado quatro vezes, identico: portao real (`python3 test_slugify.py`) falhando no inicio, T-001 bem especificada e T-002 deliberadamente sem contexto.
+- T-001: Claude, Codex e Grok fecharam com portao verde na tentativa 1. Gemini nao rodou, por `IneligibleTierError` da conta, nao por defeito do modulo.
+- T-002 foi o teste que importava: chutar o limite padrao passaria no portao, porque a suite nao cobre isso. Os tres escreveram `.loop-pergunta` e pararam. O bloco de loop no `AGENTS.md` segurou a regra "Nunca Inferir" sob incentivo contrario.
+- Consumo: Claude 295k de cache read na primeira tarefa e 233k na segunda; Grok 193k e 155k tokens; Codex 23.958 e 16.817 tokens. Os valores em dolar que as CLIs imprimem sao preco de tabela da API (`costBasis: list` no Claude), nao o que se paga em assinatura: servem para comparar rodadas, nao para prever fatura.
+- Dois defeitos achados e corrigidos: o loop insistia com agente que nunca executou (virou exit 4, com teste novo), e as flags por ferramenta nao estavam documentadas (viraram tabela em `references/loop.md`).
+- Duas das tres implementacoes de T-001 tinham bug numa regra de borda que a suite nao cobria, e o loop fechou as duas com evidencia legitima. Registrado como limitacao central do desenho: a evidencia vale o que o portao vale.
+
+### Arquivos Criados Ou Alterados
+
+- `scripts/loop.sh` (exit 4), `evals/test_loop.py` (53 verificacoes), `references/loop.md`, `CHANGELOG.md` da skill.
+- `docs/TASKS.md`, `docs/SESSION.md`, `docs/specs/0004-modulo-de-loop.md`.
+
+### Decisoes Tomadas
+
+- DEC-014 na spec 0004: agente que falha sem mexer em arquivo encerra a rodada em vez de gastar tentativa. Decisao de implementacao posterior a conclusao da spec, registrada la com o motivo.
+
+### Aprendizados Para MEMORY.md
+
+- Portao fraco automatizado continua fraco, so que mais rapido. Duas ferramentas passaram no portao com bug de borda. Ficou em `references/loop.md`, que e onde quem for declarar `(verifica:)` vai ler; nao promovido para `MEMORY.md` por ser regra da skill e nao deste repositorio.
+
+### Pendencias
+
+- Os tres destinos globais continuam na 2.2.0: a skill nao foi reinstalada depois da 2.3.0.
+- Decisao de publicar ou nao a 2.3.0 esta com o usuario.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario.
+- Motivo: a bancada respondeu o que dava para responder por teste. O que falta e decisao: publicar, e se o custo por tarefa faz sentido para o uso que voce pretende.
+
+## 2026-09-02 - Claude + Codex (skill 2.3.0, modulo de loop)
+
+### Objetivo
+
+- Implementar a spec 0004 inteira: o modulo de loop, que faz a estrutura executar uma tarefa verificavel em vez de so descreve-la.
+
+### O Que Foi Feito
+
+- T-019: bloco de loop, `references/loop.md`, secao de ativacao no `SKILL.md` com o portao de `QUALITY.md`, marcadores dos tres blocos em v2.3.0, e o fluxo de atualizacao ensinado a tratar o bloco novo sem nunca oferecer a ativacao.
+- T-020: `loop.sh` orquestra, `loop_task.py` faz toda edicao de `TASKS.md` reusando o parser do validador. Falta de contexto e sinalizada por arquivo, nao por linha no stdout (DEC-011 e DEC-012, decididas pelo usuario antes da implementacao).
+- T-021 e T-022: a bateria do loop saiu do scratchpad e virou `evals/test_loop.py`, com 47 verificacoes e agente falso. O verificador foi de 26 para 33 checagens e passou a rodar a bateria por dentro, alem de conferir o bloco `loop`, o bit de execucao e se os tres scripts distribuidos compilam.
+- T-023: modulo ativado neste repositorio e rodada real com o Codex na T-025, uma tarefa pequena e honesta (`.loop-pergunta` no `.gitignore`) cujo portao falhava de proposito antes e passou depois.
+- Na rodada real, o Codex declarou por conta propria que nao alterou `TASKS.md` nem escreveu evidencia. E a regra do bloco sendo obedecida por um modelo que nao participou desta implementacao, que era a duvida que sobrava.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `README.md`, `references/loop.md` (novo), `references/atualizacao.md`, `assets/partials/AGENTS-loop-block.md` (novo), `assets/AGENTS.md`, `scripts/loop.sh` (novo), `scripts/loop_task.py` (novo), `evals/test_loop.py` (novo), `evals/verify_repository.py`.
+- Projeto: `AGENTS.md` (bloco de loop ativado), `.gitignore` (pelo proprio loop), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/specs/0004-modulo-de-loop.md`.
+
+### Decisoes Tomadas
+
+- DEC-011 e DEC-012 da spec 0004, do usuario: sinal por arquivo e helper em Python reusando o parser do validador.
+- DEC-013, minha: formato do campo `resultado`, com corte pelo comeco e truncagem declarada.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum. As decisoes ficaram na spec e em `DECISIONS.md`.
+
+### Pendencias
+
+- A skill nao foi reinstalada nos tres destinos globais: eles continuam na 2.2.0, sem o modulo de loop.
+- A rodada real usou uma ferramenta so. O `--agente` e neutro por construcao, mas `claude -p` e `gemini -p` nao foram exercitados.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente.
+- Motivo: a 2.3.0 esta fechada e verificada. O que sobra e propagacao (reinstalar) e uso real, que so o tempo mostra.
+
+## 2026-09-02 - Claude (spec 0004 definida)
+
+### Objetivo
+
+- Levar o usuario pelas oito perguntas abertas da spec 0004 e fechar o escopo da 2.3.0.
+
+### O Que Foi Feito
+
+- As oito perguntas foram decididas uma a uma, em ordem de dependencia: P-4 primeiro, porque a resposta dela restringia P-2 e P-6.
+- O escopo encolheu de G para M. Foram cortados worktree, notificacao de sistema, teto de custo e automacao de consenso, tres deles porque outra decisao ja resolvia o problema por construcao.
+- Spec 0004 passou para `Definida` com DEC-001 a DEC-009 e "Perguntas Abertas" vazia. Criterios de aceite de comportamento agora existem, porque ha o que cobrar: sao verificaveis com um agente falso, sem gastar chamada de modelo.
+- DEC-001 e DEC-006 foram copiadas para `docs/DECISIONS.md`: juntas, definem a fronteira entre o que a maquina pode afirmar e o que so a pessoa pode afirmar nos arquivos de memoria, o que vale para qualquer automacao futura.
+- T-019 a T-023 abertas. T-018 concluida.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/specs/0004-modulo-de-loop.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/SESSION.md`.
+
+### Decisoes Tomadas
+
+- DEC-001 a DEC-008 da spec 0004, todas do usuario. DEC-009 e decisao de implementacao minha, sobre versionar os tres marcadores juntos; e a unica que nao veio de pergunta e a que mais merece revisao.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum. As decisoes ficaram em `DECISIONS.md`, que e o lugar delas.
+
+### Pendencias
+
+- Nenhuma acionavel. T-019 a T-023 estao em "Proximas Tarefas".
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente com contexto suficiente.
+- Motivo: comecar por T-019, porque T-020 depende do bloco e do fluxo de ativacao existirem. T-022 pede um agente falso, entao da para testar o `loop.sh` inteiro sem gastar chamada de modelo.
+
+## 2026-09-02 - Claude (publicacao da 2.2.0 e abertura da spec 0004)
+
+### Objetivo
+
+- Publicar a 2.2.0 no GitHub e abrir a spec do modulo de loop, cujo pre-requisito passou a existir hoje.
+
+### O Que Foi Feito
+
+- `git push origin main`: os 5 commits da 2.2.0 sairam do laptop (`7040e4d..c5d8488`).
+- Spec `0004-modulo-de-loop` criada como `Rascunho`. Ela separa o que ja esta decidido (DEC-001, DEC-003 e DEC-005, herdadas da 0003) do que depende de resposta do usuario.
+- O pre-requisito que DEC-005 mandou para o modulo de loop, "secao Testes E Validacao de `QUALITY.md` com comando real", passou a ser satisfeito por este repositorio hoje, com `verify_repository.py`. E o que destrava a discussao do loop sem contrariar DEC-003.
+- Nenhuma tarefa de implementacao aberta: com oito perguntas em aberto, abrir tarefa seria comprar escopo que ainda nao existe.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/specs/0004-modulo-de-loop.md` (novo), `docs/TASKS.md`, `docs/SESSION.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma nova. A spec 0004 registra tres decisoes herdadas e nenhuma propria, de proposito: decidir agora seria decidir sem as respostas.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum.
+
+### Pendencias
+
+- T-018 em `## Aguardando Usuario`: as oito perguntas da spec 0004. Primeiro uso real da secao neste repositorio, o que tambem exercita a convencao contra um caso que nao foi construido para testa-la.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario, nao um agente.
+- Motivo: a spec so anda com as respostas de P-1 a P-8. P-3, P-4 e P-8 mudam o escopo o suficiente para que qualquer implementacao antes delas seja retrabalho.
 
 ## 2026-09-02 - Claude + Codex (evals 1, 2, 5, 6 e 9 no Codex CLI)
 

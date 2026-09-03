@@ -135,21 +135,22 @@ Os debates de 2026-04-25 foram rotacionados para `docs/archive/CONSENSUS-2026.md
 
 **Achado:** 0005-A1
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** o usuario, ou um modelo distinto, revalida a disposicao abaixo. Primeiro achado registrado neste repositorio, entao a disposicao ainda nao passou por ninguem alem de quem a escreveu.
+**Resolvido em:** 2026-09-03, depois da rodada 2. A disposicao se sustenta com as correcoes registradas em "Revalidacao", e o residuo saiu daqui para o backlog: T-050, T-051 e T-052. A pergunta que a rodada 2 deixou aberta (identificador estavel de diagnostico ou fragmento de mensagem) foi respondida pelo usuario no mesmo dia: identificador estavel, e T-051 foi desbloqueada com essa escolha.
 
-**Metodo:** pareceres-independentes
+**Metodo:** debate-aberto
 
-**Exposicao previa a outras posicoes:** nao
+**Exposicao previa a outras posicoes:** sim
 
-**Rodada:** 1 de 1
+**Rodada:** 2 de 2
 
 **Escapou de verificacao:** sim
 
 ### Contexto
 
 - Primeiro uso do formato de achado neste repositorio, no dogfood da 2.4.0 (T-049), sobre trabalho da propria T-048.
+- Proveniencia dos campos declarativos: a rodada 1 foi escrita so pelo Claude, sem outra posicao a vista (`pareceres-independentes`, exposicao previa `nao`). Os campos acima descrevem a rodada 2, em que o Codex leu a disposicao antes de escrever. As secoes "Disposicao" e "Por Que Nada Pegou Antes" continuam como saidas da rodada 1: o que a rodada 2 corrigiu esta em "Revalidacao", e nao reescrito por cima.
 - O repositorio tem um unico padrao de fixture, herdado da 2.2.0: um par `valido`/`invalido` declarado no dicionario `FIXTURES` de `verify_repository.py`, com o exit code esperado de cada lado. Ele funciona porque todo check daquela versao era ERRO, e ERRO muda o exit code.
 
 ### O Que Foi Encontrado
@@ -164,7 +165,23 @@ Os debates de 2026-04-25 foram rotacionados para `docs/archive/CONSENSUS-2026.md
 
 ### Revalidacao
 
-- (A preencher.) Ninguem alem de quem registrou olhou esta disposicao ate agora.
+Rodada 2, em 2026-09-03, pelo Codex CLI (`gpt-5.6-sol`, `model_reasoning_effort=high`, sandbox `read-only`), a pedido do usuario. Veredito: **se sustenta com ressalva**.
+
+Aceito, e sao correcoes de fato, todas conferidas no codigo antes de registrar:
+
+- **A disposicao descreve mal o proprio codigo.** `verificar_achado` conta linhas `[AVISO]` e confere uma unica exclusao, o titulo da entrada de controle. Ela nao compara motivo nem titulo dos avisos. A frase "sem elas, o par mede presenca de aviso, nao qual aviso" prometeu mais do que o codigo entrega: o portao continua sem saber **qual** aviso saiu. A entrada correspondente de `DECISIONS.md` herdou o mesmo exagero e foi corrigida.
+- **A contagem fixa em cinco e rigida e fraca ao mesmo tempo.** Quebra quando a fixture cresce por motivo legitimo, e aceita regressao compensada: um aviso certo some, outro errado aparece, o total continua cinco e o portao passa. Contraexemplo do Codex: os cinco avisos caindo todos na mesma entrada.
+- **T-050, como estava escrita, contradizia a propria disposicao.** Ela mandava recusar par cujos dois lados declarem o mesmo exit code, e `achado-project` tem os dois lados em 0 **de proposito**, que e exatamente a guarda de regressao que esta disposicao decidiu manter. Reescrita.
+- **A causa estrutural e mais funda que "exit codes iguais".** O `FIXTURES` modela status de processo e nao associa cada fixture aos diagnosticos que ela deve produzir. Exit codes diferentes tambem escondem teste inutil: um lado invalido que sai 1 por arquivo obrigatorio ausente passaria por T-050 sem nunca exercitar o check pretendido.
+- **O criterio "projeto que nunca registra achado nao recebe aviso novo" nao e exercitado literalmente.** Os dois lados de `achado-project` tem achado. Um bug que so emitisse aviso em arquivo sem nenhum achado passaria. Conferido: nenhuma outra fixture com entrada de debate roda em `--strict` (a do `v1-project` tem uma, e roda sem a flag).
+
+Onde a revalidacao ficou incompleta, e isso tambem e registro:
+
+- O Codex nao considerou que a **raiz deste repositorio ja e um controle vivo** do ultimo item: ela roda em `--strict` no primeiro check de `verify_repository.py`, tem uma entrada de debate sem `**Achado:**` (a de 2026-09-02) e fecha com zero avisos. Um `check_consensus_achado` que disparasse em entrada de debate reprovaria ali. E controle parcial, porque depende do dogfood e nao de fixture, e nao cobre arquivo sem nenhum achado; a critica sobrevive, mas nao inteira.
+- Sobre `**Escapou de verificacao:** sim`, o Codex considera discutivel, porque nenhum portao verde chegou a existir. **Mantido `sim`**: o criterio da DEC-007 e se a verificacao existente pegaria o defeito, e ela nao pegaria. A secao "Por Que Nada Pegou Antes" ja declara essa nuance em vez de esconde-la.
+- Os contraexemplos do Codex foram derivados por leitura, sem mutacao de fixture nem do validador, porque esta rodada proibiu editar arquivos. Nenhum deles foi executado.
+
+Residuo desta rodada: T-050 (reescrita), T-051 (desbloqueada em 2026-09-03, com o usuario escolhendo identificador estavel de diagnostico em vez de fragmento de mensagem) e T-052.
 
 ### Por Que Nada Pegou Antes
 

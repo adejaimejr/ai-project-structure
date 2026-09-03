@@ -24,7 +24,7 @@ Registro de decisoes importantes do projeto.
 
 ### Decisao
 
-- Par de fixture `valido`/`invalido` cujo caso invalido produz apenas AVISO nao e verificado pelo exit code sem `--strict`: o par roda com a flag, e o check **conta** os avisos e confere que eles caem na entrada certa.
+- Par de fixture `valido`/`invalido` cujo caso invalido produz apenas AVISO nao e verificado pelo exit code sem `--strict`: o par roda com a flag, e o check confere **quais** diagnosticos sairam, por motivo e por entrada, nunca so quantos exit codes bateram.
 - O dicionario `FIXTURES` de `verify_repository.py` continua cobrindo esse par, mas como guarda de regressao ("nao virou ERRO por acidente"), nunca como prova de que o caso invalido acusa alguma coisa.
 
 ### Motivo
@@ -34,7 +34,8 @@ Registro de decisoes importantes do projeto.
 ### Impacto
 
 - `verify_repository.py` ganhou `verificar_achado`, com os dois lados em `--strict`, contagem de avisos e conferencia de que a entrada de debate de controle nunca e citada.
-- Fica aberto o conserto geral, em `TASKS.md`: fazer o proprio `verify_repository.py` recusar um par cujos dois lados declarem o mesmo exit code esperado, em vez de depender de quem escrever a proxima fixture lembrar disso.
+- Fica aberto o conserto geral, em `TASKS.md` (T-050): fazer o proprio `verify_repository.py` exigir oracle discriminante por fixture, em vez de depender de quem escrever a proxima fixture lembrar disso.
+- **Correcao de 2026-09-03, vinda da revalidacao do achado `0005-A1` pelo Codex.** A redacao original desta decisao afirmava que o check "confere que eles caem na entrada certa". Isso descrevia mal o codigo: `verificar_achado` conta linhas `[AVISO]` e confere uma unica exclusao, a entrada de debate de controle. A regra acima continua valendo como esta escrita; o que faltava era a implementacao dela, agora em T-051. A primeira versao desta decisao tambem propunha, como conserto geral, recusar par com o mesmo exit code nos dois lados, o que contradizia a guarda que ela propria manda manter no `FIXTURES`; T-050 foi reescrita.
 
 ## 2026-04-25 - Estrutura multiagente com raiz minima
 

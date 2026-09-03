@@ -81,7 +81,8 @@ As entradas anteriores a 2026-09-02 foram rotacionadas para `docs/archive/SESSIO
 
 ### Pendencias
 
-- Publicar a 2.3.0 e reinstalar nos tres destinos, que seguem na 2.2.0. Decisao do usuario.
+- Nenhuma acionavel. Depois da bancada 2 o usuario autorizou publicar: `git push origin main` levou os 9 commits (`440919f..e9640d3`) e `./install.sh` propagou a 2.3.0 para os tres destinos globais, com paridade conferida por `diff -rq` e o modulo de loop presente (`scripts/loop.sh` executavel, `scripts/loop_task.py`, `references/loop.md` e o partial do bloco).
+- As linhas de sessoes anteriores que dizem "os tres destinos continuam na 2.2.0" valiam quando foram escritas e ficam como estao: registro historico nao se reescreve.
 
 ### Proximo Passo Recomendado
 

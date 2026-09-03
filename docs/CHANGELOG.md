@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-02 (skill v2.3.0 publicada)
+
+- 2.3.0 publicada no GitHub e instalada nos tres destinos globais, apos duas bancadas com agentes reais. Paridade conferida por `diff -rq`; `evals/`, `install.sh`, `README.md` e `CHANGELOG.md` seguem so na fonte canonica, como esperado.
+
 ## 2026-09-02 (skill v2.3.0)
 
 - Modulo opcional de loop: a estrutura passa a poder executar uma tarefa verificavel, nao so descreve-la. `references/loop.md`, `assets/partials/AGENTS-loop-block.md`, marcadores `loop` e os scripts `loop.sh` e `loop_task.py`. Nunca entra no scaffold.

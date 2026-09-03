@@ -36,7 +36,9 @@ Modelo de linha concluida:
 
 ## Aguardando Usuario
 
-- (Vazio. Tarefa que travou por falta de resposta do usuario vem para ca, com `**Pergunta:**` e `**Resposta:** (A preencher.)`.)
+- T-045: Responder as seis perguntas abertas da spec 0005 para ela poder virar `Definida`. (prioridade: media) (bloqueada: 2026-09-03) (spec: 0005-consenso-para-achados)
+  - **Pergunta:** P-1 a P-6 em `docs/specs/0005-consenso-para-achados.md`. As duas que mais mudam escopo: P-1, se o identificador de achado e global e verificavel ou livre e fiel ao uso real; e P-6, se o aviso do ponto cego entra no bloco core, que todo projeto le, ou fica so no template de `CONSENSUS.md`.
+  - **Resposta:** (A preencher.)
 
 ## Concluidas
 

@@ -93,6 +93,10 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
 
 ### Project
 
+- A skill fechou a versao 2.3.0 em 2026-09-02, com o modulo de loop: a estrutura passou a executar tarefa verificavel, nao so descreve-la. Publicada no GitHub e instalada nos tres destinos globais.
+- Gemini CLI nao roda nesta maquina: a conta cai em `IneligibleTierError`, com o free tier do Gemini Code Assist descontinuado para este cliente, que foi mandado migrar para Antigravity. Nao e defeito do modulo de loop, e nao adianta reinvestigar sem mudar de conta.
+- A evidencia de uma tarefa fechada pelo loop vale exatamente o que o portao dela vale. Numa bancada com tres ferramentas, duas fecharam tarefa com bug numa regra de borda que a suite nao cobria, e a evidencia estava correta. O argumento completo esta em `references/loop.md`, secao "A Evidencia Vale O Que O Portao Vale"; antes de declarar `(verifica:)` numa tarefa, pergunte se aquele comando falharia caso o trabalho saisse errado.
+
 - Check que procura um caractere proibido tem de escrever esse caractere escapado no proprio codigo. O `verify_repository.py` foi escrito com o travessao literal na comparacao e se acusou na primeira execucao (2026-09-02). Use `"\u2014"`, como o `validate_structure.py` ja fazia.
 - O `install.sh` da skill nao distribui tudo o que existe na fonte canonica: `evals/`, `install.sh`, `README.md` e `CHANGELOG.md` ficam apenas em `docs/skills/ai-project-structure/` e nao aparecem em `~/.claude/skills/`, `~/.agents/skills/` nem `~/.gemini/skills/` (verificado por `diff -rq` em 2026-09-02). Ferramenta que deve ficar restrita ao repositorio vai em `evals/`; o que vai em `scripts/` chega na maquina de todo usuario.
 

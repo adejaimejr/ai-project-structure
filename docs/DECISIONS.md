@@ -20,6 +20,22 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-09-03 - Parenteses no comando do marcador verifica nao sao suportados; --seco nao grava agente
+
+### Decisao
+
+- O marcador verifica continua como esta: o comando vai ate o primeiro `)`. Comando com parenteses nao e suportado; isso fica escrito no bloco core, no template de `TASKS.md` e em `references/loop.md`, e o validador acusa marcador cujo comando contem `(`. O `loop_task.py check` recusa a tarefa antes de chamar o agente.
+- `loop.sh --seco` nao repassa `--agente` ao fecho: evidencia so registra `agente=` quando um agente de fato rodou.
+
+### Motivo
+
+- Opcao (c) de T-061, escolhida pelo usuario em 2026-09-03 sobre (a) casar ate o ultimo `)`, que quebra linha com outro marcador depois, e (b) exigir crases, que muda contrato e obriga atualizacao de todo projeto. Comando com parenteses tem saida barata: um script auxiliar no projeto.
+- `agente=` foi definido como "fato conhecido com certeza"; gravar sem execucao contradiz a propria razao do campo (REVAL-3).
+
+### Impacto
+
+- Cobranca nova de nivel ERRO em projeto que tenha marcador verifica com parenteses; hoje esse marcador ja nao funciona no loop, entao acusar e tornar visivel o que ja estava quebrado. Trabalho em T-072 e T-060, exige versao nova da skill.
+
 ## 2026-09-03 - Promessa do bloco core que o validador nao cobra vira check com nivel declarado, ou texto honesto
 
 ### Decisao

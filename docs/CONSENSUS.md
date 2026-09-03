@@ -250,9 +250,9 @@ Codigo morto: `ENTRY_RE` (linha 59) e `DATE_RE` (linha 70) nunca sao usados.
 
 **Achado:** REVAL-3
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** qualquer agente conserta os itens sem decisao (T-060, exige 2.5.2); usuario decide o que fazer com `--seco --agente` e com a truncagem do `(verifica:)` (T-061).
+**Resolvido em:** 2026-09-03, T-061 respondida pelo usuario (opcao c, e `--seco` sem `agente=`); decisao em `docs/DECISIONS.md`, conserto em T-060 e T-072.
 
 **Metodo:** pareceres-independentes
 

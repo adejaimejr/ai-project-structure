@@ -2,9 +2,10 @@
 
 Historico de mudancas relevantes.
 
-## 2026-09-03 (T-059 respondida)
+## 2026-09-03 (T-059 e T-061 respondidas)
 
 - Usuario aceitou item a item os niveis propostos em REVAL-1. Decisao em `docs/DECISIONS.md`; T-069 a T-071 abertas para a 2.6.0; REVAL-1, REVAL-2 e REVAL-6 resolvidas.
+- T-061: opcao (c), parenteses no marcador verifica nao suportados e acusados (T-072); `--seco` sem `agente=` (T-060). REVAL-3 resolvida.
 
 ## 2026-09-03 (revalidacao adversarial da skill 2.5.1)
 

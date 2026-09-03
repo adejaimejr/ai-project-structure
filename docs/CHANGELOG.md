@@ -2,6 +2,11 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-03 (skill v2.5.1 publicada)
+
+- 2.5.1 instalada nos tres destinos globais. `diff -rq` acusa so `evals/`, `install.sh`, `README.md` e `CHANGELOG.md`, que nao sao distribuidos, e o `os.replace` da T-057 chegou nos tres `loop_task.py`.
+- Reinstalada de proposito **antes** da revalidacao: a superficie de scaffold roda contra a copia instalada, e com os destinos em 2.5.0 a sessao acharia a T-057 de novo como se fosse achado novo, e criaria projeto com marcador de versao divergente da fonte.
+
 ## 2026-09-03 (skill v2.5.1)
 
 - `loop_task.py` grava `docs/TASKS.md` por substituicao atomica. Antes usava `write_text` direto, que trunca antes de escrever: crash no meio partia o backlog vivo do projeto. Provado por mutacao; `test_loop.py` de 55 para 58 verificacoes.

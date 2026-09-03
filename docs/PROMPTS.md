@@ -61,13 +61,39 @@ Nao quero uma nota de aprovacao. Quero achados, e quero que os que sobreviverem 
 
 ## O que quero descobrir
 
-Onde o sistema **promete e nao entrega**. Cinco superficies, e a pergunta que interessa em cada uma:
+Onde o sistema **promete e nao entrega**. A validacao e da skill **inteira**: sete superficies, e nenhum arquivo dela pode ficar de fora. A pergunta que interessa em cada uma:
 
 1. **Contrato do bloco core (`AGENTS.md`).** Que regra dele nao e verificavel, nem por script nem por pessoa? Que regra e violavel sem que nada acuse? Ha regra que contradiz outra?
 2. **Validador (`scripts/validate_structure.py`).** Os 39 diagnosticos cobram o que dizem cobrar? Onde estao os falsos negativos, ou seja, o documento errado que passa limpo? Escreva o documento que passa e nao deveria.
 3. **Modulo de loop (`scripts/loop.sh`, `scripts/loop_task.py`, `references/loop.md`).** Qual e o caminho em que o loop escreve algo que o comando nao comprova? Onde ele perde trabalho? O que acontece com entrada hostil, arquivo enorme, ou tarefa cujo portao mente?
-4. **Portao dos evals (`evals/verify_repository.py`, `evals/test_loop.py`, `evals/fixtures/`).** Que mutacao no codigo passa verde? Esta e a pergunta mais importante das cinco, porque um portao cego faz todas as outras respostas valerem menos.
-5. **Fluxos de scaffold e atualizacao (`SKILL.md`, `references/atualizacao.md`, `references/specs.md`).** Um agente que nunca viu este projeto consegue seguir? Onde ele erraria? Aqui vale executar de verdade num diretorio descartavel, e nao so ler.
+4. **Portao dos evals (`evals/verify_repository.py`, `evals/test_loop.py`, `evals/fixtures/`, `evals/evals.json`).** Que mutacao no codigo passa verde? Esta e a pergunta mais importante das sete, porque um portao cego faz todas as outras respostas valerem menos.
+5. **Fluxos de scaffold, atualizacao e specs (`SKILL.md`, `references/atualizacao.md`, `references/specs.md`).** Um agente que nunca viu este projeto consegue seguir? Onde ele erraria? Aqui **execute de verdade** num diretorio descartavel, contra a **copia instalada** da skill, que e como ela dispara nas ferramentas. Ler o texto nao substitui rodar.
+6. **Templates entregues (`assets/`).** E o que o usuario final de fato recebe. Um projeto criado a partir deles passa em `--strict` no dia seguinte? Os templates concordam com o bloco core, ou algum ficou para tras quando o core mudou? T-055 e um defeito exatamente desta classe, ja achado: procure irmaos dele. Confira tambem que `assets/partials/` nunca e copiado para o projeto-alvo.
+7. **Distribuicao (`install.sh`, `agents/openai.yaml`, `README.md` e `CHANGELOG.md` da skill).** O `install.sh` e idempotente de verdade? O que ele faz com instalacao parcial, com destino ja existente e diferente, e com `--uninstall`? O que ele **nao** distribui esta certo? O `agents/openai.yaml` declara `allow_implicit_invocation: true`, e isso corresponde ao comportamento real no Codex? O `README.md` da skill descreve o que o codigo faz hoje, ou envelheceu?
+
+**Inventario de cobertura.** Antes de fechar, prove que nada ficou de fora. Todo item abaixo tem de aparecer no seu relatorio com a superficie que o atacou e o veredito:
+
+```
+SKILL.md                     -> superficie 5
+README.md                    -> superficie 7
+CHANGELOG.md                 -> superficie 7
+install.sh                   -> superficie 7
+agents/openai.yaml           -> superficie 7
+assets/AGENTS.md             -> superficies 1 e 6
+assets/CLAUDE.md             -> superficie 6
+assets/GEMINI.md             -> superficie 6
+assets/docs/                 -> superficie 6
+assets/partials/             -> superficies 5 e 6
+references/atualizacao.md    -> superficie 5
+references/specs.md          -> superficie 5
+references/loop.md           -> superficie 3
+scripts/validate_structure.py-> superficie 2
+scripts/loop.sh              -> superficie 3
+scripts/loop_task.py         -> superficie 3
+evals/                       -> superficie 4
+```
+
+Se voce concluir que algum item nao vale ser atacado, diga qual e por que. Omissao declarada e aceitavel; omissao silenciosa nao.
 
 ## Metodo
 
@@ -78,7 +104,7 @@ Onde o sistema **promete e nao entrega**. Cinco superficies, e a pergunta que in
 - A CLI propria do Grok esta bloqueada por cota mesmo com assinatura; use o Grok pelo `cursor-agent`.
 - A CLI do Gemini nao roda nesta maquina; use o Gemini pelo `cursor-agent`.
 
-**Uma familia de modelo por superficie, nao a mesma pergunta para todos.** Cinco agentes fazendo a mesma pergunta produzem cinco versoes do mesmo vies. Distribua as cinco superficies entre familias diferentes, e use uma familia **diferente da que achou** para verificar cada achado.
+**Uma familia de modelo por superficie, nao a mesma pergunta para todos.** Sete agentes fazendo a mesma pergunta produzem sete versoes do mesmo vies. Distribua as sete superficies entre familias diferentes, e use uma familia **diferente da que achou** para verificar cada achado. Se o orcamento nao der para sete rodadas, agrupe superficies vizinhas (2 com 4, 6 com 7) e diga que agrupou, em vez de cortar superficie em silencio.
 
 **Cada agente roda cego e isolado.** Aplique a DEC-003 da spec 0006: crie um worktree descartavel (`git worktree add`) e retire de la o corpo das entradas de `docs/CONSENSUS.md`, **deixando uma nota dizendo que a omissao foi proposital**. Agente que ve arquivo incompleto sem aviso conclui coisa errada sobre o repositorio. Mantenha os modelos de debate e de achado, que sao referencia de forma.
 
@@ -119,7 +145,7 @@ Baseline de hoje: 44 de 44, 58 de 58, e exit 0 sem erro e sem aviso. Qualquer nu
 
 ## Pronto quando
 
-1. As cinco superficies foram atacadas, cada uma por uma familia de modelo diferente, com o registro de qual rodou onde e com que comando.
+1. As sete superficies foram atacadas, com o registro de qual familia rodou onde e com que comando, e o inventario de cobertura preenchido item a item.
 2. Todo achado foi confirmado no codigo, ou marcado explicitamente como nao confirmado.
 3. A superficie 4 tem pelo menos tres mutacoes executadas, com o resultado de cada uma escrito, incluindo as que o portao **nao** pegou.
 4. Os achados estao em `docs/CONSENSUS.md` e o trabalho que sobrou esta em `docs/TASKS.md`.

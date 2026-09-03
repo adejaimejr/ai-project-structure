@@ -55,6 +55,8 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - A regra subiu para `docs/DECISIONS.md`, porque vale alem desta spec: arquivo de memoria do projeto se escreve por substituicao atomica, nunca por escrita direta.
 - **Prompt de revalidacao escrito em `docs/PROMPTS.md`**, que e o lugar dele nesta estrutura, e nao um arquivo solto. Ele distribui cinco superficies (contrato do bloco core, validador, modulo de loop, portao dos evals, fluxos de scaffold) entre familias de modelo diferentes, em vez de fazer a mesma pergunta a todos, que so produz cinco versoes do mesmo vies.
 - O prompt carrega o inventario de modelos conferido hoje, a lista do que **nao** deve ser redescoberto, e as onze restricoes que ja custaram tempo nesta sessao, incluindo as duas que me morderam: `git checkout` em arquivo com trabalho nao commitado, e `index()` casando com o modelo cercado no topo do `CONSENSUS.md`.
+- A pedido do usuario, que quis a validacao da skill **inteira**, o prompt passou de cinco para **sete superficies**: faltavam os templates de `assets/`, que sao o que o usuario final recebe, e a distribuicao (`install.sh`, `agents/openai.yaml`, `README.md` e `CHANGELOG.md` da skill). Entrou tambem um **inventario de cobertura** arquivo a arquivo, para "toda a skill" ser conferivel em vez de afirmada, com a regra de que omissao declarada e aceitavel e omissao silenciosa nao.
+- Reinstalacao feita **antes** da revalidacao, e nao por higiene: a superficie 5 roda contra a copia instalada, entao com os destinos em 2.5.0 a sessao nova acharia a T-057 de novo como achado novo, e criaria projeto com marcador divergente da fonte.
 
 ### Arquivos Criados Ou Alterados
 
@@ -72,7 +74,7 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 ### Pendencias
 
 - T-053 (tres calibragens da spec 0006 e a pergunta de segredo no bruto), T-054, T-055, T-056 e T-058 seguem abertas.
-- A skill esta em 2.5.1 no repositorio e em **2.5.0 nos tres destinos globais**: falta reinstalar.
+- Nenhuma. A 2.5.1 foi instalada nos tres destinos, com paridade conferida e o `os.replace` presente nos tres.
 
 ### Proximo Passo Recomendado
 

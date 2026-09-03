@@ -157,3 +157,22 @@ Registro de decisoes importantes do projeto.
 
 - Projeto em 2.1.0 nao e afetado ate declarar o marcador; a atualizacao passa a ter um passo explicito para isso (`references/atualizacao.md`, passo 7b).
 - Registrado tambem como DEC-010 e DEC-011 na spec `docs/specs/0003-tasks-verificaveis.md`.
+
+## 2026-09-02 - O que a automacao pode escrever na memoria do projeto
+
+### Decisao
+
+- Automacao que executa tarefa (o modulo de loop, previsto para a 2.3.0) so escreve na memoria do projeto **o que um comando comprova**: fecha tarefa apenas se ela declarou `(verifica: <comando>)` e o comando saiu 0, colando a saida real como `Evidencia: tipo=comando`. Nunca escreve `tipo=revisao-manual` nem `tipo=conferencia`.
+- Excecao unica: falta de contexto obrigatorio. Nesse caso a automacao move a tarefa para `## Aguardando Usuario` e escreve `**Pergunta:**`, `**Resposta:** (A preencher.)` e `(bloqueada: AAAA-MM-DD)`.
+
+### Motivo
+
+- Sem o limite, a evidencia passaria a ser escrita pela mesma coisa que ela deveria cobrar. Seria o teatro de conformidade que o consenso de 2026-09-02 ja tinha listado como risco, agora automatizado e em escala.
+- A excecao se sustenta porque o limite protege contra **alegacao de conclusao nao merecida**, e registrar uma duvida e o oposto disso. O pior resultado possivel dessa escrita e uma pergunta boba, que a pessoa le e descarta.
+- Sem a excecao, a pergunta so existiria no relatorio da rodada e se perderia entre sessoes, que e exatamente o Problema 2 que a 2.2.0 fechou.
+
+### Impacto
+
+- Define a fronteira entre o que a maquina pode afirmar e o que so a pessoa pode afirmar nos arquivos de memoria. Vale para qualquer automacao futura, nao so para o modulo de loop.
+- A fatia do backlog que a automacao consegue fechar fica limitada as tarefas que declararam comando. Tarefa de conteudo, pesquisa ou decisao continua sendo fechada por gente.
+- Registrado como DEC-001 e DEC-006 na spec `docs/specs/0004-modulo-de-loop.md`.

@@ -2,7 +2,247 @@
 
 Entradas antigas de `docs/SESSION.md`, rotacionadas em 2026-09-02 pela regra de "Rotacao De Arquivos" do `AGENTS.md`.
 
-Cobre de 2026-04-25 (criacao da estrutura multiagente e validacao por tri-consenso) a 2026-05-26 (empacotamento da skill no Agent Skills Open Standard e instalacao nas tres ferramentas). Ordem cronologica inversa, igual a do arquivo principal.
+Cobre de 2026-04-25 (criacao da estrutura multiagente e validacao por tri-consenso) a 2026-08-20 (skill 2.1.0 e publicacao no GitHub). Ordem cronologica inversa, igual a do arquivo principal.
+
+## 2026-08-20 - Claude (skill 2.1.0)
+
+### Objetivo
+
+- Implementar a skill 2.1.0 com duas features aprovadas pelo usuario: template opcional `STACK.md` (mapa de stack com documentacao oficial) e flag `--progress` no validador (projecao de tarefas e specs).
+
+### O Que Foi Feito
+
+- Criado `assets/docs/STACK.md`: tecnologias, pacotes principais, "Onde Consultar Primeiro" e notas de compatibilidade, para o agente consultar a fonte certa antes de mexer na stack.
+- Bloco core do `AGENTS.md` atualizado (v2.1.0): STACK.md em "Onde Escrever Cada Coisa" e gatilho novo de atualizacao; marcador do bloco specs tambem em v2.1.0.
+- `validate_structure.py --progress`: contagem de tarefas por secao e, por spec, status + tarefas concluidas/total + perguntas abertas. Somente-leitura por regra (DEC-003 da spec 0002).
+- `SKILL.md` para versao 2.1.0; STACK.md incluido no nivel "completa"; evals atualizados (eval 2 com STACK, eval 8 novo de progresso).
+- Dogfood: `docs/STACK.md` do meta-projeto preenchido; bloco core da raiz atualizado preservando o restante do arquivo; spec `0002-stack-e-progresso` criada, executada e concluida com evidencia; tarefas T-005 a T-007 registradas e concluidas.
+- Skill reinstalada; paridade dos tres destinos conferida; bateria completa aprovada (scaffold completa com STACK exit 0, meta-projeto exit 0, fixtures conforme esperado, zero travessao).
+- Decisoes de escopo confirmadas com o usuario: pipeline SDD completo, coverage math, attestation e CLI continuam fora; validacao de stack (rodar testes por framework) fica fora, com comandos do projeto em `QUALITY.md`.
+- Projeto publicado no GitHub a pedido do usuario: repositorio publico `adejaimejr/ai-project-structure`, branch `main`, primeiro commit com o estado da skill 2.1.0; `.gitignore` criado (`.DS_Store`, `__pycache__/`).
+- Adicionados `README.md` e `LICENSE` (MIT) na raiz a pedido do usuario, com a excecao de raiz minima registrada em "Regras Do Projeto" do `AGENTS.md`.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `README.md`, `evals/evals.json`, `scripts/validate_structure.py`, `assets/AGENTS.md`, `assets/partials/AGENTS-specs-block.md`, `assets/docs/STACK.md` (novo), `assets/docs/README.md`.
+- Projeto: `AGENTS.md` (raiz), `docs/STACK.md` (novo), `docs/specs/0002-stack-e-progresso.md` (novo), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+- Instalacoes: tres destinos reinstalados (fora do projeto).
+
+### Decisoes Tomadas
+
+- Ver DEC-001 a DEC-003 na spec `0002-stack-e-progresso` (validacao de stack fora; progresso como flag do validador; projecao somente-leitura).
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum novo (regras ja registradas).
+
+### Pendencias
+
+- Nenhuma acionavel.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente.
+- Motivo: 2.1.0 fechada; proximos passos dependem de uso real ou de novas ideias do backlog.
+
+## 2026-08-20 - Claude
+
+### Objetivo
+
+- Fechar duas inconsistencias documentais que apareceram quando os resultados das tres ferramentas foram reunidos.
+
+### O Que Foi Feito
+
+- Diagnosticada a divergencia do eval 4 entre ferramentas: o Codex parou na entrevista e viu exit 1 por diretorio vazio; o Claude Code respondeu a entrevista e viu exit 0. Nenhum dos dois errou. O `expected_output` do eval 4 so descrevia o que acontece antes das respostas e nao dizia o que esperar do validador depois, entao o passo 4 do roteiro de execucao ficava sem criterio.
+- Corrigido o `expected_output` do eval 4 em `docs/skills/ai-project-structure/evals/evals.json`: explicita que o criterio do eval e o comportamento da entrevista, que exit 1 em diretorio vazio e o resultado correto daquele ramo e nao reprova, e como exercitar o ramo "Avançar" ate exit 0. JSON revalidado.
+- Confirmado que `install.sh` copia apenas `SKILL.md`, `assets/`, `agents/`, `scripts/` e `references/`. Como `evals/` nao e propagado, a correcao nao exigiu reinstalacao nas tres ferramentas.
+- Consolidada a secao "Evidencia De Conclusao" da spec `0001-skill-v2`, que tinha ficado auto-contraditoria: linhas antigas ainda diziam "falta repetir no Codex CLI" ao lado das linhas que registravam o Codex concluido. Agora ha um bloco por tarefa e por ferramenta, com o resumo de 21 execucoes aprovadas no topo.
+- Registrado o fechamento da validacao em `docs/CHANGELOG.md` do projeto e no CHANGELOG proprio da skill.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/skills/ai-project-structure/evals/evals.json`
+- `docs/skills/ai-project-structure/CHANGELOG.md`
+- `docs/specs/0001-skill-v2.md`
+- `docs/CHANGELOG.md`
+- `docs/SESSION.md` (esta entrada)
+
+### Decisoes Tomadas
+
+- Nao versionar a skill para 2.0.1 por esta correcao: ela toca apenas `evals/`, que nao e material instalado, e nao muda comportamento algum da skill.
+- Manter os dois vereditos do eval 4 como validos em vez de escolher um e refazer a rodada da outra ferramenta: o defeito estava na definicao do eval, nao nas execucoes.
+
+### Aprendizados Para MEMORY.md
+
+- Eval cujo criterio e "nao criar nada" precisa dizer explicitamente o que esperar dos passos seguintes do roteiro, senao cada ferramenta interpreta o silencio de um jeito e os resultados ficam incomparaveis.
+
+### Pendencias
+
+- Nenhuma acionavel.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente.
+- Motivo: a skill v2.0.0 esta validada nas tres ferramentas e a documentacao esta coerente; a proxima acao depende do que o usuario quiser construir em cima.
+
+## 2026-08-20 - Codex
+
+### Objetivo
+
+- Executar a parte Codex CLI da T-002: os 7 evals da skill ai-project-structure v2.
+
+### O Que Foi Feito
+
+- Usada a copia instalada em `~/.agents/skills/ai-project-structure`; a comparacao com a fonte canonica mostrou apenas arquivos que o instalador nao propaga por design.
+- Executados os 7 evals em subdiretorios limpos sob `/tmp/skill-v2-tests-codex/`, sem inicializar git. Resultado: 7 de 7 aprovados.
+- O validador retornou exit 0 nos evals 1, 2, 3, 5 e 6. No eval 4, nao foi criado nenhum arquivo, como exige a entrevista antes do scaffold; consequentemente, o validador retornou exit 1 por arquivos ausentes. No eval 7, retornou exit 1 com exatamente os 2 erros esperados: ID `T-001` duplicado e Status `Fazendo` invalido.
+- No eval 6, o plano e o diff da atualizacao v1 para v2 foram apresentados sem alterar a copia, pois faltava confirmacao por item. As duas fixtures ficaram intactas, com hashes iguais antes e depois.
+- Durante esta rodada, o Gemini CLI tambem concluiu os 7 evals. Com as tres ferramentas aprovadas, T-002 foi movida para Concluidas e a spec 0001 foi marcada como Concluida.
+- Rodado o validador no repositorio: exit 0, com 4 avisos historicos conhecidos em entradas de 2026-04-25.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/TASKS.md`
+- `docs/specs/0001-skill-v2.md`
+- `docs/SESSION.md` (esta entrada)
+- Fora do repositorio: `/tmp/skill-v2-tests-codex/` (artefatos temporarios dos 7 evals, preservados).
+
+### Decisoes Tomadas
+
+- Considerar o eval 4 aprovado pelo comportamento exigido, mesmo com o exit 1 esperado do validador sobre um diretorio vazio.
+- Concluir T-002 e a spec 0001, pois Claude Code, Codex CLI e Gemini CLI aprovaram os 7 cenarios.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum. O resultado e especifico desta rodada de validacao.
+
+### Pendencias
+
+- Os artefatos em `/tmp/skill-v2-tests-codex/` seguem preservados e so podem ser removidos com confirmacao do usuario.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente.
+- Motivo: a validacao da skill v2 foi concluida; qualquer agente serve se tiver contexto suficiente.
+
+## 2026-08-20 - Gemini
+
+### Objetivo
+
+- Fechar a parte Gemini CLI da tarefa T-002, rodando os 7 evals da skill ai-project-structure.
+
+### O Que Foi Feito
+
+- T-002 executado: os 7 evals foram rodados com sucesso em diretorios limpos em `/tmp/skill-v2-tests-gemini/`. 
+- Nos evals 6 e 7 as fixtures foram copiadas antes da execucao, permanecendo intactas.
+- O validador `scripts/validate_structure.py` retornou exit 0 para os evals 1 a 6.
+- No eval 7, o validador retornou exit 1 acusando exatamente os 2 erros esperados (ID duplicado `T-001` e Status invalido `Fazendo`).
+- Teste extra: a skill disparou sozinha baseada na description, sem eu precisar citar explicitamente o nome da skill.
+- Validador rodado na raiz do projeto como checagem final (0 erros, 4 avisos historicos conhecidos).
+
+### Arquivos Criados Ou Alterados
+
+- `docs/TASKS.md`
+- `docs/specs/0001-skill-v2.md`
+- `docs/SESSION.md` (esta entrada)
+- Fora do repositorio: `/tmp/skill-v2-tests-gemini/` e os 7 subdiretorios temporarios para cada eval.
+
+### Decisoes Tomadas
+
+- Manter T-002 em aberto, e spec `0001-skill-v2` como "Em andamento", pois falta a avaliacao da ferramenta Codex CLI.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum.
+
+### Pendencias
+
+- T-002: Rodar os 7 evals no Codex CLI (invocando `$ai-project-structure`).
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): Codex CLI.
+- Motivo: Para completar a tarefa T-002.
+
+## 2026-08-20 - Claude
+
+### Objetivo
+
+- Resolver as pendencias T-002 (rodar os 7 evals da skill v2) e T-003 (testar o fluxo de atualizacao v1 para v2 de ponta a ponta), na parte que o Claude Code cobre.
+
+### O Que Foi Feito
+
+- Conferida a paridade fonte x instalado: `diff -r` entre `docs/skills/ai-project-structure/` e `~/.claude/skills/ai-project-structure/` acusa apenas os arquivos que o `install.sh` nao propaga por design (`CHANGELOG.md`, `README.md`, `evals/`, `install.sh`).
+- T-002 no Claude Code: os 7 evals executados em subdiretorios limpos sob `/tmp/skill-v2-tests/`, um por eval, fora do repositorio e sem git. Resultado 7/7 aprovados. Evals 6 e 7 rodaram sobre copias das fixtures; os originais ficaram intactos (hash conferido antes e depois).
+- Cada eval fechou com `scripts/validate_structure.py`: exit 0 nos evals 1 a 6; exit 1 no eval 7 com exatamente os 2 erros esperados (ID duplicado `T-001` e Status invalido `Fazendo`), relatados sem aplicar correcao.
+- T-003: montado um projeto v1 realista em `/tmp/skill-v2-tests/projeto-v1/` (fixture `v1-project` mais 2 entradas de sessao e 1 secao propria extra no `AGENTS.md`) e executado o fluxo de `references/atualizacao.md` inteiro. Os 8 invariantes passaram, incluindo a checagem por `diff` de que o conteudo fora dos marcadores ficou byte-identico.
+- Confirmado no T-003 que as duas secoes proprias do usuario ("Regra Local Do Time" e "Padrao De Nomes De Branch") migraram para "Regras Do Projeto" com o corpo inalterado; so o nivel do heading mudou de `##` para `###` para ficar aninhado na secao.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/TASKS.md`
+- `docs/specs/0001-skill-v2.md`
+- `docs/SESSION.md` (esta entrada)
+- Fora do repositorio: `/tmp/skill-v2-tests/` (7 subdiretorios de eval mais `projeto-v1/`), todos descartaveis.
+
+### Decisoes Tomadas
+
+- Manter T-002 em aberto: a tarefa exige as tres ferramentas e so o Claude Code foi coberto nesta sessao.
+- Preencher "Evidencia De Conclusao" da spec 0001 de forma parcial e marcada como tal, sem mudar o Status para Concluida, para nao perder o registro do que ja foi verificado.
+- Na migracao de TASKS do eval 6 e do T-003, atribuir apenas os IDs, sem acrescentar data as linhas de "Concluidas": a data nao foi confirmada pelo usuario e o validador nao a exige.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum. Os resultados sao execucao de teste ja registrada aqui e na spec.
+
+### Pendencias
+
+- T-002: repetir os mesmos 7 evals no Codex CLI (invocando `$ai-project-structure`) e no Gemini CLI. So entao a tarefa fecha.
+- Spec `0001-skill-v2` segue "Em andamento" ate T-002 fechar.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): Codex CLI e depois Gemini CLI, nesta ordem.
+- Motivo: o que falta e execucao dos mesmos evals nas outras duas ferramentas; qualquer agente serve se tiver contexto suficiente, mas a tarefa e por definicao amarrada a ferramenta.
+
+## 2026-08-20 - Claude
+
+### Objetivo
+
+- Analisar a skill/metodologia specsfy (github.com/promovaweb/specsfy), extrair o que serve ao nosso contexto e implementar a v2.0.0 da skill ai-project-structure.
+
+### O Que Foi Feito
+
+- Analise completa do specsfy: repo, 18 skills, CLI, metodo MCR-10, gates com scripts; complementada por relatorio dos videos do autor (via NotebookLM). Conclusao: sistemas complementares; importamos mecanismos pontuais, sem a cerimonia pesada.
+- Skill v2.0.0 implementada: entrevista numerada com opcoes, regra "Nunca Inferir", TASKS com IDs T-NNN, blocos gerenciados `ai-project-structure:core`/`:specs` com versao, validador `scripts/validate_structure.py` (Python 3, stdlib), modulo opcional de specs (`docs/specs/`), fluxos em `references/atualizacao.md` e `references/specs.md`, 7 evals com fixtures, CHANGELOG proprio da skill, `install.sh` copiando scripts/ e references/.
+- Regra nova a pedido do usuario: travessao (em dash, U+2014) proibido em todos os textos do projeto e do core da skill; validador acusa como erro; ocorrencias existentes substituidas.
+- Dogfood no meta-projeto: `AGENTS.md` da raiz atualizado para o template v2 com bloco specs; `docs/specs/` ativado com a spec `0001-skill-v2`; `TASKS.md` migrado para T-IDs; `PROJECT_CONTEXT.md` preenchido; `ROADMAP.md` atualizado; entrada de 2026-04-25 do `CONSENSUS.md` recebeu Status.
+- Skill reinstalada nas tres ferramentas; paridade conferida por diff; validador rodado do diretorio instalado contra o meta-projeto (0 erros, 4 avisos historicos de SESSION).
+
+### Arquivos Criados Ou Alterados
+
+- `docs/skills/ai-project-structure/`: SKILL.md, CHANGELOG.md (novo), install.sh, README.md, evals/evals.json, evals/fixtures/ (novo), scripts/validate_structure.py (novo), references/ (novo), assets/AGENTS.md, assets/partials/ (novo), assets/docs/{README,TASKS,QUALITY,MEMORY}.md, assets/docs/specs/ (novo), assets/docs/archive/README.md.
+- Raiz e docs vivos: `AGENTS.md`, `docs/PROJECT_CONTEXT.md`, `docs/TASKS.md`, `docs/ROADMAP.md`, `docs/CONSENSUS.md`, `docs/specs/` (novo), `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/DECISIONS.md`, `docs/MEMORY.md`.
+- Instalacoes: `~/.claude/skills/`, `~/.agents/skills/`, `~/.gemini/skills/` (reinstaladas, fora do projeto).
+
+### Decisoes Tomadas
+
+- Direcao da v2: melhorias pontuais + modulo de specs leve; sem pipeline SDD completo (decisao do usuario; ver `docs/DECISIONS.md` e DEC-001 a DEC-004 na spec 0001).
+- Travessao proibido em textos do projeto (pedido do usuario).
+
+### Aprendizados Para MEMORY.md
+
+- O usuario nao quer o caractere travessao (em dash, U+2014) em nenhum texto deste projeto; separadores aceitos: dois-pontos, ponto-e-virgula, virgula, parenteses, hifen.
+
+### Pendencias
+
+- Rodar os 7 evals manualmente nas tres ferramentas (T-002).
+- Testar o fluxo de atualizacao v1 para v2 em projeto real externo (T-003).
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente com acesso as tres ferramentas.
+- Motivo: as pendencias sao execucao de evals e teste de fluxo; nao exigem modelo especifico.
 
 ## 2026-05-26 - Claude
 

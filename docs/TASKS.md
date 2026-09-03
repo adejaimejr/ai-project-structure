@@ -30,16 +30,24 @@ Modelo de linha concluida:
 
 ## Proximas Tarefas
 
+- T-019: Bloco de loop, `assets/partials/AGENTS-loop-block.md`, marcadores `loop` em v2.3.0 e fluxo de ativacao no `SKILL.md`, com o portao que recusa ativacao sem comando real em "Testes E Validacao" de `QUALITY.md`. (prioridade: alta) (spec: 0004-modulo-de-loop)
+- T-020: `scripts/loop.sh` neutro: `--tarefa`, `--agente`, `--tentativas`; uma tarefa por rodada, ate 3 tentativas realimentando a saida da falha, fecho so com lastro de comando, e tarefa sem contexto movida para `Aguardando Usuario` com a pergunta escrita. (prioridade: alta) (spec: 0004-modulo-de-loop)
+- T-021: `verify_repository.py` cobrindo o bloco `loop` e o partial com a mesma paridade de `core` e `specs`, e versao 2.3.0 coerente entre `SKILL.md`, marcadores e `CHANGELOG.md`. (prioridade: alta) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
+- T-022: Evals e fixtures do modulo: ativacao recusada sem comando real, ativacao aceita, scaffold sem vestigio do modulo, e o comportamento do `loop.sh` exercitado com agente falso nos quatro caminhos (portao passa, portao falha 3x, tarefa sem `(verifica:)`, falta de contexto). (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
+- T-023: Dogfood: ativar o modulo neste repositorio e rodar o loop numa tarefa real com `(verifica:)`, conferindo que a evidencia escrita bate com a saida do comando. (prioridade: media) (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0004-modulo-de-loop)
+
 
 
 ## Aguardando Usuario
 
-- T-018: Responder as perguntas abertas da spec 0004 para ela poder virar `Definida`. (prioridade: media) (bloqueada: 2026-09-02) (spec: 0004-modulo-de-loop)
-  - **Pergunta:** P-1 a P-8 em `docs/specs/0004-modulo-de-loop.md`. As tres que mais mudam o escopo: P-3 (qual ferramenta executa o loop), P-4 (se o loop pode escrever na memoria sozinho, incluindo a propria evidencia) e P-8 (se automacao de consenso e teto de custo entram na 2.3.0 ou ficam para depois).
-  - **Resposta:** (A preencher.)
+- (Vazio. Tarefa que travou por falta de resposta do usuario vem para ca, com `**Pergunta:**` e `**Resposta:** (A preencher.)`.)
 
 ## Concluidas
 
+- 2026-09-02 T-024: Rotacionadas para `docs/archive/SESSIONS-2026.md` as 6 entradas de 2026-08-20, que levaram `SESSION.md` de volta a 31KB. (verifica: python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict)
+  - Evidencia: tipo=comando; procedimento=entradas movidas por script preservando a ordem cronologica inversa, ponteiro do arquivo principal e indice do archive atualizados, e `python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict` rodado depois; resultado=exit 0 sem aviso de rotacao; SESSION.md de 31KB para 16KB (12 entradas para 6), archive de 10 para 16 entradas, nenhuma entrada perdida
+- 2026-09-02 T-018: Respondidas as perguntas abertas da spec 0004, que passou de `Rascunho` para `Definida`. (spec: 0004-modulo-de-loop)
+  - Evidencia: tipo=conferencia; procedimento=as oito perguntas foram levadas ao usuario uma a uma, cada opcao com o tradeoff explicito, e as respostas foram escritas como DEC-001 a DEC-008 na spec; resultado=8 de 8 respondidas, secao "Perguntas Abertas" zerada, escopo reduzido de G para M (worktree, notificacao, teto de custo e automacao de consenso cortados), e DEC-001 e DEC-006 copiadas para `docs/DECISIONS.md` por terem impacto alem da spec
 - 2026-09-02 T-017: Rodados no Codex CLI os evals 1, 2, 5, 6 e 9, que dependem de julgamento de comportamento e nao tinham sido exercitados fora do Claude Code. (spec: 0003-tasks-verificaveis)
   - Evidencia: tipo=conferencia; procedimento=Codex CLI 0.152.1 instalado nesta maquina (`npm i -g @openai/codex`, autenticado via ChatGPT, skill 2.2.0 visivel em `~/.agents/skills/`), cinco rodadas de `codex exec` em diretorios descartaveis fora do repositorio, com os prompts literais de `evals.json`; resultado conferido por script proprio contra o `expected_output`, lendo o diretorio produzido e nao o relato do agente; resultado=5 de 5 aprovados. Evals 1, 2 e 5: 14 a 17 invariantes cada, todos OK, validador `--strict` exit 0 nos tres, marcadores em v2.2.0, data de adocao preenchida com a data do dia e secao `Aguardando Usuario` presente. Eval 6: plano antes de tocar arquivo (fixture byte a byte intocada na primeira volta), confirmacao por item, regra local do time preservada, migracao para T-NNN oferecida, e o modelo afirmou por conta propria que a tarefa historica fica sem evidencia por a regra nao ser retroativa. Eval 9: validador rodado nos dois casos, 0 erros no valido e 1 erro no invalido, diferenca explicada corretamente e fixture nao corrigida sem pedido
 - 2026-09-02 T-016: Corrigido o validador para considerar como ID da tarefa apenas o que abre a linha. Antes, qualquer `T-NNN` no texto contava, entao tarefa que cita outra virava ID duplicado e linha concluida que mencionava outro ID marcava esse outro como concluido. (verifica: python3 docs/skills/ai-project-structure/evals/verify_repository.py) (spec: 0003-tasks-verificaveis)

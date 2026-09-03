@@ -38,7 +38,9 @@ Modelo de linha concluida:
 
 ## Aguardando Usuario
 
-- (Vazio. Tarefa que travou por falta de resposta do usuario vem para ca, com `**Pergunta:**` e `**Resposta:** (A preencher.)`.)
+- T-053: Responder as perguntas abertas da spec 0006 para ela poder virar `Definida`. (prioridade: media) (bloqueada: 2026-09-03) (spec: 0006-automacao-do-consenso)
+  - **Pergunta:** P-1 a P-6 em `docs/specs/0006-automacao-do-consenso.md`. As tres que mais mudam escopo: P-1, se a operacao entrega material bruto ou monta a entrada de `CONSENSUS.md`, porque montar acordo e julgar; P-2, se a proibicao da DEC-019 (agente nao escreve em `CONSENSUS.md`) continua valendo quando sao N agentes em vez de um; e P-4, se cobre debate, achado ou os dois.
+  - **Resposta:** (A preencher.)
 
 ## Concluidas
 

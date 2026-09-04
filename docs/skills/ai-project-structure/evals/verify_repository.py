@@ -122,7 +122,23 @@ FIXTURES = {
     "aguardando-project/invalido": {
         "strict": False,
         "exit": 1,
-        "diagnosticos": ["ERRO|AGUARDANDO-SEM-PERGUNTA|docs/TASKS.md|T-002"],
+        "diagnosticos": [
+            "AVISO|CONSENSO-RODADA-EXPOSICAO-INVALIDA|docs/CONSENSUS.md|"
+            "2026-09-03 - Rodada sem exposicao",
+            "AVISO|CONSENSO-ABERTO-SEM-PROXIMO-PASSO|docs/CONSENSUS.md|"
+            "2026-09-03 - Rodada sem exposicao",
+            "AVISO|CERCA-ABERTA|docs/TASKS.md|",
+            "AVISO|TASK-ID-FORMATO-INVALIDO|docs/TASKS.md|T-1",
+            "AVISO|TASK-BLOQUEADA-FORA-DE-AGUARDANDO|docs/TASKS.md|T-005",
+            "ERRO|AGUARDANDO-SEM-PERGUNTA|docs/TASKS.md|T-002",
+            "AVISO|AGUARDANDO-SEM-RESPOSTA|docs/TASKS.md|T-002",
+            "AVISO|AGUARDANDO-SEM-RESPOSTA|docs/TASKS.md|T-004",
+            "AVISO|AGUARDANDO-SEM-BLOQUEADA|docs/TASKS.md|T-004",
+            "AVISO|EVIDENCIA-FORMATO-INVALIDO|docs/TASKS.md|T-006",
+            "AVISO|SPEC-CONCLUIDA-COM-PENDENTE|docs/specs/0001-exemplo.md|0001-exemplo.md",
+            "AVISO|SPEC-CONCLUIDA-SEM-EVIDENCIA|docs/specs/0001-exemplo.md|0001-exemplo.md",
+            "AVISO|SPEC-TASK-COM-STATUS|docs/specs/0001-exemplo.md|0001-exemplo.md",
+        ],
     },
     # Os checks de achado sao AVISO, nao ERRO: sem --strict os dois lados saem 0.
     "achado-project/valido": {"strict": True, "exit": 0, "diagnosticos": []},
@@ -133,6 +149,8 @@ FIXTURES = {
             "AVISO|ACHADO-SEM-ESCAPOU|docs/CONSENSUS.md|"
             "2026-09-03 - Achado sem declarar se escapou",
             "AVISO|CONSENSO-SEM-PENDENTE|docs/CONSENSUS.md|"
+            "2026-09-03 - Achado que escapou sem dizer por que nada pegou",
+            "AVISO|CONSENSO-RODADA-EXPOSICAO-INVALIDA|docs/CONSENSUS.md|"
             "2026-09-03 - Achado que escapou sem dizer por que nada pegou",
             "AVISO|ACHADO-SEM-SECAO-PONTO-CEGO|docs/CONSENSUS.md|"
             "2026-09-03 - Achado que escapou sem dizer por que nada pegou",
@@ -183,6 +201,7 @@ FIXTURES = {
             "AVISO|CONSENSO-STATUS-INVALIDO|docs/CONSENSUS.md|2026-09-03 - Status invalido",
             "AVISO|CONSENSO-SEM-PENDENTE|docs/CONSENSUS.md|2026-09-03 - Aberto sem proximo e rodada sem pendencia",
             "AVISO|CONSENSO-ABERTO-SEM-PROXIMO-PASSO|docs/CONSENSUS.md|2026-09-03 - Aberto sem proximo e rodada sem pendencia",
+            "AVISO|CONSENSO-RODADA-EXPOSICAO-INVALIDA|docs/CONSENSUS.md|2026-09-03 - Aberto sem proximo e rodada sem pendencia",
             "ERRO|NUCLEO-AUSENTE|docs/DECISIONS.md|docs/DECISIONS.md",
             "ERRO|NUCLEO-AUSENTE|docs/MEMORY.md|docs/MEMORY.md",
             "ERRO|NUCLEO-AUSENTE|docs/PROJECT_CONTEXT.md|docs/PROJECT_CONTEXT.md",
@@ -210,11 +229,13 @@ FIXTURES = {
             "AVISO|TASK-SEM-ID|docs/TASKS.md|proximas tarefas",
             "ERRO|SPEC-REF-NAO-RESOLVE|docs/TASKS.md|9999-ausente",
             "AVISO|TASK-PRIORIDADE-INVALIDA|docs/TASKS.md|T-001",
+            "AVISO|TASK-BLOQUEADA-FORA-DE-AGUARDANDO|docs/TASKS.md|T-001",
             "AVISO|TASK-BLOQUEADA-FORMATO|docs/TASKS.md|T-001",
+            "AVISO|TASK-BLOQUEADA-FORA-DE-AGUARDANDO|docs/TASKS.md|T-002",
             "AVISO|TASK-BLOQUEADA-ANTIGA|docs/TASKS.md|T-002",
             "AVISO|EVIDENCIA-TIPO-INVALIDO|docs/TASKS.md|T-012",
             "ERRO|VERIFICA-COMANDO-VAZIO|docs/TASKS.md|T-014",
-            "INFO|CONVENCOES-DATA-INVALIDA|docs/TASKS.md|",
+            "AVISO|CONVENCOES-DATA-INVALIDA|docs/TASKS.md|",
             "ERRO|EVIDENCIA-AUSENTE-COM-VERIFICA|docs/TASKS.md|T-011",
             "ERRO|EVIDENCIA-SEM-RESULTADO|docs/TASKS.md|T-012",
             "ERRO|TASK-CONCLUIDA-SEM-DATA|docs/TASKS.md|T-013",

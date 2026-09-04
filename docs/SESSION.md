@@ -41,6 +41,42 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-070, skill 2.7.0)
+
+### Objetivo
+
+- Fechar T-070 (dez checks AVISO decididos em T-059) pelo loop com o `terra`, e publicar a 2.7.0.
+
+### O Que Foi Feito
+
+- Pre-checagem da raiz contra os dez avisos novos (nenhuma violacao real; `T-1` e `(bloqueada:` aparecem so em prosa e sub-linha), portao proprio por comportamento (`evals/portao_t070.py`, onze casos mais controle, versao e verificador; falhava em 12 de 14), marcadores da raiz em v2.7.0 por script, tarefa refinada dizendo isso para o agente nao parar de novo para perguntar.
+- **Loop verde na tentativa 1**, sem pergunta desta vez. Dez codigos novos, 53 no total; `CONVENCOES-DATA-INVALIDA` de INFO para AVISO; `CONSENSO-ABERTO-SEM-PROXIMO-PASSO` passou a exigir valor, nao so presenca. Bump para 2.7.0 propagado, raiz identica ao asset.
+- **Revisao:** fixtures existentes ajustadas de forma legitima (`achado-project/valido` tinha rodada 5 com exposicao `nao`, que agora e aviso; `aguardando-project/invalido` ganhou casos e oracle). Tres consertos meus: `TASK_OWN_ID_RE` tinha virado exatamente tres digitos, o que faria `T-1000` deixar de ser ID e o loop nao achar a tarefa (agora tres ou mais); o paragrafo da 2.6.0 no `SKILL.md` foi substituido pelo da 2.7.0 em vez de acrescentado (restaurado); README da skill sem a 2.7.0 (acrescentado).
+- Quatro mutacoes contra o verificador (cerca aberta, resposta ausente, formato de evidencia, adocao de volta a INFO): quatro pegas.
+- 2.7.0 reinstalada nos tres destinos, `diff -rq` limpo fora do nao distribuido.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `README.md`, `assets/AGENTS.md`, `assets/partials/*.md`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/portao_t070.py`, `evals/fixtures/achado-project/valido/`, `evals/fixtures/aguardando-project/invalido/`.
+- Projeto: `AGENTS.md` (marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/revalidacao-2026-09-03/`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal. "Tres digitos" da decisao de T-059 lido como "pelo menos tres": `T-1` e invalido, `T-1000` continua ID.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum novo. O padrao "refinar a tarefa com o que o agente vai perguntar" evitou a rodada perdida de T-069; e pratica, nao regra.
+
+### Pendencias
+
+- T-071 (texto do core), T-072 (diagnostico de parenteses), T-060 (loop) e T-073 (install.sh) abertas. Com T-069 e T-070 fechadas, das 17 promessas violaveis da REVAL-1/2 sobram as duas de texto (T-071).
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente para T-071 e T-072 juntas, que sao a proxima release (texto do core mais um ERRO).
+- Motivo: fecham o residuo de T-059 e T-061 e cabem numa rodada so.
+
 ## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-069, skill 2.6.0)
 
 ### Objetivo

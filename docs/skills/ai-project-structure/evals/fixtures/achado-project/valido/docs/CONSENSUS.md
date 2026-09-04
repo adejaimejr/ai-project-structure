@@ -34,7 +34,7 @@
 
 **Metodo:** pareceres-independentes
 
-**Exposicao previa a outras posicoes:** nao
+**Exposicao previa a outras posicoes:** sim
 
 **Rodada:** 5 de 5
 

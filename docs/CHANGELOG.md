@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-04 (skill v2.7.0)
+
+- Dez lacunas de qualidade viram AVISO no validador (T-070, decisao de T-059), 53 codigos no total, cada um com fixture. Fechada pelo loop com Codex `gpt-5.6-terra` na tentativa 1. Instalada nos tres destinos.
+
 ## 2026-09-04 (skill v2.6.0)
 
 - Seis contradicoes estruturais viram ERRO no validador (T-069, decisao de T-059), cada uma com fixture. Marcador verifica passa a valer so no fim da linha, o que tambem acaba com a truncagem de comando com parenteses. Fechada pelo loop com Codex `gpt-5.6-terra` na tentativa 1 da rodada 2, depois de parar para perguntar na rodada 1. Instalada nos tres destinos. Verificador 59 de 59, bateria 62 de 62.

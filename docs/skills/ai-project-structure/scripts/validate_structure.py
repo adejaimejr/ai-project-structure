@@ -60,7 +60,9 @@ ENTRY_RE = re.compile(r"^## \d{4}-\d{2}-\d{2}", re.MULTILINE)
 TASK_ID_RE = re.compile(r"\bT-(\d+)\b")
 # ID proprio da tarefa: o que abre a linha, depois da data quando ela e concluida.
 # Qualquer outro T-NNN no texto e referencia a outra tarefa, nao um segundo ID.
-TASK_OWN_ID_RE = re.compile(r"^(?:\d{4}-\d{2}-\d{2}\s+)?T-(\d+)\b")
+# Tres digitos ou mais: `T-1` e formato invalido, `T-1000` continua ID.
+TASK_OWN_ID_RE = re.compile(r"^(?:\d{4}-\d{2}-\d{2}\s+)?T-(\d{3,})\b")
+TASK_OWN_ID_CANDIDATE_RE = re.compile(r"^(?:\d{4}-\d{2}-\d{2}\s+)?T-([^\s:]+)\b")
 SPEC_REF_RE = re.compile(r"\(spec:\s*([^)]+)\)")
 SPEC_NAME_RE = re.compile(r"^(\d{4})-[a-z0-9][a-z0-9-]*\.md$")
 PRIORITY_RE = re.compile(r"\(prioridade:\s*([^)]*)\)")
@@ -105,6 +107,7 @@ CODIGOS = {
     "CONSENSO-SEM-STATUS",
     "CONSENSO-STATUS-INVALIDO",
     "CONSENSO-ABERTO-SEM-PROXIMO-PASSO",
+    "CONSENSO-RODADA-EXPOSICAO-INVALIDA",
     # CONSENSUS.md, achado
     "ACHADO-SEM-IDENTIFICADOR",
     "ACHADO-SEM-ESCAPOU",
@@ -129,7 +132,13 @@ CODIGOS = {
     "EVIDENCIA-AUSENTE-COM-VERIFICA",
     "EVIDENCIA-SEM-RESULTADO",
     "EVIDENCIA-TIPO-INVALIDO",
+    "EVIDENCIA-FORMATO-INVALIDO",
     "VERIFICA-COMANDO-VAZIO",
+    "AGUARDANDO-SEM-RESPOSTA",
+    "AGUARDANDO-SEM-BLOQUEADA",
+    "TASK-ID-FORMATO-INVALIDO",
+    "TASK-BLOQUEADA-FORA-DE-AGUARDANDO",
+    "CERCA-ABERTA",
     # specs/
     "SPEC-NOME-INVALIDO",
     "SPEC-PREFIXO-DUPLICADO",
@@ -138,6 +147,7 @@ CODIGOS = {
     "SPEC-TASK-INEXISTENTE",
     "SPEC-CONCLUIDA-COM-PENDENTE",
     "SPEC-CONCLUIDA-SEM-EVIDENCIA",
+    "SPEC-TASK-COM-STATUS",
 }
 
 
@@ -159,6 +169,30 @@ def strip_fences(text):
         if not in_fence:
             out.append(line)
     return "\n".join(out)
+
+
+def check_unclosed_fences(root, report):
+    """Cerca ``` sem fechamento esconde o restante do arquivo do parser."""
+    targets = [root / "AGENTS.md", root / "CLAUDE.md", root / "GEMINI.md"]
+    docs = root / "docs"
+    if docs.is_dir():
+        targets.extend(sorted(docs.glob("*.md")))
+        specs = docs / "specs"
+        if specs.is_dir():
+            targets.extend(sorted(specs.rglob("*.md")))
+    for path in targets:
+        if not path.is_file():
+            continue
+        text = read(path)
+        if text is None:
+            continue
+        opened = False
+        for line in text.splitlines():
+            if line.lstrip().startswith("```"):
+                opened = not opened
+        if opened:
+            rel = path.relative_to(root).as_posix()
+            report.aviso(rel, "CERCA-ABERTA", "Cerca de codigo ``` aberta ate o fim do arquivo.")
 
 
 class Report:
@@ -399,17 +433,28 @@ def check_consensus_declaration(title, body, report):
             f"Entrada '{title}' com '**Rodada:** {rodada}' fora do formato 'N de N'.",
             title,
         )
-    elif int(m.group(1)) > CONSENSUS_ROUNDS_SEM_PENDENCIA and not (
-        field_value(body, "Pendente da rodada anterior") or ""
-    ).strip():
-        report.aviso(
-            rel,
-            "CONSENSO-SEM-PENDENTE",
-            f"Entrada '{title}' esta na rodada {m.group(1)} sem "
-            "'**Pendente da rodada anterior:**' dizendo o que a anterior deixou "
-            "em aberto.",
-            title,
-        )
+    else:
+        number = int(m.group(1))
+        exposure = normalize(field_value(body, "Exposicao previa a outras posicoes") or "")
+        if number >= 2 and exposure == "nao":
+            report.aviso(
+                rel,
+                "CONSENSO-RODADA-EXPOSICAO-INVALIDA",
+                f"Entrada '{title}' esta na rodada {number} com exposicao previa 'nao'; "
+                "da rodada 2 em diante a exposicao previa deve ser 'sim'.",
+                title,
+            )
+        if number > CONSENSUS_ROUNDS_SEM_PENDENCIA and not (
+            field_value(body, "Pendente da rodada anterior") or ""
+        ).strip():
+            report.aviso(
+                rel,
+                "CONSENSO-SEM-PENDENTE",
+                f"Entrada '{title}' esta na rodada {m.group(1)} sem "
+                "'**Pendente da rodada anterior:**' dizendo o que a anterior deixou "
+                "em aberto.",
+                title,
+            )
 
 
 def check_consensus_achado(title, body, report):
@@ -495,9 +540,7 @@ def check_consensus(root, report, adopted=None):
                 "(esperado: aberto | resolvido | arquivado).",
                 title,
             )
-        elif status == "aberto" and not re.search(
-            r"\*\*Pr[oó]ximo passo:\*\*", body
-        ):
+        elif status == "aberto" and not (field_value(body, "Proximo passo") or "").strip():
             report.aviso(
                 "docs/CONSENSUS.md",
                 "CONSENSO-ABERTO-SEM-PROXIMO-PASSO",
@@ -613,14 +656,22 @@ def check_tasks(root, report):
             if is_placeholder(line):
                 continue
             own = TASK_OWN_ID_RE.match(line)
+            candidate = TASK_OWN_ID_CANDIDATE_RE.match(line)
             ids = [own.group(1)] if own else []
             # Unicidade vale no arquivo todo (inclusive Ideias e Concluidas).
             all_ids.extend(ids)
             if sec == "concluidas":
                 ids_done.update(ids)
+            if candidate and not own:
+                report.aviso(
+                    "docs/TASKS.md",
+                    "TASK-ID-FORMATO-INVALIDO",
+                    f"ID proprio fora do formato T-NNN (pelo menos tres digitos): T-{candidate.group(1)}.",
+                    f"T-{candidate.group(1)}",
+                )
             if sec in open_sections:
                 any_line = True
-                if not ids:
+                if not ids and not candidate:
                     lines_without_id.append((sec, line))
     # Check 7: unicidade
     seen = set()
@@ -712,6 +763,13 @@ def check_markers_values(sections, report):
                 )
             m = BLOCKED_RE.search(line)
             if m:
+                if sec != "aguardando usuario":
+                    report.aviso(
+                        "docs/TASKS.md",
+                        "TASK-BLOQUEADA-FORA-DE-AGUARDANDO",
+                        f"{label} usa '(bloqueada: ...)' fora de 'Aguardando Usuario'.",
+                        label,
+                    )
                 blocked = parse_date(m.group(1))
                 if blocked is None:
                     report.aviso(
@@ -757,6 +815,22 @@ def check_waiting(sections, report):
                 "'**Pergunta:**'. Sem a pergunta registrada, a espera nao e verificavel.",
                 task_label(line),
             )
+        if not any(normalize(s).startswith("**resposta:**") for s in task["sub"]):
+            report.aviso(
+                "docs/TASKS.md",
+                "AGUARDANDO-SEM-RESPOSTA",
+                f"{task_label(line)} esta em 'Aguardando Usuario' sem a sub-linha "
+                "'**Resposta:**'.",
+                task_label(line),
+            )
+        if not BLOCKED_RE.search(line):
+            report.aviso(
+                "docs/TASKS.md",
+                "AGUARDANDO-SEM-BLOQUEADA",
+                f"{task_label(line)} esta em 'Aguardando Usuario' sem marcador "
+                "'(bloqueada: AAAA-MM-DD)'.",
+                task_label(line),
+            )
 
 
 def check_evidence(root, sections, report):
@@ -769,7 +843,7 @@ def check_evidence(root, sections, report):
     (a regra nao e retroativa)."""
     adopted, declared = adoption_date(root)
     if declared and adopted is None:
-        report.info(
+        report.aviso(
             "docs/TASKS.md",
             "CONVENCOES-DATA-INVALIDA",
             "Marcador '(convencoes-2-2-0-desde:)' sem data valida; preencha com a "
@@ -788,6 +862,22 @@ def check_evidence(root, sections, report):
                 label,
             )
         evidences = evidence_lines(task)
+        done = DATE_PREFIX_RE.match(line)
+        done_date = parse_date(done.group(1)) if done else None
+        if adopted is not None and done_date is not None and done_date >= adopted:
+            for evidence in evidences:
+                invalid = []
+                for field in ("tipo", "procedimento", "resultado"):
+                    match = re.search(rf"\b{field}\s*=\s*([^;]*)", evidence)
+                    if not match or not match.group(1).strip():
+                        invalid.append(field)
+                if invalid:
+                    report.aviso(
+                        "docs/TASKS.md",
+                        "EVIDENCIA-FORMATO-INVALIDO",
+                        f"{label} com evidencia sem campo preenchido: {', '.join(invalid)}.",
+                        label,
+                    )
         declared_cmd = VERIFICA_RE.search(line)
         if declared_cmd:
             command = squeeze(declared_cmd.group(1))
@@ -812,8 +902,6 @@ def check_evidence(root, sections, report):
             continue
         if evidences or adopted is None:
             continue
-        done = DATE_PREFIX_RE.match(line)
-        done_date = parse_date(done.group(1)) if done else None
         if done_date is not None and done_date >= adopted:
             report.aviso(
                 "docs/TASKS.md",
@@ -917,12 +1005,23 @@ def check_specs(root, report, task_ids, done_ids):
                 clean,
                 re.MULTILINE | re.DOTALL,
             )
-            if not evidence or "(a preencher" in normalize(evidence.group(1)):
+            if not evidence or not evidence.group(1).strip() or "(a preencher" in normalize(evidence.group(1)):
                 report.aviso(
                     rel, "SPEC-CONCLUIDA-SEM-EVIDENCIA",
                     "Spec Concluida sem 'Evidencia De Conclusao' preenchida.",
                     path.name,
                 )
+        if tasks_section and re.search(
+            r"^\s*-\s*T-\d+[^\n]*\(status:\s*[^)]*\)",
+            tasks_section.group(1),
+            re.MULTILINE | re.IGNORECASE,
+        ):
+            report.aviso(
+                rel,
+                "SPEC-TASK-COM-STATUS",
+                "Spec registra status de tarefa na secao 'Tarefas'; o status vive so em TASKS.md.",
+                path.name,
+            )
 
 
 def spec_overview(root, done_ids, archived):
@@ -1035,6 +1134,7 @@ def main(argv=None):
     report = Report()
     check_core_files(root, report)
     check_em_dash(root, report)
+    check_unclosed_fences(root, report)
     check_bridges(root, report)
     check_markers(root, report)
     check_session(root, report)

@@ -149,6 +149,14 @@ bloco `loop` despareado ou sem versao, arquivo do nucleo vazio e ID repetido
 entre o `TASKS.md` vivo e `docs/archive/TASKS-*.md`. O marcador verifica so vale
 no fim da linha.
 
+Da versao 2.7.0 em diante, dez lacunas viram AVISO: evidencia sem `tipo=`,
+`procedimento=` ou `resultado=` preenchidos, espera sem `**Resposta:**` ou sem
+marcador bloqueada, exposicao previa `nao` da rodada 2 em diante, `**Proximo
+passo:**` vazio em entrada aberta, cerca de codigo aberta ate o fim do arquivo,
+spec Concluida com evidencia vazia, status de tarefa dentro da spec, ID proprio
+fora de `T-NNN` (pelo menos tres digitos), marcador bloqueada fora de Aguardando
+Usuario, e o marcador de adocao ainda com placeholder (era INFO).
+
 ## Verificador do repositorio
 
 ```bash

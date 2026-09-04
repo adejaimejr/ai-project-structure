@@ -2,6 +2,17 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.7.0 - 2026-09-04
+
+Avisos que ja eram promessas da estrutura agora sao diagnosticados pelo
+`validate_structure.py`: formato incompleto de evidencia, tarefa aguardando sem
+Resposta ou marcador bloqueada, exposicao `nao` da rodada 2 em diante, proximo
+passo vazio em consenso aberto, cerca ``` sem fechamento, spec concluida sem
+evidencia, status de tarefa dentro de spec, ID proprio fora de `T-NNN`, marcador
+bloqueada fora de Aguardando Usuario e data de adocao invalida. Cada codigo tem
+fixture com oracle exato, e os tres marcadores dos blocos gerenciados sobem para
+v2.7.0.
+
 ## 2.6.0 - 2026-09-04
 
 Seis contradicoes estruturais que passavam limpas agora sao ERRO no

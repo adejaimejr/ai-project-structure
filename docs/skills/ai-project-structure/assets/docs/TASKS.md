@@ -7,7 +7,7 @@ Formato de tarefa:
 - ID `T-NNN` sequencial e unico. Nunca reutilize um ID, nem apos concluir.
 - Novo ID = maior ID ja usado + 1 (confira tambem `docs/archive/TASKS-*.md`, se existir).
 - O status da tarefa e a secao onde ela esta (Em Andamento / Proximas Tarefas / Aguardando Usuario / Concluidas). Nao use campo de status na linha.
-- Marcadores opcionais no fim da linha: `(prioridade: alta | media | baixa)`, `(spec: NNNN-slug)` quando a tarefa pertence a uma spec de `docs/specs/`, `(verifica: <comando>)` quando ja se sabe como a tarefa sera verificada, e `(bloqueada: AAAA-MM-DD)` nas tarefas de "Aguardando Usuario".
+- Marcadores opcionais no fim da linha: `(prioridade: alta | media | baixa)`, `(spec: NNNN-slug)` quando a tarefa pertence a uma spec de `docs/specs/`, `(verifica: <comando>)` quando ja se sabe como a tarefa sera verificada (parenteses no comando nao sao suportados: use script auxiliar, por exemplo `bash portao.sh`), e `(bloqueada: AAAA-MM-DD)` nas tarefas de "Aguardando Usuario".
 - Toda tarefa movida para "Concluidas" carrega uma sub-linha `Evidencia:`. A regra completa esta em "Evidencia De Fechamento", no `AGENTS.md`.
 - Data de adocao das convencoes: `(convencoes-2-2-0-desde: AAAA-MM-DD)`. Troque `AAAA-MM-DD` pela data em que este projeto adotou a versao 2.2.0 da estrutura. Linha concluida antes dessa data nao e cobrada: registro historico nao vira alegacao sem evidencia.
 

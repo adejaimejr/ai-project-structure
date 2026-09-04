@@ -69,6 +69,10 @@ PRIORITY_RE = re.compile(r"\(prioridade:\s*([^)]*)\)")
 # Marcador so vale no fim da linha, opcionalmente seguido por outros marcadores.
 # Uma mencao em prosa como "`(verifica:)` sem resultado" nao declara comando.
 VERIFICA_RE = re.compile(r"\(verifica:\s*([^)]*)\)(?=\s*(?:\([^)]*\)\s*)*$)")
+# O formato do marcador nao tem escape para parenteses: o primeiro `)` fecha o
+# marcador. Detectar o `(` antes dele permite explicar a limitacao, em vez de
+# o loop tratar a tarefa como se ela nao tivesse portao.
+VERIFICA_COM_PARENTESES_RE = re.compile(r"\(verifica:\s*[^)]*\(")
 BLOCKED_RE = re.compile(r"\(bloqueada:\s*([^)]*)\)")
 ADOPTION_RE = re.compile(r"\(convencoes-2-2-0-desde:\s*([^)]*)\)")
 DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -134,6 +138,7 @@ CODIGOS = {
     "EVIDENCIA-TIPO-INVALIDO",
     "EVIDENCIA-FORMATO-INVALIDO",
     "VERIFICA-COMANDO-VAZIO",
+    "VERIFICA-COMANDO-PARENTESES",
     "AGUARDANDO-SEM-RESPOSTA",
     "AGUARDANDO-SEM-BLOQUEADA",
     "TASK-ID-FORMATO-INVALIDO",
@@ -751,6 +756,15 @@ def check_markers_values(sections, report):
                     "TASK-PRIORIDADE-INVALIDA",
                     f"{label} com '(prioridade: {m.group(1).strip()})' fora do "
                     "conjunto conhecido (alta | media | baixa).",
+                    label,
+                )
+            if VERIFICA_COM_PARENTESES_RE.search(line):
+                report.erro(
+                    "docs/TASKS.md",
+                    "VERIFICA-COMANDO-PARENTESES",
+                    f"{label} declara '(verifica: ...)' com parenteses no comando. "
+                    "Parenteses nao sao suportados nesse marcador: use um script "
+                    "auxiliar, por exemplo 'bash portao.sh'.",
                     label,
                 )
             m = VERIFICA_RE.search(line)

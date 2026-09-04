@@ -25,7 +25,7 @@ Desativar e remover o bloco entre os marcadores `loop`. Nada mais fica para tras
 
 Uma rodada trata **uma** tarefa:
 
-1. **Elegibilidade.** A tarefa indicada precisa existir em "Em Andamento" ou "Proximas Tarefas" e ter `(verifica: <comando>)` na linha. Sem isso, a rodada termina antes de chamar o agente, com codigo diferente de zero.
+1. **Elegibilidade.** A tarefa indicada precisa existir em "Em Andamento" ou "Proximas Tarefas" e ter `(verifica: <comando>)` na linha. Parenteses no comando nao sao suportados: use um script auxiliar no projeto, por exemplo `bash portao.sh`. Sem isso, a rodada termina antes de chamar o agente, com codigo diferente de zero.
 2. **Trabalho.** O agente recebe a tarefa e o `AGENTS.md` do projeto, que ja traz os limites do bloco de loop.
 3. **Portao.** Roda o comando declarado em `(verifica:)`, no diretorio do projeto.
 4. **Realimentacao.** Portao falhou e ainda ha tentativa: a saida do comando volta como contexto para a proxima. Essa realimentacao e a unica coisa que o loop faz melhor que uma pessoa rodando o comando na mao; sem ela o modulo nao teria razao de existir.

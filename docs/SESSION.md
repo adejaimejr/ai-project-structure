@@ -41,6 +41,42 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-072 e T-071, skill 2.8.0)
+
+### Objetivo
+
+- Fechar o residuo de T-059 e T-061 (diagnostico de parenteses no marcador verifica, e texto honesto no core) pelo loop com o `terra`, numa release so.
+
+### O Que Foi Feito
+
+- As duas tarefas mudam o texto do bloco core, que o loop nao pode propagar para a raiz. Portoes proprios por comportamento e texto **sem** o `verify_repository.py` (paridade quebrada de proposito ate a propagacao), replicando o que ele cobraria de versao e cobertura por codigo. Marcadores da raiz em v2.8.0 antes; tarefas refinadas dizendo quem propaga.
+- **T-072** (primeiro, faz o bump): loop travou na primeira tentativa de lancamento porque o `codex exec` herdou stdin aberto e ficou em "Reading additional input from stdin"; relancado com `</dev/null`, verde na tentativa 1. `VERIFICA-COMANDO-PARENTESES` (ERRO) com fixture, `loop_task.py check` recusa e explica, texto no item do marcador no core, no cabecalho do template de `TASKS.md` e em `references/loop.md`, teste novo na bateria (63). Core propagado por script, verificador 59 de 59.
+- **T-071**: verde na tentativa 1. Secao das pontes diz o que o validador confere de fato (so a mencao a `AGENTS.md`). No travessao o agente **estreitou a regra** para os arquivos que o validador olha; a decisao era texto honesto sobre o alcance, nao regra menor (o verificador deste repo acusa em qualquer arquivo versionado). Reescrito por mim: a regra segue valendo em todo texto, o validador acusa em `AGENTS.md`, pontes e `docs/**/*.md`, fora disso ninguem confere por script. Propagado.
+- 2.8.0 reinstalada nos tres destinos, `diff -rq` limpo fora do nao distribuido.
+- T-060 ganhou dois itens vindos destas rodadas: agente chamado com stdin fechado, e o prompt dizendo que propagacao ao `AGENTS.md` e do agente de chat.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/docs/TASKS.md`, `assets/partials/*.md`, `references/loop.md`, `scripts/validate_structure.py`, `scripts/loop_task.py`, `evals/verify_repository.py`, `evals/test_loop.py`, `evals/portao_t071.py`, `evals/portao_t072.py`, `evals/fixtures/cobertura-tarefas/`.
+- Projeto: `AGENTS.md` (core e marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/revalidacao-2026-09-03/`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal. Aplicadas as de T-059 (texto) e T-061 (opcao c).
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum novo. O stdin aberto e defeito de script (T-060), nao licao de processo.
+
+### Pendencias
+
+- Com T-069 a T-072 fechadas, o residuo de T-059 e T-061 acabou. Abertas: T-060 (loop, agora com quatro itens novos), T-062, T-063, T-064, T-073, e T-053 a T-058.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente para T-060, que e o pacote do loop e ja tem quatro defeitos reproduzidos por comando.
+- Motivo: e a unica tarefa aberta com risco de dado (modo 664 para 600, sub-linhas apagadas) e cada rodada de loop desde ontem esbarrou em um item dela.
+
 ## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-070, skill 2.7.0)
 
 ### Objetivo

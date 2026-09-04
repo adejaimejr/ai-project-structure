@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-04 (skill v2.8.0)
+
+- Parenteses no comando do marcador verifica viram ERRO e o loop recusa antes de chamar o agente (T-072); bloco core diz o alcance real do check de travessao e do check das pontes (T-071). Duas rodadas de loop com Codex `gpt-5.6-terra`, verdes na tentativa 1, com propagacao do core para a raiz por script. Instalada nos tres destinos.
+
 ## 2026-09-04 (skill v2.7.0)
 
 - Dez lacunas de qualidade viram AVISO no validador (T-070, decisao de T-059), 53 codigos no total, cada um com fixture. Fechada pelo loop com Codex `gpt-5.6-terra` na tentativa 1. Instalada nos tres destinos.

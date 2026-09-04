@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- ai-project-structure:core:start v2.7.0 -->
+<!-- ai-project-structure:core:start v2.8.0 -->
 <!-- Bloco gerenciado pela skill ai-project-structure. Nao edite dentro dos
      marcadores: atualizacoes da skill podem substituir este bloco (sempre com
      confirmacao). Regras especificas deste projeto vao na secao
@@ -21,7 +21,7 @@ Se houver conflito entre arquivos, siga esta prioridade:
 
 ## Arquivos-Ponte Sao Imutaveis
 
-`CLAUDE.md` e `GEMINI.md` sao apenas redirecionamentos para `AGENTS.md`. Eles nao podem conter regras de produto, arquitetura, processo, estilo ou qualquer logica. Quando uma regra precisar mudar, mude aqui.
+`CLAUDE.md` e `GEMINI.md` sao apenas redirecionamentos para `AGENTS.md`. O validador confere somente se cada ponte menciona `AGENTS.md`; o restante desta regra e de leitura, nao de script. Elas nao podem conter regras de produto, arquitetura, processo, estilo ou qualquer logica. Quando uma regra precisar mudar, mude aqui.
 
 ## Ordem De Leitura
 
@@ -59,7 +59,7 @@ Leia tambem quando necessario:
 ## Como Trabalhar
 
 - Responda em portugues claro, salvo pedido diferente do usuario.
-- Nunca use o caractere travessao (em dash, U+2014) em textos deste projeto, nem isolado nem com espacos ao redor. Separe frases com dois-pontos, ponto-e-virgula, virgula, parenteses ou hifen simples. O validador da skill acusa qualquer ocorrencia.
+- Nunca use o caractere travessao (em dash, U+2014) em textos deste projeto, nem isolado nem com espacos ao redor. Separe frases com dois-pontos, ponto-e-virgula, virgula, parenteses ou hifen simples. O validador da skill acusa toda ocorrencia em `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` e `docs/**/*.md`; fora desse alcance a regra continua valendo, mas nenhum script confere.
 - Antes de editar, entenda o objetivo, o contexto e o estado atual.
 - Prefira mudancas pequenas, focadas e faceis de revisar.
 - Nao refatore fora do escopo da tarefa.
@@ -115,7 +115,7 @@ Tarefa concluida e afirmacao. Sem evidencia, e afirmacao sem lastro. Toda tarefa
 ```
 
 - `tipo` aceita `comando`, `revisao-manual` ou `conferencia`. Tarefa de conteudo, pesquisa ou decisao usa `revisao-manual` ou `conferencia`. Nunca invente um comando inexistente so para preencher o campo.
-- Tarefa aberta pode declarar de antemao como pretende ser verificada, com `(verifica: <comando>)` no fim da linha. O marcador e opcional; declarado, vira contrato: a evidencia da tarefa concluida precisa registrar o resultado daquele comando.
+- Tarefa aberta pode declarar de antemao como pretende ser verificada, com `(verifica: <comando>)` no fim da linha. O marcador e opcional; declarado, vira contrato: a evidencia da tarefa concluida precisa registrar o resultado daquele comando. Parenteses no comando nao sao suportados: use script auxiliar no projeto, por exemplo `bash portao.sh`.
 - A exigencia nao e retroativa. A data em que ela passa a valer fica declarada uma vez em `TASKS.md`, no marcador `(convencoes-2-2-0-desde: AAAA-MM-DD)`. Linha concluida antes dessa data fica como esta: registro historico nao vira alegacao sem evidencia.
 
 O validador confere a forma da evidencia, nunca o conteudo. Evidencia colada sem conferencia real passa no script e falha no proposito.

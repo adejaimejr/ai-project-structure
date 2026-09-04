@@ -124,6 +124,11 @@ def comando_declarado(linha_tarefa):
     return V.squeeze(m.group(1)) if m else None
 
 
+def verifica_com_parenteses(linha_tarefa):
+    """O formato do marcador fecha no primeiro `)`, sem suporte a parenteses."""
+    return V.VERIFICA_COM_PARENTESES_RE.search(linha_tarefa) is not None
+
+
 def resumir_saida(saida, codigo):
     """Uma linha: exit code mais a saida real, espacos colapsados.
 
@@ -183,6 +188,12 @@ def cmd_check(args):
             f"T-{args.tarefa} esta em '{secao}'. O loop so aceita tarefa em "
             + " ou ".join(SECOES_ELEGIVEIS)
             + "."
+        )
+    if verifica_com_parenteses(linha):
+        raise Erro(
+            f"T-{args.tarefa} declara '(verifica: ...)' com parenteses no comando. "
+            "Parenteses nao sao suportados nesse marcador: use um script auxiliar, "
+            "por exemplo 'bash portao.sh'."
         )
     comando = comando_declarado(linha)
     if not comando:

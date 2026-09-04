@@ -172,6 +172,15 @@ def testar_helper(res):
         res.check(code == 0 and out == "bash portao.sh", "check em tarefa elegivel", out)
         code, out = rodar_helper("check", str(root), "T-020")
         res.check(code == 1 and "nao declarou" in out, "check recusa tarefa sem (verifica:)", out[:70])
+        tasks = root / "docs" / "TASKS.md"
+        tasks.write_text(tasks.read_text(encoding="utf-8").replace(
+            "- T-020: Tarefa sem portao declarado. (prioridade: media)",
+            "- T-020: Tarefa sem portao declarado. (prioridade: media)\n"
+            "- T-021: Tarefa com parenteses. (verifica: python3 -c \"print(1)\")",
+        ), encoding="utf-8")
+        code, out = rodar_helper("check", str(root), "T-021")
+        res.check(code == 1 and "parenteses" in out,
+                  "check recusa parenteses no comando antes de chamar o agente", out[:90])
         code, out = rodar_helper("check", str(root), "T-001")
         res.check(code == 1 and "concluidas" in out, "check recusa tarefa concluida", out[:70])
         code, out = rodar_helper("check", str(root), "T-777")

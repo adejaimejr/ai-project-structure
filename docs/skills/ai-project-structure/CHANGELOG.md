@@ -2,6 +2,19 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.8.0 - 2026-09-04
+
+Comando de `(verifica:)` com parenteses deixa de parecer tarefa sem portao: o
+validador acusa ERRO e o `loop_task.py check` recusa antes de chamar o agente.
+O formato nao suporta parenteses no comando, portanto a orientacao e usar um
+script auxiliar no projeto, por exemplo `bash portao.sh`. O bloco core, o
+template de `TASKS.md` e a referencia do loop passaram a declarar a limitacao.
+
+- **Texto do bloco core**: a regra do travessao agora declara que o validador
+  cobre `AGENTS.md`, as pontes e `docs/**/*.md`; a regra das pontes tambem
+  esclarece que o script confere somente a mencao a `AGENTS.md`, e que o
+  restante continua sendo regra de leitura.
+
 ## 2.7.0 - 2026-09-04
 
 Avisos que ja eram promessas da estrutura agora sao diagnosticados pelo

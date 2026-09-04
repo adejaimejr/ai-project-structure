@@ -16,7 +16,7 @@ Modelo por superficie (todos cegos, num worktree com o corpo das entradas contem
 
 Kimi, GLM e Gemini 3.8 nao existiam mais no catalogo do `cursor-agent` nesta data.
 
-Acrescentados em 2026-09-04: o log da rodada de loop que fechou T-065 com Codex `gpt-5.6-terra`, e a rodada 3 de mutacoes que prova o portao novo; depois, as duas rodadas de loop de T-069 (a primeira parou com pergunta, a segunda fechou e publicou a 2.6.0), e a rodada de T-070 (2.7.0, verde de primeira).
+Acrescentados em 2026-09-04: o log da rodada de loop que fechou T-065 com Codex `gpt-5.6-terra`, e a rodada 3 de mutacoes que prova o portao novo; depois, as duas rodadas de loop de T-069 (a primeira parou com pergunta, a segunda fechou e publicou a 2.6.0), e a rodada de T-070 (2.7.0, verde de primeira), e as de T-072 e T-071 (2.8.0).
 
 ## Arquivos
 
@@ -54,3 +54,5 @@ Acrescentados em 2026-09-04: o log da rodada de loop que fechou T-065 com Codex 
 | `loop-t069-codex-terra-rodada1.txt` | 316255 | 0 |
 | `loop-t069-codex-terra-rodada2.txt` | 722706 | 0 |
 | `loop-t070-codex-terra.txt` | 1219602 | 0 |
+| `loop-t072-codex-terra.txt` | 477909 | 0 |
+| `loop-t071-codex-terra.txt` | 322496 | 0 |

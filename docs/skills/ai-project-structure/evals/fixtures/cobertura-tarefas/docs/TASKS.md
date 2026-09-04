@@ -7,6 +7,7 @@
 - T-001: Sem prioridade valida. (prioridade: urgente) (bloqueada: ontem) (spec: 9999-ausente)
 - T-002: Bloqueada antiga. (bloqueada: 2000-01-01)
 - T-003: Referencia de spec concluida.
+- T-015: Comando verifica com parenteses. (verifica: python3 -c "print(1)")
 - Tarefa sem ID.
 
 ## Concluidas

@@ -41,16 +41,16 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
-## 2026-09-04 - Claude (resposta de T-053)
+## 2026-09-04 - Claude (respostas de T-053 e T-074)
 
 ### Objetivo
 
-- Registrar a resposta do usuario a T-053: a posicao do Grok nas tres calibragens da spec 0006.
+- Registrar as respostas do usuario a T-053 (posicao do Grok nas tres calibragens) e a T-074 (opcao a para o segredo no bruto), e levar a spec 0006 a `Definida`.
 
 ### O Que Foi Feito
 
 - DEC-007 (forma entra no escopo, diagnosticos novos como AVISO), DEC-008 (proveniencia com manifesto ao lado e ponte curta) e DEC-009 (retomada sempre humana, bruto in-repo desde o inicio) escritas na spec com a forca de cada uma; copiadas para `docs/DECISIONS.md`; as duas entradas de consenso no archive fechadas como `resolvido`.
-- A quarta pergunta, segredo no bruto versionado, **nao foi coberta pela resposta** e nenhuma rodada a respondeu. Ficou como P-10 na spec e T-074 em Aguardando Usuario, com tres opcoes esbocadas e sem decisao minha. A spec continua `Rascunho` so por ela.
+- A quarta pergunta, segredo no bruto versionado, ficou primeiro como P-10 e T-074 com tres opcoes esbocadas; o usuario escolheu a (a) em seguida: varredura de padroes antes de gravar, rodada para e pede palavra humana, nunca redige. DEC-010 na spec com as alternativas rejeitadas, criterios de aceite reescritos para DEC-007 a DEC-010, decisao copiada para `docs/DECISIONS.md`. **Spec 0006 passou a `Definida`**, sem pergunta aberta.
 
 ### Arquivos Criados Ou Alterados
 
@@ -58,7 +58,7 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 ### Decisoes Tomadas
 
-- DEC-007 a DEC-009 da spec 0006, pelo usuario; resumo em `docs/DECISIONS.md`.
+- DEC-007 a DEC-010 da spec 0006, pelo usuario; resumo em `docs/DECISIONS.md`.
 
 ### Aprendizados Para MEMORY.md
 
@@ -66,12 +66,12 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 ### Pendencias
 
-- T-074 aguarda o usuario. E a unica tarefa aberta do projeto.
+- Nenhuma tarefa aberta. O proximo trabalho e planejar a implementacao da spec 0006 (criar as tarefas dela), que ainda nao tem nenhuma.
 
 ### Proximo Passo Recomendado
 
-- Agente sugerido (ou "qualquer agente"): o usuario, para T-074.
-- Motivo: e o que separa a spec 0006 de `Definida`, e nenhuma linha de codigo deve nascer antes.
+- Agente sugerido (ou "qualquer agente"): qualquer agente, para desdobrar a spec 0006 em tarefas com portao, e o usuario para aprovar o plano antes da primeira rodada.
+- Motivo: a spec esta `Definida` com dez decisoes e nenhuma tarefa de implementacao; e trabalho tamanho-feature e merece plano antes de codigo.
 
 ## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-054, T-056, T-058, T-055, skill 2.10.0)
 

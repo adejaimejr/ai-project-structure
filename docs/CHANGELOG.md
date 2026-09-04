@@ -2,9 +2,9 @@
 
 Historico de mudancas relevantes.
 
-## 2026-09-04 (T-053 respondida)
+## 2026-09-04 (T-053 e T-074 respondidas; spec 0006 Definida)
 
-- Usuario escolheu a posicao do Grok nas tres calibragens da spec 0006: DEC-007 a DEC-009. Sobra P-10 (segredo no bruto), em T-074.
+- Usuario escolheu a posicao do Grok nas tres calibragens da spec 0006 (DEC-007 a DEC-009) e a varredura de segredo que para a rodada para P-10 (DEC-010). Spec 0006 passa a `Definida`; backlog sem tarefa aberta.
 
 ## 2026-09-04 (skill v2.10.0)
 

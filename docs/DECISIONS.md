@@ -20,6 +20,20 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-09-04 - Automacao que grava material de agente no repositorio varre segredo antes e para ao achar
+
+### Decisao
+
+- Nenhuma automacao deste projeto grava no repositorio texto produzido por agente sem antes varrer padroes de segredo (chave de API, token, senha em URL, chave privada). Ao achar, a automacao para antes de gravar, guarda o material fora do repositorio, informa o caminho e pede palavra humana. Nunca redige e nunca grava por conta propria.
+
+### Motivo
+
+- P-10 da spec 0006 (T-074): preservar o bruto literal (DEC-001 da spec) e versiona-lo (DEC-008, DEC-009) cria caminho de exfiltracao permanente para o historico do git. Redigir automaticamente destruiria a evidencia; nao gravar por padrao mataria o teste da DEC-001; documentar o risco transfere o problema para quem nao leu. O usuario escolheu a varredura que para, em 2026-09-04, entre as tres opcoes esbocadas na tarefa.
+
+### Impacto
+
+- Vale para o orquestrador da spec 0006 e para qualquer automacao futura que grave saida de modelo em `docs/`. Padrao nao cobre todo segredo, e a documentacao da operacao precisa dizer isso. A spec 0006 passa a `Definida`.
+
 ## 2026-09-04 - Calibragens da spec 0006: aviso, ponte curta, retomada humana e bruto in-repo
 
 ### Decisao

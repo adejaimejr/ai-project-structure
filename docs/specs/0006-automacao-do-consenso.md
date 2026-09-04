@@ -1,8 +1,8 @@
 # Spec 0006 - Automacao do consenso: independencia por construcao
 
-**Status:** Rascunho
+**Status:** Definida
 **Criada em:** 2026-09-03
-**Esforco:** G, porque toca tres coisas ao mesmo tempo: execucao de agente, escrita em arquivo de memoria, e os campos que a 2.2.0 criou justamente para denunciar consenso fraco. Depende de respostas do usuario antes de virar `Definida`.
+**Esforco:** G, porque toca tres coisas ao mesmo tempo: execucao de agente, escrita em arquivo de memoria, e os campos que a 2.2.0 criou justamente para denunciar consenso fraco. Virou `Definida` em 2026-09-04, com as dez perguntas respondidas (DEC-001 a DEC-010).
 
 ## Problema E Resultado Esperado
 
@@ -49,8 +49,12 @@ Verificaveis por comando:
 - A operacao nao inventa posicao de agente que nao rodou. Nenhum artefato sem execucao por tras.
 - Projeto que nunca usa a automacao nao ganha nenhuma cobranca nova no validador.
 - `verify_repository.py` em exit 0, e nenhum travessao (U+2014) em arquivo novo ou alterado.
-- (Depende de P-1 e P-2.) Se a operacao escrever em `CONSENSUS.md`, a entrada gerada passa em `validate_structure.py --strict` sem aviso, e declara `Metodo`, `Exposicao previa a outras posicoes` e `Rodada` coerentes com o que a execucao de fato fez.
-- (Depende de P-3.) O isolamento declarado e o isolamento verificavel sao o mesmo: existe uma forma de conferir, sem confiar no relato do agente, que ele nao teve acesso as outras posicoes.
+- A minuta que a operacao escreve em `CONSENSUS.md` passa em `validate_structure.py --strict` sem aviso, declara `Metodo`, `Exposicao previa a outras posicoes` e `Rodada` coerentes com o que a execucao de fato fez, e traz o marcador `**Origem:**` (DEC-001, DEC-002, DEC-007).
+- O isolamento declarado e o isolamento verificavel sao o mesmo: da para conferir, sem confiar no relato do agente, que ele nao teve acesso as posicoes contemporaneas (DEC-003).
+- Entrada com `**Origem:**` malformada (participante sem secao, agente falho sem secao propria, sem ponte para o manifesto) gera AVISO; entrada sem `**Origem:**` nao ganha nenhum diagnostico novo (DEC-007).
+- Cada rodada deixa um manifesto ao lado do bruto com comando integral, diretorio, exit code e hashes de insumo e saida; a entrada em `CONSENSUS.md` traz so a ponte curta para ele (DEC-008).
+- Rodada interrompida deixa `CONSENSUS.md` byte a byte como estava, o bruto e o manifesto ja gravados no repositorio fora da arvore de execucao, e a retomada so acontece por comando explicito (DEC-009).
+- Bruto que casa padrao de segredo nao entra no repositorio: a rodada para antes de gravar, guarda o material fora do repositorio, informa o caminho e sai com codigo proprio; nada e redigido e nada e escrito em `CONSENSUS.md` (DEC-010).
 
 Julgados na mao, sem runner hoje:
 
@@ -85,18 +89,18 @@ Desta spec, todas ratificadas pelo usuario em 2026-09-03 a partir da rodada 1 ce
 
 - **DEC-009 (P-9, quando a minuta e escrita; 3 de 3 no desenho, duas calibragens escolhidas pelo usuario em 2026-09-04):** criterio operacional do Grok, **publicado e anterior, nao publicado e contemporaneo**; lock exclusivo por projeto na abertura; bruto e manifesto gravados assim que cada agente encerra, onde os agentes da rodada corrente nao alcancam; minuta escrita uma vez so, no fim, por substituicao atomica do arquivo inteiro; interrupcao deixa `CONSENSUS.md` byte a byte como estava. Calibragens: **retomada apos interrupcao sempre exige palavra humana** (Claude e Grok; o Codex queria retomada automatica com insumos identicos), e **o bruto mora in-repo desde o inicio, fora da arvore de execucao** (Grok; Codex e Claude queriam fora do repositorio ate o fecho). Consequencia aceita: rodada interrompida deixa material pago no repositorio antes de qualquer minuta, e alguem precisa mandar retomar.
 
+- **DEC-010 (P-10, segredo no bruto; sem rodada, escolhida pelo usuario em 2026-09-04 entre tres opcoes esbocadas):** antes de gravar qualquer bruto no repositorio, a operacao **varre padroes de segredo** (chave de API, token, senha em URL, chave privada). Achou algo: a rodada **para**, guarda o bruto **fora** do repositorio, informa o caminho e pede palavra humana; **nunca redige**, porque redacao automatica destroi a evidencia que a DEC-001 protege, e nunca grava. Alternativas rejeitadas: bruto fora do git por padrao com promocao manual (mataria o teste da DEC-001 no dia a dia) e aceitar o risco com aviso na documentacao (transfere o problema para quem nao leu). Consequencias aceitas: falso positivo para uma rodada legitima ate alguem olhar; falso negativo continua possivel, porque padrao nao cobre todo segredo, e isso fica dito na documentacao da operacao.
+
 ## Tarefas
 
 - T-053: responder as perguntas abertas para a spec poder virar `Definida`
-- T-074: decidir o que fazer com segredo no artefato bruto (P-10), ultima pergunta que bloqueia a spec
+- T-074: decidir o que fazer com segredo no artefato bruto (P-10)
 
 ## Perguntas Abertas
 
 P-1 a P-6 foram respondidas pela rodada 1 cega de 2026-09-03 e ratificadas pelo usuario no mesmo dia (DEC-001 a DEC-006). P-7, P-8 e P-9 passaram por rodada 1 cega em 2026-09-03 com 3 de 3 no que fazer, e as calibragens que sobraram foram escolhidas pelo usuario em 2026-09-04, sempre pela posicao do Grok (DEC-007 a DEC-009). As rodadas estao em `docs/archive/CONSENSUS-2026.md`, entradas "2026-09-03 - P-7 e P-8" e "2026-09-03 - P-9", com as tres posicoes na integra.
 
-Continua aberta, e **bloqueia a spec**:
-
-- **P-10. Segredo no bruto.** O bruto pode conter segredo do repositorio; "preservar literal" (DEC-001) somado a "versionar in-repo" (DEC-008 e DEC-009) cria caminho de exfiltracao permanente para o historico do git. Redacao automatica destruiria a evidencia que a DEC-001 existe para preservar. Nenhuma das tres posicoes da rodada de P-9 propos saida, e a resposta do usuario a T-053 nao a cobriu. Precisa de decisao propria antes de qualquer linha de codigo. Rastreada por T-074.
+P-10 (segredo no bruto), que nenhuma rodada respondeu, foi decidida pelo usuario em 2026-09-04 entre tres opcoes esbocadas em T-074 e virou DEC-010. Nenhuma pergunta aberta.
 
 ## Evidencia De Conclusao
 

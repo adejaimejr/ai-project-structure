@@ -32,7 +32,7 @@ Nucleo (sempre presente):
 - `PROJECT_CONTEXT.md`: contexto permanente do projeto.
 - `SESSION.md`: registro cronologico das sessoes de IA.
 - `MEMORY.md`: memoria persistente (preferencias, licoes, refs externas).
-- `CONSENSUS.md`: debate entre modelos para chegar a consenso.
+- `CONSENSUS.md`: debate entre modelos para chegar a consenso e registro de achado de validacao cruzada.
 - `TASKS.md`: tarefas atuais e proximos passos.
 - `DECISIONS.md`: decisoes importantes.
 - `QUALITY.md`: criterios de qualidade e validacao.
@@ -53,4 +53,3 @@ Opcionais (estrutura completa, ou criados quando o projeto precisar):
 Modulo opcional:
 
 - `specs/`: specs de features (o que sera construido), quando o modulo estiver ativo.
-

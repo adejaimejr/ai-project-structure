@@ -37,4 +37,5 @@ Sempre adicione a sessao mais recente no topo.
 
 - Agente sugerido (ou "qualquer agente"): 
 - Motivo: 
+- Nota: qualquer agente serve se tiver contexto suficiente.
 ```

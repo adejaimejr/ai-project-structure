@@ -93,3 +93,9 @@ Use este arquivo quando modelos diferentes precisarem debater para chegar a um c
 ### Consenso Final
 
 - ISO 8601.
+
+~~~md
+## 2026-01-01 - Exemplo dentro de cerca til
+
+**Status:** aberto
+~~~

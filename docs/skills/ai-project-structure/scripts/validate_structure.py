@@ -56,7 +56,6 @@ ACHADO_SECAO_ESCAPE = "Por Que Nada Pegou Antes"
 MARKER_RE = re.compile(
     r"<!--\s*ai-project-structure:(core|specs|loop):(start|end)(?:\s+v(\S+))?\s*-->"
 )
-ENTRY_RE = re.compile(r"^## \d{4}-\d{2}-\d{2}", re.MULTILINE)
 TASK_ID_RE = re.compile(r"\bT-(\d+)\b")
 # ID proprio da tarefa: o que abre a linha, depois da data quando ela e concluida.
 # Qualquer outro T-NNN no texto e referencia a outra tarefa, nao um segundo ID.
@@ -64,6 +63,7 @@ TASK_ID_RE = re.compile(r"\bT-(\d+)\b")
 TASK_OWN_ID_RE = re.compile(r"^(?:\d{4}-\d{2}-\d{2}\s+)?T-(\d{3,})\b")
 TASK_OWN_ID_CANDIDATE_RE = re.compile(r"^(?:\d{4}-\d{2}-\d{2}\s+)?T-([^\s:]+)\b")
 SPEC_REF_RE = re.compile(r"\(spec:\s*([^)]+)\)")
+SPEC_PLACEHOLDER_RE = re.compile(r"NNNN-[a-z0-9][a-z0-9-]*")
 SPEC_NAME_RE = re.compile(r"^(\d{4})-[a-z0-9][a-z0-9-]*\.md$")
 PRIORITY_RE = re.compile(r"\(prioridade:\s*([^)]*)\)")
 # Marcador so vale no fim da linha, opcionalmente seguido por outros marcadores.
@@ -75,9 +75,10 @@ VERIFICA_RE = re.compile(r"\(verifica:\s*([^)]*)\)(?=\s*(?:\([^)]*\)\s*)*$)")
 VERIFICA_COM_PARENTESES_RE = re.compile(r"\(verifica:\s*[^)]*\(")
 BLOCKED_RE = re.compile(r"\(bloqueada:\s*([^)]*)\)")
 ADOPTION_RE = re.compile(r"\(convencoes-2-2-0-desde:\s*([^)]*)\)")
-DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 DATE_PREFIX_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})\b")
 EVIDENCE_TYPE_RE = re.compile(r"\btipo\s*=\s*([^;]+)")
+FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
+ATX_HEADING_RE = re.compile(r"^#{3,4}\s+(.+?)(?:\s+#+)?\s*$", re.MULTILINE)
 ROTATION_MAX_ENTRIES = 20
 ROTATION_MAX_BYTES = 30 * 1024
 BLOCKED_MAX_DAYS = 30
@@ -101,6 +102,7 @@ CODIGOS = {
     "MARCADOR-ORDEM-INVALIDA",
     "MARCADOR-LOOP-INVALIDO",
     "NUCLEO-VAZIO",
+    "ARQUIVO-UTF8-INVALIDO",
     # SESSION.md
     "SESSAO-SEM-HEADINGS",
     # CONSENSUS.md, debate
@@ -163,21 +165,31 @@ def normalize(text):
     return stripped.casefold().strip()
 
 
+def fence_marker(line):
+    """Retorna a cerca Markdown da linha, em ``` ou ~~~, quando houver."""
+    m = FENCE_RE.match(line)
+    return m.group(1) if m else None
+
+
 def strip_fences(text):
-    """Remove conteudo dentro de cercas ``` (os templates trazem modelos cercados)."""
+    """Remove conteudo dentro de cercas ``` ou ~~~ dos modelos Markdown."""
     out = []
-    in_fence = False
+    open_fence = None
     for line in text.splitlines():
-        if line.lstrip().startswith("```"):
-            in_fence = not in_fence
+        marker = fence_marker(line)
+        if marker:
+            if open_fence is None:
+                open_fence = marker
+            elif marker[0] == open_fence[0] and len(marker) >= len(open_fence):
+                open_fence = None
             continue
-        if not in_fence:
+        if open_fence is None:
             out.append(line)
     return "\n".join(out)
 
 
 def check_unclosed_fences(root, report):
-    """Cerca ``` sem fechamento esconde o restante do arquivo do parser."""
+    """Cerca ``` ou ~~~ sem fechamento esconde o restante do arquivo do parser."""
     targets = [root / "AGENTS.md", root / "CLAUDE.md", root / "GEMINI.md"]
     docs = root / "docs"
     if docs.is_dir():
@@ -188,16 +200,20 @@ def check_unclosed_fences(root, report):
     for path in targets:
         if not path.is_file():
             continue
-        text = read(path)
+        text = read(path, report, root)
         if text is None:
             continue
-        opened = False
+        open_fence = None
         for line in text.splitlines():
-            if line.lstrip().startswith("```"):
-                opened = not opened
-        if opened:
+            marker = fence_marker(line)
+            if marker:
+                if open_fence is None:
+                    open_fence = marker
+                elif marker[0] == open_fence[0] and len(marker) >= len(open_fence):
+                    open_fence = None
+        if open_fence is not None:
             rel = path.relative_to(root).as_posix()
-            report.aviso(rel, "CERCA-ABERTA", "Cerca de codigo ``` aberta ate o fim do arquivo.")
+            report.aviso(rel, "CERCA-ABERTA", "Cerca de codigo aberta ate o fim do arquivo.")
 
 
 class Report:
@@ -211,6 +227,7 @@ class Report:
 
     def __init__(self):
         self.items = {}  # arquivo -> [(nivel, codigo, sujeito, mensagem)]
+        self.unreadable_files = set()
 
     def add(self, level, file, code, message, subject=None):
         if code not in CODIGOS:
@@ -253,9 +270,24 @@ class Report:
                 print(f"{level}|{code}|{file}|{subject or ''}")
 
 
-def read(path):
+def read(path, report=None, root=None):
     try:
         return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        if report is not None:
+            try:
+                rel = path.relative_to(root).as_posix() if root is not None else str(path)
+            except ValueError:
+                rel = str(path)
+            if rel not in report.unreadable_files:
+                report.unreadable_files.add(rel)
+                report.erro(
+                    rel,
+                    "ARQUIVO-UTF8-INVALIDO",
+                    "Arquivo nao esta em UTF-8 valido.",
+                    rel,
+                )
+        return None
     except OSError:
         return None
 
@@ -280,6 +312,8 @@ def check_core_files(root, report):
             report.erro(rel, "NUCLEO-AUSENTE", "Arquivo do nucleo ausente.", rel)
         elif path.stat().st_size == 0:
             report.erro(rel, "NUCLEO-VAZIO", "Arquivo do nucleo esta vazio.", rel)
+        else:
+            read(path, report, root)
 
 
 def check_em_dash(root, report):
@@ -291,7 +325,7 @@ def check_em_dash(root, report):
     for path in targets:
         if not path.is_file():
             continue
-        text = read(path)
+        text = read(path, report, root)
         if text is None:
             continue
         count = text.count("\u2014")
@@ -307,7 +341,7 @@ def check_em_dash(root, report):
 
 def check_bridges(root, report):
     for rel in ("CLAUDE.md", "GEMINI.md"):
-        text = read(root / rel)
+        text = read(root / rel, report, root)
         if text is not None and "AGENTS.md" not in text:
             report.aviso(
                 rel, "PONTE-QUEBRADA",
@@ -316,7 +350,7 @@ def check_bridges(root, report):
 
 
 def check_markers(root, report):
-    text = read(root / "AGENTS.md")
+    text = read(root / "AGENTS.md", report, root)
     if text is None:
         return
     found = {}  # bloco -> {"start": [(versao, posicao)], "end": [posicao]}
@@ -373,14 +407,14 @@ def check_markers(root, report):
 
 
 def check_session(root, report):
-    text = read(root / "docs" / "SESSION.md")
+    text = read(root / "docs" / "SESSION.md", report, root)
     if text is None:
         return
     clean = strip_fences(text)
     entries = split_entries(clean)
     wanted = [normalize(h) for h in SESSION_HEADINGS]
     for title, body in entries:
-        headings = [normalize(h) for h in re.findall(r"^### (.+)$", body, re.MULTILINE)]
+        headings = [normalize(h) for h in ATX_HEADING_RE.findall(body)]
         missing = [
             SESSION_HEADINGS[i] for i, w in enumerate(wanted) if w not in headings
         ]
@@ -396,10 +430,13 @@ def check_session(root, report):
 
 def field_value(body, label):
     """Valor de uma linha '**Rotulo:** valor', tolerante a acento e caixa."""
-    wanted = f"**{normalize(label)}:**"
+    wanted = normalize(label)
     for line in body.splitlines():
-        if normalize(line).startswith(wanted):
-            return line.split(":**", 1)[1].strip()
+        if not line.startswith("**"):
+            continue
+        end = line.find(":**", 2)
+        if end != -1 and normalize(line[2:end]) == wanted:
+            return line[end + 3:].strip()
     return None
 
 
@@ -502,7 +539,7 @@ def check_consensus_achado(title, body, report):
         return
     if normalize(escapou) != "sim":
         return
-    headings = [normalize(h) for h in re.findall(r"^#{3,4} (.+)$", body, re.MULTILINE)]
+    headings = [normalize(h) for h in ATX_HEADING_RE.findall(body)]
     if normalize(ACHADO_SECAO_ESCAPE) not in headings:
         report.aviso(
             rel,
@@ -515,7 +552,7 @@ def check_consensus_achado(title, body, report):
 
 
 def check_consensus(root, report, adopted=None):
-    text = read(root / "docs" / "CONSENSUS.md")
+    text = read(root / "docs" / "CONSENSUS.md", report, root)
     if text is None:
         return
     clean = strip_fences(text)
@@ -571,13 +608,13 @@ def check_rotation(path, entry_count, report):
         )
 
 
-def collect_tasks(root):
+def collect_tasks(root, report=None):
     """Retorna {secao: [tarefa]}, com a secao normalizada.
 
     Cada tarefa e um dict {"line": texto da linha, "sub": [sub-linhas]}. As
     sub-linhas sao os itens indentados logo abaixo da tarefa (`Evidencia:`,
     `**Pergunta:**`, `**Resposta:**`)."""
-    text = read(root / "docs" / "TASKS.md")
+    text = read(root / "docs" / "TASKS.md", report, root)
     if text is None:
         return None
     clean = strip_fences(text)
@@ -626,12 +663,12 @@ def parse_date(value):
         return None
 
 
-def adoption_date(root):
+def adoption_date(root, report=None):
     """Data em que o projeto adotou as convencoes 2.2.0, declarada em TASKS.md.
 
     Retorna (data, marcador_presente). Sem marcador, as regras que dependem
     dele ficam silenciosas: projeto anterior a 2.2.0 nao e cobrado (DEC-008)."""
-    text = read(root / "docs" / "TASKS.md")
+    text = read(root / "docs" / "TASKS.md", report, root)
     if text is None:
         return None, False
     m = ADOPTION_RE.search(strip_fences(text))
@@ -645,7 +682,7 @@ def evidence_lines(task):
 
 
 def check_tasks(root, report):
-    sections = collect_tasks(root)
+    sections = collect_tasks(root, report)
     if sections is None:
         return set(), set()
     # Linhas sem ID so sao cobradas nas secoes de trabalho aberto; entradas
@@ -687,7 +724,7 @@ def check_tasks(root, report):
                 f"ID duplicado: T-{tid}.", f"T-{tid}",
             )
         seen.add(tid)
-    archived = archive_task_ids(root)
+    archived = archive_task_ids(root, report)
     for tid in sorted(seen & archived):
         report.erro(
             "docs/TASKS.md",
@@ -720,7 +757,7 @@ def check_tasks(root, report):
                 continue
             for ref in SPEC_REF_RE.findall(line):
                 ref = ref.strip()
-                if "NNNN" in ref:
+                if SPEC_PLACEHOLDER_RE.fullmatch(ref):
                     continue
                 if not (root / "docs" / "specs" / f"{ref}.md").is_file():
                     report.erro(
@@ -855,7 +892,7 @@ def check_evidence(root, sections, report):
     cobrada como AVISO, e so a partir da data declarada no marcador
     `(convencoes-2-2-0-desde:)` em TASKS.md; sem marcador, nada e cobrado
     (a regra nao e retroativa)."""
-    adopted, declared = adoption_date(root)
+    adopted, declared = adoption_date(root, report)
     if declared and adopted is None:
         report.aviso(
             "docs/TASKS.md",
@@ -926,12 +963,12 @@ def check_evidence(root, sections, report):
             )
 
 
-def archive_task_ids(root):
+def archive_task_ids(root, report=None):
     ids = set()
     archive = root / "docs" / "archive"
     if archive.is_dir():
         for path in archive.glob("TASKS-*.md"):
-            text = read(path)
+            text = read(path, report, root)
             if text:
                 ids.update(TASK_ID_RE.findall(strip_fences(text)))
     return ids
@@ -941,7 +978,7 @@ def check_specs(root, report, task_ids, done_ids):
     specs_dir = root / "docs" / "specs"
     if not specs_dir.is_dir():
         return
-    archived = archive_task_ids(root)
+    archived = archive_task_ids(root, report)
     prefixes = {}
     for path in sorted(specs_dir.glob("*.md")):
         if path.name == "README.md":
@@ -965,12 +1002,12 @@ def check_specs(root, report, task_ids, done_ids):
                     path.name,
                 )
             prefixes[prefix] = path.name
-        text = read(path)
+        text = read(path, report, root)
         if text is None:
             continue
         clean = strip_fences(text)
         # Check 11: Status valido
-        status_match = re.search(r"\*\*Status:\*\*\s*(.+)$", clean, re.MULTILINE)
+        status_match = re.search(r"^\*\*Status:\*\*\s*(.+)$", clean, re.MULTILINE)
         status = None
         if not status_match:
             report.erro(rel, "SPEC-SEM-STATUS", "Spec sem linha '**Status:**'.", path.name)
@@ -1053,7 +1090,7 @@ def spec_overview(root, done_ids, archived):
         if text is None:
             continue
         clean = strip_fences(text)
-        status_match = re.search(r"\*\*Status:\*\*\s*(.+)$", clean, re.MULTILINE)
+        status_match = re.search(r"^\*\*Status:\*\*\s*(.+)$", clean, re.MULTILINE)
         status = status_match.group(1).strip() if status_match else "(sem Status)"
         tasks_section = re.search(
             r"^## Tarefas\s*$(.*?)(?=^## |\Z)", clean, re.MULTILINE | re.DOTALL
@@ -1152,7 +1189,7 @@ def main(argv=None):
     check_bridges(root, report)
     check_markers(root, report)
     check_session(root, report)
-    check_consensus(root, report, adoption_date(root)[0])
+    check_consensus(root, report, adoption_date(root, report)[0])
     task_ids, done_ids = check_tasks(root, report)
     check_specs(root, report, task_ids, done_ids)
     if args.codigos:

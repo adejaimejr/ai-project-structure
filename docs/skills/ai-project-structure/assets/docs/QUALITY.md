@@ -10,7 +10,9 @@ Use este arquivo como checklist de qualidade antes de finalizar trabalho relevan
 - A documentacao afetada foi atualizada.
 - `SESSION.md` foi atualizado quando houve trabalho relevante.
 - `DECISIONS.md` foi atualizado quando houve decisao importante.
-- `CONSENSUS.md` foi usado quando houve conflito, duvida relevante ou pedido de debate entre modelos.
+- Tarefa concluida em `TASKS.md` recebeu evidencia de fechamento com procedimento e resultado.
+- Tarefa que depende de resposta foi movida para "Aguardando Usuario", com pergunta, resposta e marcador bloqueada.
+- `CONSENSUS.md` foi usado quando houve conflito, duvida relevante ou pedido de debate entre modelos. Cada entrada declara `Metodo`, `Exposicao previa a outras posicoes` e `Rodada`; achado tambem declara se escapou de verificacao.
 
 ## Checklist Para Estrutura Multiagente
 
@@ -58,4 +60,3 @@ Quando o projeto tiver codigo, registrar aqui:
 - A memoria do projeto deve reduzir retrabalho entre sessoes.
 - As regras centrais devem ficar em um unico lugar.
 - O fluxo de consenso deve ser usado apenas quando agregar valor.
-

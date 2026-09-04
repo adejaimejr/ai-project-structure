@@ -12,8 +12,8 @@ Confere, em um comando so:
    diagnostico a mais reprovando tanto quanto diagnostico a menos;
 3. os blocos gerenciados da raiz continuam identicos aos de `assets/`
    (bloco core, bloco specs e as duas pontes);
-4. os templates de `TASKS.md` e `CONSENSUS.md` carregam as convencoes da
-   versao atual, e o dogfood da raiz adotou as mesmas;
+4. os templates que citam regras do bloco core carregam as convencoes da
+   versao atual, e o dogfood da raiz adotou as mesmas quando aplicavel;
 4b. o aviso do ponto cego cabe no orcamento de linhas do bloco core;
 5. a versao e a mesma no `SKILL.md`, nos marcadores e no `CHANGELOG.md`;
 6. `evals.json` tem a estrutura esperada e os `files` resolvem;
@@ -177,7 +177,7 @@ FIXTURES = {
             "ERRO|NUCLEO-AUSENTE|docs/CHANGELOG.md|docs/CHANGELOG.md",
             "ERRO|NUCLEO-AUSENTE|docs/CONSENSUS.md|docs/CONSENSUS.md",
             "ERRO|NUCLEO-AUSENTE|docs/DECISIONS.md|docs/DECISIONS.md",
-            "ERRO|NUCLEO-AUSENTE|docs/MEMORY.md|docs/MEMORY.md",
+            "ERRO|ARQUIVO-UTF8-INVALIDO|docs/MEMORY.md|docs/MEMORY.md",
             "ERRO|NUCLEO-AUSENTE|docs/PROJECT_CONTEXT.md|docs/PROJECT_CONTEXT.md",
             "ERRO|NUCLEO-AUSENTE|docs/QUALITY.md|docs/QUALITY.md",
             "ERRO|NUCLEO-AUSENTE|docs/README.md|docs/README.md",
@@ -234,6 +234,7 @@ FIXTURES = {
             "AVISO|TASK-BLOQUEADA-FORA-DE-AGUARDANDO|docs/TASKS.md|T-002",
             "AVISO|TASK-BLOQUEADA-ANTIGA|docs/TASKS.md|T-002",
             "AVISO|EVIDENCIA-TIPO-INVALIDO|docs/TASKS.md|T-012",
+            "ERRO|SPEC-REF-NAO-RESOLVE|docs/TASKS.md|0001-NNNN-ausente",
             "ERRO|VERIFICA-COMANDO-VAZIO|docs/TASKS.md|T-014",
             "ERRO|VERIFICA-COMANDO-PARENTESES|docs/TASKS.md|T-015",
             "AVISO|CONVENCOES-DATA-INVALIDA|docs/TASKS.md|",
@@ -382,6 +383,8 @@ def verificar_fixtures(res, verbose):
                 texto = read(markdown)
                 if "{{TRAVESSAO}}" in texto:
                     markdown.write_text(texto.replace("{{TRAVESSAO}}", "\u2014"), encoding="utf-8")
+                if "{{UTF8_INVALIDO}}" in texto:
+                    markdown.write_bytes(texto.replace("{{UTF8_INVALIDO}}", "\u00e9").encode("latin-1"))
             code, out = rodar_validador(materializada, strict=strict, codigos=True)
         res.check(
             code == esperado_exit,
@@ -590,6 +593,22 @@ def verificar_convencoes(res, verbose=False):
         res.check(
             not faltando,
             f"CONSENSUS.md ({rotulo}) com os campos declarativos",
+            "faltando: " + ", ".join(faltando) if faltando else "",
+        )
+
+    convencoes_de_outros_templates = {
+        "QUALITY.md": ("evidencia", "aguardando usuario", "metodo",
+                        "exposicao previa", "rodada", "achado"),
+        "PROMPTS.md": ("evidencia", "metodo", "exposicao previa", "rodada"),
+        "ONBOARDING.md": ("memory.md", "evidencia", "aguardando usuario"),
+        "README.md": ("consensus.md", "achado"),
+    }
+    for nome, marcas in convencoes_de_outros_templates.items():
+        texto = read(ASSETS / "docs" / nome).casefold()
+        faltando = [marca for marca in marcas if marca not in texto]
+        res.check(
+            not faltando,
+            f"{nome} com as convencoes do bloco core que cita",
             "faltando: " + ", ".join(faltando) if faltando else "",
         )
 

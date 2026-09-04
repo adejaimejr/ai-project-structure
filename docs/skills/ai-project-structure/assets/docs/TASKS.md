@@ -14,14 +14,22 @@ Formato de tarefa:
 Modelo de linha:
 
 ```md
-- T-001: Descricao curta e acionavel. (prioridade: alta) (spec: 0001-login-social) (verifica: pytest -q)
+- T-001: Descricao curta e acionavel. (prioridade: alta) (verifica: pytest -q)
 ```
 
 Modelo de linha concluida:
 
 ```md
-- AAAA-MM-DD T-001: Descricao curta e acionavel. (spec: 0001-login-social)
+- AAAA-MM-DD T-001: Descricao curta e acionavel.
   - Evidencia: tipo=comando; procedimento=pytest -q; resultado=42 passed, exit 0
+```
+
+Para tarefa de conteudo, pesquisa ou decisao, use um tipo que descreva a
+verificacao realizada:
+
+```md
+- AAAA-MM-DD T-002: Revisar o texto de apresentacao.
+  - Evidencia: tipo=revisao-manual; procedimento=leitura integral; resultado=texto aprovado
 ```
 
 ## Em Andamento

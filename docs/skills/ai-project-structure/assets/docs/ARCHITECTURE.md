@@ -10,7 +10,6 @@ Descrever aqui a estrutura tecnica, os principais componentes e como eles se con
 
 - `AGENTS.md`: regras centrais para agentes.
 - `docs/`: memoria e documentacao operacional do projeto.
-- `docs/skills/`: skills portaveis ou modelos de skills relacionados ao projeto.
 
 ## Fluxos Importantes
 
@@ -38,4 +37,3 @@ Listar aqui APIs, servicos externos, bancos de dados e automacoes quando existir
 - Duplicar instrucoes entre arquivos de agentes.
 - Esquecer de atualizar `SESSION.md`.
 - Registrar debates em `CONSENSUS.md` sem transformar decisoes importantes em `DECISIONS.md`.
-

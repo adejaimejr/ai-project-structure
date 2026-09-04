@@ -23,7 +23,13 @@ Leia AGENTS.md e depois consulte docs/SESSION.md, docs/PROJECT_CONTEXT.md, docs/
 ## Solicitar Consenso Entre Modelos
 
 ```md
-Use docs/CONSENSUS.md para registrar sua posicao sobre esta decisao. Inclua contexto, recomendacao, riscos, tradeoffs e o que voce considera necessario para chegar a um consenso com outros modelos.
+Use docs/CONSENSUS.md para registrar sua posicao sobre esta decisao. Inclua contexto, recomendacao, riscos, tradeoffs, **Metodo:**, **Exposicao previa a outras posicoes:** e **Rodada:**. Diga tambem o que voce considera necessario para chegar a um consenso com outros modelos.
+```
+
+## Registrar Conclusao De Tarefa
+
+```md
+Ao mover uma tarefa para "Concluidas" em docs/TASKS.md, registre a evidencia de fechamento com tipo, procedimento e resultado. Se a tarefa tiver `(verifica:)`, use o resultado real daquele comando.
 ```
 
 ## Revisao Antes De Finalizar
@@ -31,4 +37,3 @@ Use docs/CONSENSUS.md para registrar sua posicao sobre esta decisao. Inclua cont
 ```md
 Revise a mudanca usando docs/QUALITY.md. Verifique se a tarefa foi atendida, se o escopo foi respeitado, se a memoria da sessao precisa ser atualizada e se alguma decisao deve ir para docs/DECISIONS.md.
 ```
-

@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-04 (skill v2.9.0)
+
+- Validador sem traceback em arquivo fora de UTF-8 e rotulo malformado, cercas `~~~` e headings ATX fechados aceitos, `NNNN` so como placeholder inteiro, Status de spec ancorado (T-064). Templates de `assets/` alinhados ao core 2.2.0/2.4.0 e cobertos pelo verificador (T-063). Duas rodadas de loop com Codex `gpt-5.6-terra`, verdes na tentativa 1. Instalada nos tres destinos.
+
 ## 2026-09-04 (skill v2.8.1)
 
 - Onze consertos no modulo de loop (T-060): linha da tarefa conferida no fecho, sub-linhas preservadas, saida fora de UTF-8 tolerada, realimentacao limitada a 64KB, pergunta vazia registrada, modo do `TASKS.md` preservado, sem bytecode, stdin fechado, prompt sobre propagacao, exit 4 documentado, `--seco` sem agente. Nove casos hostis na bateria (74). Fechada pelo loop com Codex `gpt-5.6-terra` na tentativa 1. Instalada nos tres destinos.

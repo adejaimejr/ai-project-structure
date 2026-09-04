@@ -2,6 +2,20 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.9.0 - 2026-09-04
+
+O validador passa a diagnosticar arquivo Markdown fora de UTF-8 sem traceback,
+reconhece cercas `~~~` e headings ATX com fechamento, e deixa de aceitar
+referencia de spec com `NNNN` no meio ou Status de spec no corpo da prosa.
+Leitura de campos declarativos tambem recusa rotulo malformado sem derrubar a
+validacao. As fixtures com oracle exato cobrem cada correcao.
+
+- Templates de `QUALITY.md`, `PROMPTS.md`, `ONBOARDING.md`, `README.md`,
+  `SESSION.md`, `TASKS.md`, `ARCHITECTURE.md` e `GLOSSARY.md` passam a refletir
+  as regras atuais do bloco core. O verificador cobre os templates que citam
+  essas convencoes. No bloco core, o item `docs/ARCHITECTURE.md` da leitura
+  relevante ganhou "quando existir": o nivel minimal nao cria o arquivo.
+
 ## 2.8.1 - 2026-09-04
 
 Correcoes no modulo de loop sem mudar o bloco core. O loop passa a conservar a

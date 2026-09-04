@@ -28,5 +28,4 @@ Periodo de trabalho de um agente de IA em uma tarefa ou conjunto de tarefas.
 
 ## Skill
 
-Instrucao reutilizavel para ensinar o Codex a executar um tipo de trabalho de forma consistente.
-
+Instrucao reutilizavel para orientar um agente a executar um tipo de trabalho de forma consistente.

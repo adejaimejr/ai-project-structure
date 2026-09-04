@@ -1,5 +1,6 @@
 ## 2026-09-03 - Sem campos
 
+**Metodo:́** pareceres-independentes
 **Exposicao previa a outras posicoes:** talvez
 **Rodada:** muitas
 

@@ -41,6 +41,41 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-064 e T-063, skill 2.9.0)
+
+### Objetivo
+
+- Fechar os dois residuos sem decisao da REVAL-2 e da REVAL-6 (consertos do validador e templates atrasados) pelo loop com o `terra`, numa release so.
+
+### O Que Foi Feito
+
+- Portoes proprios por comportamento: `portao_t064.py` (12 checks, reproduzia 4 de 12) com o verificador geral dentro, porque a tarefa nao toca o core; `portao_t063.py` (12 checks, 2 de 12) sem o verificador, porque muda uma frase do core e a propagacao e minha.
+- **T-064** (bump 2.9.0), verde na tentativa 1: `ARQUIVO-UTF8-INVALIDO` novo, com fixture materializada em latin-1 so no temporario; cercas `~~~` reconhecidas; headings ATX com fechamento aceitos; `field_value` sem `split` cego; `NNNN` tolerado so como placeholder inteiro; `**Status:**` de spec ancorado; `ENTRY_RE` e `DATE_RE` fora. Fixtures existentes ganharam os casos (debate-project como controle, cobertura-* acusando). Um ajuste meu: a fixture de consenso tinha `\u0301` como texto literal em vez do acento combinante real; trocado.
+- **T-063**, verde na tentativa 1: QUALITY, PROMPTS, ONBOARDING, README, SESSION, TASKS, ARCHITECTURE e GLOSSARY dos assets atualizados para o core 2.2.0/2.4.0; exemplo `revisao-manual` no template de tarefas e o exemplo de spec fora do modelo de linha; core com "quando existir" em `docs/ARCHITECTURE.md`; `verificar_convencoes` cobre os quatro templates que citam regra do core (verificador de 59 para 63). Core propagado por mim; CHANGELOG completado com a frase do core.
+- 2.9.0 reinstalada nos tres destinos, `diff -rq` limpo fora do nao distribuido.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/docs/{QUALITY,PROMPTS,ONBOARDING,README,SESSION,TASKS,ARCHITECTURE,GLOSSARY}.md`, `assets/partials/*.md`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/portao_t063.py`, `evals/portao_t064.py`, `evals/fixtures/{cobertura-arquivos,cobertura-consenso,cobertura-tarefas,debate-project}/`.
+- Projeto: `AGENTS.md` (core e marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/revalidacao-2026-09-03/`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum novo.
+
+### Pendencias
+
+- Da revalidacao sobram T-062 (texto de `atualizacao.md`) e T-073 (`install.sh` com confirmacao), as duas baixas e sem decisao. Fora dela, T-053 a T-058.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente para T-062 e T-073 juntas; nenhuma exige bump (T-062 muda `references/`, que e distribuido: exige; T-073 nao).
+- Motivo: fecham o pacote da revalidacao inteiro.
+
 ## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-060, skill 2.8.1)
 
 ### Objetivo

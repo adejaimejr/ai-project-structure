@@ -84,6 +84,7 @@ Exit codes, distintos de proposito para dar para ramificar por fora:
 | 1 | erro de uso, ou tarefa nao elegivel (sem `(verifica:)`, ja concluida, inexistente) |
 | 2 | portao falhou em todas as tentativas; nada movido, nada escrito |
 | 3 | o agente sinalizou falta de contexto; tarefa em "Aguardando Usuario" |
+| 4 | o agente falhou sem alterar arquivo; provavelmente o comando esta mal configurado |
 
 Qualquer caminho diferente de sucesso sai diferente de zero, o que deixa a composicao por fora funcionar:
 

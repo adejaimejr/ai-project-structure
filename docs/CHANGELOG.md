@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-04 (skill v2.8.1)
+
+- Onze consertos no modulo de loop (T-060): linha da tarefa conferida no fecho, sub-linhas preservadas, saida fora de UTF-8 tolerada, realimentacao limitada a 64KB, pergunta vazia registrada, modo do `TASKS.md` preservado, sem bytecode, stdin fechado, prompt sobre propagacao, exit 4 documentado, `--seco` sem agente. Nove casos hostis na bateria (74). Fechada pelo loop com Codex `gpt-5.6-terra` na tentativa 1. Instalada nos tres destinos.
+
 ## 2026-09-04 (skill v2.8.0)
 
 - Parenteses no comando do marcador verifica viram ERRO e o loop recusa antes de chamar o agente (T-072); bloco core diz o alcance real do check de travessao e do check das pontes (T-071). Duas rodadas de loop com Codex `gpt-5.6-terra`, verdes na tentativa 1, com propagacao do core para a raiz por script. Instalada nos tres destinos.

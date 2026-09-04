@@ -27,11 +27,15 @@ Somente biblioteca padrao (Python 3.8+). Exit code: 0 em sucesso, 1 em erro.
 import argparse
 import os
 import re
+import stat
 import sys
 import tempfile
 from datetime import date
 from pathlib import Path
 
+# O helper e distribuido ao lado do validador. Impedir bytecode aqui evita que
+# ate um `check` somente leitura deixe `scripts/__pycache__` na skill.
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import validate_structure as V  # noqa: E402  (mesmo diretorio, de proposito)
 
@@ -162,9 +166,11 @@ def escrever(caminho, linhas, original):
     destroi nada."""
     fim = "\n" if original.endswith("\n") else ""
     conteudo = "\n".join(linhas) + fim
+    modo_original = stat.S_IMODE(caminho.stat().st_mode)
     fd, tmp = tempfile.mkstemp(dir=str(caminho.parent), prefix=caminho.name + ".", suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as saida:
+            os.fchmod(saida.fileno(), modo_original)
             saida.write(conteudo)
             saida.flush()
             os.fsync(saida.fileno())
@@ -205,11 +211,24 @@ def cmd_check(args):
     return 0
 
 
+def cmd_linha(args):
+    """Imprime a linha atual da tarefa usando o mesmo parser do helper."""
+    _, texto = ler(args.projeto)
+    inicio, _, _ = achar_tarefa(texto, args.tarefa)
+    print(texto.splitlines()[inicio][2:].strip())
+    return 0
+
+
 def cmd_fechar(args):
     caminho, texto = ler(args.projeto)
     inicio, fim, secao = achar_tarefa(texto, args.tarefa)
     linhas = texto.splitlines()
     linha = linhas[inicio][2:].strip()
+    if args.linha_esperada is not None and linha != args.linha_esperada:
+        raise Erro(
+            f"T-{args.tarefa} mudou durante a rodada; o loop recusa fechar "
+            "com uma linha diferente da capturada no arranque."
+        )
     if secao not in SECOES_ELEGIVEIS:
         raise Erro(f"T-{args.tarefa} esta em '{secao}', nao em secao de trabalho aberto.")
     comando = comando_declarado(linha)
@@ -220,7 +239,7 @@ def cmd_fechar(args):
             f"comando saiu {args.codigo}. O loop so fecha tarefa com portao verde; "
             "este helper recusa escrever evidencia de comando que falhou."
         )
-    saida = Path(args.saida).read_text(encoding="utf-8") if args.saida else ""
+    saida = Path(args.saida).read_text(encoding="utf-8", errors="replace") if args.saida else ""
     hoje = date.today().isoformat()
     # `agente` e fato conhecido com certeza: foi o loop que invocou aquele
     # comando. Registrar nao e alegacao sobre qualidade, e rastreabilidade de
@@ -228,6 +247,7 @@ def cmd_fechar(args):
     agente = f"agente={V.squeeze(args.agente)}; " if args.agente else ""
     novas = [
         f"- {hoje} {linha}",
+        *linhas[inicio + 1:fim],
         f"  - Evidencia: tipo=comando; {agente}procedimento={comando}; "
         f"resultado={resumir_saida(saida, args.codigo)}",
     ]
@@ -246,9 +266,9 @@ def cmd_bloquear(args):
     linha = linhas[inicio][2:].strip()
     if secao == SECAO_AGUARDANDO:
         raise Erro(f"T-{args.tarefa} ja esta em Aguardando Usuario.")
-    pergunta = V.squeeze(Path(args.pergunta).read_text(encoding="utf-8"))
+    pergunta = V.squeeze(Path(args.pergunta).read_text(encoding="utf-8", errors="replace"))
     if not pergunta:
-        raise Erro("arquivo de pergunta vazio; nao ha o que registrar.")
+        pergunta = "(vazia)"
     hoje = date.today().isoformat()
     if V.BLOCKED_RE.search(linha):
         linha = V.BLOCKED_RE.sub(f"(bloqueada: {hoje})", linha)
@@ -256,6 +276,7 @@ def cmd_bloquear(args):
         linha = f"{linha} (bloqueada: {hoje})"
     novas = [
         f"- {linha}",
+        *linhas[inicio + 1:fim],
         f"  - **Pergunta:** {pergunta}",
         "  - **Resposta:** (A preencher.)",
     ]
@@ -275,12 +296,18 @@ def main(argv=None):
     p.add_argument("tarefa")
     p.set_defaults(func=cmd_check)
 
+    p = sub.add_parser("linha", help="Imprime a linha atual da tarefa.")
+    p.add_argument("projeto")
+    p.add_argument("tarefa")
+    p.set_defaults(func=cmd_linha)
+
     p = sub.add_parser("fechar", help="Move para Concluidas com evidencia de comando.")
     p.add_argument("projeto")
     p.add_argument("tarefa")
     p.add_argument("--saida", help="Arquivo com a saida do comando.")
     p.add_argument("--codigo", type=int, default=0, help="Exit code do comando.")
     p.add_argument("--agente", help="Comando do agente que fez o trabalho, para rastreabilidade.")
+    p.add_argument("--linha-esperada", help="Linha da tarefa capturada antes de chamar o agente.")
     p.set_defaults(func=cmd_fechar)
 
     p = sub.add_parser("bloquear", help="Move para Aguardando Usuario com a pergunta.")

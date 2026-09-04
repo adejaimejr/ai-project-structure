@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- ai-project-structure:core:start v2.8.0 -->
+<!-- ai-project-structure:core:start v2.8.1 -->
 <!-- Bloco gerenciado pela skill ai-project-structure. Nao edite dentro dos
      marcadores: atualizacoes da skill podem substituir este bloco (sempre com
      confirmacao). Regras especificas deste projeto vao na secao
@@ -237,7 +237,7 @@ Antes de finalizar, confira:
 
 <!-- ai-project-structure:core:end -->
 
-<!-- ai-project-structure:specs:start v2.8.0 -->
+<!-- ai-project-structure:specs:start v2.8.1 -->
 ## Specs (Modulo Opcional Ativo)
 
 Crie uma spec em `docs/specs/` quando o trabalho for tamanho-feature:
@@ -260,7 +260,7 @@ Regras:
 O modelo de spec esta em `docs/specs/README.md`.
 <!-- ai-project-structure:specs:end -->
 
-<!-- ai-project-structure:loop:start v2.8.0 -->
+<!-- ai-project-structure:loop:start v2.8.1 -->
 ## Loop (Modulo Opcional Ativo)
 
 Este projeto pode executar uma tarefa sem supervisao, pelo `loop.sh` da skill. O ciclo e sempre o mesmo: pega **uma** tarefa que declarou `(verifica: <comando>)`, trabalha, roda o comando declarado e usa a saida da falha como contexto da tentativa seguinte. Ate 3 tentativas.

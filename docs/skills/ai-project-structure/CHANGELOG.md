@@ -2,6 +2,17 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.8.1 - 2026-09-04
+
+Correcoes no modulo de loop sem mudar o bloco core. O loop passa a conservar a
+linha da tarefa capturada no arranque e recusa fecha-la se ela mudar; preserva
+sub-linhas ao fechar ou bloquear; le saidas invalidas com substituicao; limita a
+realimentacao da falha aos ultimos 64KB (antes ia inteira para o argumento da
+CLI e estourava o limite do sistema); registra pergunta vazia como `(vazia)`;
+preserva o modo de `TASKS.md`; nao cria bytecode ao consultar o helper; fecha o
+stdin do agente; orienta que a propagacao de bloco cabe ao agente de chat; e
+documenta o exit code 4. Em modo seco, a evidencia tambem nao atribui agente.
+
 ## 2.8.0 - 2026-09-04
 
 Comando de `(verifica:)` com parenteses deixa de parecer tarefa sem portao: o

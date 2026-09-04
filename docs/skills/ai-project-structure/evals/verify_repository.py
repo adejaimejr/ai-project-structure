@@ -56,7 +56,7 @@ IGNORADOS = {"__pycache__", ".DS_Store"}
 
 # A bateria do loop tinha 58 verificacoes em 2026-09-03. Menos que isso e teste que
 # sumiu; ao acrescentar testes, suba o piso junto.
-LOOP_TESTES_MINIMO = 58
+LOOP_TESTES_MINIMO = 74
 
 # Criterio de aceite da spec 0005: o aviso do ponto cego e permanente no bloco
 # core, entao todo projeto paga a leitura dele. Quatro linhas e o teto.

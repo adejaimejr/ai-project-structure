@@ -72,6 +72,10 @@ fi
 
 # Elegibilidade primeiro: sem portao declarado, nem chamamos o agente.
 COMANDO="$(python3 "$HELPER" check "$PROJETO" "$TAREFA")" || exit 1
+# A linha inteira, e nao apenas o comando, e o contrato da rodada. O agente
+# pode editar TASKS.md; nesse caso o portao que acabamos de executar nao prova
+# a tarefa que ficou escrita depois da edicao.
+LINHA_TAREFA="$(python3 "$HELPER" linha "$PROJETO" "$TAREFA")" || exit 1
 echo "Tarefa:  $TAREFA"
 echo "Projeto: $PROJETO"
 echo "Portao:  $COMANDO"
@@ -124,6 +128,10 @@ para passar no portao for apagar conteudo ou cobertura, isso e falta de
 contexto: escreva a pergunta em $PROJETO/$ARQUIVO_PERGUNTA e pare. Perder
 informacao e decisao de quem pediu a tarefa, nunca sua."
 
+  PROMPT="$PROMPT
+
+A propagacao de bloco gerenciado para o AGENTS.md da raiz e trabalho do agente de chat depois desta rodada. Nao pare para perguntar sobre essa propagacao."
+
   if [ -n "$FALHA_ANTERIOR" ]; then
     PROMPT="$PROMPT
 
@@ -138,7 +146,7 @@ $FALHA_ANTERIOR"
   else
     MARCA="$TMP/marca-$n"; : > "$MARCA"
     AGENTE_CODIGO=0
-    ( cd "$PROJETO" && "${AGENTE_ARGS[@]}" "$PROMPT" ) || AGENTE_CODIGO=$?
+    ( cd "$PROJETO" && "${AGENTE_ARGS[@]}" "$PROMPT" </dev/null ) || AGENTE_CODIGO=$?
     # Agente que falhou E nao mexeu em nada nunca rodou de verdade. Insistir
     # so queima tentativa e portao; o problema esta no comando, nao na tarefa.
     if [ "$AGENTE_CODIGO" -ne 0 ]; then
@@ -174,16 +182,23 @@ $FALHA_ANTERIOR"
   echo "--- portao saiu com codigo $CODIGO"
 
   if [ "$CODIGO" -eq 0 ]; then
-    python3 "$HELPER" fechar "$PROJETO" "$TAREFA" \
-      --saida "$TMP/saida.txt" --codigo 0 \
-      ${AGENTE:+--agente "$AGENTE"} || exit 1
+    FECHAR_ARGS=(--saida "$TMP/saida.txt" --codigo 0 --linha-esperada "$LINHA_TAREFA")
+    if [ "$SECO" -eq 0 ]; then
+      FECHAR_ARGS+=(--agente "$AGENTE")
+    fi
+    python3 "$HELPER" fechar "$PROJETO" "$TAREFA" "${FECHAR_ARGS[@]}" || exit 1
     echo
     echo "Portao verde na tentativa $n. Tarefa fechada com evidencia de comando."
     echo "A entrada de SESSION.md continua sendo sua: o loop nao escreve la."
     exit 0
   fi
 
-  FALHA_ANTERIOR="$(cat "$TMP/saida.txt")"
+  # O prompt tambem vira argumento da CLI, e o limite de argumento do sistema
+  # fica na casa de centenas de KB. Uma saida de portao maior que isso derrubava
+  # a tentativa seguinte com "Argument list too long" e o loop reportava exit 4.
+  # 64KB de realimentacao preservam o fim, onde suites deixam o resumo, e
+  # continuam sendo contexto de verdade, nao um resumo de uma linha.
+  FALHA_ANTERIOR="$(tail -c 65536 "$TMP/saida.txt")"
 done
 
 echo

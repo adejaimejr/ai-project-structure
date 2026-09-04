@@ -41,6 +41,42 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-060, skill 2.8.1)
+
+### Objetivo
+
+- Fechar T-060, o pacote de consertos do modulo de loop (REVAL-3 e REVAL-4, onze itens), pelo loop com o `terra`.
+
+### O Que Foi Feito
+
+- Portao proprio por comportamento com agente falso por item (`evals/portao_t060.py`, 14 checks, reproduzia 0 de 14). Loop verde na tentativa 1, sem pergunta, stdin fechado no lancamento.
+- Consertos do terra, revisados: linha da tarefa capturada no arranque (`loop_task.py linha`) e `fechar --linha-esperada` recusando se mudou; sub-linhas preservadas em `fechar` e `bloquear`; `errors="replace"` na saida e na pergunta; pergunta vazia vira `(vazia)` com exit 3; `fchmod` preservando o modo do `TASKS.md`; `sys.dont_write_bytecode` no helper; agente chamado com `</dev/null`; prompt dizendo que propagar bloco ao `AGENTS.md` e do agente de chat; exit 4 na tabela de `references/loop.md`; `--seco` sem `--agente`. Bump 2.8.1, bloco core intocado.
+- Dois ajustes meus: a realimentacao da falha tinha sido truncada a 400 bytes (mesmo teto da evidencia), o que esvazia o que o loop faz de melhor; subi para 64KB. E o agente nao escreveu os casos hostis na bateria, que a tarefa pedia: portados por mim em `testar_hostil` (nove casos, bateria de 63 para 74; piso do verificador subiu junto). O caso de saida fora de UTF-8 quebrou o proprio harness da bateria, que decodificava o stdout do `loop.sh` em UTF-8 estrito; corrigido no harness.
+- Seis mutacoes reversas (stdin aberto, `fchmod` fora, sub-linhas apagadas, linha esperada ignorada, realimentacao inteira, `--seco` com agente): seis pegas pela bateria.
+- 2.8.1 reinstalada nos tres destinos. `SESSION.md` rotacionado de novo (duas entradas de 2026-09-03 para o archive).
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/partials/*.md`, `references/loop.md`, `scripts/loop.sh`, `scripts/loop_task.py`, `evals/test_loop.py`, `evals/verify_repository.py`, `evals/portao_t060.py`.
+- Projeto: `AGENTS.md` (marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`, `docs/archive/revalidacao-2026-09-03/`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal. Realimentacao em 64KB e calibragem minha, registrada no CHANGELOG da skill.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum novo. "Portao por comportamento com agente falso" ja esta na pratica das ultimas cinco rodadas; virou molde (`portao_t0NN.py`), nao regra.
+
+### Pendencias
+
+- Todo o pacote da revalidacao que nao dependia de decisao esta fechado: T-060, T-065, T-069 a T-072. Abertas: T-062, T-063, T-064, T-073, e T-053 a T-058. Os portoes `portao_t0NN.py` ficam em `evals/` como registro; o que eles cobram vive na bateria e no verificador.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente para T-063 (templates) e T-064 (tracebacks do validador), as duas ainda sem decisao pendente; o loop serve, com portao proprio.
+- Motivo: T-063 e o que o usuario final recebe, e T-064 sao dois tracebacks reproduzidos.
+
 ## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-072 e T-071, skill 2.8.0)
 
 ### Objetivo
@@ -299,79 +335,3 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 - Agente sugerido (ou "qualquer agente"): sessao nova rodando o prompt de revalidacao de `docs/PROMPTS.md`.
 - Motivo: sete defeitos reais sairam de tres rodadas de consenso feitas de improviso. O prompt existe para fazer isso de proposito, com distribuicao por familia de modelo em vez de repetir a mesma pergunta.
-
-## 2026-09-03 - Claude, Codex e Grok (rodada de P-9, o conflito entre DEC-003 e DEC-006)
-
-### Objetivo
-
-- Responder P-9, que nao e pergunta de desenho novo: e conflito entre duas decisoes ratificadas no mesmo dia.
-
-### O Que Foi Feito
-
-- **3 de 3 no desenho**, e o criterio que resolve o conflito veio do Grok: **publicado e anterior, nao publicado e contemporaneo**. A DEC-003 e a DEC-006 nunca se contradisseram; elas falavam de momentos diferentes, e faltava alguem escolher o instante da gravacao. Os tres classificaram o caso como **lacuna**, nao contradicao, e nenhum pediu para reverter decisao ratificada.
-- Desenho convergente: lock exclusivo por projeto na abertura, bruto e manifesto gravados assim que cada agente encerra fora do alcance dos demais, minuta escrita uma vez so no fim por substituicao atomica do arquivo inteiro, e interrupcao deixando o `CONSENSUS.md` byte a byte como estava.
-- **Argumento que sozinho ja proibe publicar cedo, e veio de uma decisao ratificada:** a DEC-005 tornou `N=1` valido, entao minuta a meio com 1 de 3 posicoes e **indistinguivel de uma corrida `N=1` concluida**. Nao e so vazamento, e ambiguidade de leitura. So o Grok fez essa ligacao.
-- **O risco mais grave da rodada nao tem solucao proposta por ninguem.** O Codex mostrou a armadilha inteira: o bruto pode conter segredo do repositorio; a DEC-001 exige preservar literal; a P-8 aponta para artefato versionado; e redigir automaticamente destruiria justamente a evidencia. As tres posicoes juntas nao produziram saida. Ficou escrito na spec como nao resolvido.
-- **Dois defeitos do codigo publicado apareceram como efeito colateral**, os dois conferidos antes de aceitos, e viraram T-057 e T-058: `loop_task.py:147` grava `TASKS.md` com `write_text` direto, que nao e atomico e pode rasgar o arquivo de memoria; e o `loop.sh` nao protege contra duas rodadas simultaneas, porque o sinal de pergunta tem nome fixo e o arranque apaga o leftover da rodada anterior.
-- Duas ressalvas de independencia registradas na entrada, as duas **contra** a forca desta rodada: quem descobriu o conflito foi o Grok, entao ele respondeu a propria pergunta, ainda que sem lembrar do argumento; e o enunciado que os tres leram e a transcricao que o Claude fez do achado dele. Se a transcricao estreitou o problema, os tres herdaram o estreitamento.
-
-### Arquivos Criados Ou Alterados
-
-- Projeto: `docs/CONSENSUS.md`, `docs/specs/0006-automacao-do-consenso.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
-
-### Decisoes Tomadas
-
-- Nenhuma. O desenho de P-9 vira DEC-007 quando o usuario ratificar, e uma parte dele deve subir para `docs/DECISIONS.md`: escrever arquivo de memoria por substituicao atomica, nunca por escrita direta, porque isso vale para o `loop_task.py` ja publicado.
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum novo. O que apareceu virou tarefa (T-057, T-058) por ser defeito de codigo, e nao licao reutilizavel.
-
-### Pendencias
-
-- T-053 acumula tres calibragens (P-7, P-8, P-9) mais a pergunta de segredo no bruto, que nenhuma rodada resolveu.
-- T-057 tem prioridade alta: e o unico dos defeitos abertos que pode **destruir** dado do usuario, e nao so reportar errado.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente para T-057, que nao depende de decisao nenhuma; o usuario para as calibragens.
-- Motivo: T-057 e conserto de duas linhas com risco real de perda de arquivo, e esta parado atras de decisoes de escopo que nao tem relacao com ele.
-
-## 2026-09-03 - Claude, Codex e Grok (rodada 1 de P-7 e P-8)
-
-### Objetivo
-
-- Responder as duas perguntas que sobraram da spec 0006, com Codex e Grok, a pedido do usuario.
-
-### O Que Foi Feito
-
-- **Primeiro uso da DEC-003**, ratificada horas antes. Os agentes rodaram numa copia do repositorio com o corpo da entrada da rodada anterior **retido**, e uma nota no lugar dizendo que a omissao era proposital. Reter sem avisar faria os dois concluirem que nenhuma rodada havia acontecido, que e falso. O modelo de debate e o de achado ficaram na copia, porque **sao o objeto de P-7**.
-- **3 de 3 nas duas perguntas.** A forma entra no escopo e a proveniencia entra no escopo. Nao houve empate: o que sobrou foi calibragem.
-- **O achado que mais barateia P-7, conferido no codigo:** o validador **nunca exigiu heading de posicao nomeado**. As unicas exigencias de heading no script inteiro sao as de `SESSION.md` e a de "Por Que Nada Pegou Antes". O congelamento em Codex, Claude e Gemini esta no **template**, e nao no contrato. O Grok viu isso e recusou o binario da pergunta, partindo "forma" em tres camadas que ja nao coincidiam.
-- Codex e Grok chegaram, sem combinar, ao mesmo mecanismo para nao quebrar o criterio de "projeto que nao automatiza nao ganha cobranca nova": um marcador `**Origem:**` que faz os checks novos valerem so para entrada automatizada. O Claude tinha declarado esse exato ponto como "buraco que nao sei resolver"; os outros dois resolveram.
-- **Conflito entre duas decisoes ja ratificadas, achado pelo Grok:** DEC-003 proibe ver posicao contemporanea e DEC-006 exige ver as anteriores, e nenhuma das duas escolheu **quando** a minuta e escrita. Escrita incremental no meio da rodada vaza o contemporaneo pelo proprio repositorio. Virou P-9.
-- **Tres defeitos da 2.5.0 atual**, achados pelos dois e conferidos no codigo antes de aceitos, viraram T-054 e T-055: `Rodada` ausente nao gera diagnostico nenhum; `re.match` em vez de `fullmatch` deixa passar lixo depois do valor; e o `Modelo De Debate` da raiz esta atras do asset da skill nos campos da 2.2.0.
-- Um quarto defeito apareceu ao escrever a propria spec e virou T-056: `spec_overview` conta sub-item indentado como pergunta aberta, e a spec 0006 passou a reportar 7 perguntas quando tinha 3.
-
-### Arquivos Criados Ou Alterados
-
-- Projeto: `docs/CONSENSUS.md`, `docs/specs/0006-automacao-do-consenso.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/CONSENSUS-2026.md`, `docs/archive/README.md`.
-
-### Decisoes Tomadas
-
-- Nenhuma. As duas convergencias esperam ratificacao, e P-9 espera decisao.
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum novo. Os desta sessao ja foram promovidos nas entradas anteriores.
-
-### Pendencias
-
-- T-053 segue em "Aguardando Usuario", agora com duas calibragens e P-9.
-- T-054, T-055 e T-056 sao defeitos do que ja esta publicado, independentes da spec 0006. T-054 nao e conserto obvio: fechar os dois buracos para toda entrada e cobranca nova em projeto existente, o que esbarra num criterio de aceite da propria 0006.
-- A transcricao continua sendo feita pelo modelo criticado. O risco registrado na rodada anterior nao foi resolvido por esta, e nao sera enquanto a operacao nao existir.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): o usuario, para as duas calibragens e P-9.
-- Motivo: P-9 e o mais urgente dos tres, porque e conflito entre decisoes ja ratificadas, e nao pergunta nova. Enquanto ele nao for decidido, DEC-003 e DEC-006 se contradizem no papel.

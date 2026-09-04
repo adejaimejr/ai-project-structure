@@ -149,7 +149,7 @@ def rodar_loop(root, agente, log, tarefa="T-019", extra=()):
     p = subprocess.run(
         ["bash", str(LOOP), "--tarefa", tarefa, "--projeto", str(root),
          "--agente", agente.name, *extra],
-        capture_output=True, text=True, env=env)
+        capture_output=True, text=True, errors="replace", env=env)
     return p.returncode, p.stdout + p.stderr
 
 
@@ -388,6 +388,128 @@ def testar_loop(res):
         res.check(validar(root) == 0, "D: validador --strict exit 0 depois da rodada")
 
 
+AGENTE_TROCA_VERIFICA = """#!/usr/bin/env bash
+printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
+sed -i "" "s/(verifica: bash portao.sh)/(verifica: true)/" docs/TASKS.md
+"""
+
+AGENTE_PERGUNTA_VAZIA = """#!/usr/bin/env bash
+printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
+: > "$PWD/.loop-pergunta"
+"""
+
+AGENTE_LE_STDIN = """#!/usr/bin/env bash
+x="$(cat)"
+echo "stdin:$x" > "$PWD/stdin.txt"
+"""
+
+
+def testar_hostil(res):
+    """T-060 (REVAL-3): entradas hostis que fechavam tarefa errada ou perdiam trabalho.
+
+    Cada caso e uma mutacao reversa: desfazer o conserto correspondente em
+    loop.sh ou loop_task.py faz o caso falhar."""
+    import stat
+
+    # H1: agente troca o comando do marcador na propria linha
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp, "echo suite-real\nexit 0\n")
+        agente = agente_falso(tmp, AGENTE_TROCA_VERIFICA)
+        log = Path(tmp) / "prompts.txt"
+        code, out = rodar_loop(root, agente, log)
+        texto = (root / "docs" / "TASKS.md").read_text(encoding="utf-8")
+        res.check(code != 0, "H1: linha da tarefa mudou durante a rodada, loop nao fecha", f"exit {code}")
+        res.check("procedimento=true" not in texto, "H1: evidencia nunca registra o comando trocado")
+
+    # H2: sub-linhas preexistentes sobrevivem a fechar e a bloquear
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        tasks = root / "docs" / "TASKS.md"
+        tasks.write_text(tasks.read_text(encoding="utf-8").replace(
+            "(verifica: bash portao.sh)\n", "(verifica: bash portao.sh)\n  - Cuidado: nao alterar a variavel X\n"), encoding="utf-8")
+        saida = Path(tmp) / "saida.txt"
+        saida.write_text("ok\n", encoding="utf-8")
+        code, out = rodar_helper("fechar", str(root), "T-019", "--saida", str(saida), "--codigo", "0")
+        concluidas = tasks.read_text(encoding="utf-8").split("## Concluidas")[1]
+        res.check(code == 0 and "Cuidado: nao alterar" in concluidas, "H2: fechar preserva sub-linhas preexistentes")
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        tasks = root / "docs" / "TASKS.md"
+        tasks.write_text(tasks.read_text(encoding="utf-8").replace(
+            "(verifica: bash portao.sh)\n", "(verifica: bash portao.sh)\n  - Cuidado: nao alterar a variavel X\n"), encoding="utf-8")
+        pergunta = Path(tmp) / "pergunta.txt"
+        pergunta.write_text("Qual banco?\n", encoding="utf-8")
+        code, out = rodar_helper("bloquear", str(root), "T-019", "--pergunta", str(pergunta))
+        aguardando = tasks.read_text(encoding="utf-8").split("## Aguardando Usuario")[1].split("## Concluidas")[0]
+        res.check(code == 0 and "Cuidado: nao alterar" in aguardando and "**Pergunta:** Qual banco?" in aguardando,
+                  "H2: bloquear preserva sub-linhas preexistentes")
+
+    # H3: saida do portao fora de UTF-8 nao impede o fecho
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp, "printf 'ok \\xff\\xfe fim\\n'; exit 0\n")
+        agente = agente_falso(tmp, AGENTE_NORMAL)
+        code, out = rodar_loop(root, agente, Path(tmp) / "prompts.txt")
+        texto = (root / "docs" / "TASKS.md").read_text(encoding="utf-8")
+        res.check(code == 0 and "T-019" in texto.split("## Concluidas")[1], "H3: saida fora de UTF-8 fecha a tarefa", f"exit {code}")
+
+    # H4: saida enorme do portao vermelho nao vira exit 4
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp, 'head -c 1200000 /dev/zero | tr "\\0" x; echo; exit 1\n')
+        agente = agente_falso(tmp, AGENTE_NORMAL)
+        log = Path(tmp) / "prompts.txt"
+        code, out = rodar_loop(root, agente, log)
+        res.check(code == 2 and len(prompts(log)) == 3, "H4: saida de 1,2MB: tres tentativas e exit 2, nao exit 4",
+                  f"exit {code}, {len(prompts(log))} chamadas")
+
+    # H5: pergunta vazia
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        agente = agente_falso(tmp, AGENTE_PERGUNTA_VAZIA)
+        code, out = rodar_loop(root, agente, Path(tmp) / "prompts.txt")
+        texto = (root / "docs" / "TASKS.md").read_text(encoding="utf-8")
+        res.check(code == 3 and "T-019" in texto.split("## Aguardando Usuario")[1].split("## Concluidas")[0]
+                  and not (root / ".loop-pergunta").exists(),
+                  "H5: .loop-pergunta vazio bloqueia com (vazia), exit 3, arquivo removido", f"exit {code}")
+
+    # H6: modo do arquivo preservado
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        os.chmod(root / "docs" / "TASKS.md", 0o664)
+        agente = agente_falso(tmp, AGENTE_NORMAL)
+        code, out = rodar_loop(root, agente, Path(tmp) / "prompts.txt")
+        modo = stat.S_IMODE((root / "docs" / "TASKS.md").stat().st_mode)
+        res.check(code == 0 and modo == 0o664, "H6: modo 0664 do TASKS.md preservado", oct(modo))
+
+    # H7: --seco nao grava agente=
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        agente = agente_falso(tmp, AGENTE_NORMAL)
+        code, out = rodar_loop(root, agente, Path(tmp) / "prompts.txt", extra=("--seco",))
+        texto = (root / "docs" / "TASKS.md").read_text(encoding="utf-8")
+        res.check(code == 0 and "agente=" not in texto, "H7: --seco nao grava agente= na evidencia", f"exit {code}")
+
+    # H8: o agente recebe stdin fechado
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        agente = agente_falso(tmp, AGENTE_LE_STDIN)
+        env = dict(os.environ, LOG_PROMPT=str(Path(tmp) / "p.txt"),
+                   PATH=f"{agente.parent}{os.pathsep}{os.environ['PATH']}")
+        p = subprocess.run(["bash", str(LOOP), "--tarefa", "T-019", "--projeto", str(root), "--agente", agente.name],
+                           capture_output=True, text=True, env=env, input="segredo-do-stdin\n")
+        lido = (root / "stdin.txt").read_text(errors="replace") if (root / "stdin.txt").exists() else ""
+        res.check("segredo-do-stdin" not in lido, "H8: agente recebe stdin fechado", lido.strip()[:60])
+
+    # H9: o prompt diz quem propaga bloco gerenciado
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        agente = agente_falso(tmp, AGENTE_NORMAL)
+        log = Path(tmp) / "prompts.txt"
+        rodar_loop(root, agente, log)
+        ps = prompts(log)
+        res.check(bool(ps) and "AGENTS.md" in ps[0] and "agente de chat" in ps[0],
+                  "H9: prompt diz que propagar bloco ao AGENTS.md e do agente de chat")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Testa o modulo de loop com agente falso.")
     parser.add_argument("--verbose", action="store_true", help="Mostra tambem o que passou.")
@@ -397,6 +519,7 @@ def main(argv=None):
     testar_helper(res)
     testar_escrita_atomica(res)
     testar_loop(res)
+    testar_hostil(res)
     print(f"Modulo de loop: {res.total - res.falhas}/{res.total} verificacoes passaram.")
     return 1 if res.falhas else 0
 

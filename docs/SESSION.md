@@ -41,6 +41,43 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-069, skill 2.6.0)
+
+### Objetivo
+
+- Fechar T-069 (seis checks ERRO decididos em T-059) pelo loop com o `terra`, e publicar a 2.6.0.
+
+### O Que Foi Feito
+
+- **Portao proprio por comportamento** (`evals/portao_t069.py`): seis documentos errados montados de `assets/` precisam sair ERRO no arquivo certo, um projeto limpo precisa passar em `--strict`, versao acima de 2.5.1, verificador em exit 0. Falhava em 7 de 9. Sem ditar nome de codigo.
+- **Rodada 1: exit 3, e era certo.** A tarefa manda propagar marcadores para o `AGENTS.md` da raiz e o prompt do loop proibe editar esse arquivo. O agente parou e perguntou em vez de decidir. Resposta operacional, pela regra do bloco de loop: quem edita `AGENTS.md` e o agente de chat. Marcadores da raiz postos em v2.6.0 por script antes da rodada 2, tarefa devolvida a fila.
+- **Rodada 2: verde na tentativa 1.** Codigos novos `TASK-CONCLUIDA-SEM-DATA`, `VERIFICA-COMANDO-VAZIO`, `MARCADOR-ORDEM-INVALIDA`, `MARCADOR-LOOP-INVALIDO`, `NUCLEO-VAZIO`, `TASK-ID-ARQUIVADO-DUPLICADO`, cada um com fixture (o verificador exige desde T-065). Bump para 2.6.0 em `SKILL.md`, assets, partials e CHANGELOG; raiz byte a byte igual ao asset.
+- **Revisao do que o terra escreveu, dois pontos:** (1) mudou a regex do marcador verifica para valer so no fim da linha, porque a resposta de T-059 na propria raiz mencionava `(verifica: )` em prosa e disparou o check novo. Defensavel (o core sempre disse "no fim da linha") e com bonus: comando com parenteses deixa de ser truncado e passa a ser recusado como "nao declarou". Mas nao estava no CHANGELOG; agora esta. (2) Satisfez a versao em prosa escrevendo uma frase nova e deixou a linha velha em 2.5.1: portao medindo o que sobrou. Corrigida a linha, e `verificar_versao` passou a exigir que **toda** ocorrencia bata e que a secao mais recente do CHANGELOG so cite a versao atual; provado por mutacao (prosa velha de volta reprova).
+- `TASK-CONCLUIDA-SEM-DATA` so cobra linha com `T-NNN`: linha historica sem ID (fixture v1 e a raiz) continua tolerada, coerente com `TASKS-FORMATO-V1`.
+- 2.6.0 reinstalada nos tres destinos globais, `diff -rq` limpo fora do nao distribuido, sem `__pycache__`.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `README.md`, `assets/AGENTS.md`, `assets/partials/*.md`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/portao_t069.py`, `evals/fixtures/cobertura-arquivos/`, `evals/fixtures/cobertura-tarefas/`.
+- Projeto: `AGENTS.md` (marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/MEMORY.md`, `docs/archive/revalidacao-2026-09-03/`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal. A regex do verifica no fim da linha aplica o texto do core que ja existia.
+
+### Aprendizados Para MEMORY.md
+
+- Portao com regex "existe uma ocorrencia certa" e satisfeito por uma frase nova ao lado da errada. Cobre "toda ocorrencia bate", nunca "alguma".
+
+### Pendencias
+
+- T-070 (AVISO), T-071 (texto do core), T-072 (diagnostico de parenteses) e T-060 (loop) seguem abertas para a proxima release. Duas sessoes de loop consecutivas geraram uma pergunta operacional cada; o prompt do loop poderia dizer que a propagacao ao `AGENTS.md` e do agente de chat, para nao gastar rodada com isso (nao virou tarefa: e frase em `loop.sh`, cabe em T-060).
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente para T-070, com portao proprio por comportamento, no mesmo molde de `portao_t069.py`.
+- Motivo: e o par de T-069 e depende da mesma decisao, ja tomada.
+
 ## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-065)
 
 ### Objetivo

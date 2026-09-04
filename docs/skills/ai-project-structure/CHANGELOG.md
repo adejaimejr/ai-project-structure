@@ -2,6 +2,18 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.6.0 - 2026-09-04
+
+Seis contradicoes estruturais que passavam limpas agora sao ERRO no
+`validate_structure.py`: tarefa em Concluidas sem data, marcador verifica vazio,
+marcadores em ordem invertida, bloco loop invalido, arquivo do nucleo vazio e ID
+repetido entre `TASKS.md` vivo e `docs/archive/TASKS-*.md`. Cada diagnostico tem
+fixture com oracle exato no verificador do repositorio. Os tres marcadores dos
+blocos gerenciados sobem juntos para v2.6.0.
+
+- **Mudanca de comportamento no marcador verifica**: a regex passou a exigir que ele esteja no fim da linha, seguido no maximo de outros marcadores entre parenteses, como o bloco core sempre disse. Consequencias: mencao em prosa como "o `(verifica: )` vazio" deixa de ser lida como declaracao (era falso positivo do check novo `VERIFICA-COMANDO-VAZIO` na propria raiz deste repositorio); e comando com parenteses, que antes era truncado no primeiro `)` e executado assim pelo loop (REVAL-3), agora simplesmente nao casa, entao o `loop_task.py check` recusa a tarefa como "nao declarou verifica". O diagnostico explicito para esse caso segue em T-072.
+- Fechada pelo modulo de loop com Codex `gpt-5.6-terra`, contra portao proprio (`evals/portao_t069.py`), depois de o agente parar na rodada 1 para perguntar sobre a propagacao ao `AGENTS.md` da raiz, que o prompt do loop proibe e o agente de chat fez por script.
+
 ## 2.5.1 - 2026-09-03
 
 Conserto de seguranca de dado, nao feature. Achado pelo Grok numa rodada de consenso sobre a spec 0006, e conferido no codigo antes de aceito.

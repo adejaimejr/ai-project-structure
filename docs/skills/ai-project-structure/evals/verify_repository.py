@@ -149,8 +149,11 @@ FIXTURES = {
         "exit": 1,
         "diagnosticos": [
             "ERRO|TRAVESSAO|AGENTS.md|",
+            "ERRO|MARCADOR-ORDEM-INVALIDA|AGENTS.md|core",
             "ERRO|MARCADOR-VERSAO-INVALIDA|AGENTS.md|core",
             "ERRO|MARCADOR-DESPAREADO|AGENTS.md|specs",
+            "ERRO|MARCADOR-DESPAREADO|AGENTS.md|loop",
+            "ERRO|MARCADOR-LOOP-INVALIDO|AGENTS.md|loop",
             "AVISO|PONTE-QUEBRADA|CLAUDE.md|",
             "ERRO|NUCLEO-AUSENTE|GEMINI.md|GEMINI.md",
             "ERRO|NUCLEO-AUSENTE|docs/CHANGELOG.md|docs/CHANGELOG.md",
@@ -160,7 +163,7 @@ FIXTURES = {
             "ERRO|NUCLEO-AUSENTE|docs/PROJECT_CONTEXT.md|docs/PROJECT_CONTEXT.md",
             "ERRO|NUCLEO-AUSENTE|docs/QUALITY.md|docs/QUALITY.md",
             "ERRO|NUCLEO-AUSENTE|docs/README.md|docs/README.md",
-            "ERRO|NUCLEO-AUSENTE|docs/SESSION.md|docs/SESSION.md",
+            "ERRO|NUCLEO-VAZIO|docs/SESSION.md|docs/SESSION.md",
             "ERRO|NUCLEO-AUSENTE|docs/TASKS.md|docs/TASKS.md",
             "ERRO|NUCLEO-AUSENTE|docs/archive/README.md|docs/archive/README.md",
         ],
@@ -210,9 +213,12 @@ FIXTURES = {
             "AVISO|TASK-BLOQUEADA-FORMATO|docs/TASKS.md|T-001",
             "AVISO|TASK-BLOQUEADA-ANTIGA|docs/TASKS.md|T-002",
             "AVISO|EVIDENCIA-TIPO-INVALIDO|docs/TASKS.md|T-012",
+            "ERRO|VERIFICA-COMANDO-VAZIO|docs/TASKS.md|T-014",
             "INFO|CONVENCOES-DATA-INVALIDA|docs/TASKS.md|",
             "ERRO|EVIDENCIA-AUSENTE-COM-VERIFICA|docs/TASKS.md|T-011",
             "ERRO|EVIDENCIA-SEM-RESULTADO|docs/TASKS.md|T-012",
+            "ERRO|TASK-CONCLUIDA-SEM-DATA|docs/TASKS.md|T-013",
+            "ERRO|TASK-ID-ARQUIVADO-DUPLICADO|docs/TASKS.md|T-001",
             "ERRO|NUCLEO-AUSENTE|docs/archive/README.md|docs/archive/README.md",
             "ERRO|SPEC-PREFIXO-DUPLICADO|docs/specs/0001-segunda.md|0001-segunda.md",
             "ERRO|SPEC-STATUS-INVALIDO|docs/specs/0002-status.md|0002-status.md",
@@ -514,10 +520,19 @@ def verificar_versao(res, verbose=False):
         is not None,
         f"CHANGELOG.md da skill tem a secao {versao}",
     )
+    # Toda ocorrencia em prosa precisa bater, nao so uma: na T-069 o agente
+    # satisfez este check com uma frase nova e deixou a linha velha em 2.5.1.
+    em_prosa = re.findall(r"versao da estrutura:\s*(\d+\.\d+\.\d+)", frontmatter, re.IGNORECASE)
     res.check(
-        re.search(rf"versao da estrutura:\s*{re.escape(versao)}\b", frontmatter,
-                  re.IGNORECASE) is not None,
-        f"SKILL.md declara versao da estrutura {versao} em prosa",
+        bool(em_prosa) and set(em_prosa) == {versao},
+        f"toda 'versao da estrutura' em prosa no SKILL.md e {versao}",
+        f"encontradas: {', '.join(em_prosa) or 'nenhuma'}",
+    )
+    changelog_prosa = re.findall(r"\bv(\d+\.\d+\.\d+)\b", read(SKILL / "CHANGELOG.md").split("\n## ", 2)[1])
+    res.check(
+        set(changelog_prosa) <= {versao},
+        f"secao mais recente do CHANGELOG so cita v{versao}",
+        f"encontradas: {', '.join(sorted(set(changelog_prosa))) or 'nenhuma'}",
     )
 
 

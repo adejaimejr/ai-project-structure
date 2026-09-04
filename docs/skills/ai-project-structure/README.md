@@ -143,6 +143,12 @@ declarou `sim` sem a secao "Por Que Nada Pegou Antes". A partir da quarta
 rodada, a entrada precisa de `**Pendente da rodada anterior:**`. Entrada de
 debate nao e afetada: os checks novos so valem para quem declarar `**Achado:**`.
 
+Da versao 2.6.0 em diante, seis contradicoes estruturais viram ERRO: tarefa
+concluida sem data, marcador verifica vazio, marcadores em ordem invertida,
+bloco `loop` despareado ou sem versao, arquivo do nucleo vazio e ID repetido
+entre o `TASKS.md` vivo e `docs/archive/TASKS-*.md`. O marcador verifica so vale
+no fim da linha.
+
 ## Verificador do repositorio
 
 ```bash

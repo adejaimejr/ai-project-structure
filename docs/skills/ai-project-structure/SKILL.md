@@ -1,6 +1,6 @@
 ---
 name: ai-project-structure
-version: "2.5.1"
+version: "2.6.0"
 description: Use sempre que o usuario quiser iniciar um projeto novo de IA, criar a estrutura inicial de um repositorio multiagente, ou fazer scaffold de um projeto Markdown que sera tocado por varias IAs. Dispare mesmo que o usuario nao mencione a skill por nome - basta o pedido envolver frases como "inicia projeto novo", "cria projeto", "scaffold projeto", "estrutura inicial", "novo repo de IA", "inicia projeto de IA", "monta a base do projeto", "cria a pasta do projeto", ou qualquer pedido para preparar um diretorio com AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ (SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS, etc). Use tambem quando o usuario quiser converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ativar o modulo de specs (docs/specs/) em um projeto existente, ou ativar, rodar e configurar o modulo de loop (perfis de modelo e esforco por intencao e ferramenta). Esta skill cria os arquivos de fato, nao apenas explica como criar.
 ---
 
@@ -26,6 +26,8 @@ A partir da versao 2.4.0, `CONSENSUS.md` deixa de servir so para debate:
 - entrada que declara `**Achado:** <identificador>` e um **achado**, com disposicao de quem registrou e revalidacao por outro modelo. O identificador e livre; o validador confere que o campo existe e tem valor;
 - achado que declarou `**Escapou de verificacao:** sim` traz a secao `Por Que Nada Pegou Antes`, que transforma defeito escapado em conserto de portao;
 - o teto de tres rodadas saiu. Da quarta rodada em diante a entrada declara `**Pendente da rodada anterior:**`.
+
+A partir da versao 2.6.0, o validador acusa como ERRO seis contradicoes estruturais que antes passavam em silencio: tarefa concluida sem data, marcador verifica com comando vazio, marcadores em ordem invertida, bloco `loop` sem par ou sem versao, arquivo do nucleo vazio e ID repetido entre o `TASKS.md` vivo e `docs/archive/TASKS-*.md`. O marcador verifica so vale no fim da linha (seguido, no maximo, de outros marcadores); mencao em prosa nao declara comando.
 
 ## Fluxo
 
@@ -183,7 +185,7 @@ No final, liste de forma curta:
 
 - caminho absoluto do destino;
 - nivel escolhido (completa ou minimal) e se o modulo de specs foi ativado;
-- versao da estrutura: 2.5.1;
+- versao da estrutura: 2.6.0;
 - arquivos criados (em arvore);
 - proximo passo sugerido: preencher os demais campos de `PROJECT_CONTEXT.md` e adicionar tarefas iniciais em `TASKS.md`;
 - oferta: "quer validar a estrutura? `python3 <dir-desta-skill>/scripts/validate_structure.py <destino>`".

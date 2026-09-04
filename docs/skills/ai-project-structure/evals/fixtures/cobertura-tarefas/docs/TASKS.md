@@ -15,3 +15,6 @@
 - 2026-09-03 T-011: Com portao e sem evidencia. (verifica: bash portao.sh)
 - 2026-09-03 T-012: Evidencia sem resultado. (verifica: bash outro.sh)
   - Evidencia: tipo=estranho; procedimento=bash nada.sh
+- T-013: Concluida sem prefixo de data.
+- 2026-09-03 T-014: Marcador verifica sem comando. (verifica: )
+  - Evidencia: tipo=comando; procedimento=conferencia manual; resultado=ok

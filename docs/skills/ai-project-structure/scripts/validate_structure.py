@@ -54,7 +54,7 @@ CONSENSUS_ESCAPOU = {"sim", "nao"}
 ACHADO_SECAO_ESCAPE = "Por Que Nada Pegou Antes"
 
 MARKER_RE = re.compile(
-    r"<!--\s*ai-project-structure:(core|specs):(start|end)(?:\s+v(\S+))?\s*-->"
+    r"<!--\s*ai-project-structure:(core|specs|loop):(start|end)(?:\s+v(\S+))?\s*-->"
 )
 ENTRY_RE = re.compile(r"^## \d{4}-\d{2}-\d{2}", re.MULTILINE)
 TASK_ID_RE = re.compile(r"\bT-(\d+)\b")
@@ -64,7 +64,9 @@ TASK_OWN_ID_RE = re.compile(r"^(?:\d{4}-\d{2}-\d{2}\s+)?T-(\d+)\b")
 SPEC_REF_RE = re.compile(r"\(spec:\s*([^)]+)\)")
 SPEC_NAME_RE = re.compile(r"^(\d{4})-[a-z0-9][a-z0-9-]*\.md$")
 PRIORITY_RE = re.compile(r"\(prioridade:\s*([^)]*)\)")
-VERIFICA_RE = re.compile(r"\(verifica:\s*([^)]*)\)")
+# Marcador so vale no fim da linha, opcionalmente seguido por outros marcadores.
+# Uma mencao em prosa como "`(verifica:)` sem resultado" nao declara comando.
+VERIFICA_RE = re.compile(r"\(verifica:\s*([^)]*)\)(?=\s*(?:\([^)]*\)\s*)*$)")
 BLOCKED_RE = re.compile(r"\(bloqueada:\s*([^)]*)\)")
 ADOPTION_RE = re.compile(r"\(convencoes-2-2-0-desde:\s*([^)]*)\)")
 DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -90,6 +92,9 @@ CODIGOS = {
     "ESTRUTURA-V1",
     "MARCADOR-DESPAREADO",
     "MARCADOR-VERSAO-INVALIDA",
+    "MARCADOR-ORDEM-INVALIDA",
+    "MARCADOR-LOOP-INVALIDO",
+    "NUCLEO-VAZIO",
     # SESSION.md
     "SESSAO-SEM-HEADINGS",
     # CONSENSUS.md, debate
@@ -109,8 +114,10 @@ CODIGOS = {
     "ROTACAO",
     # TASKS.md
     "TASK-ID-DUPLICADO",
+    "TASK-ID-ARQUIVADO-DUPLICADO",
     "TASKS-FORMATO-V1",
     "TASK-SEM-ID",
+    "TASK-CONCLUIDA-SEM-DATA",
     "TASK-PRIORIDADE-INVALIDA",
     "TASK-BLOQUEADA-FORMATO",
     "TASK-BLOQUEADA-ANTIGA",
@@ -122,6 +129,7 @@ CODIGOS = {
     "EVIDENCIA-AUSENTE-COM-VERIFICA",
     "EVIDENCIA-SEM-RESULTADO",
     "EVIDENCIA-TIPO-INVALIDO",
+    "VERIFICA-COMANDO-VAZIO",
     # specs/
     "SPEC-NOME-INVALIDO",
     "SPEC-PREFIXO-DUPLICADO",
@@ -228,8 +236,11 @@ def split_entries(clean_text):
 
 def check_core_files(root, report):
     for rel in CORE_FILES:
-        if not (root / rel).is_file():
+        path = root / rel
+        if not path.is_file():
             report.erro(rel, "NUCLEO-AUSENTE", "Arquivo do nucleo ausente.", rel)
+        elif path.stat().st_size == 0:
+            report.erro(rel, "NUCLEO-VAZIO", "Arquivo do nucleo esta vazio.", rel)
 
 
 def check_em_dash(root, report):
@@ -269,14 +280,14 @@ def check_markers(root, report):
     text = read(root / "AGENTS.md")
     if text is None:
         return
-    found = {}  # bloco -> {"start": [versoes], "end": contagem}
+    found = {}  # bloco -> {"start": [(versao, posicao)], "end": [posicao]}
     for m in MARKER_RE.finditer(text):
         block, kind, version = m.group(1), m.group(2), m.group(3)
-        entry = found.setdefault(block, {"start": [], "end": 0})
+        entry = found.setdefault(block, {"start": [], "end": []})
         if kind == "start":
-            entry["start"].append(version)
+            entry["start"].append((version, m.start()))
         else:
-            entry["end"] += 1
+            entry["end"].append(m.start())
     if not found:
         report.info(
             "AGENTS.md",
@@ -287,22 +298,37 @@ def check_markers(root, report):
         return
     for block, entry in found.items():
         starts, ends = entry["start"], entry["end"]
-        if len(starts) != 1 or ends != 1:
+        pareado = len(starts) == 1 and len(ends) == 1
+        if not pareado:
             report.erro(
                 "AGENTS.md",
                 "MARCADOR-DESPAREADO",
                 f"Marcadores do bloco '{block}' despareados "
-                f"({len(starts)} start, {ends} end). Esperado exatamente 1 de cada.",
+                f"({len(starts)} start, {len(ends)} end). Esperado exatamente 1 de cada.",
                 block,
             )
-            continue
-        version = starts[0]
-        if not version or not re.fullmatch(r"v?\d+\.\d+\.\d+", version):
+        if pareado and starts[0][1] > ends[0]:
+            report.erro(
+                "AGENTS.md",
+                "MARCADOR-ORDEM-INVALIDA",
+                f"Marcador end do bloco '{block}' aparece antes do start.",
+                block,
+            )
+        version = starts[0][0] if len(starts) == 1 else None
+        versao_invalida = not version or not re.fullmatch(r"v?\d+\.\d+\.\d+", version)
+        if pareado and versao_invalida:
             report.erro(
                 "AGENTS.md",
                 "MARCADOR-VERSAO-INVALIDA",
                 f"Versao ausente ou invalida no marcador do bloco '{block}' "
                 f"(esperado ex: 'v2.0.0', encontrado: {version!r}).",
+                block,
+            )
+        if block == "loop" and (not pareado or versao_invalida):
+            report.erro(
+                "AGENTS.md",
+                "MARCADOR-LOOP-INVALIDO",
+                "Bloco 'loop' sem marcadores pareados e versao valida no start.",
                 block,
             )
 
@@ -605,6 +631,14 @@ def check_tasks(root, report):
                 f"ID duplicado: T-{tid}.", f"T-{tid}",
             )
         seen.add(tid)
+    archived = archive_task_ids(root)
+    for tid in sorted(seen & archived):
+        report.erro(
+            "docs/TASKS.md",
+            "TASK-ID-ARQUIVADO-DUPLICADO",
+            f"ID T-{tid} existe no arquivo vivo e em docs/archive/TASKS-*.md.",
+            f"T-{tid}",
+        )
     # Check 8: formato v1 vs misto
     if any_line and not all_ids and lines_without_id:
         report.info(
@@ -666,6 +700,14 @@ def check_markers_values(sections, report):
                     "TASK-PRIORIDADE-INVALIDA",
                     f"{label} com '(prioridade: {m.group(1).strip()})' fora do "
                     "conjunto conhecido (alta | media | baixa).",
+                    label,
+                )
+            m = VERIFICA_RE.search(line)
+            if m and not squeeze(m.group(1)):
+                report.erro(
+                    "docs/TASKS.md",
+                    "VERIFICA-COMANDO-VAZIO",
+                    f"{label} declara '(verifica:)' sem comando.",
                     label,
                 )
             m = BLOCKED_RE.search(line)
@@ -738,6 +780,13 @@ def check_evidence(root, sections, report):
         if is_placeholder(line):
             continue
         label = task_label(line)
+        if TASK_OWN_ID_RE.match(line) and not DATE_PREFIX_RE.match(line):
+            report.erro(
+                "docs/TASKS.md",
+                "TASK-CONCLUIDA-SEM-DATA",
+                f"{label} em 'Concluidas' nao comeca com data AAAA-MM-DD.",
+                label,
+            )
         evidences = evidence_lines(task)
         declared_cmd = VERIFICA_RE.search(line)
         if declared_cmd:

@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-04 (skill v2.6.0)
+
+- Seis contradicoes estruturais viram ERRO no validador (T-069, decisao de T-059), cada uma com fixture. Marcador verifica passa a valer so no fim da linha, o que tambem acaba com a truncagem de comando com parenteses. Fechada pelo loop com Codex `gpt-5.6-terra` na tentativa 1 da rodada 2, depois de parar para perguntar na rodada 1. Instalada nos tres destinos. Verificador 59 de 59, bateria 62 de 62.
+
 ## 2026-09-04 (T-065 pelo loop)
 
 - Portao dos evals deixou de ser cego: 39 de 39 codigos com fixture, manifesto de etapas, inventario de fixtures, prompt do loop assertado, versao em prosa conferida. Fechada pelo loop com Codex `gpt-5.6-terra` na tentativa 1, contra portao proprio. As 11 mutacoes cegas da revalidacao agora sao pegas. Verificador 58 de 58, bateria 62 de 62.

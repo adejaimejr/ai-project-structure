@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-04 (T-053 respondida)
+
+- Usuario escolheu a posicao do Grok nas tres calibragens da spec 0006: DEC-007 a DEC-009. Sobra P-10 (segredo no bruto), em T-074.
+
 ## 2026-09-04 (skill v2.10.0)
 
 - `Rodada` ausente vira AVISO e o formato exige a linha inteira (T-054); `--progress` conta so perguntas de primeiro nivel (T-056); `loop.sh` com lock por projeto e exit 5 (T-058); modelos cercados de `docs/CONSENSUS.md` da raiz iguais ao template e cobrados pelo verificador (T-055). Quatro rodadas de loop com Codex `gpt-5.6-terra`, verdes na tentativa 1. Backlog tecnico zerado; sobra T-053. Instalada nos tres destinos.

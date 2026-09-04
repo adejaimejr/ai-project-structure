@@ -20,6 +20,21 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-09-04 - Calibragens da spec 0006: aviso, ponte curta, retomada humana e bruto in-repo
+
+### Decisao
+
+- Na automacao do consenso (spec 0006), os checks novos para entrada automatizada sao **AVISO**, valendo so para entrada com marcador `**Origem:**`; a proveniencia fica num **manifesto** ao lado do bruto, com a entrada trazendo so uma ponte curta; a **retomada** de rodada interrompida sempre exige palavra humana; e o **bruto mora no repositorio desde o inicio**, fora da arvore de execucao, nunca em `.gitignore`.
+- Detalhe e forca de cada uma em DEC-007, DEC-008 e DEC-009 da spec.
+
+### Motivo
+
+- As tres perguntas passaram por rodada 1 cega com 3 de 3 no que fazer; o que sobrou foi calibragem, e o usuario escolheu a posicao do Grok nas tres em 2026-09-04 (T-053). AVISO por simetria com o resto de `CONSENSUS.md`; ponte curta por rotacao e leitura humana; retomada humana porque insumo identico nao prova intencao identica; bruto in-repo porque o teste da DEC-001 (conferir o campo olhando o bruto ao lado) morre se o bruto sumir na sessao seguinte.
+
+### Impacto
+
+- Vale para o orquestrador da spec 0006 e para qualquer escrita automatizada em `docs/`. Uma pergunta continua a bloquear a spec: segredo no bruto versionado (P-10, T-074). Nenhuma linha de codigo antes dela.
+
 ## 2026-09-03 - install.sh avisa e pede confirmacao quando o destino diverge da fonte
 
 ### Decisao

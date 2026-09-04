@@ -41,6 +41,38 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-04 - Claude (resposta de T-053)
+
+### Objetivo
+
+- Registrar a resposta do usuario a T-053: a posicao do Grok nas tres calibragens da spec 0006.
+
+### O Que Foi Feito
+
+- DEC-007 (forma entra no escopo, diagnosticos novos como AVISO), DEC-008 (proveniencia com manifesto ao lado e ponte curta) e DEC-009 (retomada sempre humana, bruto in-repo desde o inicio) escritas na spec com a forca de cada uma; copiadas para `docs/DECISIONS.md`; as duas entradas de consenso no archive fechadas como `resolvido`.
+- A quarta pergunta, segredo no bruto versionado, **nao foi coberta pela resposta** e nenhuma rodada a respondeu. Ficou como P-10 na spec e T-074 em Aguardando Usuario, com tres opcoes esbocadas e sem decisao minha. A spec continua `Rascunho` so por ela.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/specs/0006-automacao-do-consenso.md`, `docs/DECISIONS.md`, `docs/TASKS.md`, `docs/archive/CONSENSUS-2026.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- DEC-007 a DEC-009 da spec 0006, pelo usuario; resumo em `docs/DECISIONS.md`.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum.
+
+### Pendencias
+
+- T-074 aguarda o usuario. E a unica tarefa aberta do projeto.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario, para T-074.
+- Motivo: e o que separa a spec 0006 de `Definida`, e nenhuma linha de codigo deve nascer antes.
+
 ## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-054, T-056, T-058, T-055, skill 2.10.0)
 
 ### Objetivo

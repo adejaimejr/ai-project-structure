@@ -49,9 +49,9 @@ Cobre os dois debates de 2026-04-25, a revisao da spec 0003 de 2026-09-02, e do 
 
 ## 2026-09-03 - P-9 da spec 0006: quando a minuta e escrita
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** o usuario ratifica o desenho, que teve 3 de 3, e decide as duas divergencias: se a retomada apos interrupcao e automatica ou exige palavra humana, e onde o bruto mora **durante** a rodada.
+**Resolvido em:** 2026-09-04, pelo usuario (T-053): desenho ratificado, retomada sempre com palavra humana e bruto in-repo desde o inicio, fora da arvore de execucao (posicao do Grok). Virou DEC-009 da spec 0006. O segredo no bruto ficou como P-10 / T-074.
 
 **Metodo:** pareceres-independentes
 
@@ -141,9 +141,9 @@ Nada ainda. Quando o usuario ratificar, isto vira DEC-007 na spec 0006. **Uma pa
 
 ## 2026-09-03 - P-7 e P-8 da spec 0006: forma da entrada e proveniencia
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** o usuario ratifica ou vira as duas. As tres posicoes convergiram no **o que** e divergiram no **quanto**, entao nao ha empate a desfazer, ha calibragem a escolher.
+**Resolvido em:** 2026-09-04, pelo usuario (T-053): forma e proveniencia entram no escopo; diagnosticos novos como AVISO e ponte curta na entrada com manifesto ao lado (posicao do Grok nas duas). Viraram DEC-007 e DEC-008 da spec 0006.
 
 **Metodo:** pareceres-independentes
 

@@ -466,8 +466,12 @@ def check_consensus_declaration(title, body, report):
             )
     rodada = field_value(body, "Rodada")
     if rodada is None:
+        report.aviso(
+            rel, "CONSENSO-CAMPO-AUSENTE",
+            f"Entrada '{title}' sem linha '**Rodada:**'.", title,
+        )
         return
-    m = re.match(r"(\d+)\s*de\s*(\d+)", normalize(rodada))
+    m = re.fullmatch(r"(\d+)\s*de\s*(\d+)", normalize(rodada))
     if not m:
         report.aviso(
             rel,
@@ -1102,8 +1106,12 @@ def spec_overview(root, done_ids, archived):
         )
         open_q = 0
         if questions:
-            for line in questions.group(1).splitlines():
-                line = line.strip()
+            for raw_line in questions.group(1).splitlines():
+                # Pergunta aberta e item de primeiro nivel. Sub-itens servem
+                # para contexto ou alternativas da pergunta imediatamente acima.
+                if raw_line[:1].isspace():
+                    continue
+                line = raw_line.strip()
                 if line.startswith("- ") and not line[2:].lstrip().startswith("("):
                     open_q += 1
         rows.append((path.stem, status, len(spec_ids), done, open_q))

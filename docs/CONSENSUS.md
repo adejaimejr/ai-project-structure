@@ -25,6 +25,12 @@ Nao use para decisoes simples ou tarefas obvias.
 
 **Proximo passo:** (preencher quando o status for `aberto`, com dono claro)
 
+**Metodo:** pareceres-independentes | debate-aberto
+
+**Exposicao previa a outras posicoes:** sim | nao
+
+**Rodada:** 1 de 1
+
 ### Contexto
 
 - 

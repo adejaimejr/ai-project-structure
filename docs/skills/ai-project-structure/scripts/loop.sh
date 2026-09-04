@@ -25,6 +25,7 @@
 #   2  portao falhou em todas as tentativas; nada foi movido, nada foi escrito
 #   3  o agente sinalizou falta de contexto; a tarefa foi para "Aguardando Usuario"
 #   4  o agente falhou e nao mexeu em nada; provavelmente esta mal configurado
+#   5  ja existe outra rodada ativa neste projeto
 #
 # O que este script NUNCA faz: escolher a tarefa sozinho, fechar tarefa sem
 # comando declarado, escrever evidencia de tipo nao comprovado por comando, ou
@@ -34,6 +35,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HELPER="$SCRIPT_DIR/loop_task.py"
 ARQUIVO_PERGUNTA=".loop-pergunta"
+ARQUIVO_LOCK=".loop-lock"
 
 TAREFA=""; AGENTE=""; TENTATIVAS=3; PROJETO="$PWD"; SECO=0
 
@@ -63,6 +65,26 @@ case "$TENTATIVAS" in
 esac
 
 PROJETO="$(cd "$PROJETO" && pwd)"
+LOCK_DIR="$PROJETO/$ARQUIVO_LOCK"
+
+# mkdir e atomico: so uma rodada pode criar o diretorio vazio no mesmo
+# projeto. O lock cobre tambem a leitura da tarefa e o leftover de pergunta,
+# que nao podem correr junto com outra rodada.
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+  if [ -e "$LOCK_DIR" ]; then
+    echo "[ERRO] outra rodada ja esta em andamento neste projeto: lock em $LOCK_DIR." >&2
+    echo "Se uma rodada anterior terminou de forma inesperada e voce confirmou que" >&2
+    echo "nao ha rodada ativa, limpe o lock orfao com: rmdir \"$LOCK_DIR\"" >&2
+    exit 5
+  fi
+  erro "nao foi possivel criar o lock da rodada em $LOCK_DIR."
+fi
+
+TMP=""
+# O lock nasce vazio. rmdir evita apagar conteudo que nao foi criado pelo
+# loop, caso outra coisa tenha sido posta nele durante a rodada.
+trap 'if [ -n "$TMP" ]; then rm -rf "$TMP"; fi; rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
+TMP="$(mktemp -d)"
 
 if [ "$SECO" -eq 0 ]; then
   read -r -a AGENTE_ARGS <<< "$AGENTE"
@@ -87,8 +109,6 @@ if [ -f "$SINAL" ]; then
   rm -f "$SINAL"
 fi
 
-TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
 FALHA_ANTERIOR=""
 
 for (( n=1; n<=TENTATIVAS; n++ )); do

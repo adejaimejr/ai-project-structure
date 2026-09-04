@@ -85,6 +85,7 @@ Exit codes, distintos de proposito para dar para ramificar por fora:
 | 2 | portao falhou em todas as tentativas; nada movido, nada escrito |
 | 3 | o agente sinalizou falta de contexto; tarefa em "Aguardando Usuario" |
 | 4 | o agente falhou sem alterar arquivo; provavelmente o comando esta mal configurado |
+| 5 | outra rodada ja esta ativa no mesmo projeto; nenhum arquivo foi alterado por esta chamada |
 
 Qualquer caminho diferente de sucesso sai diferente de zero, o que deixa a composicao por fora funcionar:
 
@@ -258,6 +259,22 @@ loop.sh --tarefa T-042 --agente "claude -p"
 ```
 
 Isso foi deixado de fora do modulo de proposito: a estrutura nem sempre vive em repositorio git, e trazer a rodada de volta viraria merge em `TASKS.md`, o arquivo mais editado do projeto.
+
+### Uma Rodada Por Projeto
+
+O `loop.sh` cria atomicamente o diretorio `.loop-lock` na raiz do projeto antes
+de ler a tarefa. Enquanto uma rodada estiver ativa, uma segunda chamada
+simultanea para o mesmo projeto para com exit code 5: ela nao chama agente nem toca em
+`TASKS.md`. Rodadas em projetos ou worktrees diferentes continuam independentes.
+
+O lock e removido ao sair por qualquer caminho normal, inclusive portao vermelho
+ou falta de contexto. Se a maquina ou o processo morrer de forma inesperada, o
+diretorio pode sobrar. So depois de confirmar que nao existe rodada ativa,
+remova o lock orfao com:
+
+```bash
+rmdir .loop-lock
+```
 
 ## O Que O Loop Nunca Faz
 

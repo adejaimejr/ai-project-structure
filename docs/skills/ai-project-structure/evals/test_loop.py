@@ -27,6 +27,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 # Importar `loop_task` gravaria `scripts/__pycache__` na fonte, e o `install.sh`
@@ -79,6 +80,11 @@ Modelo de linha:
 
 AGENTE_NORMAL = """#!/usr/bin/env bash
 printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
+"""
+
+AGENTE_LENTO = """#!/usr/bin/env bash
+printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
+sleep 2
 """
 
 AGENTE_QUEBRADO = """#!/usr/bin/env bash
@@ -388,6 +394,42 @@ def testar_loop(res):
         res.check(validar(root) == 0, "D: validador --strict exit 0 depois da rodada")
 
 
+def testar_lock(res):
+    """T-058: duas rodadas no mesmo projeto nao podem correr em TASKS.md."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        agente = agente_falso(tmp, AGENTE_LENTO)
+        log = Path(tmp) / "prompts.txt"
+        env = dict(os.environ, LOG_PROMPT=str(log),
+                   PATH=f"{agente.parent}{os.pathsep}{os.environ['PATH']}")
+        comando = ["bash", str(LOOP), "--tarefa", "T-019", "--projeto", str(root),
+                   "--agente", agente.name]
+        primeira = subprocess.Popen(comando, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                    text=True, errors="replace", env=env,
+                                    stdin=subprocess.DEVNULL)
+        lock = root / ".loop-lock"
+        limite = time.monotonic() + 5
+        while not lock.exists() and time.monotonic() < limite:
+            time.sleep(0.02)
+        if not lock.exists():
+            primeira.communicate(timeout=10)
+            res.check(False, "I: primeira rodada adquire o lock", "lock nao apareceu")
+            return
+
+        segunda = subprocess.run(comando, capture_output=True, text=True, errors="replace",
+                                 env=env, stdin=subprocess.DEVNULL, timeout=5)
+        saida_primeira, _ = primeira.communicate(timeout=10)
+        saida_segunda = segunda.stdout + segunda.stderr
+        texto = (root / "docs" / "TASKS.md").read_text(encoding="utf-8")
+        res.check(segunda.returncode == 5 and "lock" in saida_segunda.lower()
+                  and "rmdir" in saida_segunda,
+                  "I: segunda rodada sai 5, cita lock e limpeza de orfao",
+                  f"exit {segunda.returncode}")
+        res.check(primeira.returncode == 0 and "Evidencia:" in texto,
+                  "I: primeira rodada continua e fecha a tarefa", f"exit {primeira.returncode}")
+        res.check(not lock.exists(), "I: lock removido ao terminar a rodada")
+
+
 AGENTE_TROCA_VERIFICA = """#!/usr/bin/env bash
 printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
 sed -i "" "s/(verifica: bash portao.sh)/(verifica: true)/" docs/TASKS.md
@@ -519,6 +561,7 @@ def main(argv=None):
     testar_helper(res)
     testar_escrita_atomica(res)
     testar_loop(res)
+    testar_lock(res)
     testar_hostil(res)
     print(f"Modulo de loop: {res.total - res.falhas}/{res.total} verificacoes passaram.")
     return 1 if res.falhas else 0

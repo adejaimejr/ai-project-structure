@@ -41,6 +41,42 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-054, T-056, T-058, T-055, skill 2.10.0)
+
+### Objetivo
+
+- Fechar as quatro tarefas tecnicas anteriores a revalidacao, pelo loop com o `terra`, numa release so.
+
+### O Que Foi Feito
+
+- Duas traziam "decidir antes de consertar"; como o usuario mandou fazer, apliquei criterio ja decidido e deixei escrito na tarefa: **T-054** cobra `Rodada` ausente como AVISO pelo mesmo codigo dos campos irmaos e so apos a data de adocao (criterio de T-059), mais `fullmatch`; **T-058** implementa lock em vez de so documentar, porque documentar nao conserta. Se o usuario discordar, reverte antes do commit.
+- Quatro portoes proprios por comportamento (`portao_t054/055/056/058.py`). O da T-058 nasceu com um traceback (a segunda rodada sem lock ficava presa esperando o agente e estourava o `timeout`); tratado como FALHA em vez de excecao. Os quatro reproduziam os defeitos antes das rodadas.
+- **T-054** (bump 2.10.0): verde de primeira, fixture `rodada-project` com oracle para ausencia e para sufixo. **T-056**: `--progress` conta so bullet de primeiro nivel; a spec 0006 voltou a reportar 3 perguntas; etapa `verificar_progresso_de_specs` no verificador. **T-058**: `mkdir .loop-lock` atomico, exit 5 para a segunda rodada, `rmdir` no `trap`, mensagem ensina limpar orfao, caso na bateria (77), secao "Uma Rodada Por Projeto" em `loop.md`. **T-055**: os dois modelos cercados da raiz ficam identicos aos do template e o verificador cobra (71 de 71).
+- **Registro honesto sobre T-055**: a tarefa exigia editar `docs/CONSENSUS.md`, que o prompt do loop proibe ao agente. O agente **editou mesmo assim** (6 linhas, exatamente os tres campos do modelo cercado, nada nas entradas reais). A culpa e da instrucao: eu mandei para o loop uma tarefa cuja unica saida era um arquivo proibido, e o texto da tarefa venceu o prompt. Duas licoes: tarefa que exige tocar arquivo proibido ao loop e do agente de chat, nao do loop; e a proibicao do prompt nao resiste a instrucao contraria na propria tarefa. A segunda e um achado sobre a forca real do prompt e vai para `MEMORY.md`.
+- 2.10.0 reinstalada nos tres destinos com `--sim` (o instalador recusou sem ela, como desenhado).
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/partials/*.md`, `references/loop.md`, `scripts/loop.sh`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/test_loop.py`, `evals/portao_t05{4,5,6,8}.py`, `evals/fixtures/rodada-project/`, `evals/fixtures/progresso-subitens/`.
+- Projeto: `AGENTS.md` (marcadores), `docs/CONSENSUS.md` (modelos cercados), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/MEMORY.md`, `docs/archive/revalidacao-2026-09-03/`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal. As duas escolhas de T-054 e T-058 estao declaradas nas tarefas e aqui, com a porta aberta para reverter.
+
+### Aprendizados Para MEMORY.md
+
+- A proibicao no prompt do loop nao resiste a uma tarefa que manda fazer o contrario: o agente editou `CONSENSUS.md` porque a tarefa dizia para editar. Tarefa que exige tocar arquivo proibido ao loop e trabalho do agente de chat.
+
+### Pendencias
+
+- Aberta so **T-053** (calibragens da spec 0006, do usuario). Todo o resto do backlog fechou: 15 tarefas em dois dias, sete releases (2.6.0 a 2.10.0), 54 codigos com fixture.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario, para T-053.
+- Motivo: e a unica tarefa aberta, e destrava a spec 0006 (automacao do consenso), que e o proximo modulo.
+
 ## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-062 e T-073, skill 2.9.1)
 
 ### Objetivo

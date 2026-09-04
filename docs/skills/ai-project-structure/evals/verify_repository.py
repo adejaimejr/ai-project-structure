@@ -211,6 +211,27 @@ FIXTURES = {
             "ERRO|NUCLEO-AUSENTE|docs/archive/README.md|docs/archive/README.md",
         ],
     },
+    # Entrada adotada sem Rodada e outra com sufixo: os dois avisos precisam
+    # ter oracle proprio, para que ausencia e fullmatch nao regressem juntos.
+    "rodada-project": {
+        "strict": False,
+        "exit": 1,
+        "diagnosticos": [
+            "ERRO|NUCLEO-AUSENTE|AGENTS.md|AGENTS.md",
+            "ERRO|NUCLEO-AUSENTE|CLAUDE.md|CLAUDE.md",
+            "ERRO|NUCLEO-AUSENTE|GEMINI.md|GEMINI.md",
+            "ERRO|NUCLEO-AUSENTE|docs/CHANGELOG.md|docs/CHANGELOG.md",
+            "AVISO|CONSENSO-CAMPO-AUSENTE|docs/CONSENSUS.md|2026-09-03 - Rodada ausente",
+            "AVISO|CONSENSO-RODADA-FORMATO|docs/CONSENSUS.md|2026-09-03 - Rodada com sufixo",
+            "ERRO|NUCLEO-AUSENTE|docs/DECISIONS.md|docs/DECISIONS.md",
+            "ERRO|NUCLEO-AUSENTE|docs/MEMORY.md|docs/MEMORY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/PROJECT_CONTEXT.md|docs/PROJECT_CONTEXT.md",
+            "ERRO|NUCLEO-AUSENTE|docs/QUALITY.md|docs/QUALITY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/README.md|docs/README.md",
+            "ERRO|NUCLEO-AUSENTE|docs/SESSION.md|docs/SESSION.md",
+            "ERRO|NUCLEO-AUSENTE|docs/archive/README.md|docs/archive/README.md",
+        ],
+    },
     "cobertura-tarefas": {
         "strict": False,
         "exit": 1,
@@ -288,6 +309,7 @@ ETAPAS = [
     "verificar_blocos",
     "verificar_versao",
     "verificar_convencoes",
+    "verificar_progresso_de_specs",
     "verificar_evals_json",
     "verificar_scripts",
     "verificar_testes_do_loop",
@@ -328,12 +350,14 @@ def read(path):
     return Path(path).read_text(encoding="utf-8")
 
 
-def rodar_validador(caminho, strict=False, codigos=False):
+def rodar_validador(caminho, strict=False, codigos=False, progress=False):
     cmd = [sys.executable, str(VALIDATOR), str(caminho)]
     if strict:
         cmd.append("--strict")
     if codigos:
         cmd.append("--codigos")
+    if progress:
+        cmd.append("--progress")
     p = subprocess.run(cmd, capture_output=True, text=True)
     return p.returncode, p.stdout
 
@@ -341,6 +365,15 @@ def rodar_validador(caminho, strict=False, codigos=False):
 def bloco(texto, regex):
     m = regex.search(texto)
     return m.group(0) if m else None
+
+
+def modelo_consensus(texto, titulo):
+    m = re.search(
+        rf"^## {re.escape(titulo)}\s*$\s*```md\n(.*?)```",
+        texto,
+        re.MULTILINE | re.DOTALL,
+    )
+    return m.group(1) if m else None
 
 
 def verificar_raiz(res, verbose):
@@ -501,6 +534,17 @@ def verificar_blocos(res, verbose=False):
             f"ponte {ponte} identica ao template",
         )
 
+    consensus_raiz = read(ROOT / "docs" / "CONSENSUS.md")
+    consensus_template = read(ASSETS / "docs" / "CONSENSUS.md")
+    for titulo in ("Modelo De Debate", "Modelo De Achado"):
+        modelo_raiz = modelo_consensus(consensus_raiz, titulo)
+        modelo_template = modelo_consensus(consensus_template, titulo)
+        res.check(
+            modelo_raiz is not None and modelo_raiz == modelo_template,
+            f"{titulo} da raiz identico ao template",
+            "modelo ausente" if modelo_raiz is None else "",
+        )
+
     m = AVISO_PONTO_CEGO_RE.search(core_template or "")
     if m is None:
         res.check(False, "aviso do ponto cego no bloco core", "secao nao encontrada")
@@ -611,6 +655,40 @@ def verificar_convencoes(res, verbose=False):
             f"{nome} com as convencoes do bloco core que cita",
             "faltando: " + ", ".join(faltando) if faltando else "",
         )
+
+
+def verificar_progresso_de_specs(res, verbose=False):
+    """Sub-itens de uma pergunta nao podem inflar a projecao de progresso."""
+    fixture = EVALS / "fixtures" / "progresso-subitens" / "0001-subitens.md"
+    if not fixture.is_file():
+        res.check(False, "fixture de progresso com sub-itens existe", "arquivo ausente")
+        return
+
+    with tempfile.TemporaryDirectory() as tmp:
+        projeto = Path(tmp) / "projeto"
+        shutil.copytree(ASSETS, projeto)
+        tasks = projeto / "docs" / "TASKS.md"
+        tasks.write_text(
+            read(tasks).replace(
+                "(convencoes-2-2-0-desde: AAAA-MM-DD)",
+                "(convencoes-2-2-0-desde: 2026-09-01)",
+            ),
+            encoding="utf-8",
+        )
+        specs = projeto / "docs" / "specs"
+        specs.mkdir(exist_ok=True)
+        shutil.copy(fixture, specs / fixture.name)
+        code, out = rodar_validador(projeto, progress=True)
+
+    linha = next((line for line in out.splitlines() if "0001-subitens" in line), "")
+    res.check(code == 0, "--progress na fixture com sub-itens", f"exit {code}")
+    res.check(
+        "perguntas abertas: 3" in linha,
+        "--progress conta so perguntas de primeiro nivel",
+        linha.strip(),
+    )
+    if verbose and code != 0:
+        print(out)
 
 
 def verificar_evals_json(res, verbose=False):

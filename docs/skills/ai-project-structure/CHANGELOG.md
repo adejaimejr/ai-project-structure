@@ -2,6 +2,22 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.10.0 - 2026-09-04
+
+`validate_structure.py` passa a avisar `**Rodada:**` ausente, pelo mesmo
+codigo `CONSENSO-CAMPO-AUSENTE` dos outros campos declarativos. A cobranca
+continua limitada a entradas posteriores a data de adocao, sem criar aviso em
+projeto que ainda nao adotou essa convencao. O formato agora exige a linha
+inteira: `1 de 1` seguido de texto nao passa como rodada valida.
+
+- A projecao `--progress` conta como pergunta aberta apenas bullet de primeiro
+  nivel em "Perguntas Abertas". Sub-itens indentados sao contexto da pergunta,
+  nao perguntas adicionais.
+- `loop.sh` agora usa `.loop-lock`, criado atomicamente por projeto. Uma segunda
+  rodada simultanea sai com codigo 5 sem tocar em `TASKS.md`; o lock e removido
+  na saida e a mensagem ensina como limpar um orfao depois de confirmar que nao
+  ha rodada ativa.
+
 ## 2.9.1 - 2026-09-04
 
 O fluxo de atualizacao esclarece que secoes resgatadas de um `AGENTS.md` v1

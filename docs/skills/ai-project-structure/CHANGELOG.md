@@ -2,6 +2,19 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.9.1 - 2026-09-04
+
+O fluxo de atualizacao esclarece que secoes resgatadas de um `AGENTS.md` v1
+viram itens ou subsecoes dentro de "## Regras Do Projeto", nunca uma secao
+irma. Na migracao de `TASKS.md`, linha concluida recebe data quando ela for
+conhecida; sem data, a linha nao e cobrada pela convencao de evidencia.
+
+- `install.sh` (nao distribuido) deixa de sobrescrever destino divergente em
+  silencio: compara o que distribui, lista `faltando`, `diferente` e `extra`,
+  pede confirmacao `[s/N]`, recusa sem terminal e aceita `--sim` para
+  automacao. Arquivo extra no destino nao e apagado. O verificador prova os
+  dois lados em destino temporario sujo.
+
 ## 2.9.0 - 2026-09-04
 
 O validador passa a diagnosticar arquivo Markdown fora de UTF-8 sem traceback,

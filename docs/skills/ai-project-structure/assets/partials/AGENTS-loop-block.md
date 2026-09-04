@@ -1,4 +1,4 @@
-<!-- ai-project-structure:loop:start v2.9.0 -->
+<!-- ai-project-structure:loop:start v2.9.1 -->
 ## Loop (Modulo Opcional Ativo)
 
 Este projeto pode executar uma tarefa sem supervisao, pelo `loop.sh` da skill. O ciclo e sempre o mesmo: pega **uma** tarefa que declarou `(verifica: <comando>)`, trabalha, roda o comando declarado e usa a saida da falha como contexto da tentativa seguinte. Ate 3 tentativas.

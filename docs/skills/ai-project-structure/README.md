@@ -51,7 +51,13 @@ Opcoes:
 ./install.sh --gemini           # so uma ferramenta
 ./install.sh --claude --codex   # subconjunto
 ./install.sh --uninstall        # remove dos destinos escolhidos
+./install.sh --sim              # confirma destino divergente sem perguntar (automacao)
 ```
+
+Destino ja instalado e identico: reinstala sem pergunta. Destino divergente
+(arquivo editado localmente, faltando ou extra): o instalador lista as
+diferencas e pede confirmacao `[s/N]`; sem terminal interativo, recusa, salvo
+`--sim`. Arquivo extra no destino nao e apagado.
 
 ## Onde cada ferramenta le a skill
 
@@ -188,4 +194,4 @@ versao aplicada nos marcadores do `AGENTS.md`.
 
 A fonte canonica e esta pasta no repositorio. Edite `SKILL.md` / `assets/` /
 `scripts/` / `references/` aqui e rode `./install.sh` de novo para propagar para
-as tres ferramentas (a copia sobrescreve).
+as tres ferramentas (destino divergente pede confirmacao; `--sim` em script).

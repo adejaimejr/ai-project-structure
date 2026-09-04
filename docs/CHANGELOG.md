@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-04 (skill v2.9.1)
+
+- `atualizacao.md` diz onde a secao resgatada do v1 vai e o que fazer com a data das concluidas migradas (T-062). `install.sh` pede confirmacao em destino divergente, com `--sim` para automacao (T-073). Fecha o pacote da revalidacao adversarial: T-059 a T-073. Instalada nos tres destinos com `--sim`, depois de recusar sem ela.
+
 ## 2026-09-04 (skill v2.9.0)
 
 - Validador sem traceback em arquivo fora de UTF-8 e rotulo malformado, cercas `~~~` e headings ATX fechados aceitos, `NNNN` so como placeholder inteiro, Status de spec ancorado (T-064). Templates de `assets/` alinhados ao core 2.2.0/2.4.0 e cobertos pelo verificador (T-063). Duas rodadas de loop com Codex `gpt-5.6-terra`, verdes na tentativa 1. Instalada nos tres destinos.

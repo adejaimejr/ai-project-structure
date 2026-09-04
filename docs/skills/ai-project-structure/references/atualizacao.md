@@ -42,9 +42,9 @@ Monte a lista de acoes e **mostre ao usuario antes de tocar qualquer arquivo**:
 
 ### v1 → v2 (sem marcadores)
 
-Mostre o diff entre o `AGENTS.md` atual do projeto e o bloco `core` do template v2. Pergunte:
+Mostre o diff entre o `AGENTS.md` atual do projeto e o bloco `core` do template da versao 2. Pergunte:
 
-- **(a) substituir pelo bloco v2** - secoes que existem no arquivo do usuario mas nao no template sao preservadas: mova-as para "## Regras Do Projeto", abaixo do bloco. Avise o usuario para revisar o resultado.
+- **(a) substituir pelo bloco da versao 2** - secoes que existem no arquivo do usuario mas nao no template sao preservadas: mova cada uma para dentro de "## Regras Do Projeto", abaixo do bloco, como item ou como subsecao `###`. Nunca crie uma secao `##` irma de "## Regras Do Projeto". Avise o usuario para revisar o resultado.
 - **(b) manter como esta** - o projeto continua v1; registre a pendencia como tarefa em `TASKS.md`.
 
 ### v2 → v2.x (com marcadores)
@@ -71,6 +71,10 @@ A unica excecao e o passo 7b, e ela e **aditiva**: acrescenta secao e marcador a
 ## 7. MIGRAR TASKS
 
 Se `docs/TASKS.md` nao usa IDs `T-NNN`, ofereca atribuir `T-001, T-002, ...` as tarefas existentes na ordem em que aparecem (Em Andamento primeiro, depois Proximas, depois Concluidas). Recusado → siga em frente; o validador emitira apenas um INFO "formato v1".
+
+Nas linhas de "Concluidas", quando a data de conclusao for conhecida, prefixe a
+linha com `AAAA-MM-DD`. Quando nao souber a data, deixe a linha sem data: ela
+nao e cobrada pela convencao de evidencia.
 
 ## 7b. ADOTAR AS CONVENCOES 2.2.0
 

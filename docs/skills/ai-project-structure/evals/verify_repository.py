@@ -730,7 +730,11 @@ def verificar_sem_pycache(res, verbose=False):
 
 
 def verificar_install(res, verbose):
-    """install.sh em destino temporario; nunca toca as instalacoes reais."""
+    """install.sh em destino temporario, inclusive recusando destino divergente.
+
+    Nunca toca as instalacoes reais. O caminho sujo prova os dois lados da
+    protecao: sem `--sim` preserva a edicao local, e com ela permite a copia.
+    """
     with tempfile.TemporaryDirectory() as tmp:
         env = dict(os.environ, HOME=tmp)
         p = subprocess.run(["bash", str(SKILL / "install.sh"), "--project"],
@@ -772,6 +776,36 @@ def verificar_install(res, verbose):
             not detalhe,
             "destino identico a fonte canonica (fora o que nao e distribuido)",
             "; ".join(detalhe),
+        )
+
+        # O destino inicial ja foi comparado acima. Agora sujamos um arquivo
+        # distribuido e acrescentamos outro, para provar que a confirmacao nao
+        # e apenas uma mensagem sem efeito.
+        destino_sujo = destinos["Claude Code"]
+        skill_destino = destino_sujo / "SKILL.md"
+        skill_destino.write_text(skill_destino.read_text(encoding="utf-8") + "\nlocal\n", encoding="utf-8")
+        (destino_sujo / "extra-local.md").write_text("local\n", encoding="utf-8")
+        p = subprocess.run(
+            ["bash", str(SKILL / "install.sh"), "--project", "--claude"],
+            cwd=tmp, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True,
+        )
+        saida = p.stdout + p.stderr
+        preservado = "local" in skill_destino.read_text(encoding="utf-8")
+        res.check(
+            p.returncode != 0 and preservado and "SKILL.md" in saida and "extra-local.md" in saida,
+            "install.sh recusa destino divergente sem --sim e lista os arquivos",
+            f"exit {p.returncode}",
+        )
+
+        p = subprocess.run(
+            ["bash", str(SKILL / "install.sh"), "--project", "--claude", "--sim"],
+            cwd=tmp, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True,
+        )
+        restaurado = hashes(destino_sujo).get("SKILL.md") == hashes(SKILL).get("SKILL.md")
+        res.check(
+            p.returncode == 0 and restaurado,
+            "install.sh --sim sobrescreve arquivo distribuido divergente",
+            f"exit {p.returncode}",
         )
         if verbose:
             print(f"  destino temporario: {tmp} ({len(referencia)} arquivos)")

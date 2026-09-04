@@ -308,9 +308,9 @@ Documentacao: a tabela de exit codes de `references/loop.md` nao tem o exit 4; `
 
 **Achado:** REVAL-4
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** qualquer agente escreve o manifesto de cobertura e as fixtures por codigo (T-065); usuario decide se quer piso fixo de verificacoes no `verify_repository.py` (aplicado hoje para a bateria do loop, com 58).
+**Resolvido em:** 2026-09-04, T-065 fechada pelo loop (Codex `gpt-5.6-terra`, tentativa 1, portao proprio `evals/portao_t065.py`): 39 de 39 codigos com oracle, `ETAPAS` com manifesto, inventario de fixtures, prompt assertado, versao em prosa. As 11 mutacoes cegas de 2026-09-03 refeitas: todas pegas.
 
 **Metodo:** pareceres-independentes
 

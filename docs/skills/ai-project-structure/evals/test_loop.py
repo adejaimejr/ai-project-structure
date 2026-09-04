@@ -298,7 +298,15 @@ def testar_loop(res):
         res.check("T-019" in concluidas, "B: tarefa foi para Concluidas")
         res.check("resultado=exit 0; portao-verde" in concluidas, "B: evidencia com a saida real")
         res.check(f"agente={agente.name}" in concluidas, "B: loop.sh repassa o agente para a evidencia")
-        res.check(len(prompts(log)) == 1, "B: agente chamado uma vez")
+        ps = prompts(log)
+        res.check(len(ps) == 1, "B: agente chamado uma vez")
+        prompt = ps[0] if ps else ""
+        res.check("T-019" in prompt, "B: prompt traz a tarefa declarada")
+        res.check("bash portao.sh" in prompt, "B: prompt traz o comando do portao")
+        res.check("NAO APAGUE O QUE FALHA" in prompt,
+                  "B: prompt contem NAO APAGUE O QUE FALHA")
+        res.check("docs/MEMORY.md" in prompt,
+                  "B: prompt proibe editar docs/MEMORY.md")
         res.check("2026-08-10 T-001" in texto, "B: historico intocado")
         res.check(validar(root) == 0, "B: validador --strict exit 0 depois da rodada")
 

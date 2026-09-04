@@ -1,0 +1,67 @@
+
+=== M1r desliga check_session
+  exit=1 -> PEGOU
+  Resumo: 57/58 verificacoes passaram.
+   [FALHA] fixture cobertura-rotacao com 14 diagnosticos exatos: nao saiu: AVISO|ROTACAO|docs/SESSION.md|; AVISO|SESSAO-SEM-HEADINGS|docs/SESSION.md|2026-09-01 - Entrada 01
+  restaurado ok
+
+=== M2r desliga check_em_dash
+  exit=1 -> PEGOU
+  Resumo: 57/58 verificacoes passaram.
+   [FALHA] fixture cobertura-arquivos com 15 diagnosticos exatos: nao saiu: ERRO|TRAVESSAO|AGENTS.md|
+  restaurado ok
+
+=== M3r desliga check_bridges
+  exit=1 -> PEGOU
+  Resumo: 57/58 verificacoes passaram.
+   [FALHA] fixture cobertura-arquivos com 15 diagnosticos exatos: nao saiu: AVISO|PONTE-QUEBRADA|CLAUDE.md|
+  restaurado ok
+
+=== M5r desliga check_evidence
+  exit=1 -> PEGOU
+  Resumo: 56/58 verificacoes passaram.
+   [FALHA] fixture cobertura-rotacao com 14 diagnosticos exatos: nao saiu: AVISO|EVIDENCIA-AUSENTE|docs/TASKS.md|T-001
+   [FALHA] fixture cobertura-tarefas com 28 diagnosticos exatos: nao saiu: ERRO|EVIDENCIA-AUSENTE-COM-VERIFICA|docs/TASKS.md|T-011; ERRO|EVIDENCIA-SEM-RESULTADO|docs/TASKS.md|T-012; INFO|CONVENCOES-DATA-INVALIDA|docs/TASKS.md|
+  restaurado ok
+
+=== M9r desliga check_markers_values
+  exit=1 -> PEGOU
+  Resumo: 57/58 verificacoes passaram.
+   [FALHA] fixture cobertura-tarefas com 28 diagnosticos exatos: nao saiu: AVISO|EVIDENCIA-TIPO-INVALIDO|docs/TASKS.md|T-012; AVISO|TASK-BLOQUEADA-ANTIGA|docs/TASKS.md|T-002; AVISO|TASK-BLOQUEADA-FORMATO|docs/TASKS.md|T-001; AVISO|TASK-PRIORIDADE-INVALIDA|docs/TASKS.md|T-001
+  restaurado ok
+
+=== M10r check_rotation nunca avisa
+  exit=1 -> PEGOU
+  Resumo: 57/58 verificacoes passaram.
+   [FALHA] fixture cobertura-rotacao com 14 diagnosticos exatos: nao saiu: AVISO|ROTACAO|docs/SESSION.md|
+  restaurado ok
+
+=== M17r tira verificar_fixtures de ETAPAS
+  exit=1 -> PEGOU
+  Resumo: 35/36 verificacoes passaram.
+   [FALHA] as 15 etapas definidas estao em ETAPAS: verificar_fixtures
+  restaurado ok
+
+=== M19r tira cobertura-rotacao de FIXTURES
+  exit=1 -> PEGOU
+  Resumo: 55/57 verificacoes passaram.
+   [FALHA] fixture cobertura-rotacao-x: diretorio nao encontrado
+   [FALHA] as 10 fixtures no disco estao declaradas em FIXTURES: cobertura-rotacao
+  restaurado ok
+
+=== M22r prompt manda trabalhar na T-999
+  exit=1 -> PEGOU
+  Modulo de loop: 61/62 verificacoes passaram.
+   [FALHA] B: prompt traz a tarefa declarada
+  restaurado ok
+
+=== M23r prompt sem NAO APAGUE e sem proibicao de memoria
+  exit=1 -> PEGOU
+  Modulo de loop: 61/62 verificacoes passaram.
+   [FALHA] B: prompt proibe editar docs/MEMORY.md
+  restaurado ok
+
+=== M8r versao em prosa desatualizada
+  exit=1 -> PEGOU
+   [FALHA] SKILL.md declara versao da estrutura 2.5.1 em prosa
+  restaurado ok

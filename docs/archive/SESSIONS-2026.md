@@ -4,6 +4,97 @@ Entradas antigas de `docs/SESSION.md`, rotacionadas em 2026-09-02 pela regra de 
 
 Cobre de 2026-04-25 (criacao da estrutura multiagente e validacao por tri-consenso) a 2026-09-03 (skill 2.4.0 e 2.5.0, com o formato de achado, o diagnostico com identidade estavel e as fixtures que os provaram). Ordem cronologica inversa, igual a do arquivo principal. Rotacionado tres vezes em 2026-09-03.
 
+<!-- Rotacionadas em 2026-09-04: as duas entradas de 2026-09-03 abaixo (rodada 1 cega da spec 0006 e a ratificacao das seis perguntas) vieram de docs/SESSION.md por tamanho. -->
+
+## 2026-09-03 - Claude (ratificacao das seis perguntas da spec 0006)
+
+### Objetivo
+
+- Transformar em decisao o que a rodada 1 cega produziu, apos o usuario ratificar as seis.
+
+### O Que Foi Feito
+
+- **DEC-001 a DEC-006 escritas na spec 0006**, cada uma declarando **como** foi decidida, e nao so o que ficou decidido. Tres unanimes, duas em que o Claude foi vencido por 2 a 1, e uma com dissidencia registrada.
+- A forca da decisao entrou no texto de proposito. DEC-004 e DEC-005 dizem que o Claude perdeu e por que; DEC-006 registra o argumento do Grok que perdeu mas sobrevive, e a consequencia pratica dele: quem implementar a rodada 2 tem de passar as posicoes anteriores na integra, porque resumo ali e regressao e nao otimizacao.
+- **DEC-002 subiu para `docs/DECISIONS.md`**, porque muda o alcance de uma decisao ja registrada do projeto. A 0004/DEC-019 proibia o **agente** de escrever consenso; agora fica dito que a proibicao e sobre agente e nao sobre software, que um orquestrador mecanico escreve o recorte comprovado, e que o que sustenta a excecao e a separacao entre quem opina e quem escreve, nunca a quantidade de agentes. As outras cinco ficaram so na spec.
+- Corrigido o defeito de escopo que o Grok apontou: "alterar qualquer projeto que nao seja este repositorio" confundia o projeto-evidencia da 0005 com o projeto-alvo de um script distribuido. Reescrito sem ambiguidade, e declarado que nao e mudanca de escopo.
+- Os outros tres defeitos apontados eram **nas perguntas**, e sairam junto com elas ao virarem DEC. Ficaram registrados dentro das decisoes correspondentes, em vez de apagados: a DEC-003 diz que a premissa empirica de P-3(c) era falsa, e a DEC-005 diz que o exemplo de revisores no enunciado era o catalogo que a DEC-016 proibiu.
+- Sobraram duas perguntas: **P-7**, sobre a forma da entrada, que ficou mais urgente porque a DEC-004 mandou cobrir tambem o achado, e sao duas formas para acomodar; e **P-8**, nova, sobre proveniencia entrar no escopo. Registrei P-8 em vez de decidir sozinho, mesmo com as tres posicoes recomendando: recomendacao unanime de modelos continua nao sendo decisao de projeto.
+- Entrada de consenso fechada como `resolvido`, com o que ficou de fora da ratificacao dito na propria linha de `Resolvido em`.
+
+### Arquivos Criados Ou Alterados
+
+- Projeto: `docs/specs/0006-automacao-do-consenso.md`, `docs/DECISIONS.md`, `docs/CONSENSUS.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- DEC-001 a DEC-006 na spec 0006, ratificadas pelo usuario.
+- Em `docs/DECISIONS.md`: agente nao escreve consenso, orquestrador deterministico escreve o recorte que a execucao comprova.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum novo. Os desta sessao (o caminho do `cursor-agent`, e que as CLIs se atualizam sozinhas) ja foram promovidos na entrada anterior.
+
+### Pendencias
+
+- T-053 segue em "Aguardando Usuario", agora so com P-7 e P-8.
+- A spec continua `Rascunho`: as duas perguntas restantes mexem em escopo, entao nenhuma das duas e cosmetica.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario, para P-7 e P-8.
+- Motivo: as duas sao escopo, e P-7 ficou acoplada a DEC-004. Decidir P-7 sem lembrar que agora sao duas formas a acomodar levaria a uma resposta que a propria ratificacao ja invalidou.
+
+## 2026-09-03 - Claude, Codex e Grok (rodada 1 cega das perguntas da spec 0006)
+
+### Objetivo
+
+- Responder as seis perguntas abertas da spec 0006 consultando Codex e Grok, a pedido do usuario.
+
+### O Que Foi Feito
+
+- **Primeira rodada de consenso cega de verdade deste projeto, e ela e sobre a spec que quer automatizar exatamente isso.** A posicao do Claude foi escrita e selada em arquivo fora do repositorio **antes** de qualquer agente rodar; escrever depois seria `debate-aberto` disfarcado de parecer independente.
+- Codex rodou com `codex exec -s read-only -m gpt-5.6-sol -c model_reasoning_effort="high"`, com o mesmo arquivo de prompt, em processo separado e saida em arquivo proprio.
+- A CLI propria do Grok recusou cinco vezes, com `You've reached your free Grok Build usage limit`, mesmo com o usuario assinando hoje e refazendo o login no meio. **A rodada so aconteceu por outro caminho:** o `cursor-agent`, ja instalado e autenticado com a assinatura do Cursor, expoe `cursor-grok-4.6-xhigh`. Rodou em `--mode ask`, read-only por construcao em vez de "nao edite" no prompt.
+- Diagnostico do bloqueio do Grok foi refeito uma vez. A primeira leitura culpou o tamanho do pedido, porque um prompt de 20 bytes passava e um de 2858 falhava; a sonda de enchimento derrubou isso, porque 1000 bytes tambem falhou depois. O que separa passar de falhar e o momento: franquia pequena que repoe.
+- Resultado com tres posicoes: **tres unanimidades (P-1, P-2, P-3), duas derrotas do Claude por 2 a 1 (P-4 e P-5), e uma maioria com dissidencia substantiva (P-6)**.
+- Em P-1 e P-3 os tres recusaram as opcoes que a pergunta oferecia, cada um por conta propria. Recusas que coincidem valem mais que votos na mesma alternativa.
+- **O Grok achou o risco que estava acontecendo no proprio registro:** se quem dispara a operacao for o modelo criticado, o Problema 3 sobrevive mesmo com N agentes isolados. Quem isolou as tres posicoes e escreveu o resumo das tres foi o Claude, que e uma delas e o alvo das outras duas. O isolamento resolveu a producao das posicoes e nao a transcricao.
+- Ele tambem mostrou que a **ancora empirica da spec e falsa**: P-3(c) descreve "sem acesso ao repositorio", e a rodada de 2026-09-03 teve o repositorio visivel, sendo justamente a leitura do codigo que fez o Codex achar o erro factual. Mais tres defeitos confirmados na spec, todos independentes de decisao.
+- Em P-1 e P-3 os dois modelos **recusaram as opcoes da pergunta**, independentemente e pelo mesmo motivo. E o sinal mais forte da rodada, porque nao e concordancia com uma opcao oferecida, e sim duas recusas que coincidem.
+- O Codex corrigiu o fundamento da P-2 do Claude: a excecao a DEC-019 nao se sustenta por haver N agentes, e sim por separar os agentes opinantes de um **escritor deterministico**. Se quem escreve for um dos opinantes, o acoplamento volta com N igual a qualquer coisa.
+- Tres criticas dele mudaram a spec no ato. A primeira foi conferida no codigo antes de aceita: o reuso do `loop.sh` estava superestimado, porque `loop.sh:145` decide se o agente fez algo com `find -type f -newer`, e agente de parecer nao escreve nada, entao cairia no `exit 4` da DEC-014 sempre. Corrigido no Problema 4, com a correcao declarada.
+- A segunda virou **P-7**: "N agentes" e "nao mexer na forma" nao cabem juntos, porque nem o modelo de debate (secoes nomeadas para Codex, Claude e Gemini) nem o de achado (uma `Revalidacao` unica) representam N arbitrario, falha individual ou hash de insumo. Contradicao de escopo que o Claude nao tinha visto.
+- A terceira ficou registrada como risco: a DEC-001 foi generalizada alem do que ela prova. Um comando comprova exit code e bytes; nao comprova qual modelo respondeu, se houve fallback, nem se o isolamento existiu.
+- **A entrada bateu no defeito que ela mesma descreve.** O campo `**Rodada:** 1 de 1` afirma um denominador que ninguem sabe, e o Codex acabara de apontar que `N de N` ficou fragil depois que o teto saiu. Registrado nos riscos da propria entrada.
+- `CONSENSUS.md` passou de 30KB e disparou `AVISO|ROTACAO`. A revisao da spec 0003, de 2026-09-02, foi para `docs/archive/CONSENSUS-2026.md`, que ficou com tres entradas.
+
+### Arquivos Criados Ou Alterados
+
+- Projeto: `docs/CONSENSUS.md`, `docs/specs/0006-automacao-do-consenso.md`, `docs/TASKS.md`, `docs/MEMORY.md`, `docs/SESSION.md`, `docs/archive/CONSENSUS-2026.md`, `docs/archive/README.md`.
+- Dois escorregoes meus na mesma sessao, os dois registrados: usei `t.index()` para cortar secoes da entrada e o indice casou com o **modelo cercado no topo do arquivo**, duplicando a entrada inteira; restaurado por `git checkout` (seguro desta vez, porque so aquele arquivo estava sujo) e refeito com ancora a partir do inicio da entrada. E antes disso, o diagnostico errado do bloqueio do Grok.
+
+### Decisoes Tomadas
+
+- **Nenhuma.** Quatro perguntas convergiram e continuam sem virar DEC, de proposito: parecer de modelo nao e decisao de projeto, e a regra de desempate diz que quem decide e o usuario quando ele esta disponivel.
+
+### Aprendizados Para MEMORY.md
+
+- **`cursor-agent` promovido como caminho de agente**, com os perfis de consenso e de loop, a nota de que os degraus de esforco vem no nome do modelo, e a de que o formato encaixa no `loop.sh` sem mudar nada porque `loop.sh:141` anexa o prompt como ultimo argumento.
+- Promovido tambem que `grok` e `cursor-agent` **se atualizam sozinhos**, com o caso concreto de hoje: o `grok` foi de `1.0.5` para `1.0.13` no meio do diagnostico.
+- Fato do usuario atualizado com sobrescrita ativa: ele assinou o Grok em 2026-09-03 e a CLI propria continua tratando a conta como free tier.
+
+### Pendencias
+
+- T-053 continua em "Aguardando Usuario", agora com cinco pedidos: ratificar as tres unanimes, ratificar ou virar as tres de maioria, decidir P-7, decidir se proveniencia entra no escopo, e mandar corrigir os quatro defeitos confirmados.
+- `CONSENSUS.md` passou de 30KB de novo, e a rotacao expos uma tensao na propria regra: ela manda manter "as 5 a 10 mais recentes" e rotacionar acima de 30KB, e com poucas entradas grandes as duas metades se contradizem. Rotacionei o achado `0005-A1`, ja `resolvido` e com residuo fechado, em vez de encurtar a entrada nova, porque encurtar para o portao ficar verde e o que a regra "Nao Apague O Que Falha" proibe. Nao virou tarefa: e n=1 e pode nao se repetir.
+- O artefato bruto de cada agente ficou fora do repositorio e nao foi preservado, contra o que a resposta de P-1 dos dois modelos recomenda. Nao virou tarefa porque o destino desse artefato e parte do que P-1 decide.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario.
+- Motivo: sao cinco pedidos e nenhum deles e do agente. O mais interessante ficou sendo P-6: o Grok perdeu por 2 a 1, e o argumento dele (rodada 2 exige o pacote inteiro, e no instante em que o orquestrador resume o Problema 3 volta por dentro da automacao) sobrevive a derrota e vale ser lido antes de ratificar a maioria.
+
 ## 2026-09-03 - Claude (fixture de controle do criterio de achado)
 
 ### Objetivo

@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-09-04 (T-065 pelo loop)
+
+- Portao dos evals deixou de ser cego: 39 de 39 codigos com fixture, manifesto de etapas, inventario de fixtures, prompt do loop assertado, versao em prosa conferida. Fechada pelo loop com Codex `gpt-5.6-terra` na tentativa 1, contra portao proprio. As 11 mutacoes cegas da revalidacao agora sao pegas. Verificador 58 de 58, bateria 62 de 62.
+
 ## 2026-09-03 (T-059, T-061 e T-067 respondidas)
 
 - Usuario aceitou item a item os niveis propostos em REVAL-1. Decisao em `docs/DECISIONS.md`; T-069 a T-071 abertas para a 2.6.0; REVAL-1, REVAL-2 e REVAL-6 resolvidas.

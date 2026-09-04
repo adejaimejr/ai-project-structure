@@ -38,6 +38,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -141,7 +142,130 @@ FIXTURES = {
             "2026-09-03 - Achado sem identificador e com valor invalido",
         ],
     },
+    # Fixtures de cobertura: uma por area do validador, inclusive casos que
+    # deliberadamente acumulam diagnosticos para manter o inventario pequeno.
+    "cobertura-arquivos": {
+        "strict": False,
+        "exit": 1,
+        "diagnosticos": [
+            "ERRO|TRAVESSAO|AGENTS.md|",
+            "ERRO|MARCADOR-VERSAO-INVALIDA|AGENTS.md|core",
+            "ERRO|MARCADOR-DESPAREADO|AGENTS.md|specs",
+            "AVISO|PONTE-QUEBRADA|CLAUDE.md|",
+            "ERRO|NUCLEO-AUSENTE|GEMINI.md|GEMINI.md",
+            "ERRO|NUCLEO-AUSENTE|docs/CHANGELOG.md|docs/CHANGELOG.md",
+            "ERRO|NUCLEO-AUSENTE|docs/CONSENSUS.md|docs/CONSENSUS.md",
+            "ERRO|NUCLEO-AUSENTE|docs/DECISIONS.md|docs/DECISIONS.md",
+            "ERRO|NUCLEO-AUSENTE|docs/MEMORY.md|docs/MEMORY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/PROJECT_CONTEXT.md|docs/PROJECT_CONTEXT.md",
+            "ERRO|NUCLEO-AUSENTE|docs/QUALITY.md|docs/QUALITY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/README.md|docs/README.md",
+            "ERRO|NUCLEO-AUSENTE|docs/SESSION.md|docs/SESSION.md",
+            "ERRO|NUCLEO-AUSENTE|docs/TASKS.md|docs/TASKS.md",
+            "ERRO|NUCLEO-AUSENTE|docs/archive/README.md|docs/archive/README.md",
+        ],
+    },
+    "cobertura-consenso": {
+        "strict": False,
+        "exit": 1,
+        "diagnosticos": [
+            "ERRO|NUCLEO-AUSENTE|AGENTS.md|AGENTS.md",
+            "ERRO|NUCLEO-AUSENTE|CLAUDE.md|CLAUDE.md",
+            "ERRO|NUCLEO-AUSENTE|GEMINI.md|GEMINI.md",
+            "ERRO|NUCLEO-AUSENTE|docs/CHANGELOG.md|docs/CHANGELOG.md",
+            "AVISO|CONSENSO-CAMPO-AUSENTE|docs/CONSENSUS.md|2026-09-03 - Sem campos",
+            "AVISO|CONSENSO-CAMPO-INVALIDO|docs/CONSENSUS.md|2026-09-03 - Sem campos",
+            "AVISO|CONSENSO-RODADA-FORMATO|docs/CONSENSUS.md|2026-09-03 - Sem campos",
+            "AVISO|CONSENSO-SEM-STATUS|docs/CONSENSUS.md|2026-09-03 - Sem campos",
+            "AVISO|CONSENSO-STATUS-INVALIDO|docs/CONSENSUS.md|2026-09-03 - Status invalido",
+            "AVISO|CONSENSO-SEM-PENDENTE|docs/CONSENSUS.md|2026-09-03 - Aberto sem proximo e rodada sem pendencia",
+            "AVISO|CONSENSO-ABERTO-SEM-PROXIMO-PASSO|docs/CONSENSUS.md|2026-09-03 - Aberto sem proximo e rodada sem pendencia",
+            "ERRO|NUCLEO-AUSENTE|docs/DECISIONS.md|docs/DECISIONS.md",
+            "ERRO|NUCLEO-AUSENTE|docs/MEMORY.md|docs/MEMORY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/PROJECT_CONTEXT.md|docs/PROJECT_CONTEXT.md",
+            "ERRO|NUCLEO-AUSENTE|docs/QUALITY.md|docs/QUALITY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/README.md|docs/README.md",
+            "ERRO|NUCLEO-AUSENTE|docs/SESSION.md|docs/SESSION.md",
+            "ERRO|NUCLEO-AUSENTE|docs/archive/README.md|docs/archive/README.md",
+        ],
+    },
+    "cobertura-tarefas": {
+        "strict": False,
+        "exit": 1,
+        "diagnosticos": [
+            "ERRO|NUCLEO-AUSENTE|AGENTS.md|AGENTS.md",
+            "ERRO|NUCLEO-AUSENTE|CLAUDE.md|CLAUDE.md",
+            "ERRO|NUCLEO-AUSENTE|GEMINI.md|GEMINI.md",
+            "ERRO|NUCLEO-AUSENTE|docs/CHANGELOG.md|docs/CHANGELOG.md",
+            "ERRO|NUCLEO-AUSENTE|docs/CONSENSUS.md|docs/CONSENSUS.md",
+            "ERRO|NUCLEO-AUSENTE|docs/DECISIONS.md|docs/DECISIONS.md",
+            "ERRO|NUCLEO-AUSENTE|docs/MEMORY.md|docs/MEMORY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/PROJECT_CONTEXT.md|docs/PROJECT_CONTEXT.md",
+            "ERRO|NUCLEO-AUSENTE|docs/QUALITY.md|docs/QUALITY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/README.md|docs/README.md",
+            "ERRO|NUCLEO-AUSENTE|docs/SESSION.md|docs/SESSION.md",
+            "AVISO|TASK-SEM-ID|docs/TASKS.md|proximas tarefas",
+            "ERRO|SPEC-REF-NAO-RESOLVE|docs/TASKS.md|9999-ausente",
+            "AVISO|TASK-PRIORIDADE-INVALIDA|docs/TASKS.md|T-001",
+            "AVISO|TASK-BLOQUEADA-FORMATO|docs/TASKS.md|T-001",
+            "AVISO|TASK-BLOQUEADA-ANTIGA|docs/TASKS.md|T-002",
+            "AVISO|EVIDENCIA-TIPO-INVALIDO|docs/TASKS.md|T-012",
+            "INFO|CONVENCOES-DATA-INVALIDA|docs/TASKS.md|",
+            "ERRO|EVIDENCIA-AUSENTE-COM-VERIFICA|docs/TASKS.md|T-011",
+            "ERRO|EVIDENCIA-SEM-RESULTADO|docs/TASKS.md|T-012",
+            "ERRO|NUCLEO-AUSENTE|docs/archive/README.md|docs/archive/README.md",
+            "ERRO|SPEC-PREFIXO-DUPLICADO|docs/specs/0001-segunda.md|0001-segunda.md",
+            "ERRO|SPEC-STATUS-INVALIDO|docs/specs/0002-status.md|0002-status.md",
+            "ERRO|SPEC-TASK-INEXISTENTE|docs/specs/0002-status.md|T-999",
+            "AVISO|SPEC-CONCLUIDA-COM-PENDENTE|docs/specs/0003-concluida.md|0003-concluida.md",
+            "AVISO|SPEC-CONCLUIDA-SEM-EVIDENCIA|docs/specs/0003-concluida.md|0003-concluida.md",
+            "AVISO|SPEC-NOME-INVALIDO|docs/specs/invalida.md|invalida.md",
+            "ERRO|SPEC-SEM-STATUS|docs/specs/invalida.md|invalida.md",
+        ],
+    },
+    "cobertura-rotacao": {
+        "strict": False,
+        "exit": 1,
+        "diagnosticos": [
+            "ERRO|NUCLEO-AUSENTE|AGENTS.md|AGENTS.md",
+            "ERRO|NUCLEO-AUSENTE|CLAUDE.md|CLAUDE.md",
+            "ERRO|NUCLEO-AUSENTE|GEMINI.md|GEMINI.md",
+            "ERRO|NUCLEO-AUSENTE|docs/CHANGELOG.md|docs/CHANGELOG.md",
+            "ERRO|NUCLEO-AUSENTE|docs/CONSENSUS.md|docs/CONSENSUS.md",
+            "ERRO|NUCLEO-AUSENTE|docs/DECISIONS.md|docs/DECISIONS.md",
+            "ERRO|NUCLEO-AUSENTE|docs/MEMORY.md|docs/MEMORY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/PROJECT_CONTEXT.md|docs/PROJECT_CONTEXT.md",
+            "ERRO|NUCLEO-AUSENTE|docs/QUALITY.md|docs/QUALITY.md",
+            "ERRO|NUCLEO-AUSENTE|docs/README.md|docs/README.md",
+            "AVISO|SESSAO-SEM-HEADINGS|docs/SESSION.md|2026-09-01 - Entrada 01",
+            "AVISO|ROTACAO|docs/SESSION.md|",
+            "AVISO|EVIDENCIA-AUSENTE|docs/TASKS.md|T-001",
+            "ERRO|NUCLEO-AUSENTE|docs/archive/README.md|docs/archive/README.md",
+        ],
+    },
 }
+
+# O verificador e uma sequencia declarada, nao uma lista de chamadas soltas no
+# `main`. Assim, remover uma etapa exige mudar o manifesto e faz o portao
+# acusar a regressao. Os nomes apontam para funcoes com a assinatura
+# `(resultado, verbose)`.
+ETAPAS = [
+    "verificar_raiz",
+    "verificar_fixtures",
+    "verificar_cobertura_codigos",
+    "verificar_inventario_fixtures",
+    "verificar_etapas",
+    "verificar_controle_do_debate",
+    "verificar_blocos",
+    "verificar_versao",
+    "verificar_convencoes",
+    "verificar_evals_json",
+    "verificar_scripts",
+    "verificar_testes_do_loop",
+    "verificar_travessao",
+    "verificar_sem_pycache",
+    "verificar_install",
+]
 
 # Titulo da entrada de debate que abre os dois lados de achado-project. Nenhum
 # diagnostico pode cita-la: e o controle do criterio "projeto que nunca registra
@@ -220,7 +344,17 @@ def verificar_fixtures(res, verbose):
         strict = oraculo.get("strict", False)
         modo = "--strict" if strict else "normal"
         esperado_exit = oraculo["exit"]
-        code, out = rodar_validador(caminho, strict=strict, codigos=True)
+        # A regra global tambem proibe o travessao no proprio repositorio. A
+        # fixture usa um token, materializado so no temporario, para ainda
+        # provar o diagnostico TRAVESSAO sem tornar o portao autorreferente.
+        with tempfile.TemporaryDirectory() as tmp:
+            materializada = Path(tmp) / "fixture"
+            shutil.copytree(caminho, materializada)
+            for markdown in materializada.rglob("*.md"):
+                texto = read(markdown)
+                if "{{TRAVESSAO}}" in texto:
+                    markdown.write_text(texto.replace("{{TRAVESSAO}}", "\u2014"), encoding="utf-8")
+            code, out = rodar_validador(materializada, strict=strict, codigos=True)
         res.check(
             code == esperado_exit,
             f"fixture {nome} em {modo}",
@@ -245,7 +379,54 @@ def verificar_fixtures(res, verbose):
             print(out)
 
 
-def verificar_controle_do_debate(res):
+def verificar_cobertura_codigos(res, verbose=False):
+    """Todo codigo publico precisa ter ao menos um oracle que o produza."""
+    import ast
+
+    arvore = ast.parse(read(VALIDATOR))
+    codigos = set()
+    for no in arvore.body:
+        if isinstance(no, ast.Assign) and any(
+            isinstance(alvo, ast.Name) and alvo.id == "CODIGOS" for alvo in no.targets
+        ):
+            codigos = set(ast.literal_eval(no.value))
+            break
+    cobertos = {
+        diagnostico.split("|", 2)[1]
+        for oraculo in FIXTURES.values()
+        for diagnostico in oraculo.get("diagnosticos", [])
+        if diagnostico.count("|") >= 1
+    }
+    faltando = sorted(codigos - cobertos)
+    res.check(
+        not faltando,
+        f"todos os {len(codigos)} codigos tem fixture que os produza",
+        ", ".join(faltando),
+    )
+
+
+def verificar_inventario_fixtures(res, verbose=False):
+    """Toda fixture no disco esta declarada em FIXTURES. Fixture sem oracle e
+    teste que ninguem roda; tirar a chave do dicionario passava verde (REVAL-4, M19)."""
+    base = EVALS / "fixtures"
+    no_disco = sorted(
+        p.parent.parent.relative_to(base).as_posix() for p in base.rglob("docs/TASKS.md")
+    )
+    fora = [d for d in no_disco if d not in FIXTURES]
+    res.check(not fora, f"as {len(no_disco)} fixtures no disco estao declaradas em FIXTURES",
+              ", ".join(fora))
+
+
+def verificar_etapas(res, verbose=False):
+    """Toda funcao `verificar_*` deste arquivo esta em ETAPAS. Tirar o nome da
+    lista deixaria a etapa definida e nunca executada, sem FALHA (REVAL-4, M17)."""
+    definidas = sorted(n for n, f in globals().items()
+                       if n.startswith("verificar_") and callable(f))
+    fora = [n for n in definidas if n not in ETAPAS]
+    res.check(not fora, f"as {len(definidas)} etapas definidas estao em ETAPAS", ", ".join(fora))
+
+
+def verificar_controle_do_debate(res, verbose=False):
     """O oracle de achado-project nao pode declarar diagnostico na entrada de debate.
 
     A comparacao exata ja reprova um diagnostico que caia nela. Este check guarda
@@ -264,7 +445,7 @@ def verificar_controle_do_debate(res):
     )
 
 
-def verificar_blocos(res):
+def verificar_blocos(res, verbose=False):
     raiz = read(ROOT / "AGENTS.md")
     template = read(ASSETS / "AGENTS.md")
 
@@ -311,7 +492,7 @@ def verificar_blocos(res):
                   "bloco loop identico ao partial da skill")
 
 
-def verificar_versao(res):
+def verificar_versao(res, verbose=False):
     frontmatter = read(SKILL / "SKILL.md")
     m = re.search(r'^version:\s*"?([\d.]+)"?\s*$', frontmatter, re.MULTILINE)
     if not res.check(m is not None, "SKILL.md declara version no frontmatter"):
@@ -333,9 +514,14 @@ def verificar_versao(res):
         is not None,
         f"CHANGELOG.md da skill tem a secao {versao}",
     )
+    res.check(
+        re.search(rf"versao da estrutura:\s*{re.escape(versao)}\b", frontmatter,
+                  re.IGNORECASE) is not None,
+        f"SKILL.md declara versao da estrutura {versao} em prosa",
+    )
 
 
-def verificar_convencoes(res):
+def verificar_convencoes(res, verbose=False):
     """Templates trazem as convencoes atuais, e o dogfood da raiz adotou as mesmas."""
     tasks_template = read(ASSETS / "docs" / "TASKS.md")
     tasks_raiz = read(ROOT / "docs" / "TASKS.md")
@@ -371,7 +557,7 @@ def verificar_convencoes(res):
         )
 
 
-def verificar_evals_json(res):
+def verificar_evals_json(res, verbose=False):
     caminho = EVALS / "evals.json"
     try:
         dados = json.loads(read(caminho))
@@ -447,7 +633,7 @@ def arquivos_versionados():
     return [ROOT / rel for rel in p.stdout.split("\0") if rel]
 
 
-def verificar_travessao(res):
+def verificar_travessao(res, verbose=False):
     arquivos = arquivos_versionados()
     if arquivos is None:
         res.check(False, "travessao (U+2014)", "git ls-files falhou")
@@ -481,7 +667,7 @@ def hashes(base):
     return saida
 
 
-def verificar_sem_pycache(res):
+def verificar_sem_pycache(res, verbose=False):
     """Nenhum `__pycache__` dentro da skill: o `install.sh` copiava o que existisse."""
     achados = sorted(p.relative_to(SKILL).as_posix() for p in SKILL.rglob("__pycache__"))
     res.check(not achados, "nenhum __pycache__ dentro da skill", ", ".join(achados))
@@ -545,18 +731,8 @@ def main(argv=None):
 
     print(f"Verificando integridade de: {ROOT}\n")
     res = Resultado()
-    verificar_raiz(res, args.verbose)
-    verificar_fixtures(res, args.verbose)
-    verificar_controle_do_debate(res)
-    verificar_blocos(res)
-    verificar_versao(res)
-    verificar_convencoes(res)
-    verificar_evals_json(res)
-    verificar_scripts(res, args.verbose)
-    verificar_testes_do_loop(res, args.verbose)
-    verificar_travessao(res)
-    verificar_sem_pycache(res)
-    verificar_install(res, args.verbose)
+    for etapa in ETAPAS:
+        globals()[etapa](res, args.verbose)
     res.print()
     return 1 if res.falhas else 0
 

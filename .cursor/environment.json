@@ -1,0 +1,4 @@
+{
+  "name": "ai-project-structure",
+  "install": "python3 --version && bash --version | head -n 1"
+}

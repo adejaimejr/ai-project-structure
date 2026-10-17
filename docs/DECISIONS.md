@@ -20,6 +20,23 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-10-17 - Contexto de delegacao viaja na mensagem, nunca em arquivo temporario
+
+### Decisao
+
+- Ao delegar uma tarefa a outro agente (subagente, outra sessao, outro modelo), quem delega manda, na propria mensagem, um resumo curto com: objetivo e criterio de conclusao; estado feito e pendente; decisoes que valem e tentativas que nao se repetem; arquivos e registros a consultar, por caminho; e a instrucao de conferir o estado real antes de agir. A regra e o modelo vivem na secao "Passagem De Trabalho" do bloco core de `AGENTS.md`.
+- Nenhum documento permanente novo: `SESSION.md`, `MEMORY.md`, `TASKS.md` e os demais seguem como registro do projeto, e o resumo aponta para eles em vez de copia-los. Subagente nao le a skill `ai-project-structure`: le o `AGENTS.md` do projeto e o resumo.
+
+### Motivo
+
+- No Cloudroom, subagente pode rodar em sandbox propria: nao ve a conversa do gestor, e arquivo temporario criado pelo gestor nao chega la. O metodo da skill Handoff (davidondrej) serviu de referencia (estado em vez de ordens, apontar artefatos, preservar o porque, exigir verificacao, sem segredo, so o util), mas o arquivo em `$TMPDIR` dela nao atravessa sandbox; por isso o resumo vai na mensagem.
+- Mesmo principio ja registrado para o loop em `references/loop.md`: regra critica vai no prompt, porque ler arquivo e opcional e o prompt chega sempre.
+
+### Impacto
+
+- Bloco core cresce 1362 bytes (cerca de 380 tokens) para todo agente que le `AGENTS.md`; cada delegacao custa um resumo de uns 150 a 400 tokens, contra os cerca de 8 mil de ler `SESSION.md` inteiro ou os 1,2 mil da skill Handoff mais o arquivo que ela gera.
+- Sem bump de versao, por T-078 a T-083; o passo 2 de `atualizacao.md` passa a seguir para o diff do bloco quando a versao e igual e o bloco difere. Bump em T-086. Validador intocado.
+
 ## 2026-10-17 - Gatilho da skill nao decide se um projeto ganha a estrutura; quem coordena decide
 
 ### Decisao

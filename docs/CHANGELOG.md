@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-17 (passagem de trabalho, ainda na 2.11.0)
+
+- Secao "Passagem De Trabalho" no bloco core de `AGENTS.md` (assets e raiz): toda delegacao a outro agente leva, na propria mensagem, um resumo curto com objetivo e criterio de conclusao, estado feito e pendente, decisoes e tentativas a nao repetir, arquivos a consultar por caminho e a instrucao de conferir o estado real antes de agir; `docs/` segue como registro, sem arquivo novo. Motivo: no Cloudroom o subagente pode estar em outra sandbox, onde arquivo temporario do gestor nao chega. Referencia de metodo: skill Handoff (davidondrej), sem copia nem instalacao. Passo 2 de `references/atualizacao.md` deixa de encerrar em versao igual quando um bloco gerenciado difere do template. Sem bump (T-078 a T-083 pedem para nao subir); bump em T-086. Verificador 74/74, validador `--strict` limpo, duas mutacoes acusadas, reinstalada nos tres destinos. Decisao em `docs/DECISIONS.md`.
+
 ## 2026-10-17 (T-085, fixture aguardando-project com data relativa)
 
 - `verify_repository.py` volta a 74/74: a fixture `evals/fixtures/aguardando-project` troca `(bloqueada: 2026-09-01)` pelo token `{{HOJE-N}}`, materializado em pasta temporaria relativo ao dia da execucao por `materializar_fixture` (que tambem absorveu `{{TRAVESSAO}}` e `{{UTF8_INVALIDO}}`); `invalido` ganha T-007 bloqueada ha 45 dias de proposito, com `TASK-BLOQUEADA-ANTIGA` no oracle. So `evals/`, sem bump; `validate_structure.py` intocado, o check segue relativo a hoje em projeto real. Portao `evals/portao_t085.py` (3/9 antes, 9/9 depois) com tres mutacoes acusando. Desbloqueia os portoes de T-078 a T-083.

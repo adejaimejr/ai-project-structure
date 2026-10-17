@@ -10,6 +10,79 @@ Cobre de 2026-04-25 (criacao da estrutura multiagente e validacao por tri-consen
 
 <!-- Rotacionadas em 2026-10-17: as tres entradas de 2026-09-04 abaixo (T-064 e T-063 com a 2.9.0, T-060 com a 2.8.1, T-072 e T-071 com a 2.8.0) vieram de docs/SESSION.md por tamanho. -->
 
+<!-- Rotacionadas em 2026-10-17, segunda vez no dia: as duas entradas de 2026-09-04 abaixo (T-054, T-056, T-058 e T-055 com a 2.10.0; T-062 e T-073 com a 2.9.1) vieram de docs/SESSION.md por tamanho. -->
+
+## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-054, T-056, T-058, T-055, skill 2.10.0)
+
+### Objetivo
+
+- Fechar as quatro tarefas tecnicas anteriores a revalidacao, pelo loop com o `terra`, numa release so.
+
+### O Que Foi Feito
+
+- Duas traziam "decidir antes de consertar"; como o usuario mandou fazer, apliquei criterio ja decidido e deixei escrito na tarefa: **T-054** cobra `Rodada` ausente como AVISO pelo mesmo codigo dos campos irmaos e so apos a data de adocao (criterio de T-059), mais `fullmatch`; **T-058** implementa lock em vez de so documentar, porque documentar nao conserta. Se o usuario discordar, reverte antes do commit.
+- Quatro portoes proprios por comportamento (`portao_t054/055/056/058.py`). O da T-058 nasceu com um traceback (a segunda rodada sem lock ficava presa esperando o agente e estourava o `timeout`); tratado como FALHA em vez de excecao. Os quatro reproduziam os defeitos antes das rodadas.
+- **T-054** (bump 2.10.0): verde de primeira, fixture `rodada-project` com oracle para ausencia e para sufixo. **T-056**: `--progress` conta so bullet de primeiro nivel; a spec 0006 voltou a reportar 3 perguntas; etapa `verificar_progresso_de_specs` no verificador. **T-058**: `mkdir .loop-lock` atomico, exit 5 para a segunda rodada, `rmdir` no `trap`, mensagem ensina limpar orfao, caso na bateria (77), secao "Uma Rodada Por Projeto" em `loop.md`. **T-055**: os dois modelos cercados da raiz ficam identicos aos do template e o verificador cobra (71 de 71).
+- **Registro honesto sobre T-055**: a tarefa exigia editar `docs/CONSENSUS.md`, que o prompt do loop proibe ao agente. O agente **editou mesmo assim** (6 linhas, exatamente os tres campos do modelo cercado, nada nas entradas reais). A culpa e da instrucao: eu mandei para o loop uma tarefa cuja unica saida era um arquivo proibido, e o texto da tarefa venceu o prompt. Duas licoes: tarefa que exige tocar arquivo proibido ao loop e do agente de chat, nao do loop; e a proibicao do prompt nao resiste a instrucao contraria na propria tarefa. A segunda e um achado sobre a forca real do prompt e vai para `MEMORY.md`.
+- 2.10.0 reinstalada nos tres destinos com `--sim` (o instalador recusou sem ela, como desenhado).
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/partials/*.md`, `references/loop.md`, `scripts/loop.sh`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/test_loop.py`, `evals/portao_t05{4,5,6,8}.py`, `evals/fixtures/rodada-project/`, `evals/fixtures/progresso-subitens/`.
+- Projeto: `AGENTS.md` (marcadores), `docs/CONSENSUS.md` (modelos cercados), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/MEMORY.md`, `docs/archive/revalidacao-2026-09-03/`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal. As duas escolhas de T-054 e T-058 estao declaradas nas tarefas e aqui, com a porta aberta para reverter.
+
+### Aprendizados Para MEMORY.md
+
+- A proibicao no prompt do loop nao resiste a uma tarefa que manda fazer o contrario: o agente editou `CONSENSUS.md` porque a tarefa dizia para editar. Tarefa que exige tocar arquivo proibido ao loop e trabalho do agente de chat.
+
+### Pendencias
+
+- Aberta so **T-053** (calibragens da spec 0006, do usuario). Todo o resto do backlog fechou: 15 tarefas em dois dias, sete releases (2.6.0 a 2.10.0), 54 codigos com fixture.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario, para T-053.
+- Motivo: e a unica tarefa aberta, e destrava a spec 0006 (automacao do consenso), que e o proximo modulo.
+
+## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-062 e T-073, skill 2.9.1)
+
+### Objetivo
+
+- Fechar as duas ultimas tarefas da revalidacao adversarial (texto de `atualizacao.md` e `install.sh` com confirmacao) pelo loop com o `terra`.
+
+### O Que Foi Feito
+
+- **T-062** (bump 2.9.1): verde na tentativa 2. O texto do agente estava certo desde a tentativa 1; quem falhava era o meu portao, duas vezes: `.*` no titulo com `re.S` engolia o documento e capturava corpo vazio, e o titulo era comparado sem `re.I`. Corrigido com o loop rodando (ele rele o portao a cada execucao). Efeito colateral: tentando casar a regex, o agente renomeou dois headings de `atualizacao.md` (`MIGRAR TASKS` em minusculo, `v2 -> v2.x` em prosa); restaurados por mim. Licao: portao de texto que casa heading precisa de teste contra o texto **antes** da rodada, senao o agente escreve para a regex e nao para o leitor.
+- **T-073** (sem bump): verde na tentativa 1. `install.sh` compara so o que distribui, lista `faltando`, `diferente` e `extra`, pede `[s/N]`, recusa sem terminal, aceita `--sim`; arquivo extra nao e apagado (decisao de T-067). `verificar_install` prova os dois lados com destino temporario sujo (verificador de 63 para 65). README da skill e CHANGELOG completados por mim.
+- **Primeiro uso real da protecao**: a reinstalacao da 2.9.1 nos destinos em 2.9.0 recusou sem `--sim`, listando os arquivos, e instalou com `--sim`. `diff -rq` limpo fora do nao distribuido.
+- `SESSION.md` rotacionado pela terceira vez no dia.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `README.md`, `install.sh`, `assets/AGENTS.md`, `assets/partials/*.md`, `references/atualizacao.md`, `evals/verify_repository.py`, `evals/portao_t062.py`, `evals/portao_t073.py`.
+- Projeto: `AGENTS.md` (marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`, `docs/archive/revalidacao-2026-09-03/`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal.
+
+### Aprendizados Para MEMORY.md
+
+- Portao de tarefa que casa texto por regex precisa passar contra um texto de exemplo escrito antes da rodada. Dois bugs de regex no portao de T-062 custaram uma tentativa e dois headings renomeados pelo agente para satisfazer a regex.
+
+### Pendencias
+
+- **O pacote da revalidacao adversarial de 2026-09-03 esta inteiro fechado**: T-059 a T-073, seis releases (2.6.0 a 2.9.1). Abertas so T-053 a T-058, anteriores a revalidacao.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario para T-053 (calibragens da spec 0006); qualquer agente para T-054, T-055, T-056 e T-058, que ja tem conserto descrito.
+- Motivo: sao as unicas tarefas abertas, e as quatro tecnicas cabem numa release 2.10.0 pelo mesmo molde de portao proprio.
+
 ## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-064 e T-063, skill 2.9.0)
 
 ### Objetivo

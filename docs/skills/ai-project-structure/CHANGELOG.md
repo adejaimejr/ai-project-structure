@@ -38,6 +38,19 @@ execucao.
   disparo errado, nao o zera. Evals 2 e 4 ajustados e eval 11 negativo
   (projeto Vite nao aciona a skill); `agents/openai.yaml` segue com
   invocacao implicita, so o comentario mudou.
+- Secao "Passagem De Trabalho" no bloco core de `AGENTS.md`: ao delegar uma
+  tarefa a outro agente (subagente, outra sessao, outro modelo), o contexto
+  viaja dentro da propria mensagem de delegacao, como resumo curto com
+  objetivo e criterio de conclusao, estado feito e pendente, decisoes que
+  valem e tentativas que nao se repetem, arquivos a consultar por caminho e
+  a instrucao de conferir o estado real antes de agir. Nenhum arquivo novo:
+  `docs/` segue como registro e o resumo aponta para ele. Motivo: no
+  Cloudroom o subagente pode estar em outra sandbox, e arquivo temporario do
+  gestor nao chega la. Metodo inspirado na skill Handoff (davidondrej), sem
+  copia-la nem exigir a instalacao dela. O passo 2 de
+  `references/atualizacao.md` deixa de encerrar em versao igual quando um
+  bloco gerenciado difere do template: o diff do bloco e oferecido mesmo sem
+  bump. Validador intocado: o resumo vive na mensagem, nao em arquivo.
 
 ## 2.10.0 - 2026-09-04
 

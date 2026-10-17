@@ -27,7 +27,9 @@ Compare com a versao no frontmatter do `SKILL.md` desta skill.
 
 ## 2. JA ATUALIZADO?
 
-Versoes iguais: informe o usuario, ofereca rodar o validador (`scripts/validate_structure.py`) e encerre.
+Versoes iguais e blocos gerenciados identicos aos do template: informe o usuario, ofereca rodar o validador (`scripts/validate_structure.py`) e encerre.
+
+Versoes iguais e algum bloco diferente do template (a skill mudou o bloco sem subir a versao): nao encerre; siga para o passo 4 so com esse bloco, com diff e confirmacao como sempre.
 
 ## 3. PLANEJAR
 

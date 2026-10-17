@@ -150,6 +150,25 @@ Ao finalizar trabalho relevante, adicione uma nova entrada no topo de `docs/SESS
 - nao registre dados sensiveis;
 - se um fato virar estrutural permanente, promova para `PROJECT_CONTEXT.md`.
 
+## Passagem De Trabalho
+
+Ao delegar uma tarefa a outro agente (subagente, outra sessao, outro modelo), assuma que ele esta em outra sandbox: nao ve esta conversa, e arquivo temporario criado fora do projeto nao chega la. O contexto viaja dentro da propria mensagem de delegacao, como resumo curto. Os arquivos de `docs/` continuam sendo o registro do projeto: o resumo aponta para eles, nao os copia nem os substitui.
+
+Toda delegacao leva, no minimo:
+
+```md
+Tarefa: <T-NNN, se houver; uma frase>. Pronta quando: <criterio verificavel; o comando de (verifica:), se houver>.
+Estado: feito <...>; pendente <...>.
+Decisoes que valem aqui: <DEC-NNN ou uma frase>. Nao repetir: <tentativa que falhou, e por que>.
+Consulte antes de agir: AGENTS.md; <arquivos e registros, por caminho a partir da raiz>.
+Confira o estado real do projeto (arquivos, testes, git) antes de agir: este resumo pode estar desatualizado.
+```
+
+- Descreva estado, nao ordens: "X esta feito, Y nao comecou" deixa o destinatario escolher a acao.
+- So o contexto da tarefa: nao repita as regras deste arquivo nem cole conteudo de `docs/`; aponte. Item que nao se aplica recebe "nenhum".
+- Nunca inclua segredo ou dado pessoal: nomeie onde a credencial esta, nunca o valor.
+- O destinatario responde pelo mesmo canal (feito, pendente, aprendido); quem delegou registra em `SESSION.md` e `TASKS.md`.
+
 ## Consenso Entre Modelos
 
 Use `docs/CONSENSUS.md` quando:

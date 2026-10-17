@@ -1,0 +1,33 @@
+Tarefa:  T-075
+Projeto: /Users/adejaimejunioer/Dev/2026/ai-project-structure
+Portao:  python3 docs/skills/ai-project-structure/evals/portao_t075.py
+Limite:  3 tentativa(s)
+
+=== Tentativa 1 de 3 ===
+A T-075 está feita. O primitivo de consenso passa no portão (14/14).
+
+`scripts/consenso.py debate` roda N agentes em paralelo, cada um numa cópia temporária fora do projeto (sem `docs/consensus/`, com `CONSENSUS.md` só na nota de retenção). O bruto e o manifesto entram em `docs/consensus/<run-id>/` assim que cada agente termina. Falha de um participante não derruba a rodada; todos falhando sai 2 e deixa `CONSENSUS.md` intacto. Sidecar no `.gitignore` recusa com exit 1.
+
+Também entrou a bateria `evals/test_consenso.py` (13/13), a etapa `verificar_testes_do_consenso` no verificador (piso 12, e `consenso.py` passa a compilar junto com os outros scripts) e o bump 2.11.0 nos marcadores da skill, no `SKILL.md` e no `CHANGELOG.md` da skill. O `AGENTS.md` da raiz não foi editado.
+--- portao: python3 docs/skills/ai-project-structure/evals/portao_t075.py
+[OK  ] 1. rodada com alfa, beta e falho sai 0: exit 0; Rodada concluida: 2026-09-04-214913-debate
+[OK  ] 2. um run dir em docs/consensus/ com manifesto de debate, rodada 1, concluida, tres participantes: runs=['2026-09-04-214913-debate'] modo=debate rodada=1 status=concluida ids=['alfa', 'beta', 'falho']
+[OK  ] 3. alfa: resultado=posicao, bruto com o token, sha256 de saida e de prompt batendo, comando registrado: resultado=posicao exit=0 comando=['ag-alfa']
+[OK  ] 4. beta viu o bruto de alfa no sidecar real e nao o encontra na propria copia; copias distintas e fora do projeto: beta=VI-BRUTO-DE-ALFA | ISOLADO | POSICAO-BETA TOKEN-BETA-075 dirs=('/var/folders/vk/tsqh815j4czfr6crv_v2rhl80000gn/T/consenso-v3hyo025/projeto', '/var/folders/vk/tsqh815j4czfr6crv_v2rhl80000gn/T/consenso-pfmtc4_7/projeto')
+[OK  ] 5. falho: resultado=falha, exit 4, stderr guardado: resultado=falha exit=4
+[OK  ] 6. na rodada 1 a copia nao traz as entradas de CONSENSUS.md e traz a nota de retencao: POSICAO-ALFA TOKEN-ALFA-075 | NOTA-RETIDA
+[OK  ] 7. nada fora de docs/consensus/ e docs/CONSENSUS.md mudou, e o rascunho do agente nao chegou ao projeto
+[OK  ] 8. prompt.txt traz a pergunta na integra, o id, o caminho da copia e a regra de somente-leitura: 487 bytes
+[OK  ] 9. todos falharam: exit 2, status sem-posicao, bruto das falhas fica, CONSENSUS.md byte a byte: exit 2 status=sem-posicao
+[OK  ] 10a. sem --agente, pergunta ausente ou debate com um agente so: exit 1, agente nao chamado, sem run dir: exits 1 1 1; prompts=0
+[OK  ] 10b. projeto git com docs/consensus/ no .gitignore: exit 1 antes de chamar agente, explicando: exit 1
+[OK  ] 11. versao 2.11.0 ou acima, coerente em SKILL.md, prosa, marcadores e CHANGELOG: versao=2.11.0 prosa=['2.11.0'] marcadores=['2.11.0']
+[OK  ] 12a. bateria test_consenso.py passa com pelo menos 12 verificacoes: exit 0; 13 verificacoes (piso 12)
+[OK  ] 12b. verify_repository.py exit 0: Resumo: 74/74 verificacoes passaram.
+
+Portao T-075: 14/14.
+--- portao saiu com codigo 0
+T-075 movida para Concluidas com evidencia de comando.
+
+Portao verde na tentativa 1. Tarefa fechada com evidencia de comando.
+A entrada de SESSION.md continua sendo sua: o loop nao escreve la.

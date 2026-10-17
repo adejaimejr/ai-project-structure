@@ -8,6 +8,10 @@ interface:
 
 policy:
   # true = o Codex pode acionar a skill automaticamente quando o pedido casar
-  # com a `description` do SKILL.md. A invocacao explicita ($ai-project-structure)
-  # funciona de qualquer forma.
+  # com a `description` do SKILL.md. Desde a 2.11.0 a description so casa com
+  # pedido que nomeia a estrutura multiagente ou seus arquivos (ou com os fluxos
+  # de atualizar, validar, specs e loop); pedido generico de "criar projeto" nao
+  # dispara, para que a decisao fique com quem coordena (usuario ou agente
+  # gestor). A invocacao explicita ($ai-project-structure) funciona de qualquer
+  # forma.
   allow_implicit_invocation: true

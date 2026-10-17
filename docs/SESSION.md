@@ -41,6 +41,100 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-10-17 - Claude (gatilhos da skill para o fluxo gestor e subagentes no Cloudroom)
+
+### Objetivo
+
+- Revisar os gatilhos da skill `ai-project-structure` para o uso no Cloudroom, onde um agente gestor coordena subagentes em sandbox: o gestor decide quando um projeto precisa da estrutura, os subagentes so a executam quando recebem essa tarefa, e o pedido direto do usuario continua valendo. Analise e proposta antes de qualquer edicao, a pedido do usuario; aplicacao depois da aprovacao.
+
+### O Que Foi Feito
+
+- Leitura: `AGENTS.md`, `SESSION.md`, `MEMORY.md`, `SKILL.md`, `agents/openai.yaml`, `evals.json`, `install.sh`, `verify_repository.py` (so checa `version` no frontmatter, nunca a `description`) e as referencias do `room-cli` (skills chegam aos agentes pelos roots globais `~/.claude/skills` e `~/.agents/skills`; `.bb/AGENTS.md` na raiz do workspace injeta instrucao em toda thread).
+- Diagnostico: a `description` do frontmatter e a unica superficie de roteamento, e a skill nao sabe quem a chama; a tarefa do gestor chega ao subagente como se fosse o pedido do usuario. As frases genericas ("cria projeto", "inicia projeto novo", "scaffold projeto", "estrutura inicial", "monta a base do projeto", "cria a pasta do projeto", "projeto de IA") faziam um subagente mandado fazer scaffold de codigo abrir a entrevista ou criar `AGENTS.md` e `docs/` sem pedido, tirando a decisao do gestor. Os gatilhos especificos (estrutura multiagente, atualizar, validar, specs, loop) nao conflitam.
+- Proposta aprovada e aplicada: `description` reescrita com clausula positiva estreita (nomear a estrutura ou seus arquivos, citar a skill, fluxos de atualizar, validar, specs e loop) e clausula negativa (pedido generico nao dispara; quem coordena decide; no maximo oferecer a estrutura em uma linha). Escalar YAML plano, sem `": "` nem travessao; Claude Code releu a skill com o texto novo na mesma sessao. Comentario do `openai.yaml` atualizado, `allow_implicit_invocation` segue `true`. Eval 2 passa a nomear a estrutura no prompt; eval 4 ("Inicia projeto novo aqui.") passa a esperar oferta e confirmacao antes da entrevista; eval 11 novo, negativo (projeto Node com Vite nao aciona). Item na secao 2.11.0 do CHANGELOG da skill, sem bump: a 2.11.0 nao foi commitada e T-078 a T-083 pedem para nao subir; os portoes aceitam "2.11.0 ou acima".
+- Casos ambiguos decididos com o usuario: "inicia projeto novo" sozinho sai dos gatilhos (custa um turno de confirmacao no chat direto); "scaffold projeto" e "estrutura inicial" saem por casarem com scaffold de codigo; "projeto de IA" e "repo de IA" saem porque projeto sobre IA nao e projeto para varias IAs. Travas mecanicas (`allow_implicit_invocation: false` no Codex, `disable-model-invocation` no Claude Code, esta a confirmar na documentacao) rejeitadas por exigirem invocar a skill pelo nome e quebrarem o pedido direto em linguagem natural.
+- Verificacao: `validate_structure.py . --strict` sem problema; frontmatter com tres chaves; zero travessao nos quatro arquivos. `verify_repository.py` em **71/74**: as tres falhas sao `TASK-BLOQUEADA-ANTIGA` na fixture `aguardando-project` (`valido` em `--strict` e as contagens exatas de `valido` e `invalido`), porque o validador compara `(bloqueada:)` com `date.today()` e as datas de setembro da fixture passaram do limite. Nada a ver com esta mudanca: validador e fixture intocados desde 2026-09-04. Virou T-085, prioridade alta, porque `portao_consenso_lib.py` roda o verificador e toda rodada de loop de T-078 a T-083 ficaria vermelha por causa alheia.
+- Reinstalada nos tres destinos com `install.sh --sim` (divergencia listada em cada um: `SKILL.md` e `agents/openai.yaml`); paridade conferida por `cmp` nos dois arquivos, nos tres destinos.
+- Rotacao: `SESSION.md` passaria de 30KB com esta entrada; as tres entradas mais antigas (2.9.0 com T-064 e T-063, 2.8.1 com T-060, 2.8.0 com T-072 e T-071) foram para `docs/archive/SESSIONS-2026.md`, indice do archive atualizado (44 entradas).
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md` (description), `agents/openai.yaml` (comentario), `evals/evals.json` (evals 2, 4 e 11), `CHANGELOG.md` (item na 2.11.0).
+- Projeto: `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/DECISIONS.md`, `docs/TASKS.md` (T-085), `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`.
+- Instalacao: `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills`.
+
+### Decisoes Tomadas
+
+- Gatilho da skill nao decide se um projeto ganha a estrutura; quem coordena decide. Registrada em `docs/DECISIONS.md`.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum promovido. Candidato ainda em hipotese: fixture com data absoluta sob check relativo a `date.today()` envelhece sozinha e derruba o verificador sem regressao real; vira regra se T-085 confirmar o conserto.
+
+### Pendencias
+
+- T-085 (fixture `aguardando-project` envelhecendo; verificador em 71/74) antes de qualquer rodada de loop de T-078 a T-083.
+- Do usuario: commitar. A 2.11.0 inteira continua nao commitada, e esta sessao soma a mudanca de gatilhos.
+- Cloudroom, fora deste repositorio: linha em `.bb/AGENTS.md` do workspace repetindo a regra, e template de delegacao do gestor nomeando a estrutura e pre-respondendo as quatro perguntas da entrevista (nome, objetivo, minimal ou completa, specs), para o subagente nao travar perguntando ao gestor.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente de chat, para T-085 antes de mandar T-078 ao loop; portao proprio escrito antes da rodada.
+- Motivo: verificador vermelho por causa alheia esconde regressao real, e todos os portoes abertos passam por ele.
+
+## 2026-09-04 - Claude, com Grok cursor-grok-4.6-high pelo loop (plano da spec 0006, T-075 a T-077, skill 2.11.0)
+
+### Objetivo
+
+- Desdobrar a spec 0006 (automacao do consenso), `Definida` com DEC-001 a DEC-010 e sem tarefa, em tarefas que cabem numa rodada de loop, cada uma com portao proprio, sem escrever codigo do produto.
+- Depois da aprovacao do plano, a pedido do usuario: rodar T-075, T-076 e T-077 pelo loop (a ultima virou a madrugada de 2026-09-05).
+
+### O Que Foi Feito
+
+- Leitura na ordem pedida: `AGENTS.md`, a spec inteira, as quatro rodadas de loop mais recentes, `MEMORY.md` (Feedback e Project), `DECISIONS.md` de 2026-09-03 e 2026-09-04, `loop.sh` e `loop_task.py`, `references/loop.md`, e as entradas de P-7/P-8 e P-9 do archive. Plano mostrado e aprovado pelo usuario **antes** de gravar qualquer coisa.
+- **Leitura da spec:** o primitivo e um orquestrador mecanico novo, `scripts/consenso.py`, que roda N agentes em paralelo, cada um numa copia propria do projeto sem `docs/consensus/`, e grava bruto e manifesto em `docs/consensus/<run-id>/` assim que cada agente termina; os pacotes em cima sao a minuta de debate (citacao linha a linha, julgamento em branco, atomica sob lock), a varredura de segredo, o achado (revalidacao dentro da entrada existente), a rodada 2 com anteriores na integra, a retomada por comando e os checks AVISO por `**Origem:**`. Do `loop.sh` reaproveita-se o contrato, nao o codigo.
+- **Escolhas de forma, dentro das DECs e vetaveis antes da primeira rodada:** campos `**Origem:** automacao`, `**Manifesto:**`, `**Participantes:**` (todos os ids) e `**Falhas:**` (`nenhuma` ou ids); headings `### Posicao De <id>`, `### Falha De <id>` e `### Revalidacao De <id>`; `Metodo` sempre `pareceres-independentes` (nenhum modo mostra posicao contemporanea); `--pendente` obrigatorio da rodada 4 em diante, porque o campo e julgamento humano; sidecar em `docs/consensus/`, copias com `.git` e sem o sidecar; sem bloco gerenciado novo em `AGENTS.md`.
+- **Nove tarefas, T-075 a T-083**, em "Proximas Tarefas" de `docs/TASKS.md` por script com substituicao atomica, na ordem de execucao e com dependencia dita na linha: primitivo (bump 2.11.0), lock e minuta, segredo, validador com fixture, achado, rodada 2, retomada, documentacao (portao sem `verify_repository.py`, porque a raiz precisa da propagacao do agente de chat), bancada real (tarefa do agente de chat, com evidencia `revisao-manual`). Cada linha diz o que e proibido ao loop e o que sobra para o chat. T-IDs listados na spec sem status; a spec segue `Definida` ate a primeira rodada, como combinado.
+- **Nove portoes** sobre uma base comum, `evals/portao_consenso_lib.py` (molde de `portao_t058.py` mais agente falso, chamada do orquestrador e leitura do sidecar), cada um com regex autotestada contra exemplo e contraexemplo. Rodados hoje, **todos falham pelo motivo certo** (`scripts/consenso.py` ausente, versao 2.10.0, `test_consenso.py` ausente, sem run dir, sem secao no `SKILL.md`): T-075 1/14, T-076 1/13, T-077 0/10, T-078 6/14, T-079 1/12, T-080 0/11, T-081 0/11, T-082 2/8, T-083 1/4. O que passa hoje e o que deve continuar passando (raiz limpa, controle sem diagnostico, verificador).
+- Dois consertos no proprio trabalho antes de qualquer verificacao: `portao_t076.py` nasceu com o travessao literal (trocado por `\u2014` escapado, regra de `MEMORY.md`); e o regex de perfil de `portao_t083.py` casava a nota do `cursor-agent` em `MEMORY.md`, que cita Codex, consenso e read-only na mesma frase, e foi apertado para a forma `- Codex, consenso:` com esse contraexemplo real no autoteste.
+- `SESSION.md` passou de 30KB com a entrada nova: quatro entradas rotacionadas para o archive (T-070 e 2.7.0, T-069 e 2.6.0, T-065, respostas de T-059/T-061/T-067), indice do archive corrigido (41 entradas). Linha no CHANGELOG do projeto.
+- **Rodada 1 de T-075 com Codex `gpt-5.6-terra`: morreu na cota.** 82.683 tokens na tentativa 1 e `You've hit your usage limit` (volta em 2026-09-05 02:18); tentativas 2 e 3 recusadas na hora; portao 3/14 nas tres, exit 2, nada movido. Sobrou um `consenso.py` parcial com `SyntaxError` (um `+` de patch meio aplicado). Nenhum arquivo de memoria tocado. Os marcadores da raiz estavam de volta em 2.10.0 antes de o loop comecar (o verificador passou 71/71 dentro da tentativa 1; a reversao veio de fora do loop, provavelmente do `sed` que eu mesmo tinha oferecido) e foram repostos.
+- **Rodada 2 de T-075 com Grok pelo `cursor-agent` (`-p --force --model cursor-grok-4.6-high`), escolhido pelo usuario entre quatro opcoes: verde na tentativa 1**, em cerca de 8 minutos, no mesmo degrau base (cota nao e sinal de dificuldade). `scripts/consenso.py debate` com copias por agente (`copytree` sem `docs/consensus/`, `.consenso-lock` e `__pycache__`), `ThreadPoolExecutor` para o paralelo, bruto e manifesto gravados no `as_completed` de cada agente, manifesto por substituicao atomica, retencao de `## Registros` com nota, envelope de prompt com os seis itens do contrato, `git check-ignore` para o sidecar ignorado, ids validados contra `/` e `..`. Bateria `evals/test_consenso.py` com 13 checks (espelha o portao e importa a base `portao_consenso_lib.py`), etapa `verificar_testes_do_consenso` com piso 12, `consenso.py` compilado no verificador, bump 2.11.0 em `SKILL.md`, assets, partials e CHANGELOG da skill. `AGENTS.md` da raiz intocado. Portao 14/14; verificador de 71 para 74.
+- **Revisao do que o Grok escreveu, sem conserto necessario:** `--titulo` e aceito e ainda nao usado (e de T-076); o envelope diz "copia somente-leitura" enquanto a copia e gravavel, o que e o desenho (isolamento por copia, nao por permissao); `run-id` com resolucao de segundo e recusa de duplicata; `.git` vai na copia, como a tarefa manda. Consumo nao impresso pelo `cursor-agent`. 2.11.0 reinstalada nos tres destinos com `--sim`, paridade limpa fora do nao distribuido.
+- **T-076 com o mesmo perfil do Grok, verde na tentativa 1** (portao 13/13, uns 6 minutos), lancada depois de conferir que o portao falhava contra o `consenso.py` real (sem `--dono`, sem lock, sem sinal, sem minuta, bateria em 13, verificador acusando travessao sob `docs/consensus/`). O que entrou: `.consenso-lock` por `mkdir`, exit 5 com a mensagem do orfao, `soltar_lock` em `finally`; handler de SIGINT e SIGTERM que encerra os agentes vivos e leva a rodada a `status=interrompida` com exit 1, sem tocar em `CONSENSUS.md`; minuta no fim do arquivo por `escrever_bytes_atomico` (temporario, `fsync`, `os.replace`), na forma da tarefa, com `citar` pondo `> ` em toda linha e trocando U+2014 por hifen com `travessoes_substituidos` no manifesto; bloco `minuta` com os hashes e so entao `concluida`. Bateria de 13 para 24 (lock, SIGTERM, injecao, minuta), piso 24, `verificar_travessao` ignorando `docs/consensus/`, item no CHANGELOG 2.11.0. `AGENTS.md` da raiz intocado.
+- **Revisao de T-076, sem conserto:** tres checagens redundantes de `_interrompendo` no caminho final (inofensivas); a interrupcao sai com exit 1, que a lista de exit codes do plano nao previa; anotado na linha de T-082 para a tabela dizer isso. Verificador 74/74, loop 77/77, consenso 24/24, `--strict` limpo, portao 13/13 de novo, sem sobras.
+- **T-077 com o Grok: o trabalho ficou pronto em uns 8 minutos e o `cursor-agent` ficou preso por quase duas horas.** O log mostra seis `Connection lost, reconnecting`; o processo `node` morreu, o wrapper ficou vivo sem filho, e o `loop.sh` esperou, porque nao tem timeout de agente. Evidencia antes de agir: ultimo arquivo tocado as 22:41, `pgrep -P` vazio, e o portao rodado a mao contra o que ficou ja em 10/10. `kill -TERM` no wrapper; o loop viu exit 143 com arquivos alterados, rodou o portao (10/10) e fechou T-077 na tentativa 1. Licao promovida para `MEMORY.md`; o timeout no `loop.sh` virou **T-084**.
+- **O que entrou em T-077:** `tem_segredo` com sete regex (AWS, PEM, rotulo com valor de 16+, `ghp_`, `sk-`, `xox`, URL com senha), aplicada a pergunta antes de chamar qualquer agente (exit 6 sem run dir) e a stdout e stderr de cada agente antes de gravar; bruto retido em `tempfile.mkdtemp("consenso-retido-")` com `stdout.txt` e `stderr.txt`, manifesto com `retido-por-segredo` e `retido_em` sem conteudo, `status=parada-segredo`, exit 6, mensagem ensinando mover ou apagar e `retomar`. Bateria 24 para 31, piso 30, CHANGELOG.
+- **Um ajuste meu, provado por mutacao:** `sk-[A-Za-z0-9_-]+` casava `task-force`, `risk-based` e `desk-top` (conferido no interpretador), e nem o portao nem a bateria cobriam o prefixo. Regex dos tres prefixos com inicio de palavra e comprimento minimo (`\bsk-[A-Za-z0-9_-]{16,}`, idem `ghp_` 16 e `xox?-` 8), dois casos novos na bateria (chave `sk-` real dispara; `task-force`, `risk-based` e `desk-top` nao), piso 32, bateria 33/33. Efeito colateral meu no meio: um `import consenso` no interpretador gravou `scripts/__pycache__`; removido.
+
+### Arquivos Criados Ou Alterados
+
+- Skill, por mim (nao distribuidos): `evals/portao_consenso_lib.py`, `evals/portao_t075.py` a `evals/portao_t083.py`.
+- Skill, pelo Grok nas rodadas de T-075, T-076 e T-077 (com o ajuste do `sk-` por mim): `scripts/consenso.py` (novo, distribuido), `evals/test_consenso.py` (novo), `evals/verify_repository.py`, `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/partials/*.md`.
+- Projeto: `AGENTS.md` (marcadores em 2.11.0), `docs/TASKS.md`, `docs/specs/0006-automacao-do-consenso.md` (T-IDs e `Em andamento`), `docs/SESSION.md`, `docs/MEMORY.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`, `docs/archive/revalidacao-2026-09-03/` (README e quatro logs), `docs/CHANGELOG.md`. `docs/PROMPTS.md` ja estava alterado pelo usuario com o prompt desta sessao e nao foi tocado.
+
+### Decisoes Tomadas
+
+- Nenhuma formal. As escolhas de forma acima estao escritas nas tarefas, nao em `DECISIONS.md`, porque sao implementacao dentro das DECs; o usuario aprovou o plano sem veta-las. A spec 0006 passou a `Em andamento` com o fecho de T-075.
+
+### Aprendizados Para MEMORY.md
+
+- Promovido em `MEMORY.md`, secao User: o `cursor-agent -p` pode terminar o trabalho e ficar preso em reconexao sem sair; os sinais que separam isso de trabalho lento, e a saida (`kill -TERM` no wrapper, o loop deixa o portao decidir).
+- Promovido em `MEMORY.md`, secao User, com sobrescrita ativa: a primeira rodada de loop completa do Grok neste projeto aconteceu hoje, pelo `cursor-agent` com `cursor-grok-4.6-high`, verde na tentativa 1 em cerca de 8 minutos, quando a cota do Codex acabou. Junto, a observacao que decidiu a troca: falha por cota nao e sinal de dificuldade, entao troca-se a ferramenta e mantem-se o degrau.
+- O regex que casou a linha errada em T-083 e a regra ja registrada (regex de portao testada contra exemplo) aplicada com um contraexemplo tirado do arquivo real; nada novo.
+
+### Pendencias
+
+- T-078 a T-083 abertas, nessa ordem, mais T-084 (timeout de agente no `loop.sh`, fora da spec, sem portao ainda). T-078 (validador) e a proxima. Antes de T-083: rotacionar `docs/CONSENSUS.md` (30186 de 30720 bytes) e registrar os perfis `Codex, consenso` e `Grok, consenso` em `MEMORY.md` com o usuario.
+- Codex `gpt-5.6-terra` sem cota ate 2026-09-05 02:18. Ate la, o loop roda com o Grok pelo `cursor-agent` ou com outro perfil que o usuario escolher.
+- Do usuario: commitar. Plano e rodada estao juntos na arvore, separaveis por arquivo: do plano, `evals/portao_*` e os arquivos de `docs/`; da rodada, `scripts/consenso.py`, `evals/test_consenso.py`, `verify_repository.py`, `SKILL.md`, assets e CHANGELOG da skill.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente de chat, para mandar T-078 ao loop (Grok pelo `cursor-agent` no degrau base, ou Codex `terra` se a cota voltou), rodando `portao_t078.py` contra o validador atual antes de lancar. Vigiar o log: se parar em `Retry attempt N` sem arquivo tocado por muito tempo, e o caso de `MEMORY.md`, nao trabalho lento.
+- Motivo: T-078 e independente do script e fecha a DEC-007 no validador; T-079 (achado) depende de T-077, que acabou de fechar, e pode ir em seguida.
+
+
 ## 2026-09-04 - Claude (respostas de T-053 e T-074)
 
 ### Objetivo
@@ -143,252 +237,3 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 - Agente sugerido (ou "qualquer agente"): o usuario para T-053 (calibragens da spec 0006); qualquer agente para T-054, T-055, T-056 e T-058, que ja tem conserto descrito.
 - Motivo: sao as unicas tarefas abertas, e as quatro tecnicas cabem numa release 2.10.0 pelo mesmo molde de portao proprio.
-
-## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-064 e T-063, skill 2.9.0)
-
-### Objetivo
-
-- Fechar os dois residuos sem decisao da REVAL-2 e da REVAL-6 (consertos do validador e templates atrasados) pelo loop com o `terra`, numa release so.
-
-### O Que Foi Feito
-
-- Portoes proprios por comportamento: `portao_t064.py` (12 checks, reproduzia 4 de 12) com o verificador geral dentro, porque a tarefa nao toca o core; `portao_t063.py` (12 checks, 2 de 12) sem o verificador, porque muda uma frase do core e a propagacao e minha.
-- **T-064** (bump 2.9.0), verde na tentativa 1: `ARQUIVO-UTF8-INVALIDO` novo, com fixture materializada em latin-1 so no temporario; cercas `~~~` reconhecidas; headings ATX com fechamento aceitos; `field_value` sem `split` cego; `NNNN` tolerado so como placeholder inteiro; `**Status:**` de spec ancorado; `ENTRY_RE` e `DATE_RE` fora. Fixtures existentes ganharam os casos (debate-project como controle, cobertura-* acusando). Um ajuste meu: a fixture de consenso tinha `\u0301` como texto literal em vez do acento combinante real; trocado.
-- **T-063**, verde na tentativa 1: QUALITY, PROMPTS, ONBOARDING, README, SESSION, TASKS, ARCHITECTURE e GLOSSARY dos assets atualizados para o core 2.2.0/2.4.0; exemplo `revisao-manual` no template de tarefas e o exemplo de spec fora do modelo de linha; core com "quando existir" em `docs/ARCHITECTURE.md`; `verificar_convencoes` cobre os quatro templates que citam regra do core (verificador de 59 para 63). Core propagado por mim; CHANGELOG completado com a frase do core.
-- 2.9.0 reinstalada nos tres destinos, `diff -rq` limpo fora do nao distribuido.
-
-### Arquivos Criados Ou Alterados
-
-- Skill: `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/docs/{QUALITY,PROMPTS,ONBOARDING,README,SESSION,TASKS,ARCHITECTURE,GLOSSARY}.md`, `assets/partials/*.md`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/portao_t063.py`, `evals/portao_t064.py`, `evals/fixtures/{cobertura-arquivos,cobertura-consenso,cobertura-tarefas,debate-project}/`.
-- Projeto: `AGENTS.md` (core e marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/revalidacao-2026-09-03/`.
-
-### Decisoes Tomadas
-
-- Nenhuma formal.
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum novo.
-
-### Pendencias
-
-- Da revalidacao sobram T-062 (texto de `atualizacao.md`) e T-073 (`install.sh` com confirmacao), as duas baixas e sem decisao. Fora dela, T-053 a T-058.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente para T-062 e T-073 juntas; nenhuma exige bump (T-062 muda `references/`, que e distribuido: exige; T-073 nao).
-- Motivo: fecham o pacote da revalidacao inteiro.
-
-## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-060, skill 2.8.1)
-
-### Objetivo
-
-- Fechar T-060, o pacote de consertos do modulo de loop (REVAL-3 e REVAL-4, onze itens), pelo loop com o `terra`.
-
-### O Que Foi Feito
-
-- Portao proprio por comportamento com agente falso por item (`evals/portao_t060.py`, 14 checks, reproduzia 0 de 14). Loop verde na tentativa 1, sem pergunta, stdin fechado no lancamento.
-- Consertos do terra, revisados: linha da tarefa capturada no arranque (`loop_task.py linha`) e `fechar --linha-esperada` recusando se mudou; sub-linhas preservadas em `fechar` e `bloquear`; `errors="replace"` na saida e na pergunta; pergunta vazia vira `(vazia)` com exit 3; `fchmod` preservando o modo do `TASKS.md`; `sys.dont_write_bytecode` no helper; agente chamado com `</dev/null`; prompt dizendo que propagar bloco ao `AGENTS.md` e do agente de chat; exit 4 na tabela de `references/loop.md`; `--seco` sem `--agente`. Bump 2.8.1, bloco core intocado.
-- Dois ajustes meus: a realimentacao da falha tinha sido truncada a 400 bytes (mesmo teto da evidencia), o que esvazia o que o loop faz de melhor; subi para 64KB. E o agente nao escreveu os casos hostis na bateria, que a tarefa pedia: portados por mim em `testar_hostil` (nove casos, bateria de 63 para 74; piso do verificador subiu junto). O caso de saida fora de UTF-8 quebrou o proprio harness da bateria, que decodificava o stdout do `loop.sh` em UTF-8 estrito; corrigido no harness.
-- Seis mutacoes reversas (stdin aberto, `fchmod` fora, sub-linhas apagadas, linha esperada ignorada, realimentacao inteira, `--seco` com agente): seis pegas pela bateria.
-- 2.8.1 reinstalada nos tres destinos. `SESSION.md` rotacionado de novo (duas entradas de 2026-09-03 para o archive).
-
-### Arquivos Criados Ou Alterados
-
-- Skill: `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/partials/*.md`, `references/loop.md`, `scripts/loop.sh`, `scripts/loop_task.py`, `evals/test_loop.py`, `evals/verify_repository.py`, `evals/portao_t060.py`.
-- Projeto: `AGENTS.md` (marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`, `docs/archive/revalidacao-2026-09-03/`.
-
-### Decisoes Tomadas
-
-- Nenhuma formal. Realimentacao em 64KB e calibragem minha, registrada no CHANGELOG da skill.
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum novo. "Portao por comportamento com agente falso" ja esta na pratica das ultimas cinco rodadas; virou molde (`portao_t0NN.py`), nao regra.
-
-### Pendencias
-
-- Todo o pacote da revalidacao que nao dependia de decisao esta fechado: T-060, T-065, T-069 a T-072. Abertas: T-062, T-063, T-064, T-073, e T-053 a T-058. Os portoes `portao_t0NN.py` ficam em `evals/` como registro; o que eles cobram vive na bateria e no verificador.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente para T-063 (templates) e T-064 (tracebacks do validador), as duas ainda sem decisao pendente; o loop serve, com portao proprio.
-- Motivo: T-063 e o que o usuario final recebe, e T-064 sao dois tracebacks reproduzidos.
-
-## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-072 e T-071, skill 2.8.0)
-
-### Objetivo
-
-- Fechar o residuo de T-059 e T-061 (diagnostico de parenteses no marcador verifica, e texto honesto no core) pelo loop com o `terra`, numa release so.
-
-### O Que Foi Feito
-
-- As duas tarefas mudam o texto do bloco core, que o loop nao pode propagar para a raiz. Portoes proprios por comportamento e texto **sem** o `verify_repository.py` (paridade quebrada de proposito ate a propagacao), replicando o que ele cobraria de versao e cobertura por codigo. Marcadores da raiz em v2.8.0 antes; tarefas refinadas dizendo quem propaga.
-- **T-072** (primeiro, faz o bump): loop travou na primeira tentativa de lancamento porque o `codex exec` herdou stdin aberto e ficou em "Reading additional input from stdin"; relancado com `</dev/null`, verde na tentativa 1. `VERIFICA-COMANDO-PARENTESES` (ERRO) com fixture, `loop_task.py check` recusa e explica, texto no item do marcador no core, no cabecalho do template de `TASKS.md` e em `references/loop.md`, teste novo na bateria (63). Core propagado por script, verificador 59 de 59.
-- **T-071**: verde na tentativa 1. Secao das pontes diz o que o validador confere de fato (so a mencao a `AGENTS.md`). No travessao o agente **estreitou a regra** para os arquivos que o validador olha; a decisao era texto honesto sobre o alcance, nao regra menor (o verificador deste repo acusa em qualquer arquivo versionado). Reescrito por mim: a regra segue valendo em todo texto, o validador acusa em `AGENTS.md`, pontes e `docs/**/*.md`, fora disso ninguem confere por script. Propagado.
-- 2.8.0 reinstalada nos tres destinos, `diff -rq` limpo fora do nao distribuido.
-- T-060 ganhou dois itens vindos destas rodadas: agente chamado com stdin fechado, e o prompt dizendo que propagacao ao `AGENTS.md` e do agente de chat.
-
-### Arquivos Criados Ou Alterados
-
-- Skill: `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/docs/TASKS.md`, `assets/partials/*.md`, `references/loop.md`, `scripts/validate_structure.py`, `scripts/loop_task.py`, `evals/verify_repository.py`, `evals/test_loop.py`, `evals/portao_t071.py`, `evals/portao_t072.py`, `evals/fixtures/cobertura-tarefas/`.
-- Projeto: `AGENTS.md` (core e marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/revalidacao-2026-09-03/`.
-
-### Decisoes Tomadas
-
-- Nenhuma formal. Aplicadas as de T-059 (texto) e T-061 (opcao c).
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum novo. O stdin aberto e defeito de script (T-060), nao licao de processo.
-
-### Pendencias
-
-- Com T-069 a T-072 fechadas, o residuo de T-059 e T-061 acabou. Abertas: T-060 (loop, agora com quatro itens novos), T-062, T-063, T-064, T-073, e T-053 a T-058.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente para T-060, que e o pacote do loop e ja tem quatro defeitos reproduzidos por comando.
-- Motivo: e a unica tarefa aberta com risco de dado (modo 664 para 600, sub-linhas apagadas) e cada rodada de loop desde ontem esbarrou em um item dela.
-
-## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-070, skill 2.7.0)
-
-### Objetivo
-
-- Fechar T-070 (dez checks AVISO decididos em T-059) pelo loop com o `terra`, e publicar a 2.7.0.
-
-### O Que Foi Feito
-
-- Pre-checagem da raiz contra os dez avisos novos (nenhuma violacao real; `T-1` e `(bloqueada:` aparecem so em prosa e sub-linha), portao proprio por comportamento (`evals/portao_t070.py`, onze casos mais controle, versao e verificador; falhava em 12 de 14), marcadores da raiz em v2.7.0 por script, tarefa refinada dizendo isso para o agente nao parar de novo para perguntar.
-- **Loop verde na tentativa 1**, sem pergunta desta vez. Dez codigos novos, 53 no total; `CONVENCOES-DATA-INVALIDA` de INFO para AVISO; `CONSENSO-ABERTO-SEM-PROXIMO-PASSO` passou a exigir valor, nao so presenca. Bump para 2.7.0 propagado, raiz identica ao asset.
-- **Revisao:** fixtures existentes ajustadas de forma legitima (`achado-project/valido` tinha rodada 5 com exposicao `nao`, que agora e aviso; `aguardando-project/invalido` ganhou casos e oracle). Tres consertos meus: `TASK_OWN_ID_RE` tinha virado exatamente tres digitos, o que faria `T-1000` deixar de ser ID e o loop nao achar a tarefa (agora tres ou mais); o paragrafo da 2.6.0 no `SKILL.md` foi substituido pelo da 2.7.0 em vez de acrescentado (restaurado); README da skill sem a 2.7.0 (acrescentado).
-- Quatro mutacoes contra o verificador (cerca aberta, resposta ausente, formato de evidencia, adocao de volta a INFO): quatro pegas.
-- 2.7.0 reinstalada nos tres destinos, `diff -rq` limpo fora do nao distribuido.
-
-### Arquivos Criados Ou Alterados
-
-- Skill: `SKILL.md`, `CHANGELOG.md`, `README.md`, `assets/AGENTS.md`, `assets/partials/*.md`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/portao_t070.py`, `evals/fixtures/achado-project/valido/`, `evals/fixtures/aguardando-project/invalido/`.
-- Projeto: `AGENTS.md` (marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/revalidacao-2026-09-03/`.
-
-### Decisoes Tomadas
-
-- Nenhuma formal. "Tres digitos" da decisao de T-059 lido como "pelo menos tres": `T-1` e invalido, `T-1000` continua ID.
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum novo. O padrao "refinar a tarefa com o que o agente vai perguntar" evitou a rodada perdida de T-069; e pratica, nao regra.
-
-### Pendencias
-
-- T-071 (texto do core), T-072 (diagnostico de parenteses), T-060 (loop) e T-073 (install.sh) abertas. Com T-069 e T-070 fechadas, das 17 promessas violaveis da REVAL-1/2 sobram as duas de texto (T-071).
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente para T-071 e T-072 juntas, que sao a proxima release (texto do core mais um ERRO).
-- Motivo: fecham o residuo de T-059 e T-061 e cabem numa rodada so.
-
-## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-069, skill 2.6.0)
-
-### Objetivo
-
-- Fechar T-069 (seis checks ERRO decididos em T-059) pelo loop com o `terra`, e publicar a 2.6.0.
-
-### O Que Foi Feito
-
-- **Portao proprio por comportamento** (`evals/portao_t069.py`): seis documentos errados montados de `assets/` precisam sair ERRO no arquivo certo, um projeto limpo precisa passar em `--strict`, versao acima de 2.5.1, verificador em exit 0. Falhava em 7 de 9. Sem ditar nome de codigo.
-- **Rodada 1: exit 3, e era certo.** A tarefa manda propagar marcadores para o `AGENTS.md` da raiz e o prompt do loop proibe editar esse arquivo. O agente parou e perguntou em vez de decidir. Resposta operacional, pela regra do bloco de loop: quem edita `AGENTS.md` e o agente de chat. Marcadores da raiz postos em v2.6.0 por script antes da rodada 2, tarefa devolvida a fila.
-- **Rodada 2: verde na tentativa 1.** Codigos novos `TASK-CONCLUIDA-SEM-DATA`, `VERIFICA-COMANDO-VAZIO`, `MARCADOR-ORDEM-INVALIDA`, `MARCADOR-LOOP-INVALIDO`, `NUCLEO-VAZIO`, `TASK-ID-ARQUIVADO-DUPLICADO`, cada um com fixture (o verificador exige desde T-065). Bump para 2.6.0 em `SKILL.md`, assets, partials e CHANGELOG; raiz byte a byte igual ao asset.
-- **Revisao do que o terra escreveu, dois pontos:** (1) mudou a regex do marcador verifica para valer so no fim da linha, porque a resposta de T-059 na propria raiz mencionava `(verifica: )` em prosa e disparou o check novo. Defensavel (o core sempre disse "no fim da linha") e com bonus: comando com parenteses deixa de ser truncado e passa a ser recusado como "nao declarou". Mas nao estava no CHANGELOG; agora esta. (2) Satisfez a versao em prosa escrevendo uma frase nova e deixou a linha velha em 2.5.1: portao medindo o que sobrou. Corrigida a linha, e `verificar_versao` passou a exigir que **toda** ocorrencia bata e que a secao mais recente do CHANGELOG so cite a versao atual; provado por mutacao (prosa velha de volta reprova).
-- `TASK-CONCLUIDA-SEM-DATA` so cobra linha com `T-NNN`: linha historica sem ID (fixture v1 e a raiz) continua tolerada, coerente com `TASKS-FORMATO-V1`.
-- 2.6.0 reinstalada nos tres destinos globais, `diff -rq` limpo fora do nao distribuido, sem `__pycache__`.
-
-### Arquivos Criados Ou Alterados
-
-- Skill: `SKILL.md`, `CHANGELOG.md`, `README.md`, `assets/AGENTS.md`, `assets/partials/*.md`, `scripts/validate_structure.py`, `evals/verify_repository.py`, `evals/portao_t069.py`, `evals/fixtures/cobertura-arquivos/`, `evals/fixtures/cobertura-tarefas/`.
-- Projeto: `AGENTS.md` (marcadores), `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/MEMORY.md`, `docs/archive/revalidacao-2026-09-03/`.
-
-### Decisoes Tomadas
-
-- Nenhuma formal. A regex do verifica no fim da linha aplica o texto do core que ja existia.
-
-### Aprendizados Para MEMORY.md
-
-- Portao com regex "existe uma ocorrencia certa" e satisfeito por uma frase nova ao lado da errada. Cobre "toda ocorrencia bate", nunca "alguma".
-
-### Pendencias
-
-- T-070 (AVISO), T-071 (texto do core), T-072 (diagnostico de parenteses) e T-060 (loop) seguem abertas para a proxima release. Duas sessoes de loop consecutivas geraram uma pergunta operacional cada; o prompt do loop poderia dizer que a propagacao ao `AGENTS.md` e do agente de chat, para nao gastar rodada com isso (nao virou tarefa: e frase em `loop.sh`, cabe em T-060).
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente para T-070, com portao proprio por comportamento, no mesmo molde de `portao_t069.py`.
-- Motivo: e o par de T-069 e depende da mesma decisao, ja tomada.
-
-## 2026-09-04 - Claude, com Codex gpt-5.6-terra pelo loop (T-065)
-
-### Objetivo
-
-- Fechar T-065, o portao dos evals cego (REVAL-4), pelo modulo de loop com o Codex `terra`, a pedido do usuario.
-
-### O Que Foi Feito
-
-- **Portao proprio antes de rodar.** O marcador da tarefa apontava para `verify_repository.py`, que ja passava com 46 de 46: o loop fecharia a tarefa verde com trabalho zero. Escrito `evals/portao_t065.py`, que cobra o resultado (39 codigos com oracle, inventario de fixtures, manifesto de etapas, prompt assertado, versao em prosa) e falhava em 5 de 6; o marcador da tarefa foi trocado para ele.
-- **Loop na T-065**, `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="high"`, degrau base, com `PYTHONDONTWRITEBYTECODE=1` no ambiente porque `loop_task.py check` gravou `__pycache__` na skill e derrubou o check novo. Portao verde na tentativa 1, ~12 minutos. O agente nao tocou em `TASKS.md` nem em arquivo de memoria; um patch caiu em caminho errado (`evals/` na raiz) e ele corrigiu sozinho.
-- **Revisao do que o terra escreveu**: quatro fixtures `cobertura-*` com oracle exato (uma por area, acumulando `NUCLEO-AUSENTE` de proposito para ficar pequena), `TRAVESSAO` provado por token `{{TRAVESSAO}}` materializado so no temporario (repo continua sem U+2014), `ETAPAS` com despacho por nome, quatro assercoes de prompt em `test_loop.py`, e a versao em prosa do `SKILL.md` em `verificar_versao`. Duas lacunas fechadas por mim: `verificar_inventario_fixtures` (disco contra `FIXTURES`) e `verificar_etapas` (toda `verificar_*` definida esta em `ETAPAS`).
-- **Prova por mutacao**: as 11 mutacoes que passaram cegas em 2026-09-03 (M1, M2, M3, M5, M8, M9, M10, M17, M19, M22, M23) refeitas contra o portao novo: **11 de 11 pegas**, cada uma nomeando o diagnostico ausente. Verificador de 46 para 58, bateria do loop de 58 para 62.
-
-### Arquivos Criados Ou Alterados
-
-- Skill (nao distribuidos): `evals/verify_repository.py`, `evals/test_loop.py`, `evals/portao_t065.py`, `evals/fixtures/cobertura-{arquivos,consenso,rotacao,tarefas}/`, `README.md`.
-- Projeto: `docs/TASKS.md`, `docs/CONSENSUS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/MEMORY.md`, `docs/archive/revalidacao-2026-09-03/`.
-
-### Decisoes Tomadas
-
-- Nenhuma formal. REVAL-4 fechada como `resolvido`; as sete entradas da revalidacao estao fechadas.
-
-### Aprendizados Para MEMORY.md
-
-- Portao que ja passa antes do trabalho nao e portao: o loop fecharia a tarefa verde com trabalho zero. Antes de mandar tarefa para o loop, rode o comando declarado; se sair 0, escreva um portao que falhe hoje.
-
-### Pendencias
-
-- T-060 ganhou o item do `__pycache__` do `loop_task.py`. `portao_t065.py` fica em `evals/` como registro; o que ele cobra agora vive no proprio verificador.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente para T-069 e T-070 (checks novos), agora que cada codigo novo tem onde nascer com fixture; o loop serve, com portao proprio pelo mesmo motivo.
-- Motivo: a decisao de T-059 esta tomada e o portao deixou de ser cego; e a hora de os checks entrarem.
-
-## 2026-09-03 - Claude (respostas de T-059, T-061 e T-067)
-
-### Objetivo
-
-- Registrar as respostas do usuario a T-059, T-061 e T-067 e desdobrar em trabalho.
-
-### O Que Foi Feito
-
-- Usuario aceitou item a item a proposta de niveis de REVAL-1 (seis ERRO, dez AVISO, dois so texto). T-059 concluida com a resposta transcrita; decisao formal em `docs/DECISIONS.md`; REVAL-1, REVAL-2 e REVAL-6 fechadas como `resolvido`.
-- Trabalho desdobrado por nivel: T-069 (ERRO), T-070 (AVISO), T-071 (texto do core). Os tres exigem versao 2.6.0 e dependem de T-065 para cada codigo novo nascer com fixture.
-- T-061 respondida em seguida: opcao (c), parenteses no comando do marcador verifica nao sao suportados e o validador acusa (T-072), e `--seco` deixa de gravar `agente=` (item em T-060). REVAL-3 fechada como `resolvido`.
-- T-067 respondida: `install.sh` avisa e pede confirmacao quando o destino diverge (T-073, sem bump). REVAL-7 fechada como `resolvido`. Das sete entradas, so REVAL-4 continua aberta, esperando T-065.
-
-### Arquivos Criados Ou Alterados
-
-- `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/CONSENSUS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
-
-### Decisoes Tomadas
-
-- Em `docs/DECISIONS.md`: promessa do core sem check vira check com nivel declarado, ou texto honesto; codigo novo so entra com fixture.
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum.
-
-### Pendencias
-
-- Nenhuma tarefa da revalidacao aguarda o usuario; sobra T-053 (spec 0006). Pela regra do bloco specs, T-065, T-069, T-070 e T-071 juntas mudam contrato e passam de tres tarefas: cabem numa spec 0007, se o usuario quiser.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente, comecando por T-065 e depois T-069.
-- Motivo: sem o manifesto de cobertura, os checks novos nasceriam com o mesmo ponto cego que a revalidacao acabou de achar.

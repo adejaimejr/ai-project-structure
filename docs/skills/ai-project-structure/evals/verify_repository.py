@@ -17,7 +17,7 @@ Confere, em um comando so:
 4b. o aviso do ponto cego cabe no orcamento de linhas do bloco core;
 5. a versao e a mesma no `SKILL.md`, nos marcadores e no `CHANGELOG.md`;
 6. `evals.json` tem a estrutura esperada e os `files` resolvem;
-6b. os scripts distribuidos compilam, e a bateria do modulo de loop passa;
+6b. os scripts distribuidos compilam, e as baterias do loop e do consenso passam;
 7. nenhum travessao (U+2014) em arquivo versionado;
 8. `install.sh` em destino temporario produz tres destinos identicos entre si
    e identicos a fonte canonica, tirando o que nao e distribuido.
@@ -57,6 +57,7 @@ IGNORADOS = {"__pycache__", ".DS_Store"}
 # A bateria do loop tinha 58 verificacoes em 2026-09-03. Menos que isso e teste que
 # sumiu; ao acrescentar testes, suba o piso junto.
 LOOP_TESTES_MINIMO = 74
+CONSENSO_TESTES_MINIMO = 32
 
 # Criterio de aceite da spec 0005: o aviso do ponto cego e permanente no bloco
 # core, entao todo projeto paga a leitura dele. Quatro linhas e o teto.
@@ -313,6 +314,7 @@ ETAPAS = [
     "verificar_evals_json",
     "verificar_scripts",
     "verificar_testes_do_loop",
+    "verificar_testes_do_consenso",
     "verificar_travessao",
     "verificar_sem_pycache",
     "verificar_install",
@@ -725,6 +727,7 @@ def verificar_scripts(res, verbose):
     for rel, cmd in (
         ("scripts/validate_structure.py", compila),
         ("scripts/loop_task.py", compila),
+        ("scripts/consenso.py", compila),
         ("scripts/loop.sh", ["bash", "-n"]),
     ):
         caminho = SKILL / rel
@@ -757,6 +760,26 @@ def verificar_testes_do_loop(res, verbose):
         print(p.stdout)
 
 
+def verificar_testes_do_consenso(res, verbose):
+    """Bateria do primitivo de consenso, com agente falso: sem chamada de modelo."""
+    teste = EVALS / "test_consenso.py"
+    if not teste.is_file():
+        res.check(False, "evals/test_consenso.py existe", "arquivo ausente")
+        return
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    p = subprocess.run([sys.executable, str(teste)], capture_output=True, text=True, env=env)
+    resumo = next((l for l in p.stdout.splitlines() if "verificacoes passaram" in l), "")
+    res.check(p.returncode == 0, "bateria do modulo de consenso", resumo.strip())
+    m = re.search(r"(\d+)/(\d+) verificacoes passaram", resumo)
+    total = int(m.group(2)) if m else 0
+    res.check(total >= CONSENSO_TESTES_MINIMO,
+              f"bateria do consenso com pelo menos {CONSENSO_TESTES_MINIMO} verificacoes",
+              f"{total} verificacoes")
+    if p.returncode != 0 and verbose:
+        print(p.stdout)
+        print(p.stderr)
+
+
 def arquivos_versionados():
     """Rastreados mais os novos ainda nao commitados, fora os ignorados."""
     p = subprocess.run(
@@ -775,9 +798,16 @@ def verificar_travessao(res, verbose=False):
     culpados = []
     for path in arquivos:
         try:
+            rel = path.relative_to(ROOT).as_posix()
+        except ValueError:
+            continue
+        # Bruto em docs/consensus/ e evidencia, nao texto do projeto (T-076).
+        if rel == "docs/consensus" or rel.startswith("docs/consensus/"):
+            continue
+        try:
             # U+2014 escapado de proposito: escrito literal, este arquivo se acusaria.
             if "\u2014" in path.read_text(encoding="utf-8"):
-                culpados.append(path.relative_to(ROOT).as_posix())
+                culpados.append(rel)
         except (OSError, UnicodeDecodeError):
             continue
     res.check(

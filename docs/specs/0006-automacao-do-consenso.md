@@ -1,8 +1,8 @@
 # Spec 0006 - Automacao do consenso: independencia por construcao
 
-**Status:** Definida
+**Status:** Em andamento
 **Criada em:** 2026-09-03
-**Esforco:** G, porque toca tres coisas ao mesmo tempo: execucao de agente, escrita em arquivo de memoria, e os campos que a 2.2.0 criou justamente para denunciar consenso fraco. Virou `Definida` em 2026-09-04, com as dez perguntas respondidas (DEC-001 a DEC-010).
+**Esforco:** G, porque toca tres coisas ao mesmo tempo: execucao de agente, escrita em arquivo de memoria, e os campos que a 2.2.0 criou justamente para denunciar consenso fraco. Virou `Definida` em 2026-09-04, com as dez perguntas respondidas (DEC-001 a DEC-010). Passou a `Em andamento` no mesmo dia, com o plano de T-075 a T-083 aprovado e T-075 fechada pelo loop.
 
 ## Problema E Resultado Esperado
 
@@ -95,6 +95,15 @@ Desta spec, todas ratificadas pelo usuario em 2026-09-03 a partir da rodada 1 ce
 
 - T-053: responder as perguntas abertas para a spec poder virar `Definida`
 - T-074: decidir o que fazer com segredo no artefato bruto (P-10)
+- T-075: primitivo `consenso.py debate`, N agentes isolados em paralelo, bruto e manifesto em `docs/consensus/` (bump 2.11.0)
+- T-076: lock e minuta de debate atomica com julgamento em branco
+- T-077: varredura de segredo antes de gravar
+- T-078: marcador `**Origem:**` e checks AVISO no validador, com fixture
+- T-079: pacote de achado, revalidacao dentro da entrada existente
+- T-080: rodada 2 com as posicoes anteriores na integra
+- T-081: retomada por comando explicito
+- T-082: `references/consenso.md`, secao no `SKILL.md`, template e README
+- T-083: bancada real com dois agentes baratos, comparada com a rodada de 2026-09-03
 
 ## Perguntas Abertas
 

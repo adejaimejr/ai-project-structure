@@ -241,3 +241,80 @@ ENCERRAMENTO:
 - Me pergunte antes de apagar /tmp/skill-v2-tests-gemini/.
 ```
 
+## Desdobrar A Spec 0006 Em Tarefas
+
+Prompt para abrir uma sessao nova cujo objetivo e **planejar** a implementacao da spec 0006 (automacao do consenso): transformar as dez decisoes em tarefas com portao, numa ordem que de para executar pelo loop, sem escrever codigo do produto nesta sessao.
+
+Escrito em 2026-09-04, depois de a spec virar `Definida`. Reaproveitando em versao futura, confira a versao da skill instalada e a lista de tarefas abertas.
+
+```text
+Contexto: /Users/adejaimejunioer/Dev/2026/ai-project-structure. Skill `ai-project-structure` 2.10.0, publicada e instalada. Sou o dono do projeto. A spec `docs/specs/0006-automacao-do-consenso.md` esta `Definida`, com DEC-001 a DEC-010, e nao tem nenhuma tarefa de implementacao. Quero que voce a desdobre em tarefas em `docs/TASKS.md`, e me mostre o plano antes de gravar.
+
+Nesta sessao voce NAO escreve codigo do produto, nao cria fixture, nao muda versao. Planeja, registra e para.
+
+## Leia antes de qualquer coisa
+
+1. `AGENTS.md` inteiro. O bloco de loop e o bloco de specs valem para o que voce vai propor.
+2. `docs/specs/0006-automacao-do-consenso.md` inteira, com as dez decisoes e os criterios de aceite. Toda tarefa que voce criar aponta para pelo menos um criterio.
+3. `docs/SESSION.md`, as quatro entradas mais recentes: sao as rodadas de loop que fecharam T-054 a T-073 e mostram como uma tarefa boa para o loop se parece.
+4. `docs/MEMORY.md`, secoes `## Feedback` e `## Project`. Ali estao as regras que ja custaram tempo: portao proprio que falhe antes do trabalho, regex de portao testada contra exemplo, tarefa que exige arquivo proibido ao loop e do agente de chat, custo do Codex.
+5. `docs/DECISIONS.md`, as entradas de 2026-09-03 e 2026-09-04.
+6. `docs/skills/ai-project-structure/scripts/loop.sh` e `loop_task.py`: e o que ja existe de invocacao de agente; a spec manda reaproveitar o conceito, e o Problema 4 dela explica por que nao da para reaproveitar o script como esta.
+7. `docs/skills/ai-project-structure/references/loop.md`, secoes "Perfis" e "Como A Evidencia E Escrita".
+8. `docs/archive/CONSENSUS-2026.md`, entradas "P-7 e P-8" e "P-9": as tres posicoes na integra, com o desenho que a DEC-009 ratificou.
+
+## O que ja esta decidido, e voce nao reabre
+
+As dez decisoes da spec. Se uma tarefa parecer exigir mudar uma decisao, registre isso como pergunta em "Aguardando Usuario" e siga planejando o resto. Em especial:
+
+- quem escreve a minuta e um orquestrador mecanico, nunca um agente (DEC-002);
+- N e os comandos dos agentes entram na chamada, nao ha catalogo de modelo na skill (DEC-005);
+- rodada 1 cega por padrao, rodada 2 recebe as anteriores inteiras (DEC-006);
+- diagnosticos novos so para entrada com `**Origem:**`, nivel AVISO (DEC-007);
+- bruto e manifesto no repositorio desde o inicio, fora da arvore de execucao, ponte curta na entrada (DEC-008, DEC-009);
+- retomada so com palavra humana (DEC-009);
+- varredura de segredo que para e pergunta, nunca redige (DEC-010).
+
+## O que quero receber
+
+Um plano em `docs/TASKS.md`, secao "Proximas Tarefas", com estas propriedades:
+
+1. **Cada tarefa cabe numa rodada de loop** de um agente so, com ate 3 tentativas. Tarefa que precisa de mais de uma rodada esta grande demais: divida.
+2. **Cada tarefa declara `(verifica: <comando>)`** e o comando e um portao proprio no molde de `docs/skills/ai-project-structure/evals/portao_t0NN.py`: cobra comportamento e texto, nao nome de funcao; falha antes do trabalho e passa depois; inclui `verify_repository.py` quando a tarefa nao toca o bloco core, e nao inclui quando toca (a propagacao para o `AGENTS.md` da raiz e do agente de chat). Voce **escreve os portoes nesta sessao**, porque eles sao a especificacao executavel de cada tarefa; e o unico codigo que nasce aqui. Rode cada um e confirme que falha hoje.
+3. **Ordem de execucao explicita**, com dependencia dita na linha ("depende de T-NNN"). Primeiro o que nao depende de decisao nem de outra tarefa. Sugestao de espinha, que voce pode mudar dizendo por que: o primitivo de invocar N agentes isolados e coletar bruto mais manifesto; o lock e a escrita atomica da minuta com os campos de julgamento em branco; a varredura de segredo antes de gravar; o marcador `**Origem:**` e os checks AVISO no validador com fixture; o pacote de debate; o pacote de achado; a rodada 2 com as anteriores inteiras; a retomada por comando; `references/consenso.md` e o bloco gerenciado, se houver; a secao no `SKILL.md` no molde de "Rodar Uma Tarefa Com O Loop".
+4. **Cada tarefa diz o que e distribuido e se exige bump**, e qual bump: a release inteira da spec e uma minor (2.11.0). Uma tarefa faz o bump e as outras acrescentam ao CHANGELOG da skill. Marcadores da raiz sao postos pelo agente de chat antes da primeira rodada, e a tarefa diz isso.
+5. **Cada tarefa lista o que o agente do loop NAO pode tocar** e o que sobra para o agente de chat: `AGENTS.md`, `SESSION.md`, `MEMORY.md`, `DECISIONS.md`, `CONSENSUS.md` e specs. Se a tarefa exigir editar um desses, a parte proibida sai da tarefa e vira nota para o agente de chat.
+6. **Cada tarefa cita o criterio de aceite da spec** que ela fecha, e a secao "Tarefas" da spec lista todos os T-IDs, sem status (anti-drift).
+7. **Uma tarefa de bancada real no fim**: rodar a operacao de verdade, com dois agentes baratos (`gpt-5.6-terra` e o perfil de Grok via `cursor-agent` em `docs/MEMORY.md`), numa pergunta real do projeto, e comparar com a rodada feita na mao em 2026-09-03. E o unico criterio julgado na mao da spec.
+
+Nao invente perfil de modelo: os perfis estao em `docs/MEMORY.md`, secao `## User`, e o custo pedido pelo usuario e `terra` para executar. Nao crie spec nova: e a mesma spec.
+
+## Restricoes que ja custaram tempo aqui
+
+- **Nenhum travessao (U+2014)**, nem nos portoes, nem nas tarefas.
+- **Nada de `scripts/` na raiz.** Portao vai em `docs/skills/ai-project-structure/evals/`. Codigo do produto, quando existir, vai em `docs/skills/ai-project-structure/scripts/`.
+- Marcador verifica **no fim da linha**, sem parenteses no comando: `(verifica: python3 docs/skills/ai-project-structure/evals/portao_t0NN.py)`.
+- `docs/TASKS.md` se edita por substituicao atomica ou por script pequeno; nunca reescreva o arquivo inteiro de cabeca.
+- **Nao rode o loop nesta sessao.** Planejar e uma coisa, executar e outra, e a primeira rodada so acontece depois de eu aprovar o plano.
+- `docs/SESSION.md` esta perto de 30KB: se a entrada nova estourar, rotacione as mais antigas para `docs/archive/SESSIONS-2026.md` e atualize o indice de la. Nao encurte conteudo.
+
+## Verificacao, ao terminar
+
+```
+python3 docs/skills/ai-project-structure/evals/verify_repository.py
+python3 docs/skills/ai-project-structure/evals/test_loop.py
+python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict
+python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --progress
+```
+
+Baseline de hoje: 71 de 71, 77 de 77, exit 0 sem erro e sem aviso. Os portoes novos, rodados um a um, precisam **falhar** hoje; portao que passa antes do trabalho nao e portao.
+
+## Pronto quando
+
+1. As tarefas estao em `docs/TASKS.md` com ID, ordem, dependencia, criterio da spec, bump e o que e do agente de chat; a spec lista os T-IDs e passou para `Em andamento` so se eu aprovar, senao continua `Definida`.
+2. Cada tarefa tem o portao escrito em `evals/`, rodado, e falhando hoje pelo motivo certo.
+3. `docs/SESSION.md` tem a entrada da sessao, e `docs/CHANGELOG.md` a linha.
+4. Voce me mostrou o plano numa tabela (tarefa, o que entrega, portao, depende de, bump, parte do agente de chat) e parou. Nao commite: eu commito depois de ler.
+
+Comece me dizendo, em cinco linhas, como voce leu a spec: qual e o primitivo, o que e pacote em cima dele, e onde voce acha que o plano vai errar.
+```

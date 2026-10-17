@@ -9,8 +9,8 @@
     },
     {
       "id": 2,
-      "prompt": "Quero comecar um repositorio novo aqui pra um assistente financeiro pessoal. Cria a base inteira pra mim, com tudo que precisar. Nome: 'finbot'. Objetivo: 'agente que le extratos bancarios em PDF e ajuda o usuario a categorizar gastos e identificar oportunidades de economia'.",
-      "expected_output": "A skill dispara mesmo sem o usuario mencionar 'ai-project-structure' por nome (frase 'comecar repositorio novo' + 'cria a base inteira'). Cria estrutura completa: nucleo + opcionais (ARCHITECTURE, API, DATA_MODEL, GLOSSARY, ONBOARDING, ROADMAP, PROMPTS, STACK). AGENTS.md com marcadores core v2.5.1. PROJECT_CONTEXT.md preenchido com 'finbot' e o objetivo. Primeira entrada em SESSION.md. docs/specs/ so se o usuario confirmar na pergunta 4; sem confirmacao, nao cria.",
+      "prompt": "Quero comecar um repositorio novo aqui pra um assistente financeiro pessoal, com a estrutura multiagente completa. Cria a base inteira pra mim, com tudo que precisar. Nome: 'finbot'. Objetivo: 'agente que le extratos bancarios em PDF e ajuda o usuario a categorizar gastos e identificar oportunidades de economia'.",
+      "expected_output": "A skill dispara sem o usuario citar 'ai-project-structure' por nome, porque o pedido nomeia a estrutura multiagente ('com a estrutura multiagente completa'); 'comecar repositorio novo' e 'cria a base inteira' sozinhos nao bastariam, sao pedido generico. Cria estrutura completa: nucleo + opcionais (ARCHITECTURE, API, DATA_MODEL, GLOSSARY, ONBOARDING, ROADMAP, PROMPTS, STACK). AGENTS.md com marcadores core na versao atual da skill. PROJECT_CONTEXT.md preenchido com 'finbot' e o objetivo. Primeira entrada em SESSION.md. docs/specs/ so se o usuario confirmar na pergunta 4; sem confirmacao, nao cria.",
       "files": []
     },
     {
@@ -22,7 +22,7 @@
     {
       "id": 4,
       "prompt": "Inicia projeto novo aqui.",
-      "expected_output": "Nenhuma resposta veio no prompt, entao a skill faz a entrevista completa ANTES de criar qualquer arquivo: perguntas numeradas 1-4, cada uma com opcoes numeradas (pergunta 1 oferece o nome da pasta como opcao 1; pergunta 2 oferece 'Avançar'; perguntas 3 e 4 marcam as opcoes recomendadas). Nada e criado antes das respostas. Nenhum campo e preenchido por inferencia: se o usuario avancar a pergunta 2, PROJECT_CONTEXT.md fica com '(A preencher.)' e nasce a tarefa 'Preencher objetivo do projeto' em TASKS.md. Nao pergunta sobre git. NOTA PARA QUEM EXECUTA: o criterio deste eval e o comportamento da entrevista, nao o resultado do validador. Se a execucao parar na entrevista, o diretorio fica vazio e o validador retorna exit 1 por arquivos ausentes; isso e o resultado correto desse ramo e NAO reprova o eval. Para exercitar tambem o ramo 'Avançar' e chegar a exit 0, responda 1 / Avançar / 1 / 1 e siga o scaffold: PROJECT_CONTEXT.md deve ficar com '(A preencher.)' no objetivo e TASKS.md deve ganhar a tarefa correspondente.",
+      "expected_output": "Pedido generico, sem mencao a estrutura multiagente nem a seus arquivos: a skill NAO dispara sozinha. O agente oferece a estrutura multiagente em uma linha e espera a resposta; decidir se o projeto precisa dela e do usuario (ou do agente gestor, quando a tarefa veio dele). Nada e criado antes dessa confirmacao. Se o usuario confirmar, nenhuma resposta da entrevista veio no prompt, entao a skill faz a entrevista completa ANTES de criar qualquer arquivo: perguntas numeradas 1-4, cada uma com opcoes numeradas (pergunta 1 oferece o nome da pasta como opcao 1; pergunta 2 oferece 'Avançar'; perguntas 3 e 4 marcam as opcoes recomendadas). Nada e criado antes das respostas. Nenhum campo e preenchido por inferencia: se o usuario avancar a pergunta 2, PROJECT_CONTEXT.md fica com '(A preencher.)' e nasce a tarefa 'Preencher objetivo do projeto' em TASKS.md. Nao pergunta sobre git. NOTA PARA QUEM EXECUTA: o criterio deste eval e o comportamento da entrevista, nao o resultado do validador. Se a execucao parar na oferta ou na entrevista, o diretorio fica vazio e o validador retorna exit 1 por arquivos ausentes; isso e o resultado correto desse ramo e NAO reprova o eval. Para exercitar tambem o ramo 'Avançar' e chegar a exit 0, confirme a estrutura e responda 1 / Avançar / 1 / 1 e siga o scaffold: PROJECT_CONTEXT.md deve ficar com '(A preencher.)' no objetivo e TASKS.md deve ganhar a tarefa correspondente.",
       "files": []
     },
     {
@@ -70,6 +70,12 @@
       "files": [
         "fixtures/achado-project"
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "Cria aqui um projeto Node com Vite pro front do dashboard, com TypeScript e ESLint configurados.",
+      "expected_output": "A skill NAO e acionada: pedido generico de criar projeto, sem mencao a estrutura multiagente nem a AGENTS.md ou docs/. E a forma tipica de tarefa que um agente gestor delega a um subagente, e decidir se o projeto precisa da estrutura e de quem coordena, nao da skill. Nenhum AGENTS.md, CLAUDE.md, GEMINI.md ou docs/ e criado pela skill; nenhuma entrevista de 4 perguntas. No maximo, uma linha oferecendo a estrutura multiagente, sem bloquear o pedido original. O que o agente faz com o scaffold do Vite em si esta fora deste eval.",
+      "files": []
     }
   ]
 }

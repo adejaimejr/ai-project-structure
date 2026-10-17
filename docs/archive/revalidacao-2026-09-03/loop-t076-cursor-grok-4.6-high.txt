@@ -1,0 +1,36 @@
+Tarefa:  T-076
+Projeto: /Users/adejaimejunioer/Dev/2026/ai-project-structure
+Portao:  python3 docs/skills/ai-project-structure/evals/portao_t076.py
+Limite:  3 tentativa(s)
+
+=== Tentativa 1 de 3 ===
+A T-076 ficou pronta: lock exclusivo e minuta atômica no fim de `CONSENSUS.md`.
+
+O `consenso.py debate` agora cria `.consenso-lock` na abertura (diretório atômico) e remove em qualquer saída. Segunda execução simultânea sai 5, cita o lock e ensina o `rmdir` do órfão. SIGINT e SIGTERM encerram os agentes, marcam `status=interrompida` e deixam `CONSENSUS.md` byte a byte.
+
+Havendo pelo menos uma posição, a minuta entra uma vez só no fim do arquivo, por temporário no mesmo diretório, `fsync` e `os.replace`. Campos derivados da execução, posições em citação linha a linha, julgamento em branco. U+2014 vira hífen só na minuta (`travessoes_substituidos` no manifesto); o bruto no sidecar fica intacto. O manifesto só passa a `concluida` depois de gravar `minuta`.
+
+A bateria subiu para 24 verificações. `verify_repository.py` ignora travessão em bruto sob `docs/consensus/` e o piso da bateria foi para 24. Versão permanece 2.11.0; o CHANGELOG da skill ganhou o item correspondente.
+
+Não movi a tarefa nem escrevi evidência. O portão desta rodada é `python3 docs/skills/ai-project-structure/evals/portao_t076.py`.
+--- portao: python3 docs/skills/ai-project-structure/evals/portao_t076.py
+[OK  ] 1. rodada sai 0 e CONSENSUS.md ganha exatamente uma entrada no fim, texto anterior byte a byte: exit 0; entradas novas=['2026-09-04 - Portao T-076']
+[OK  ] 2. campos: Status aberto, Proximo passo com o dono, Metodo, Exposicao nao, Rodada 1 de 1, Origem, Manifesto existente, Participantes, Falhas nenhuma: status=aberto metodo=pareceres-independentes exp=nao rodada=1 de 1 origem=automacao manifesto=docs/consensus/2026-09-04-221309-debate/manifesto.json part=alfa, beta falhas=nenhuma
+[OK  ] 3. secoes Contexto, Pergunta Ou Decisao e Posicao De <id> em citacao, e as quatro de julgamento com (A preencher.): Pontos De Acordo=ok; Riscos E Tradeoffs=ok; Consenso Final=ok; Decisao Para Registrar Em DECISIONS.md=ok
+[OK  ] 4. injecao neutralizada: --strict limpo, heading injetado em citacao, travessao substituido e contado, bruto intacto: strict exit 0  substituidos=1
+[OK  ] 8. manifesto com minuta.sha256_antes e sha256_depois batendo com o arquivo, e status concluida depois da minuta: antes=5875b1ef051a depois=02159b0e8f41 status=concluida
+[OK  ] 5. agente falho: secao Falha De falho com exit e caminho do bruto, Participantes com os dois, Falhas com o id: exit 0 part=alfa, falho falhas=falho
+[OK  ] 6a. segunda execucao simultanea sai 5 citando o lock; a primeira segue e fecha; nenhum lock sobra: segunda exit 5; primeira exit 0; sobras=[]
+[OK  ] 6b. proxima execucao roda normalmente: exit 0
+[OK  ] 7. SIGTERM no meio: CONSENSUS.md byte a byte, manifesto interrompida, bruto do agente rapido presente, sem temporario, sem lock: status=interrompida runs=1 temporarios=[] lock=False
+[OK  ] 9. verify_repository.py ignora travessao em bruto sob docs/consensus/: Resumo: 74/74 verificacoes passaram.
+[OK  ] 10. bateria test_consenso.py com pelo menos 24 verificacoes: exit 0; 24 verificacoes (piso 24)
+[OK  ] 11. versao 2.11.0 ou acima, coerente: versao=2.11.0 prosa=['2.11.0'] marcadores=['2.11.0']
+[OK  ] 12. verify_repository.py exit 0: Resumo: 74/74 verificacoes passaram.
+
+Portao T-076: 13/13.
+--- portao saiu com codigo 0
+T-076 movida para Concluidas com evidencia de comando.
+
+Portao verde na tentativa 1. Tarefa fechada com evidencia de comando.
+A entrada de SESSION.md continua sendo sua: o loop nao escreve la.

@@ -2,6 +2,18 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-17 (gatilhos da skill, ainda na 2.11.0)
+
+- `description` do `SKILL.md` deixa de disparar em pedido generico de criar projeto ("cria projeto", "inicia projeto novo", "monta a base"): dispara quando o pedido nomeia a estrutura multiagente ou seus arquivos, cita a skill, ou cai em atualizar, validar, specs e loop. Motivo: no Cloudroom um agente gestor coordena subagentes em sandbox, e decidir se um projeto ganha a estrutura e de quem coordena; a lista de frases genericas disparava a skill dentro de tarefas de scaffold de codigo delegadas. Evals 2 e 4 ajustados, eval 11 negativo, comentario do `agents/openai.yaml`, item no CHANGELOG 2.11.0 da skill sem bump (a 2.11.0 nao foi commitada e T-078 a T-083 pedem para nao subir). Reinstalada nos tres destinos. `verify_repository.py` em 71/74 por causa alheia: a fixture `aguardando-project` envelheceu sob `date.today()` (T-085, prioridade alta, bloqueia os portoes de T-078 a T-083). Decisao em `docs/DECISIONS.md`.
+
+## 2026-09-04 e 2026-09-05 (skill v2.11.0, T-075 a T-077)
+
+- Primitivo da automacao do consenso: `scripts/consenso.py debate` roda N agentes em paralelo, cada um numa copia do projeto sem `docs/consensus/`, e grava bruto e manifesto em `docs/consensus/<run-id>/` assim que cada agente termina (T-075). Bateria `test_consenso.py` (13) e etapa nova no verificador (74). Primeira rodada com Codex `gpt-5.6-terra` morreu na cota; fechada pelo loop com Grok `cursor-grok-4.6-high` pelo `cursor-agent`, verde na tentativa 1. Lock `.consenso-lock`, tratamento de SIGINT e SIGTERM e minuta de debate atomica no fim de `CONSENSUS.md` com julgamento em branco (T-076), tambem pelo Grok na tentativa 1; bateria 24, verificador ignora travessao em bruto. Varredura de segredo antes de gravar qualquer bruto, com retencao fora do repositorio e exit 6 (T-077), Grok na tentativa 1 depois de o `cursor-agent` ficar preso em reconexao com o trabalho pronto; prefixos apertados por mim (`sk-` solto casava `task-force`); bateria 33. T-084 aberta para timeout de agente no `loop.sh`. Spec 0006 passa a `Em andamento`. Instalada nos tres destinos.
+
+## 2026-09-04 (plano da spec 0006)
+
+- Spec 0006 (automacao do consenso) desdobrada em nove tarefas, T-075 a T-083, em `docs/TASKS.md`, com ordem, dependencia, criterio da spec e bump (2.11.0 em T-075); os nove portoes `evals/portao_t075.py` a `portao_t083.py` escritos sobre a base `evals/portao_consenso_lib.py`, rodados e falhando hoje pelo motivo certo (`scripts/consenso.py` ausente). Spec segue `Definida` ate a primeira rodada. Nenhum codigo do produto, nenhuma fixture, nenhum bump nesta sessao.
+
 ## 2026-09-04 (T-053 e T-074 respondidas; spec 0006 Definida)
 
 - Usuario escolheu a posicao do Grok nas tres calibragens da spec 0006 (DEC-007 a DEC-009) e a varredura de segredo que para a rodada para P-10 (DEC-010). Spec 0006 passa a `Definida`; backlog sem tarefa aberta.

@@ -16,7 +16,7 @@ Modelo por superficie (todos cegos, num worktree com o corpo das entradas contem
 
 Kimi, GLM e Gemini 3.8 nao existiam mais no catalogo do `cursor-agent` nesta data.
 
-Acrescentados em 2026-09-04: o log da rodada de loop que fechou T-065 com Codex `gpt-5.6-terra`, e a rodada 3 de mutacoes que prova o portao novo; depois, as duas rodadas de loop de T-069 (a primeira parou com pergunta, a segunda fechou e publicou a 2.6.0), e a rodada de T-070 (2.7.0, verde de primeira), as de T-072 e T-071 (2.8.0), a de T-060 (2.8.1), as de T-064 e T-063 (2.9.0), as de T-062 e T-073 (2.9.1), que fecham o pacote, e as de T-054, T-056, T-058 e T-055 (2.10.0), anteriores a revalidacao.
+Acrescentados em 2026-09-04, a noite: a rodada 1 de T-075 (spec 0006), que morreu na cota do Codex `gpt-5.6-terra` na tentativa 1, com as tentativas 2 e 3 recusadas na hora; a rodada 2 da mesma tarefa com Grok `cursor-grok-4.6-high` pelo `cursor-agent`, verde na tentativa 1 (o `cursor-agent -p` imprime so a resposta final, por isso o log e curto); a rodada de T-076 (lock e minuta), mesmo perfil, verde na tentativa 1; e a de T-077 (varredura de segredo), em 2026-09-05, em que o `cursor-agent` terminou o trabalho e ficou preso em reconexao por quase duas horas, ate ser encerrado com SIGTERM (exit 143) e o loop rodar o portao, verde. Acrescentados em 2026-09-04: o log da rodada de loop que fechou T-065 com Codex `gpt-5.6-terra`, e a rodada 3 de mutacoes que prova o portao novo; depois, as duas rodadas de loop de T-069 (a primeira parou com pergunta, a segunda fechou e publicou a 2.6.0), e a rodada de T-070 (2.7.0, verde de primeira), as de T-072 e T-071 (2.8.0), a de T-060 (2.8.1), as de T-064 e T-063 (2.9.0), as de T-062 e T-073 (2.9.1), que fecham o pacote, e as de T-054, T-056, T-058 e T-055 (2.10.0), anteriores a revalidacao.
 
 ## Arquivos
 
@@ -65,3 +65,7 @@ Acrescentados em 2026-09-04: o log da rodada de loop que fechou T-065 com Codex 
 | `loop-t056-codex-terra.txt` | 273386 | 0 |
 | `loop-t058-codex-terra.txt` | 495805 | 0 |
 | `loop-t055-codex-terra.txt` | 253474 | 0 |
+| `loop-t075-codex-terra.txt` | 430376 | 0 |
+| `loop-t075-cursor-grok-4.6-high.txt` | 3261 | 0 |
+| `loop-t076-cursor-grok-4.6-high.txt` | 3651 | 0 |
+| `loop-t077-cursor-grok-4.6-high.txt` | 2443 | 0 |

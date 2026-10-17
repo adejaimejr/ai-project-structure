@@ -20,6 +20,24 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-10-17 - Gatilho da skill nao decide se um projeto ganha a estrutura; quem coordena decide
+
+### Decisao
+
+- A `description` do `SKILL.md` dispara a skill so quando o pedido nomeia a estrutura multiagente ou seus arquivos (`AGENTS.md`, `docs/`), cita a skill pelo nome, ou pede atualizar, validar, ativar specs ou rodar o loop. Pedido generico de criar projeto, pasta, repositorio ou scaffold nao dispara: o agente, no maximo, oferece a estrutura em uma linha, e quem coordena (o usuario, ou o agente gestor no Cloudroom) decide.
+- `agents/openai.yaml` mantem `allow_implicit_invocation: true`: a invocacao implicita continua, agora contra uma description estreita.
+
+### Motivo
+
+- No Cloudroom, um agente gestor coordena subagentes em sandbox, e a tarefa do gestor chega ao subagente como se fosse o pedido do usuario. A skill nao distingue quem a chama. Com "cria projeto" e "monta a base do projeto" na lista de gatilhos, um subagente mandado fazer scaffold de codigo abria a entrevista da estrutura ou criava `AGENTS.md` e `docs/` sem ninguem pedir, e a decisao saia da mao do gestor.
+- Alternativas rejeitadas: `allow_implicit_invocation: false` no Codex e `disable-model-invocation` no Claude Code (a confirmar na documentacao) travam de forma mecanica, mas exigem invocar a skill pelo nome e quebram o pedido direto do usuario em linguagem natural, que deve continuar funcionando.
+
+### Impacto
+
+- "Inicia projeto novo aqui." sozinho deixa de disparar a skill; custa um turno de confirmacao. Evals 2 e 4 refletem isso, e o eval 11 cobre o caso negativo (projeto Node com Vite).
+- A description e prompt, nao trava: baixa a probabilidade de disparo errado, nao a zera. Protecao adicional fica fora da skill, no Cloudroom: `.bb/AGENTS.md` do workspace repetindo a regra, e o texto da tarefa que o gestor delega nomeando a estrutura e pre-respondendo a entrevista.
+- Sem bump de versao: entra como item da 2.11.0, ainda nao commitada.
+
 ## 2026-09-04 - Automacao que grava material de agente no repositorio varre segredo antes e para ao achar
 
 ### Decisao

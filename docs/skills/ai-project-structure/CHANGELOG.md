@@ -2,6 +2,43 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.11.0 - 2026-09-04
+
+Orquestrador mecanico de consenso: `scripts/consenso.py debate` roda N agentes
+em paralelo, cada um numa copia temporaria do projeto sem `docs/consensus/`.
+O bruto e o manifesto entram em `docs/consensus/<run-id>/` assim que cada
+agente termina. Independencia deixa de ser declaracao e vira propriedade da
+execucao.
+
+- `evals/test_consenso.py` cobre o primitivo com agente falso.
+- `verify_repository.py` passa a compilar `consenso.py` e a exigir a bateria
+  com piso 32.
+- Lock exclusivo `.consenso-lock` (diretorio atomico) na abertura; segunda
+  execucao simultanea sai 5 e ensina a limpar um orfao. SIGINT e SIGTERM
+  encerram os agentes, marcam `status=interrompida` e soltam o lock.
+- Minuta de debate no fim de `CONSENSUS.md`, uma vez so, por temporario no
+  mesmo diretorio, `fsync` e `os.replace`. Posicoes em citacao linha a linha;
+  U+2014 vira hifen so na minuta; julgamento em branco. O manifesto ganha
+  `minuta` e so entao `status=concluida`.
+- `verify_repository.py` ignora travessao em bruto sob `docs/consensus/`.
+- Varredura de padroes de segredo antes de gravar bruto: chave AWS, PEM,
+  rotulo com valor, prefixos `ghp_` / `sk-` / `xox` e URL com senha. Achou:
+  material fora do projeto, manifesto sem o conteudo, `status=parada-segredo`,
+  exit 6, nenhuma minuta. Palavras soltas sem valor nao disparam, e os
+  prefixos exigem inicio de palavra e comprimento minimo: `sk-` solto casava
+  `task-force`.
+- `description` do `SKILL.md` deixa de disparar em pedido generico de criar
+  projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto
+  novo", "monta a base"). Dispara quando o pedido nomeia a estrutura
+  multiagente ou seus arquivos, cita a skill, ou cai nos fluxos de atualizar,
+  validar, specs e loop. Motivo: com um agente gestor coordenando subagentes,
+  decidir se um projeto ganha a estrutura e de quem coordena, e a lista de
+  frases genericas tirava essa decisao dele e disparava a skill dentro de
+  tarefas de scaffold de codigo. A `description` e prompt, nao trava: baixa o
+  disparo errado, nao o zera. Evals 2 e 4 ajustados e eval 11 negativo
+  (projeto Vite nao aciona a skill); `agents/openai.yaml` segue com
+  invocacao implicita, so o comentario mudou.
+
 ## 2.10.0 - 2026-09-04
 
 `validate_structure.py` passa a avisar `**Rodada:**` ausente, pelo mesmo

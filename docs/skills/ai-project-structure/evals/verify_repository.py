@@ -42,6 +42,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from datetime import date, timedelta
 from pathlib import Path
 
 EVALS = Path(__file__).resolve().parent
@@ -53,6 +54,11 @@ ASSETS = SKILL / "assets"
 # Presentes apenas na fonte canonica: o install.sh nao os copia.
 NAO_DISTRIBUIDO = {"evals", "install.sh", "README.md", "CHANGELOG.md"}
 IGNORADOS = {"__pycache__", ".DS_Store"}
+# Token de data relativa nas fixtures: `{{HOJE}}`, `{{HOJE-7}}`, `{{HOJE+3}}`.
+# O validador compara `(bloqueada:)` com `date.today()`, entao data absoluta na
+# fixture envelhece sozinha e derruba o verificador sem regressao nenhuma
+# (T-085: 71/74 em 2026-10-17 com validador e fixture intocados desde setembro).
+HOJE_RE = re.compile(r"\{\{HOJE([+-]\d+)?\}\}")
 
 # A bateria do loop tinha 58 verificacoes em 2026-09-03. Menos que isso e teste que
 # sumiu; ao acrescentar testes, suba o piso junto.
@@ -135,6 +141,7 @@ FIXTURES = {
             "AVISO|AGUARDANDO-SEM-RESPOSTA|docs/TASKS.md|T-002",
             "AVISO|AGUARDANDO-SEM-RESPOSTA|docs/TASKS.md|T-004",
             "AVISO|AGUARDANDO-SEM-BLOQUEADA|docs/TASKS.md|T-004",
+            "AVISO|TASK-BLOQUEADA-ANTIGA|docs/TASKS.md|T-007",
             "AVISO|EVIDENCIA-FORMATO-INVALIDO|docs/TASKS.md|T-006",
             "AVISO|SPEC-CONCLUIDA-COM-PENDENTE|docs/specs/0001-exemplo.md|0001-exemplo.md",
             "AVISO|SPEC-CONCLUIDA-SEM-EVIDENCIA|docs/specs/0001-exemplo.md|0001-exemplo.md",
@@ -352,6 +359,31 @@ def read(path):
     return Path(path).read_text(encoding="utf-8")
 
 
+def materializar_fixture(origem, destino, hoje=None):
+    """Copia a fixture para `destino` trocando os tokens que nao vivem no repositorio.
+
+    `{{TRAVESSAO}}` e `{{UTF8_INVALIDO}}`: a regra global tambem proibe o travessao
+    e o UTF-8 invalido no proprio repositorio, e o portao nao pode ser
+    autorreferente. `{{HOJE-N}}` (ver `HOJE_RE`): data relativa ao dia da execucao,
+    para a fixture nao envelhecer. `hoje` existe so para `portao_t085.py` provar
+    que a data gerada acompanha o dia; o verificador sempre usa o dia real."""
+    hoje = hoje or date.today()
+
+    def data_relativa(m):
+        return (hoje + timedelta(days=int(m.group(1) or 0))).isoformat()
+
+    shutil.copytree(origem, destino)
+    for markdown in Path(destino).rglob("*.md"):
+        original = read(markdown)
+        texto = HOJE_RE.sub(data_relativa, original)
+        if "{{UTF8_INVALIDO}}" in texto:
+            markdown.write_bytes(texto.replace("{{UTF8_INVALIDO}}", "\u00e9").encode("latin-1"))
+        elif "{{TRAVESSAO}}" in texto:
+            markdown.write_text(texto.replace("{{TRAVESSAO}}", "\u2014"), encoding="utf-8")
+        elif texto != original:
+            markdown.write_text(texto, encoding="utf-8")
+
+
 def rodar_validador(caminho, strict=False, codigos=False, progress=False):
     cmd = [sys.executable, str(VALIDATOR), str(caminho)]
     if strict:
@@ -408,18 +440,11 @@ def verificar_fixtures(res, verbose):
         strict = oraculo.get("strict", False)
         modo = "--strict" if strict else "normal"
         esperado_exit = oraculo["exit"]
-        # A regra global tambem proibe o travessao no proprio repositorio. A
-        # fixture usa um token, materializado so no temporario, para ainda
-        # provar o diagnostico TRAVESSAO sem tornar o portao autorreferente.
+        # Tokens (travessao, UTF-8 invalido, data relativa) materializados so no
+        # temporario: ver `materializar_fixture`.
         with tempfile.TemporaryDirectory() as tmp:
             materializada = Path(tmp) / "fixture"
-            shutil.copytree(caminho, materializada)
-            for markdown in materializada.rglob("*.md"):
-                texto = read(markdown)
-                if "{{TRAVESSAO}}" in texto:
-                    markdown.write_text(texto.replace("{{TRAVESSAO}}", "\u2014"), encoding="utf-8")
-                if "{{UTF8_INVALIDO}}" in texto:
-                    markdown.write_bytes(texto.replace("{{UTF8_INVALIDO}}", "\u00e9").encode("latin-1"))
+            materializar_fixture(caminho, materializada)
             code, out = rodar_validador(materializada, strict=strict, codigos=True)
         res.check(
             code == esperado_exit,

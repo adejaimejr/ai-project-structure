@@ -14,7 +14,7 @@ Formato de tarefa:
 
 ## Aguardando Usuario
 
-- T-002: Escolher o provedor de e-mail transacional. (bloqueada: 2026-09-01)
+- T-002: Escolher o provedor de e-mail transacional. (bloqueada: {{HOJE-7}})
   - **Pergunta:** qual provedor de e-mail transacional o projeto deve usar?
   - **Resposta:** (A preencher.)
 

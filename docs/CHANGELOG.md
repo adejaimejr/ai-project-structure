@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-17 (T-085, fixture aguardando-project com data relativa)
+
+- `verify_repository.py` volta a 74/74: a fixture `evals/fixtures/aguardando-project` troca `(bloqueada: 2026-09-01)` pelo token `{{HOJE-N}}`, materializado em pasta temporaria relativo ao dia da execucao por `materializar_fixture` (que tambem absorveu `{{TRAVESSAO}}` e `{{UTF8_INVALIDO}}`); `invalido` ganha T-007 bloqueada ha 45 dias de proposito, com `TASK-BLOQUEADA-ANTIGA` no oracle. So `evals/`, sem bump; `validate_structure.py` intocado, o check segue relativo a hoje em projeto real. Portao `evals/portao_t085.py` (3/9 antes, 9/9 depois) com tres mutacoes acusando. Desbloqueia os portoes de T-078 a T-083.
+
 ## 2026-10-17 (gatilhos da skill, ainda na 2.11.0)
 
 - `description` do `SKILL.md` deixa de disparar em pedido generico de criar projeto ("cria projeto", "inicia projeto novo", "monta a base"): dispara quando o pedido nomeia a estrutura multiagente ou seus arquivos, cita a skill, ou cai em atualizar, validar, specs e loop. Motivo: no Cloudroom um agente gestor coordena subagentes em sandbox, e decidir se um projeto ganha a estrutura e de quem coordena; a lista de frases genericas disparava a skill dentro de tarefas de scaffold de codigo delegadas. Evals 2 e 4 ajustados, eval 11 negativo, comentario do `agents/openai.yaml`, item no CHANGELOG 2.11.0 da skill sem bump (a 2.11.0 nao foi commitada e T-078 a T-083 pedem para nao subir). Reinstalada nos tres destinos. `verify_repository.py` em 71/74 por causa alheia: a fixture `aguardando-project` envelheceu sob `date.today()` (T-085, prioridade alta, bloqueia os portoes de T-078 a T-083). Decisao em `docs/DECISIONS.md`.

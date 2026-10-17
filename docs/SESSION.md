@@ -41,6 +41,44 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-10-17 - Claude (T-085: fixture aguardando-project com data relativa)
+
+### Objetivo
+
+- Fechar T-085: `verify_repository.py` em 71/74 porque a fixture `aguardando-project` tinha `(bloqueada: 2026-09-01)` absoluto e o validador compara com `date.today()` (limite 30 dias). Envelhecimento, nao regressao: validador e fixture intocados desde setembro. Bloqueava os portoes de T-078 a T-083, que rodam o verificador pela base `portao_consenso_lib.py`.
+
+### O Que Foi Feito
+
+- Portao antes do conserto: `evals/portao_t085.py`, molde de `portao_t058.py`, 9 checks. Com a data real saiu 3/9 pelo motivo certo (tres datas absolutas; verificador sem `materializar_fixture`; 71/74).
+- Solucao (b) da tarefa, so em `evals/`, sem bump: token `{{HOJE-N}}` na fixture, materializado em pasta temporaria por `materializar_fixture(origem, destino, hoje)` em `verify_repository.py`, que absorveu as trocas de `{{TRAVESSAO}}` e `{{UTF8_INVALIDO}}`. `valido` e `invalido` usam `{{HOJE-7}}`; `invalido` ganhou T-007 com `{{HOJE-45}}`, bloqueada antiga de proposito, e `TASK-BLOQUEADA-ANTIGA|T-007` entrou no oracle (ate aqui so `cobertura-tarefas`, com 2000-01-01, produzia o codigo). `validate_structure.py` intocado: em projeto real o check segue relativo a hoje. README da fixture explica o token.
+- Opcao (a), data de referencia no validador, descartada: toca `scripts/`, exige bump e reinstalacao, e T-078 a T-083 mandam nao subir a 2.11.0 nao commitada.
+- Depois: portao 9/9, verificador 74/74, raiz `--strict` com 0 erros e 0 avisos, sem `__pycache__`.
+- Mutacoes, backup por `cp` e volta conferida por `cmp`: data absoluta de volta em `valido`, 6/9 (1a, 1b, 3d; verificador 72/74); `hoje` forcado para daqui a um ano no verificador, 6/9 (1c, 2a, 3d; 73/74); para um ano atras, 6/9 (1b, 2b, 3d; 71/74). O parametro `hoje` existe so para o portao viajar no tempo pela mesma funcao do verificador.
+
+### Arquivos Criados Ou Alterados
+
+- Skill, nao distribuidos: `evals/portao_t085.py` (novo), `evals/verify_repository.py`, `evals/fixtures/aguardando-project/README.md`, `valido/docs/TASKS.md` e `invalido/docs/TASKS.md` da mesma fixture.
+- Projeto: `docs/TASKS.md` (T-085 concluida), `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal. Escolha de implementacao dentro da tarefa: fixture relativa em vez de flag no validador.
+
+### Aprendizados Para MEMORY.md
+
+- Confirmado o candidato da sessao anterior: fixture com data absoluta sob check relativo a `date.today()` envelhece sozinha e derruba o verificador sem regressao; data que o validador compara com hoje entra na fixture como token relativo, materializado no teste. Nao promovido aqui: `MEMORY.md` fora do escopo pedido.
+
+### Pendencias
+
+- Promover o aprendizado acima para `MEMORY.md`.
+- CHANGELOG da skill (secao 2.11.0) sem item desta mudanca: `evals/` nao e distribuido e o escopo pedido nao o incluia; decidir se entra.
+- Do usuario: commitar (2.11.0 inteira, gatilhos e T-085 seguem nao commitados).
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, para mandar T-078 ao loop com o verificador verde.
+- Motivo: a causa alheia dos portoes vermelhos saiu; o que falhar agora e da propria tarefa.
+
 ## 2026-10-17 - Claude (gatilhos da skill para o fluxo gestor e subagentes no Cloudroom)
 
 ### Objetivo

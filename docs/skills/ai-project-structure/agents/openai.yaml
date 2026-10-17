@@ -8,7 +8,7 @@ interface:
 
 policy:
   # true = o Codex pode acionar a skill automaticamente quando o pedido casar
-  # com a `description` do SKILL.md. Desde a 2.11.0 a description so casa com
+  # com a `description` do SKILL.md. Desde a 2.12.0 a description so casa com
   # pedido que nomeia a estrutura multiagente ou seus arquivos (ou com os fluxos
   # de atualizar, validar, specs e loop); pedido generico de "criar projeto" nao
   # dispara, para que a decisao fique com quem coordena (usuario ou agente

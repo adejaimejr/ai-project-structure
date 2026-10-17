@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-17 (skill 2.12.0, T-086: bump levando Passagem De Trabalho)
+
+- Skill 2.12.0: `version` e prosa do `SKILL.md`, marcadores `core`, `specs` e `loop` em v2.12.0 nos assets, nos partials e no `AGENTS.md` da raiz, sem mudar o conteudo dos blocos. Secao `## 2.12.0` no CHANGELOG da skill com os dois itens escritos depois da publicacao da 2.11.0 (gatilhos da `description`; secao Passagem De Trabalho e passo 2 de `atualizacao.md`), migrados por decisao do usuario; a 2.11.0 publicada fica com um conteudo so de bloco core e o fluxo de atualizacao oferece o bloco pelo caminho normal. Linhas de T-078 a T-082 em `docs/TASKS.md` passam a "a versao ja e 2.12.0, nao suba de novo". Portao `evals/portao_t086.py` (6/8 antes, 8/8 depois) com quatro mutacoes acusando; verificador 74/74; validador `--strict` limpo; reinstalada nos tres destinos com paridade por `cmp`. `SESSION.md` rotacionado (duas entradas de 2026-09-04 para o archive).
+
 ## 2026-10-17 (passagem de trabalho, ainda na 2.11.0)
 
 - Secao "Passagem De Trabalho" no bloco core de `AGENTS.md` (assets e raiz): toda delegacao a outro agente leva, na propria mensagem, um resumo curto com objetivo e criterio de conclusao, estado feito e pendente, decisoes e tentativas a nao repetir, arquivos a consultar por caminho e a instrucao de conferir o estado real antes de agir; `docs/` segue como registro, sem arquivo novo. Motivo: no Cloudroom o subagente pode estar em outra sandbox, onde arquivo temporario do gestor nao chega. Referencia de metodo: skill Handoff (davidondrej), sem copia nem instalacao. Passo 2 de `references/atualizacao.md` deixa de encerrar em versao igual quando um bloco gerenciado difere do template. Sem bump (T-078 a T-083 pedem para nao subir); bump em T-086. Verificador 74/74, validador `--strict` limpo, duas mutacoes acusadas, reinstalada nos tres destinos. Decisao em `docs/DECISIONS.md`.

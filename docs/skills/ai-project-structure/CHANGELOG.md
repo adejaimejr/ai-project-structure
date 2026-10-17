@@ -2,6 +2,43 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.12.0 - 2026-10-17
+
+Bump que leva a secao "Passagem De Trabalho" do bloco core e os gatilhos novos
+da `description`. Os dois itens abaixo foram escritos em 2026-10-17 como
+acrescimos a 2.11.0, sem subir a versao, com a 2.11.0 ja publicada em
+`origin/main`. Migraram para ca para que a 2.11.0 publicada tenha um conteudo
+so de bloco core e para que o fluxo de atualizacao (`references/atualizacao.md`)
+ofereca o bloco a projeto que ja esta em 2.11.0 pelo caminho normal, sem
+depender do ajuste do passo 2. Marcadores `core`, `specs` e `loop` em v2.12.0;
+o conteudo dos blocos specs e loop nao muda. Nenhum script distribuido mudou.
+Portao da tarefa: `evals/portao_t086.py` (T-086).
+
+- `description` do `SKILL.md` deixa de disparar em pedido generico de criar
+  projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto
+  novo", "monta a base"). Dispara quando o pedido nomeia a estrutura
+  multiagente ou seus arquivos, cita a skill, ou cai nos fluxos de atualizar,
+  validar, specs e loop. Motivo: com um agente gestor coordenando subagentes,
+  decidir se um projeto ganha a estrutura e de quem coordena, e a lista de
+  frases genericas tirava essa decisao dele e disparava a skill dentro de
+  tarefas de scaffold de codigo. A `description` e prompt, nao trava: baixa o
+  disparo errado, nao o zera. Evals 2 e 4 ajustados e eval 11 negativo
+  (projeto Vite nao aciona a skill); `agents/openai.yaml` segue com
+  invocacao implicita, so o comentario mudou.
+- Secao "Passagem De Trabalho" no bloco core de `AGENTS.md`: ao delegar uma
+  tarefa a outro agente (subagente, outra sessao, outro modelo), o contexto
+  viaja dentro da propria mensagem de delegacao, como resumo curto com
+  objetivo e criterio de conclusao, estado feito e pendente, decisoes que
+  valem e tentativas que nao se repetem, arquivos a consultar por caminho e
+  a instrucao de conferir o estado real antes de agir. Nenhum arquivo novo:
+  `docs/` segue como registro e o resumo aponta para ele. Motivo: no
+  Cloudroom o subagente pode estar em outra sandbox, e arquivo temporario do
+  gestor nao chega la. Metodo inspirado na skill Handoff (davidondrej), sem
+  copia-la nem exigir a instalacao dela. O passo 2 de
+  `references/atualizacao.md` deixa de encerrar em versao igual quando um
+  bloco gerenciado difere do template: o diff do bloco e oferecido mesmo sem
+  bump. Validador intocado: o resumo vive na mensagem, nao em arquivo.
+
 ## 2.11.0 - 2026-09-04
 
 Orquestrador mecanico de consenso: `scripts/consenso.py debate` roda N agentes
@@ -27,30 +64,6 @@ execucao.
   exit 6, nenhuma minuta. Palavras soltas sem valor nao disparam, e os
   prefixos exigem inicio de palavra e comprimento minimo: `sk-` solto casava
   `task-force`.
-- `description` do `SKILL.md` deixa de disparar em pedido generico de criar
-  projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto
-  novo", "monta a base"). Dispara quando o pedido nomeia a estrutura
-  multiagente ou seus arquivos, cita a skill, ou cai nos fluxos de atualizar,
-  validar, specs e loop. Motivo: com um agente gestor coordenando subagentes,
-  decidir se um projeto ganha a estrutura e de quem coordena, e a lista de
-  frases genericas tirava essa decisao dele e disparava a skill dentro de
-  tarefas de scaffold de codigo. A `description` e prompt, nao trava: baixa o
-  disparo errado, nao o zera. Evals 2 e 4 ajustados e eval 11 negativo
-  (projeto Vite nao aciona a skill); `agents/openai.yaml` segue com
-  invocacao implicita, so o comentario mudou.
-- Secao "Passagem De Trabalho" no bloco core de `AGENTS.md`: ao delegar uma
-  tarefa a outro agente (subagente, outra sessao, outro modelo), o contexto
-  viaja dentro da propria mensagem de delegacao, como resumo curto com
-  objetivo e criterio de conclusao, estado feito e pendente, decisoes que
-  valem e tentativas que nao se repetem, arquivos a consultar por caminho e
-  a instrucao de conferir o estado real antes de agir. Nenhum arquivo novo:
-  `docs/` segue como registro e o resumo aponta para ele. Motivo: no
-  Cloudroom o subagente pode estar em outra sandbox, e arquivo temporario do
-  gestor nao chega la. Metodo inspirado na skill Handoff (davidondrej), sem
-  copia-la nem exigir a instalacao dela. O passo 2 de
-  `references/atualizacao.md` deixa de encerrar em versao igual quando um
-  bloco gerenciado difere do template: o diff do bloco e oferecido mesmo sem
-  bump. Validador intocado: o resumo vive na mensagem, nao em arquivo.
 
 ## 2.10.0 - 2026-09-04
 

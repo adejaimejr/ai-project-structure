@@ -4,7 +4,7 @@ Registro cronologico inverso das sessoes de IA.
 
 Sempre adicione a sessao mais recente no topo.
 
-As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`. Este arquivo mantem as 5 mais recentes.
+As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`. Este arquivo mantem as 4 mais recentes.
 
 ## Modelo Para Nova Sessao
 
@@ -40,6 +40,47 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Agente sugerido (ou "qualquer agente"): 
 - Motivo: 
 ```
+
+## 2026-10-17 - Claude (sessao lateral: T-086, skill 2.12.0 levando Passagem De Trabalho)
+
+### Objetivo
+
+- Fechar T-086: subir a skill para 2.12.0 levando a secao "Passagem De Trabalho" do bloco core, que entrou na 2.11.0 sem bump com a 2.11.0 ja publicada em `origin/main`. Sessao lateral aberta pela sessao do protocolo de handoff, com o briefing no formato da propria secao nova.
+
+### O Que Foi Feito
+
+- Pre-condicoes do briefing: `git status` tinha `AGENTS.md`, `assets/AGENTS.md` e `SESSION.md` sem commit; parei e pedi o commit (fdafa73, arvore limpa). Confirmacao do usuario, relayada pela sessao gestora: "Sim, 2.12.0 agora" (bump antes de T-078 a T-083) e "Migrar os dois" (itens pos-publicacao da 2.11.0 para a secao nova).
+- Portao antes do bump: `evals/portao_t086.py`, molde de `portao_t058.py` sobre `portao_consenso_lib.py` (`versao_coerente("2.12.0")`), 8 checks: versao coerente em frontmatter, prosa, marcadores dos assets e CHANGELOG; secao mais recente do CHANGELOG cita "Passagem De Trabalho"; tres marcadores da raiz na versao do frontmatter; bloco core da raiz byte a byte igual ao dos assets e com a secao dentro; T-078 a T-083 sem "a versao ja e 2.11.0" (T-078 a T-082 apontando para a nova; T-083 nunca teve a frase); raiz `--strict`; verificador. Com a arvore de hoje saiu 6/8 pelo motivo certo (1a e 4).
+- Bump: `version: "2.12.0"` e `versao da estrutura: 2.12.0` no `SKILL.md`; marcadores `core`, `specs` e `loop` em v2.12.0 em `assets/AGENTS.md`, nos dois partials e nos tres blocos do `AGENTS.md` da raiz, conteudo dos blocos intocado; comentario do `agents/openai.yaml` ("Desde a 2.12.0", porque o item dos gatilhos migrou). CHANGELOG da skill: secao `## 2.12.0 - 2026-10-17` com paragrafo explicando a migracao e os dois itens movidos da 2.11.0 (gatilhos da `description`; secao Passagem De Trabalho e passo 2 de `atualizacao.md`); a 2.11.0 fica so com o que foi publicado.
+- `docs/TASKS.md`: nas linhas de T-078 a T-082, "a versao ja e 2.11.0, nao suba de novo, acrescente um item na secao `## 2.11.0`" e "o `AGENTS.md` da raiz ja esta em v2.11.0" passam a 2.12.0 (16 trocas; T-082 tambem "item no CHANGELOG 2.12.0"). T-083 nao tinha a frase. T-077, concluida, fica como registro historico.
+- Depois: portao 8/8, `verify_repository.py` 74/74, `validate_structure.py . --strict` 0 erros e 0 avisos, sem `__pycache__`, sem travessao nos arquivos tocados.
+- Mutacoes, backup por `cp` e volta conferida por `cmp`: marcador core da raiz de volta a v2.11.0, 5/8 (2, 3a, 6 com 72/74); secao Passagem De Trabalho removida so da raiz, 6/8 (3a, 6 com 73/74); T-080 de volta a 2.11.0, 7/8 (4); prosa do `SKILL.md` em 2.11.0, 6/8 (1a, 6 com 73/74).
+- Reinstalada com `install.sh --sim`: 33 arquivos distribuidos comparados por `cmp` em `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills`, 0 divergentes, `version: "2.12.0"` nos tres.
+- `SESSION.md` passaria de 30KB com esta entrada: as duas entradas de 2026-09-04 (plano da spec 0006 com T-075 a T-077 e a 2.11.0; respostas de T-053 e T-074) foram para `docs/archive/SESSIONS-2026.md`, indice atualizado (48 entradas). Ficam 4 aqui.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `agents/openai.yaml`, `assets/AGENTS.md`, `assets/partials/AGENTS-specs-block.md`, `assets/partials/AGENTS-loop-block.md`; `evals/portao_t086.py` (novo, nao distribuido).
+- Projeto: `AGENTS.md` (so os tres marcadores), `docs/TASKS.md` (T-086 concluida; T-078 a T-082), `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`.
+- Instalacao: `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills`.
+
+### Decisoes Tomadas
+
+- Do usuario, dentro da tarefa: bump 2.12.0 antes de T-078 a T-083, e os dois itens escritos depois da publicacao migram da 2.11.0 para a 2.12.0 no CHANGELOG da skill. Nenhuma decisao formal nova em `DECISIONS.md`.
+
+### Aprendizados Para MEMORY.md
+
+- Candidato, nao promovido (fora do escopo pedido): bloco gerenciado que muda com a versao ja publicada precisa do bump na mesma sessao; adiar o bump por regra de outras tarefas deixou a versao publicada com dois conteudos e custou uma tarefa propria para desfazer.
+
+### Pendencias
+
+- Do usuario: commitar (nada commitado nem pushado nesta sessao).
+- T-078 a T-083 seguem na fila, agora com a regra "a versao ja e 2.12.0, nao suba de novo".
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, para mandar T-078 ao loop; os portoes delas aceitam 2.11.0 ou acima e o verificador esta verde.
+- Motivo: o bump era o unico bloqueio de versao; a spec 0006 segue de onde parou.
 
 ## 2026-10-17 - Claude (passagem de trabalho entre gestor e subagentes)
 
@@ -159,88 +200,3 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 - Agente sugerido (ou "qualquer agente"): qualquer agente de chat, para T-085 antes de mandar T-078 ao loop; portao proprio escrito antes da rodada.
 - Motivo: verificador vermelho por causa alheia esconde regressao real, e todos os portoes abertos passam por ele.
-
-## 2026-09-04 - Claude, com Grok cursor-grok-4.6-high pelo loop (plano da spec 0006, T-075 a T-077, skill 2.11.0)
-
-### Objetivo
-
-- Desdobrar a spec 0006 (automacao do consenso), `Definida` com DEC-001 a DEC-010 e sem tarefa, em tarefas que cabem numa rodada de loop, cada uma com portao proprio, sem escrever codigo do produto.
-- Depois da aprovacao do plano, a pedido do usuario: rodar T-075, T-076 e T-077 pelo loop (a ultima virou a madrugada de 2026-09-05).
-
-### O Que Foi Feito
-
-- Leitura na ordem pedida: `AGENTS.md`, a spec inteira, as quatro rodadas de loop mais recentes, `MEMORY.md` (Feedback e Project), `DECISIONS.md` de 2026-09-03 e 2026-09-04, `loop.sh` e `loop_task.py`, `references/loop.md`, e as entradas de P-7/P-8 e P-9 do archive. Plano mostrado e aprovado pelo usuario **antes** de gravar qualquer coisa.
-- **Leitura da spec:** o primitivo e um orquestrador mecanico novo, `scripts/consenso.py`, que roda N agentes em paralelo, cada um numa copia propria do projeto sem `docs/consensus/`, e grava bruto e manifesto em `docs/consensus/<run-id>/` assim que cada agente termina; os pacotes em cima sao a minuta de debate (citacao linha a linha, julgamento em branco, atomica sob lock), a varredura de segredo, o achado (revalidacao dentro da entrada existente), a rodada 2 com anteriores na integra, a retomada por comando e os checks AVISO por `**Origem:**`. Do `loop.sh` reaproveita-se o contrato, nao o codigo.
-- **Escolhas de forma, dentro das DECs e vetaveis antes da primeira rodada:** campos `**Origem:** automacao`, `**Manifesto:**`, `**Participantes:**` (todos os ids) e `**Falhas:**` (`nenhuma` ou ids); headings `### Posicao De <id>`, `### Falha De <id>` e `### Revalidacao De <id>`; `Metodo` sempre `pareceres-independentes` (nenhum modo mostra posicao contemporanea); `--pendente` obrigatorio da rodada 4 em diante, porque o campo e julgamento humano; sidecar em `docs/consensus/`, copias com `.git` e sem o sidecar; sem bloco gerenciado novo em `AGENTS.md`.
-- **Nove tarefas, T-075 a T-083**, em "Proximas Tarefas" de `docs/TASKS.md` por script com substituicao atomica, na ordem de execucao e com dependencia dita na linha: primitivo (bump 2.11.0), lock e minuta, segredo, validador com fixture, achado, rodada 2, retomada, documentacao (portao sem `verify_repository.py`, porque a raiz precisa da propagacao do agente de chat), bancada real (tarefa do agente de chat, com evidencia `revisao-manual`). Cada linha diz o que e proibido ao loop e o que sobra para o chat. T-IDs listados na spec sem status; a spec segue `Definida` ate a primeira rodada, como combinado.
-- **Nove portoes** sobre uma base comum, `evals/portao_consenso_lib.py` (molde de `portao_t058.py` mais agente falso, chamada do orquestrador e leitura do sidecar), cada um com regex autotestada contra exemplo e contraexemplo. Rodados hoje, **todos falham pelo motivo certo** (`scripts/consenso.py` ausente, versao 2.10.0, `test_consenso.py` ausente, sem run dir, sem secao no `SKILL.md`): T-075 1/14, T-076 1/13, T-077 0/10, T-078 6/14, T-079 1/12, T-080 0/11, T-081 0/11, T-082 2/8, T-083 1/4. O que passa hoje e o que deve continuar passando (raiz limpa, controle sem diagnostico, verificador).
-- Dois consertos no proprio trabalho antes de qualquer verificacao: `portao_t076.py` nasceu com o travessao literal (trocado por `\u2014` escapado, regra de `MEMORY.md`); e o regex de perfil de `portao_t083.py` casava a nota do `cursor-agent` em `MEMORY.md`, que cita Codex, consenso e read-only na mesma frase, e foi apertado para a forma `- Codex, consenso:` com esse contraexemplo real no autoteste.
-- `SESSION.md` passou de 30KB com a entrada nova: quatro entradas rotacionadas para o archive (T-070 e 2.7.0, T-069 e 2.6.0, T-065, respostas de T-059/T-061/T-067), indice do archive corrigido (41 entradas). Linha no CHANGELOG do projeto.
-- **Rodada 1 de T-075 com Codex `gpt-5.6-terra`: morreu na cota.** 82.683 tokens na tentativa 1 e `You've hit your usage limit` (volta em 2026-09-05 02:18); tentativas 2 e 3 recusadas na hora; portao 3/14 nas tres, exit 2, nada movido. Sobrou um `consenso.py` parcial com `SyntaxError` (um `+` de patch meio aplicado). Nenhum arquivo de memoria tocado. Os marcadores da raiz estavam de volta em 2.10.0 antes de o loop comecar (o verificador passou 71/71 dentro da tentativa 1; a reversao veio de fora do loop, provavelmente do `sed` que eu mesmo tinha oferecido) e foram repostos.
-- **Rodada 2 de T-075 com Grok pelo `cursor-agent` (`-p --force --model cursor-grok-4.6-high`), escolhido pelo usuario entre quatro opcoes: verde na tentativa 1**, em cerca de 8 minutos, no mesmo degrau base (cota nao e sinal de dificuldade). `scripts/consenso.py debate` com copias por agente (`copytree` sem `docs/consensus/`, `.consenso-lock` e `__pycache__`), `ThreadPoolExecutor` para o paralelo, bruto e manifesto gravados no `as_completed` de cada agente, manifesto por substituicao atomica, retencao de `## Registros` com nota, envelope de prompt com os seis itens do contrato, `git check-ignore` para o sidecar ignorado, ids validados contra `/` e `..`. Bateria `evals/test_consenso.py` com 13 checks (espelha o portao e importa a base `portao_consenso_lib.py`), etapa `verificar_testes_do_consenso` com piso 12, `consenso.py` compilado no verificador, bump 2.11.0 em `SKILL.md`, assets, partials e CHANGELOG da skill. `AGENTS.md` da raiz intocado. Portao 14/14; verificador de 71 para 74.
-- **Revisao do que o Grok escreveu, sem conserto necessario:** `--titulo` e aceito e ainda nao usado (e de T-076); o envelope diz "copia somente-leitura" enquanto a copia e gravavel, o que e o desenho (isolamento por copia, nao por permissao); `run-id` com resolucao de segundo e recusa de duplicata; `.git` vai na copia, como a tarefa manda. Consumo nao impresso pelo `cursor-agent`. 2.11.0 reinstalada nos tres destinos com `--sim`, paridade limpa fora do nao distribuido.
-- **T-076 com o mesmo perfil do Grok, verde na tentativa 1** (portao 13/13, uns 6 minutos), lancada depois de conferir que o portao falhava contra o `consenso.py` real (sem `--dono`, sem lock, sem sinal, sem minuta, bateria em 13, verificador acusando travessao sob `docs/consensus/`). O que entrou: `.consenso-lock` por `mkdir`, exit 5 com a mensagem do orfao, `soltar_lock` em `finally`; handler de SIGINT e SIGTERM que encerra os agentes vivos e leva a rodada a `status=interrompida` com exit 1, sem tocar em `CONSENSUS.md`; minuta no fim do arquivo por `escrever_bytes_atomico` (temporario, `fsync`, `os.replace`), na forma da tarefa, com `citar` pondo `> ` em toda linha e trocando U+2014 por hifen com `travessoes_substituidos` no manifesto; bloco `minuta` com os hashes e so entao `concluida`. Bateria de 13 para 24 (lock, SIGTERM, injecao, minuta), piso 24, `verificar_travessao` ignorando `docs/consensus/`, item no CHANGELOG 2.11.0. `AGENTS.md` da raiz intocado.
-- **Revisao de T-076, sem conserto:** tres checagens redundantes de `_interrompendo` no caminho final (inofensivas); a interrupcao sai com exit 1, que a lista de exit codes do plano nao previa; anotado na linha de T-082 para a tabela dizer isso. Verificador 74/74, loop 77/77, consenso 24/24, `--strict` limpo, portao 13/13 de novo, sem sobras.
-- **T-077 com o Grok: o trabalho ficou pronto em uns 8 minutos e o `cursor-agent` ficou preso por quase duas horas.** O log mostra seis `Connection lost, reconnecting`; o processo `node` morreu, o wrapper ficou vivo sem filho, e o `loop.sh` esperou, porque nao tem timeout de agente. Evidencia antes de agir: ultimo arquivo tocado as 22:41, `pgrep -P` vazio, e o portao rodado a mao contra o que ficou ja em 10/10. `kill -TERM` no wrapper; o loop viu exit 143 com arquivos alterados, rodou o portao (10/10) e fechou T-077 na tentativa 1. Licao promovida para `MEMORY.md`; o timeout no `loop.sh` virou **T-084**.
-- **O que entrou em T-077:** `tem_segredo` com sete regex (AWS, PEM, rotulo com valor de 16+, `ghp_`, `sk-`, `xox`, URL com senha), aplicada a pergunta antes de chamar qualquer agente (exit 6 sem run dir) e a stdout e stderr de cada agente antes de gravar; bruto retido em `tempfile.mkdtemp("consenso-retido-")` com `stdout.txt` e `stderr.txt`, manifesto com `retido-por-segredo` e `retido_em` sem conteudo, `status=parada-segredo`, exit 6, mensagem ensinando mover ou apagar e `retomar`. Bateria 24 para 31, piso 30, CHANGELOG.
-- **Um ajuste meu, provado por mutacao:** `sk-[A-Za-z0-9_-]+` casava `task-force`, `risk-based` e `desk-top` (conferido no interpretador), e nem o portao nem a bateria cobriam o prefixo. Regex dos tres prefixos com inicio de palavra e comprimento minimo (`\bsk-[A-Za-z0-9_-]{16,}`, idem `ghp_` 16 e `xox?-` 8), dois casos novos na bateria (chave `sk-` real dispara; `task-force`, `risk-based` e `desk-top` nao), piso 32, bateria 33/33. Efeito colateral meu no meio: um `import consenso` no interpretador gravou `scripts/__pycache__`; removido.
-
-### Arquivos Criados Ou Alterados
-
-- Skill, por mim (nao distribuidos): `evals/portao_consenso_lib.py`, `evals/portao_t075.py` a `evals/portao_t083.py`.
-- Skill, pelo Grok nas rodadas de T-075, T-076 e T-077 (com o ajuste do `sk-` por mim): `scripts/consenso.py` (novo, distribuido), `evals/test_consenso.py` (novo), `evals/verify_repository.py`, `SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, `assets/partials/*.md`.
-- Projeto: `AGENTS.md` (marcadores em 2.11.0), `docs/TASKS.md`, `docs/specs/0006-automacao-do-consenso.md` (T-IDs e `Em andamento`), `docs/SESSION.md`, `docs/MEMORY.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`, `docs/archive/revalidacao-2026-09-03/` (README e quatro logs), `docs/CHANGELOG.md`. `docs/PROMPTS.md` ja estava alterado pelo usuario com o prompt desta sessao e nao foi tocado.
-
-### Decisoes Tomadas
-
-- Nenhuma formal. As escolhas de forma acima estao escritas nas tarefas, nao em `DECISIONS.md`, porque sao implementacao dentro das DECs; o usuario aprovou o plano sem veta-las. A spec 0006 passou a `Em andamento` com o fecho de T-075.
-
-### Aprendizados Para MEMORY.md
-
-- Promovido em `MEMORY.md`, secao User: o `cursor-agent -p` pode terminar o trabalho e ficar preso em reconexao sem sair; os sinais que separam isso de trabalho lento, e a saida (`kill -TERM` no wrapper, o loop deixa o portao decidir).
-- Promovido em `MEMORY.md`, secao User, com sobrescrita ativa: a primeira rodada de loop completa do Grok neste projeto aconteceu hoje, pelo `cursor-agent` com `cursor-grok-4.6-high`, verde na tentativa 1 em cerca de 8 minutos, quando a cota do Codex acabou. Junto, a observacao que decidiu a troca: falha por cota nao e sinal de dificuldade, entao troca-se a ferramenta e mantem-se o degrau.
-- O regex que casou a linha errada em T-083 e a regra ja registrada (regex de portao testada contra exemplo) aplicada com um contraexemplo tirado do arquivo real; nada novo.
-
-### Pendencias
-
-- T-078 a T-083 abertas, nessa ordem, mais T-084 (timeout de agente no `loop.sh`, fora da spec, sem portao ainda). T-078 (validador) e a proxima. Antes de T-083: rotacionar `docs/CONSENSUS.md` (30186 de 30720 bytes) e registrar os perfis `Codex, consenso` e `Grok, consenso` em `MEMORY.md` com o usuario.
-- Codex `gpt-5.6-terra` sem cota ate 2026-09-05 02:18. Ate la, o loop roda com o Grok pelo `cursor-agent` ou com outro perfil que o usuario escolher.
-- Do usuario: commitar. Plano e rodada estao juntos na arvore, separaveis por arquivo: do plano, `evals/portao_*` e os arquivos de `docs/`; da rodada, `scripts/consenso.py`, `evals/test_consenso.py`, `verify_repository.py`, `SKILL.md`, assets e CHANGELOG da skill.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente de chat, para mandar T-078 ao loop (Grok pelo `cursor-agent` no degrau base, ou Codex `terra` se a cota voltou), rodando `portao_t078.py` contra o validador atual antes de lancar. Vigiar o log: se parar em `Retry attempt N` sem arquivo tocado por muito tempo, e o caso de `MEMORY.md`, nao trabalho lento.
-- Motivo: T-078 e independente do script e fecha a DEC-007 no validador; T-079 (achado) depende de T-077, que acabou de fechar, e pode ir em seguida.
-
-
-## 2026-09-04 - Claude (respostas de T-053 e T-074)
-
-### Objetivo
-
-- Registrar as respostas do usuario a T-053 (posicao do Grok nas tres calibragens) e a T-074 (opcao a para o segredo no bruto), e levar a spec 0006 a `Definida`.
-
-### O Que Foi Feito
-
-- DEC-007 (forma entra no escopo, diagnosticos novos como AVISO), DEC-008 (proveniencia com manifesto ao lado e ponte curta) e DEC-009 (retomada sempre humana, bruto in-repo desde o inicio) escritas na spec com a forca de cada uma; copiadas para `docs/DECISIONS.md`; as duas entradas de consenso no archive fechadas como `resolvido`.
-- A quarta pergunta, segredo no bruto versionado, ficou primeiro como P-10 e T-074 com tres opcoes esbocadas; o usuario escolheu a (a) em seguida: varredura de padroes antes de gravar, rodada para e pede palavra humana, nunca redige. DEC-010 na spec com as alternativas rejeitadas, criterios de aceite reescritos para DEC-007 a DEC-010, decisao copiada para `docs/DECISIONS.md`. **Spec 0006 passou a `Definida`**, sem pergunta aberta.
-
-### Arquivos Criados Ou Alterados
-
-- `docs/specs/0006-automacao-do-consenso.md`, `docs/DECISIONS.md`, `docs/TASKS.md`, `docs/archive/CONSENSUS-2026.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
-
-### Decisoes Tomadas
-
-- DEC-007 a DEC-010 da spec 0006, pelo usuario; resumo em `docs/DECISIONS.md`.
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum.
-
-### Pendencias
-
-- Nenhuma tarefa aberta. O proximo trabalho e planejar a implementacao da spec 0006 (criar as tarefas dela), que ainda nao tem nenhuma.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente, para desdobrar a spec 0006 em tarefas com portao, e o usuario para aprovar o plano antes da primeira rodada.
-- Motivo: a spec esta `Definida` com dez decisoes e nenhuma tarefa de implementacao; e trabalho tamanho-feature e merece plano antes de codigo.

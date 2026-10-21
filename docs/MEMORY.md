@@ -150,6 +150,10 @@ Exemplo de entrada:
 
 ### Armadilha
 
+- **Tentou:** portoes de bump (T-082, T-109, T-110) que conferem "a secao mais recente do CHANGELOG da skill", em 2026-10-21.
+- **Aconteceu:** cada bump seguinte envelhecia o portao da tarefa anterior: T-082 caiu para 7/8 depois da 2.13.0, T-109 e T-110 cairiam depois da 2.14.1 e da 2.15.0, sem defeito nenhum no produto.
+- **Por que nao serve:** portao de tarefa fechada que fica vermelho sozinho ensina a ignorar vermelho.
+- **Data:** 2026-10-21. Desfecho: T-109 e T-110 passaram a procurar a secao da propria versao (`## 2.14.0 - `, `## 2.14.1 - `). Portao novo de bump olha a secao da versao dele, nunca a mais recente.
 - **Tentou:** confiar que o frontmatter do `SKILL.md` estava valido porque o Claude Code carregava a skill e os portoes passavam, ate a 2.14.0 (2026-10-21).
 - **Aconteceu:** a T-108 pos no `description` a frase "camada GitHub do repositorio: comunidade"; o ": " num valor YAML sem aspas e invalido, e a 2.14.0 foi publicada assim. Nenhum portao fazia parse do frontmatter, e o Claude Code e tolerante. O `description` tambem passava do teto de 1024 do padrao Agent Skills desde a 2.13.0.
 - **Por que nao serve:** "a ferramenta carregou" nao prova YAML valido, e Codex e Gemini podem usar parser estrito. Texto em prosa com dois-pontos e natural em pt-BR, entao o erro volta.

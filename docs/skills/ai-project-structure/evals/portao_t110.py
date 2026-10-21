@@ -13,7 +13,7 @@ certo: o `description` tem 1479 caracteres. O texto novo foi aprovado pelo usuar
 3. fica a regra de nao disparar em pedido generico ("cria projeto", "inicia projeto novo",
    "monta a base"), com quem decide (usuario ou agente gestor) e a oferta em uma linha;
 4. `name` continua `ai-project-structure` e igual ao nome da pasta;
-5. versao coerente em 2.14.1 ou acima, com a secao mais recente do CHANGELOG da skill citando
+5. versao coerente em 2.14.1 ou acima, com a secao 2.14.1 do CHANGELOG da skill citando
    o `description`;
 6. sem travessao no `SKILL.md`; verificador em exit 0; raiz limpa em `--strict`.
 
@@ -49,8 +49,11 @@ def main():
     check(not faltam, "3. regra de nao disparar em pedido generico, com quem decide e oferta em uma linha",
           "faltam: %s" % faltam if faltam else "")
     check(campos.get("name", "").strip() == "ai-project-structure" == SKILL.name, "4. name igual ao nome da pasta")
-    versao, ok_versao, recente, detalhe = versao_coerente("2.14.1")
-    check(ok_versao and "description" in recente, "5. versao coerente em 2.14.1 ou acima, CHANGELOG citando o description", detalhe)
+    versao, ok_versao, _, detalhe = versao_coerente("2.14.1")
+    # A secao da 2.14.1, e nao a mais recente: o bump seguinte (2.15.0) envelhecia o check.
+    secao = re.search(r"^## 2\.14\.1 - .*?(?=^## )", ler(SKILL / "CHANGELOG.md"), re.M | re.S)
+    check(ok_versao and secao is not None and "description" in secao.group(0),
+          "5. versao coerente em 2.14.1 ou acima, e a secao 2.14.1 do CHANGELOG cita o description", detalhe)
     ok, detalhe_v = verify_ok()
     codigo, saida, _ = validar(ROOT, "--strict")
     check(chr(0x2014) not in skill and ok and codigo == 0, "6. sem travessao, verificador em exit 0 e raiz limpa em --strict",

@@ -6,7 +6,7 @@ certo: a skill esta em 2.13.0 e a raiz nao tem o bloco `github`.
 
 1. versao coerente em 2.14.0 ou acima (frontmatter, prosa, marcadores do core, specs e loop, e
    secao mais recente do CHANGELOG da skill); o partial `github` na mesma versao;
-2. a secao mais recente do CHANGELOG da skill cita `references/github.md`, `assets/github/` e o
+2. a secao 2.14.0 do CHANGELOG da skill cita `references/github.md`, `assets/github/` e o
    codigo `CONSENSO-ORIGEM-CORRIDA-INCOMPLETA` (T-104 no mesmo bump);
 3. a raiz tem o bloco `github` identico ao partial, depois do ultimo bloco gerenciado e antes de
    "## Regras Do Projeto";
@@ -37,8 +37,11 @@ def main():
     m = re.search(r"github:start\s+v(\d+\.\d+\.\d+)", parcial)
     check(ok_versao and m and m.group(1) == versao, "1. versao coerente em %s ou acima, partial github na mesma versao" % NOVA,
           "%s; partial=%s" % (detalhe, m.group(1) if m else "ausente"))
-    check(all(t in recente for t in ("references/github.md", "assets/github/", "CONSENSO-ORIGEM-CORRIDA-INCOMPLETA")),
-          "2. CHANGELOG da skill, secao mais recente, cita references/github.md, assets/github/ e o codigo da T-104")
+    # A secao da 2.14.0, e nao a mais recente: o bump seguinte (2.14.1) envelhecia o check.
+    secao = re.search(r"^## 2\.14\.0 - .*?(?=^## )", ler(SKILL / "CHANGELOG.md"), re.M | re.S)
+    secao = secao.group(0) if secao else ""
+    check(all(t in secao for t in ("references/github.md", "assets/github/", "CONSENSO-ORIGEM-CORRIDA-INCOMPLETA")),
+          "2. CHANGELOG da skill, secao 2.14.0, cita references/github.md, assets/github/ e o codigo da T-104")
 
     agents = ler(ROOT / "AGENTS.md")
     b_raiz, b_partial = RE_BLOCO.search(agents), RE_BLOCO.search(parcial)

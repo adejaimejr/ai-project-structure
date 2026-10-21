@@ -2,6 +2,24 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.14.1 - 2026-10-21
+
+Patch sem mudanca de comportamento. Marcadores `core`, `specs`, `loop` e `github` em v2.14.1;
+o conteudo dos blocos nao muda. Portao: `evals/portao_t110.py`.
+
+- O `description` do frontmatter do `SKILL.md` cai de 1479 para 982 caracteres, dentro do teto
+  de 1024 do padrao Agent Skills (agentskills.io/specification), que a 2.13.0 ja passava (1394).
+  Ficam todos os gatilhos (estrutura multiagente, converter, atualizar, validar, specs, loop,
+  modulo github, consenso) e a regra de nao disparar em pedido generico de criar projeto. Saem
+  o gatilho redundante "scaffold Markdown multiagente", o detalhe dos perfis do loop (que esta no
+  corpo) e exemplos repetidos. Texto aprovado pelo usuario (T-110).
+- Conserto: o `description` da 2.14.0 tinha ": " no meio de um valor sem aspas ("camada GitHub do
+  repositorio: comunidade"), YAML invalido que o Claude Code carrega por ser tolerante e que um parser
+  estrito recusa. O texto novo nao tem ": " nem " #".
+- `evals/verify_repository.py` ganha a etapa `verificar_frontmatter`: YAML seguro em valor sem aspas,
+  `description` com 1 a 1024 caracteres e `name` no formato do padrao. Aplicada ao `SKILL.md` da 2.14.0,
+  reprova os dois defeitos.
+
 ## 2.14.0 - 2026-10-21
 
 Bump que leva o modulo opcional `github` (spec 0007) e a correcao de corrida incompleta na

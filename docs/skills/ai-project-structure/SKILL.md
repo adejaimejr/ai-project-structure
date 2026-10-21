@@ -1,7 +1,7 @@
 ---
 name: ai-project-structure
-version: "2.14.0"
-description: Cria, atualiza e valida a estrutura Markdown multiagente (AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ com SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS etc) em projeto que sera tocado por varias IAs ou por varias sessoes. Use quando o pedido nomear essa estrutura ou seus arquivos ("estrutura multiagente", "scaffold Markdown multiagente", "AGENTS.md e docs/", "memoria do projeto em docs/") ou citar a skill pelo nome; e para converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ativar o modulo de specs (docs/specs/) em um projeto existente, ou ativar, rodar e configurar o modulo de loop (perfis de modelo e esforco por intencao e ferramenta), ou ativar o modulo github (camada GitHub do repositorio: comunidade, templates, CI), ou rodar uma rodada de consenso automatizada com outros modelos ("roda um consenso", "pede uma segunda opiniao a outros modelos", "revalida o achado com outro modelo", "retoma a rodada de consenso"). NAO dispare sozinha em pedido generico de criar projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto novo", "monta a base", "cria a pasta") que nao mencione a estrutura multiagente nem seus arquivos; decidir se o projeto precisa dela e de quem coordena (o usuario ou o agente gestor), e nesse caso, no maximo, ofereca a estrutura em uma linha. Esta skill cria os arquivos de fato, nao apenas explica como criar.
+version: "2.14.1"
+description: Cria, atualiza e valida a estrutura Markdown multiagente (AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ com SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS) para projeto tocado por varias IAs ou sessoes. Use quando o pedido citar essa estrutura, seus arquivos ou a skill pelo nome ("estrutura multiagente", "AGENTS.md e docs/", "memoria do projeto em docs/"); para converter um diretorio, ATUALIZAR para a versao nova da skill ou VALIDAR a estrutura; para ativar specs, ativar, rodar ou configurar o loop, ou ativar o modulo github (comunidade, templates, CI); ou para rodar consenso com outros modelos ("roda um consenso", "segunda opiniao", "revalida o achado", "retoma a rodada"). NAO dispare sozinha em pedido generico de criar projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto novo", "monta a base") que nao cite a estrutura; quem decide se o projeto precisa dela e o usuario ou o agente gestor, e no maximo ofereca em uma linha. Cria os arquivos de fato.
 ---
 
 # AI Project Structure
@@ -195,7 +195,7 @@ No final, liste de forma curta:
 
 - caminho absoluto do destino;
 - nivel escolhido (completa ou minimal), se o modulo de specs foi ativado e se o modulo `github` foi ativado (e em que lingua);
-- versao da estrutura: 2.14.0;
+- versao da estrutura: 2.14.1;
 - arquivos criados (em arvore);
 - proximo passo sugerido: preencher os demais campos de `PROJECT_CONTEXT.md` e adicionar tarefas iniciais em `TASKS.md`;
 - oferta: "quer validar a estrutura? `python3 <dir-desta-skill>/scripts/validate_structure.py <destino>`".

@@ -360,6 +360,7 @@ ETAPAS = [
     "verificar_controle_do_debate",
     "verificar_blocos",
     "verificar_versao",
+    "verificar_frontmatter",
     "verificar_convencoes",
     "verificar_progresso_de_specs",
     "verificar_evals_json",
@@ -685,6 +686,37 @@ def verificar_versao(res, verbose=False):
         f"secao mais recente do CHANGELOG so cita v{versao}",
         f"encontradas: {', '.join(sorted(set(changelog_prosa))) or 'nenhuma'}",
     )
+
+
+def verificar_frontmatter(res, verbose=False):
+    """Frontmatter do SKILL.md: YAML que um parser estrito aceita e os tetos do padrao Agent Skills.
+
+    Na 2.14.0 o `description` saiu com ": " no meio de um valor sem aspas, YAML invalido que o
+    Claude Code carregou por ser tolerante e que um parser estrito recusa. Sem PyYAML (so
+    biblioteca padrao), a etapa cobra a forma segura: valor sem aspas nao tem ": " nem " #" e
+    nao comeca por indicador YAML."""
+    texto = read(SKILL / "SKILL.md")
+    m = re.match(r"^---\n(.*?)\n---\n", texto, re.S)
+    if not res.check(m is not None, "SKILL.md abre com frontmatter entre ---"):
+        return
+    campos, inseguros = {}, []
+    for linha in m.group(1).splitlines():
+        c = re.match(r"^([A-Za-z][\w-]*):\s*(.*)$", linha)
+        if not c:
+            continue
+        chave, valor = c.group(1), c.group(2)
+        campos[chave] = valor.strip('"')
+        aspas = len(valor) >= 2 and valor[0] == valor[-1] and valor[0] in "\"'"
+        if valor and not aspas and (": " in valor or " #" in valor or valor[0] in "[]{}&*!|>%@`\"'"):
+            inseguros.append(chave)
+    res.check(not inseguros, "frontmatter do SKILL.md em YAML seguro (sem ': ' nem ' #' em valor sem aspas)",
+              ", ".join(inseguros))
+    desc = campos.get("description", "")
+    res.check(1 <= len(desc) <= 1024, "description do SKILL.md com 1 a 1024 caracteres (padrao Agent Skills)",
+              f"{len(desc)} caracteres")
+    nome = campos.get("name", "")
+    res.check(nome == SKILL.name and re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", nome or "-") is not None and len(nome) <= 64,
+              "name do SKILL.md igual a pasta e no formato do padrao Agent Skills", nome)
 
 
 def verificar_convencoes(res, verbose=False):

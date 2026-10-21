@@ -64,6 +64,7 @@ HOJE_RE = re.compile(r"\{\{HOJE([+-]\d+)?\}\}")
 # sumiu; ao acrescentar testes, suba o piso junto.
 LOOP_TESTES_MINIMO = 83
 CONSENSO_TESTES_MINIMO = 95
+CLOUDROOM_TESTES_MINIMO = 56
 
 # Criterio de aceite da spec 0005: o aviso do ponto cego e permanente no bloco
 # core, entao todo projeto paga a leitura dele. Quatro linhas e o teto.
@@ -367,6 +368,7 @@ ETAPAS = [
     "verificar_scripts",
     "verificar_testes_do_loop",
     "verificar_testes_do_consenso",
+    "verificar_testes_do_cloudroom",
     "verificar_travessao",
     "verificar_sem_pycache",
     "verificar_install",
@@ -841,6 +843,7 @@ def verificar_scripts(res, verbose):
         ("scripts/validate_structure.py", compila),
         ("scripts/loop_task.py", compila),
         ("scripts/consenso.py", compila),
+        ("scripts/cloudroom_agente.py", compila),
         ("scripts/loop.sh", ["bash", "-n"]),
     ):
         caminho = SKILL / rel
@@ -887,6 +890,26 @@ def verificar_testes_do_consenso(res, verbose):
     total = int(m.group(2)) if m else 0
     res.check(total >= CONSENSO_TESTES_MINIMO,
               f"bateria do consenso com pelo menos {CONSENSO_TESTES_MINIMO} verificacoes",
+              f"{total} verificacoes")
+    if p.returncode != 0 and verbose:
+        print(p.stdout)
+        print(p.stderr)
+
+
+def verificar_testes_do_cloudroom(res, verbose):
+    """Bateria do adaptador Cloudroom, com room-cli falso: sem modelo e sem thread real."""
+    teste = EVALS / "test_cloudroom_agente.py"
+    if not teste.is_file():
+        res.check(False, "evals/test_cloudroom_agente.py existe", "arquivo ausente")
+        return
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    p = subprocess.run([sys.executable, str(teste)], capture_output=True, text=True, env=env)
+    resumo = next((l for l in p.stdout.splitlines() if "verificacoes passaram" in l), "")
+    res.check(p.returncode == 0, "bateria do adaptador Cloudroom", resumo.strip())
+    m = re.search(r"(\d+)/(\d+) verificacoes passaram", resumo)
+    total = int(m.group(2)) if m else 0
+    res.check(total >= CLOUDROOM_TESTES_MINIMO,
+              f"bateria do adaptador Cloudroom com pelo menos {CLOUDROOM_TESTES_MINIMO} verificacoes",
               f"{total} verificacoes")
     if p.returncode != 0 and verbose:
         print(p.stdout)

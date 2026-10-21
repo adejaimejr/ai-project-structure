@@ -143,3 +143,4 @@ Antes de gravar qualquer bruto, a operacao varre stdout e stderr atras de: chave
 - Um argumento de comando aceita cerca de 128KB no Linux: prompt maior falha na execucao do agente (exit 127, registrado como falha dele) e nunca e truncado.
 - A entrada e escrita so em `CONSENSUS.md` com fim de linha LF.
 - Os campos `**Metodo:**` e `**Exposicao previa a outras posicoes:**` agora descrevem um fato da execucao, mas o validador continua checando forma, nao veracidade.
+- O filho do Cloudroom (`scripts/cloudroom_agente.py`) nao entra como participante: ele roda na pasta da thread, onde o `consenso.py` grava o bruto de cada participante, o que quebra a rodada 1 cega, e a sandbox propria nao devolve a resposta. Detalhe em `references/cloudroom.md`.

@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (skill 2.15.0: adaptador Cloudroom documentado, T-102; T-111 aberta para a bancada)
+
+- T-102: `references/cloudroom.md`, `SKILL.md`, `references/loop.md` e `references/consenso.md` apontando para o adaptador; bump 2.15.0 com secao no CHANGELOG da skill. PR #5 rebaseado sobre a 2.14.1. T-111 criada como tarefa real da bancada da T-103.
+
 ## 2026-10-21 (skill 2.14.1: description dentro do padrao Agent Skills)
 
 - T-110: `description` do `SKILL.md` de 1479 para 985 caracteres, com texto aprovado pelo usuario; conserto do YAML invalido (": " em valor sem aspas) que a 2.14.0 publicou; etapa `verificar_frontmatter` no verificador (88 verificacoes).
@@ -9,6 +13,10 @@ Historico de mudancas relevantes.
 ## 2026-10-21 (skill 2.14.0: modulo opcional github e corrida incompleta no validador)
 
 - Spec 0007 `Concluida` e T-104: modulo `github` (assets em en e pt-BR, partial, pergunta 5, `references/github.md`, codigos `GITHUB-*`, fixture e evals 13 e 14), ativo nesta raiz; AVISO `CONSENSO-ORIGEM-CORRIDA-INCOMPLETA`. Subagentes Sonnet 5.5 executaram, o coordenador Opus 5.5 revisou e publicou: PR #6, tag `v2.14.0`, Release 2.14.0 pelo `release.yml` no push da tag, pela primeira vez. Verificador 84/84. T-110 aberta (`description` do `SKILL.md` acima de 1024 caracteres).
+
+## 2026-10-21 (spec 0008: adaptador Cloudroom e bateria, T-100 e T-101, em PR sem merge)
+
+- `scripts/cloudroom_agente.py` (T-100, portao 17/17) e `evals/test_cloudroom_agente.py` com 56 verificacoes e etapa no verificador (T-101, portao 6/6, verificador 81/81), na branch `spec-0008/adaptador`. Sem bump: o merge espera a tag `v2.14.0` da spec 0007, porque o zip da Release empacota `scripts/` inteiro.
 
 ## 2026-10-21 (spec 0008 commitada; spec 0006 concluida; ordem entre 0007 e 0008)
 

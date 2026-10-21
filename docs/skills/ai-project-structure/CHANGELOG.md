@@ -2,6 +2,25 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.15.0 - 2026-10-21
+
+Bump que leva o adaptador Cloudroom (spec 0008). Marcadores `core`, `specs`, `loop` e `github`
+em v2.15.0; o conteudo dos blocos nao muda. Portoes: `evals/portao_t100.py`,
+`evals/portao_t101.py` e `evals/portao_t102.py`.
+
+- `scripts/cloudroom_agente.py`: faz um filho do Cloudroom se comportar como CLI headless
+  (prompt como ultimo argumento, resposta integral no stdout, exit codes 0, 1, 2 e 143). Chama
+  `room-cli thread spawn --shared-sandbox` e consulta `thread output ID --all` ate o filho
+  terminar; SIGTERM vira `thread stop`. Serve de `--agente` ao `loop.sh`, em thread do
+  Cloudroom, com `--projeto` igual a pasta da thread. So biblioteca padrao do python3.
+- `evals/test_cloudroom_agente.py` e `evals/mock_room_cli.py`: bateria do adaptador contra um
+  `room-cli` falso, copia da CLI de 2026-10-21 (pode envelhecer).
+- `references/cloudroom.md`: uso, tabela de exit codes e limites declarados (nao serve ao
+  `consenso.py`, sandbox propria fica fora, thread Local no Mac nao foi exercitada, o loop so
+  vale na pasta da thread). `SKILL.md`, a tabela de ferramentas de `references/loop.md` e os
+  limites de `references/consenso.md` passam a apontar para ele.
+- `evals/portao_t102.py`: portao da documentacao e do bump.
+
 ## 2.14.1 - 2026-10-21
 
 Patch sem mudanca de comportamento. Marcadores `core`, `specs`, `loop` e `github` em v2.14.1;

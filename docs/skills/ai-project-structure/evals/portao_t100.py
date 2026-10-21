@@ -81,7 +81,7 @@ def main():
         except SyntaxError:
             pass
     check(existe and compila and so_stdlib, "1. scripts/cloudroom_agente.py existe, compila e importa so biblioteca padrao",
-          "ausente" if not existe else ("nao compila" if not compila else "import fora da stdlib"))
+          "ausente" if not existe else ("nao compila" if not compila else ("import fora da stdlib" if not so_stdlib else "")))
     check(existe and not re.search(r"sed -i|\bperl\b|\btimeout \d|\bsetsid\b", fonte),
           "1b. sem sed -i, perl, timeout(1) ou setsid (portabilidade nos tres sistemas)")
 
@@ -201,7 +201,21 @@ def main():
 
     with tempfile.TemporaryDirectory() as tmp:
         _, estado, env = mock.instalar(tmp, "ok")
-        codigo, out, err = rodar(env, "--provider", "claude-code", "--intervalo", "0.2", prompt="y" * (mock.LIMITE_PROMPT + 1))
+        # O Linux limita cada argumento a 131072 bytes (MAX_ARG_STRLEN): um prompt de 262145 bytes
+        # nao passa por exec. Achado pelo subagente da T-100 em 2026-10-21. O prompt vai por arquivo
+        # e o adaptador roda por runpy num subprocesso, com o argv montado dentro dele: continua caixa-preta.
+        grande = Path(tmp) / "prompt-grande.txt"
+        grande.write_text("y" * (mock.LIMITE_PROMPT + 1), encoding="utf-8")
+        ponte = ("import runpy, sys\n"
+                 "w, f = sys.argv[1], sys.argv[2]\n"
+                 "sys.argv = [w, '--provider', 'claude-code', '--intervalo', '0.2', open(f, encoding='utf-8').read()]\n"
+                 "runpy.run_path(w, run_name='__main__')\n")
+        if existe:
+            p = subprocess.run([sys.executable, "-c", ponte, str(WRAPPER), str(grande)], capture_output=True, text=True,
+                               errors="replace", env=env, stdin=subprocess.DEVNULL, timeout=60)
+            codigo, out, err = p.returncode, p.stdout, p.stderr
+        else:
+            codigo, out, err = None, "", ""
         check(codigo == 1 and not mock.por_comando(estado, "output") and "262144" in err,
               "11. prompt acima de 262144 bytes: a CLI recusa, o adaptador sai 1 com a mensagem e nao consulta nada",
               "exit %s" % codigo)

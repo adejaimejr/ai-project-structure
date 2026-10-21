@@ -1,6 +1,6 @@
 ---
 name: ai-project-structure
-version: "2.14.1"
+version: "2.15.0"
 description: Cria, atualiza e valida a estrutura Markdown multiagente (AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ com SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS) para projeto tocado por varias IAs ou sessoes. Use quando o pedido citar essa estrutura, seus arquivos ou a skill pelo nome ("estrutura multiagente", "AGENTS.md e docs/", "memoria do projeto em docs/"); para converter um diretorio, ATUALIZAR para a versao nova da skill ou VALIDAR a estrutura; para ativar specs, ativar, rodar ou configurar o loop, ou ativar o modulo github (comunidade, templates, CI); ou para rodar consenso com outros modelos ("roda um consenso", "segunda opiniao", "revalida o achado", "retoma a rodada"). NAO dispare sozinha em pedido generico de criar projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto novo", "monta a base") que nao cite a estrutura; quem decide se o projeto precisa dela e o usuario ou o agente gestor, e no maximo ofereca em uma linha. Cria os arquivos de fato.
 ---
 
@@ -195,7 +195,7 @@ No final, liste de forma curta:
 
 - caminho absoluto do destino;
 - nivel escolhido (completa ou minimal), se o modulo de specs foi ativado e se o modulo `github` foi ativado (e em que lingua);
-- versao da estrutura: 2.14.1;
+- versao da estrutura: 2.15.0;
 - arquivos criados (em arvore);
 - proximo passo sugerido: preencher os demais campos de `PROJECT_CONTEXT.md` e adicionar tarefas iniciais em `TASKS.md`;
 - oferta: "quer validar a estrutura? `python3 <dir-desta-skill>/scripts/validate_structure.py <destino>`".
@@ -242,6 +242,8 @@ Quando o usuario pedir para rodar o loop em uma tarefa (ex: "roda o loop na T-04
 6. **Rode e reporte** o que aconteceu, traduzindo o exit code: 0 fechou com evidencia, 2 o portao falhou em todas as tentativas, 3 a tarefa foi para "Aguardando Usuario" com uma pergunta, 4 o comando do agente esta mal configurado. Em 3, mostre a pergunta que ficou registrada.
 
 A tabela de comandos por ferramenta, as armadilhas de flag e o formato dos perfis estao em `references/loop.md`.
+
+Dentro de uma thread do Cloudroom, o `--agente` pode ser `scripts/cloudroom_agente.py`, que roda a tarefa como filho visivel na barra do Cloudroom. Uso, exit codes e limites (inclusive o de que o `--projeto` tem de ser a pasta da thread) estao em `references/cloudroom.md`.
 
 **Configurar os perfis**: quando o usuario pedir para ver, trocar ou criar perfil ("configura os perfis do loop", "que modelo o loop esta usando", "quero trocar o modelo"), siga a secao "Configurar Os Perfis" de `references/loop.md`. Ela mostra o que existe hoje, pergunta o que mudar com opcoes numeradas e confirma os nomes de modelo na propria CLI antes de gravar.
 

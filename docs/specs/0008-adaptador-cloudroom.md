@@ -64,6 +64,7 @@ Julgados na mao:
 - T-101: bateria, etapa no verificador e loop de ponta a ponta
 - T-102: documentacao e bump
 - T-103: perfil em `MEMORY.md` e bancada real (agente de chat)
+- T-111: tarefa real e pequena para a bancada da T-103 (detalhe do check 1 do `portao_t102.py`)
 
 ## Perguntas Abertas
 

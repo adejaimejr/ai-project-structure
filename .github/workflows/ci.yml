@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: gates (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
+
+      - name: Validate structure (strict)
+        run: python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict
+
+      - name: Verify repository
+        run: python3 docs/skills/ai-project-structure/evals/verify_repository.py
+
+  # Single status check named "ci" for the main ruleset: matrix checks carry an
+  # "(os)" suffix, so this job aggregates them under one stable name.
+  ci:
+    name: ci
+    needs: gates
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any matrix job did not succeed
+        env:
+          GATES_RESULT: ${{ needs.gates.result }}
+        run: |
+          echo "gates result: $GATES_RESULT"
+          test "$GATES_RESULT" = "success"

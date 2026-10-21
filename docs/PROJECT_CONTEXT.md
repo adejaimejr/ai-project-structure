@@ -16,7 +16,7 @@ Manter a estrutura Markdown multiagente (AGENTS.md + pontes + memoria em `docs/`
 - Estrutura v1 validada por tri-consenso (Claude + Gemini + Codex) em 2026-04-25.
 - Skill empacotada no Agent Skills Open Standard e instalada nas tres ferramentas em 2026-05-26.
 - v2 desenvolvida em 2026-08-20, inspirada na analise da metodologia specsfy: entrevista numerada, regra "Nunca Inferir", IDs T-NNN, blocos gerenciados com versao, validador Python, modulo opcional de specs e proibicao de travessao.
-- Skill em 2.12.0 (2026-10-17). Camada GitHub do repositorio (CI, tags e releases, protecao de `main`, arquivos de comunidade, README em ingles) em adocao desde 2026-10-20; vira o modulo opcional `github` da skill na 2.14.0 (spec 0007).
+- Skill em 2.14.0 (2026-10-21), publicada como Release no GitHub a cada versao desde a 2.12.0. A camada GitHub do repositorio (CI, tags e releases, rulesets de `main`, arquivos de comunidade, README em ingles), adotada em 2026-10-20, virou o modulo opcional `github` da skill (spec 0007), ativo nesta raiz.
 
 ## Preferencias
 

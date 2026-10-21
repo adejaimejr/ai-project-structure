@@ -1,6 +1,6 @@
 # Spec 0007 - Modulo opcional `github` (skill 2.14.0)
 
-**Status:** Em andamento
+**Status:** Concluida
 **Criada em:** 2026-10-21
 **Esforco:** M. Toca validador, verificador, `SKILL.md`, assets, referencia, evals e fixture, mas tudo no molde ja existente dos modulos specs e loop; nenhum mecanismo novo.
 
@@ -99,5 +99,5 @@ Respostas as Perguntas Abertas, aceitas pelo usuario em 2026-10-21 no chat ("P-1
 
 ## Evidencia De Conclusao
 
-- Verificacao: (A preencher.)
-- Resultado: (A preencher.)
+- Verificacao: `python3 docs/skills/ai-project-structure/evals/portao_t106.py` a `portao_t109.py`, `evals/verify_repository.py` e `scripts/validate_structure.py . --strict` em 2026-10-21, depois de T-105 a T-109 concluidas em `docs/TASKS.md` com evidencia; CI do PR #6 em Linux e macOS; run 39663549782 do `release.yml` pela tag `v2.14.0`; e o passo de validacao do `ci.yml` gerado contra a Release 2.14.0 real.
+- Resultado: T-106 11/11, T-107 9/9, T-108 9/9, T-109 6/6, verificador 84/84, `--strict` 0 erros e 0 avisos; `ci` verde nos dois sistemas; Release 2.14.0 publicada pelo workflow com 58 arquivos e `.sha256` conferido; o passo gerado saiu 0 num projeto limpo e 1 com travessao injetado.

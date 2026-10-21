@@ -149,6 +149,10 @@ Exemplo de entrada:
 
 ### Armadilha
 
+- **Tentou:** deixar o subagente Sonnet da T-109 rodar sozinho os portoes demorados (o verificador instala a skill nos tres destinos e leva minutos), em 2026-10-21.
+- **Aconteceu:** ele mandou os portoes para segundo plano e encerrou o turno com "aguardo o resultado", sem saida nenhuma; a thread ficou ociosa e poderia acordar sozinha quando o segundo plano terminasse, mexendo nos arquivos durante o commit.
+- **Por que nao serve:** o retorno de um subagente e o relatorio que o coordenador revisa; sem a saida do portao, nao ha o que revisar.
+- **Data:** 2026-10-21. Desfecho: o coordenador rodou os portoes, conferiu 6/6 e parou a thread com `room-cli thread stop` antes do commit. Na mensagem de delegacao, peca os portoes em primeiro plano.
 - **Tentou:** publicar a Release 2.13.0 pelo `release.yml` empurrando a tag `v2.13.0` em `a480ed0`, e depois disparar o workflow e criar o ruleset de `main` pelo token `gh` desta sandbox Cloudroom, em 2026-10-21.
 - **Aconteceu:** a tag nao disparou nada, porque push de tag roda o workflow que existe no commit tagueado, e `a480ed0` e anterior ao `release.yml`. O `gh workflow run` e o `POST .../rulesets` deram HTTP 403: o token tem contents e pull requests, mas nao Actions: write nem Administration.
 - **Por que nao serve:** tag em commit anterior ao workflow nunca o dispara; para publicar versao antiga existe o `workflow_dispatch` com entrada `tag`. Configuracao de repositorio e dispatch dependem do usuario conceder permissao ou agir pela UI.

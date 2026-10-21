@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (skill 2.14.0: modulo opcional github e corrida incompleta no validador)
+
+- Spec 0007 `Concluida` e T-104: modulo `github` (assets em en e pt-BR, partial, pergunta 5, `references/github.md`, codigos `GITHUB-*`, fixture e evals 13 e 14), ativo nesta raiz; AVISO `CONSENSO-ORIGEM-CORRIDA-INCOMPLETA`. Subagentes Sonnet 5.5 executaram, o coordenador Opus 5.5 revisou e publicou: PR #6, tag `v2.14.0`, Release 2.14.0 pelo `release.yml` no push da tag, pela primeira vez. Verificador 84/84. T-110 aberta (`description` do `SKILL.md` acima de 1024 caracteres).
+
 ## 2026-10-21 (spec 0008 commitada; spec 0006 concluida; ordem entre 0007 e 0008)
 
 - Planejamento da spec 0008 commitado como a outra thread deixou. Spec 0006 `Concluida`. Consenso da T-083: rodada 1 arquivada (falha de ambiente), rodada 2 resolvida com decisao e T-104 (AVISO de proveniencia incompleta no validador). Ordem: spec 0007 na 2.14.0 depois da T-105 (P-1 a P-4); T-100 e T-101 em branch sem merge ate `v2.14.0`; T-102 na 2.15.0.

@@ -5,6 +5,7 @@ Historico de mudancas relevantes.
 ## 2026-10-21 (camada GitHub publicada: CI, tags, Releases 2.12.0 e 2.13.0)
 
 - PR #2 (`ci.yml`, T-092 e T-093) e PR #3 (comunidade, `release.yml`, READMEs, spec 0007; T-096 a T-099) mergeados com `ci` verde em Linux e macOS. Tags anotadas v2.4.0 a v2.13.0; Releases 2.12.0 e 2.13.0 com zip e `.sha256`, pelos passos do `release.yml` rodados localmente. O `release.yml` ganhou `workflow_dispatch` com entrada `tag`. Perfil de comunidade em 100. Ruleset (T-094) e evidencia de run real do workflow (T-097) aguardam o usuario: o token desta sandbox nao tem Administration nem Actions: write.
+- Com as permissoes concedidas: rulesets `main` (delecao e force push) e `main-ci` (check `ci`, bypass do admin) ativos (T-094); `release.yml` consertado no PR #4 (`runner.temp` no `env` do job, achado pelo primeiro dispatch e conferido com `actionlint`) e Release 2.13.0 republicada pelo workflow (T-097). Camada GitHub completa.
 
 ## 2026-10-21 (camada GitHub escrita e revisada, spec 0007 aberta; acoes externas aguardando o usuario)
 

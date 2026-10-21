@@ -57,6 +57,7 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - **Ruleset**: ao montar o JSON, apareceu que check obrigatorio em ruleset tambem rejeita push direto em `main`, contra a regra de `AGENTS.md` que deixa mudanca so em `docs/` ir direta. Proposta em T-094: dois rulesets (abaixo). Nada criado.
 - Conferencias: perfil de comunidade em 100; badge do CI `passing`; badge de Release em v2.13.0.
 - Registro: T-092, T-093, T-095, T-096 e T-098 em Concluidas com evidencia; T-094 e T-097 continuam em "Aguardando Usuario" com pergunta nova; Armadilha nova em `MEMORY.md`; linha no `CHANGELOG.md`. Commit de docs direto em `main`.
+- **Segunda volta, depois de o usuario conceder Administration e Actions: write e escolher os dois rulesets pela recomendacao do agente**: rulesets `main` (25565596) e `main-ci` (25565599) criados e ativos, bypass do admin conferido (`current_user_can_bypass: always`); T-094 fechada. Release 2.13.0 apagada (tag mantida) para o workflow republicar; o dispatch deu HTTP 422 porque `runner.temp` nao vale no `env` do job, entao o `release.yml` nunca tinha sido aceito pelo GitHub, nem em push de tag. A simulacao local rodava o script de cada passo direto e nao avaliava as expressoes `${{ }}`. Conserto no PR #4 (`0d066cd`), conferido com `actionlint` 1.7.12 (acusa a versao antiga, limpo na nova); run 39637733376 em success, Release 2.13.0 Latest por `github-actions[bot]`, `sha256sum -c` OK; T-097 fechada. A Release ficou fora do ar por cerca de 10 minutos, e nao 1 como avisado, por causa do conserto.
 
 ### Rulesets Propostos (T-094)
 
@@ -89,13 +90,13 @@ JSON
 
 ### Pendencias
 
-- Do usuario: T-094 (concordar com os dois rulesets e cria-los, ou conceder Administration: write); T-097 (evidencia de run real do workflow na `v2.14.0`, ou conceder Actions: write). Refletidas em "Aguardando Usuario".
+- Nenhuma da camada GitHub: T-092 a T-099 concluidas. Candidato a tarefa futura, nao aberto: rodar `actionlint` no CI quando `.github/workflows/` mudar.
 - O trabalho da sessao da spec 0008 continua sem commit na arvore compartilhada, como ela pediu.
 
 ### Proximo Passo Recomendado
 
-- Agente sugerido (ou "qualquer agente"): o usuario, para T-094; depois qualquer agente com `gh` autenticado e permissao de admin.
-- Motivo: o que resta da camada GitHub e permissao de repositorio, que so o dono concede.
+- Agente sugerido (ou "qualquer agente"): qualquer agente com contexto, para a spec 0007 (modulo `github`, skill 2.14.0) ou a execucao da spec 0008; a tag `v2.14.0` sera o primeiro push de tag a disparar o `release.yml`.
+- Motivo: a camada GitHub do repositorio esta completa; o proximo trabalho e a skill.
 
 ## 2026-10-21 - Claude Fable 5.1 (gestor) com subagentes Sonnet 5.5 (camada GitHub, T-092 a T-099)
 

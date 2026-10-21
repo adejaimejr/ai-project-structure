@@ -20,6 +20,26 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-10-20 - ai-memory (akitaonrails) e camada complementar, fora do repositorio; nao mesclar
+
+### Decisao
+
+- O projeto `github.com/akitaonrails/ai-memory` nao entra no ai-project-structure nem como codigo nem como dependencia. Os dois atendem o mesmo problema (continuidade entre sessoes e entre vendors) em camadas diferentes: o ai-project-structure e o arquivo de regras e o registro revisado dentro do repositorio (`AGENTS.md`, `docs/`); o ai-memory e infraestrutura fora do repositorio (servidor Rust com MCP, hooks, SQLite FTS5, wiki propria) que, pela precedencia que ele mesmo declara, fica abaixo do arquivo de regras e nao duplica registro de decisao mantido no repo.
+- Do ai-memory importam-se ideias, em texto do bloco core, das pontes e do template de `MEMORY.md`, nunca mecanismo: import real `@AGENTS.md` nas pontes, memoria tratada como evidencia e nao instrucao, releitura de `SESSION.md` e `TASKS.md` apos compactacao de contexto, medicao do orcamento de instrucoes de `AGENTS.md` e tipo "Armadilha" em `MEMORY.md`. Tarefas T-087 a T-091, escolhidas pelo usuario.
+- Receita de coexistencia (alguem instalar o ai-memory ao lado da estrutura) ficou de fora por escolha do usuario; sobra a nota curta em `docs/MEMORY.md`.
+
+### Motivo
+
+- `PROJECT_CONTEXT.md` poe CLI propria fora de escopo e exige validador so com biblioteca padrao; absorver ou depender de um servidor Rust contraria as duas restricoes.
+- O proprio ai-memory tracou a fronteira: precedencia usuario, rules file, memoria, perfil; o snippet que ele injeta em `AGENTS.md` diz que registro de decisao mantido no repositorio nao e store local de harness e que ele nao o duplica. Mesclar apagaria uma fronteira que os dois lados ja respeitam.
+- A memoria da estrutura viaja no git do projeto (clone, PR, outra maquina, outra pessoa) sem servico rodando; a do ai-memory exige servidor ou o companion `wikisync`.
+- Nao ha relacao de origem entre os projetos: nenhum cita o outro; linhagens distintas (Karpathy LLM Wiki, basic-memory e agentmemory de um lado; specsfy e Handoff do davidondrej do outro). A convergencia (`AGENTS.md` canonico, `CLAUDE.md` de ponte, Markdown como fonte) e independente.
+
+### Impacto
+
+- Nenhum arquivo da skill muda por esta decisao; as adocoes entram pelas tarefas, com bump 2.13.0 quando tocarem o bloco core, os assets de ponte ou o template de `MEMORY.md`.
+- A analise completa (camadas, mapa de sobreposicao, o que nao importar) fica na entrada de `SESSION.md` de 2026-10-20; quem reavaliar o ai-memory parte dela, nao do zero.
+
 ## 2026-10-17 - Contexto de delegacao viaja na mensagem, nunca em arquivo temporario
 
 ### Decisao

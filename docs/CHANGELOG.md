@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-20 (analise do ai-memory, decisao de nao mesclar)
+
+- Analise de `github.com/akitaonrails/ai-memory` contra a estrutura: sem relacao de origem, camadas complementares (ele e infraestrutura fora do repo e se poe abaixo do rules file; nos somos o rules file e o registro no repo), nao mesclar. Decisao em `docs/DECISIONS.md`, referencia em `docs/MEMORY.md`, cinco tarefas de adocao de ideias em `docs/TASKS.md` (T-087 pontes com `@AGENTS.md`, T-088 memoria e evidencia, T-089 recarga apos compactacao, T-090 orcamento de instrucoes, T-091 tipo Armadilha), escolhidas pelo usuario entre seis propostas. Nenhum arquivo da skill mudou; bump 2.13.0 fica para as tarefas. Validador `--strict` 0 erros e 0 avisos; verificador 74/74.
+
 ## 2026-10-17 (skill 2.12.0, T-086: bump levando Passagem De Trabalho)
 
 - Skill 2.12.0: `version` e prosa do `SKILL.md`, marcadores `core`, `specs` e `loop` em v2.12.0 nos assets, nos partials e no `AGENTS.md` da raiz, sem mudar o conteudo dos blocos. Secao `## 2.12.0` no CHANGELOG da skill com os dois itens escritos depois da publicacao da 2.11.0 (gatilhos da `description`; secao Passagem De Trabalho e passo 2 de `atualizacao.md`), migrados por decisao do usuario; a 2.11.0 publicada fica com um conteudo so de bloco core e o fluxo de atualizacao oferece o bloco pelo caminho normal. Linhas de T-078 a T-082 em `docs/TASKS.md` passam a "a versao ja e 2.12.0, nao suba de novo". Portao `evals/portao_t086.py` (6/8 antes, 8/8 depois) com quatro mutacoes acusando; verificador 74/74; validador `--strict` limpo; reinstalada nos tres destinos com paridade por `cmp`. `SESSION.md` rotacionado (duas entradas de 2026-09-04 para o archive).

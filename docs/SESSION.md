@@ -41,6 +41,43 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-10-20 - Claude (analise do ai-memory de akitaonrails)
+
+### Objetivo
+
+- Responder se `github.com/akitaonrails/ai-memory` tem relacao com o ai-project-structure, se algo de la vale importar e se os dois deveriam ser mesclados.
+
+### O Que Foi Feito
+
+- Leitura do ai-memory pela API do GitHub, sem clonar: README, `AGENTS.md`, `INSTALL_FOR_AGENTS.md`, `DATA_HANDLING.md`, `docs/usage.md` (precedencia regras, memoria, perfil; compaction recap), `docs/cookbook.md`, `docs/comparison.md`, `docs/design-rules-promotion.md`, `docs/design-handoff-offer-not-claim.md`, as quatro Agent Skills de roteamento (`handoff`, `durable-pages`, `retrieval`, `learning-maintenance`), o README do companion `wikisync` e o snippet que ele injeta em `AGENTS.md` (`routing_snippet.rs`). Mapa do nosso lado por subagente Explore (layout, scripts, modelo de memoria, tarefas abertas, limites reconhecidos).
+- O que ele e: binario Rust (11,9 mil stars, MIT) com servidor MCP/HTTP, hooks de ciclo de vida em mais de vinte harnesses, wiki Markdown propria em `<data_dir>/wiki/` com indice SQLite FTS5 (vetores opcionais), handoff tipado claim-once, perfil cross-project, decay e compactacao reversiveis, zero LLM e dado local por padrao.
+- Veredito: sem relacao de origem (nenhum cita o outro; linhagens distintas), convergencia de desenho (`AGENTS.md` canonico, `CLAUDE.md` ponte, Markdown fonte). Camadas diferentes: nos somos o rules file e o registro revisado dentro do repo; ele e infraestrutura fora do repo que, pela precedencia que declara (usuario, rules file, memoria, perfil), fica abaixo de `AGENTS.md` e diz nao duplicar registro de decisao mantido no repo. Nao mesclar.
+- Sobreposicao real: `SESSION.md` curado versus `sessions/<id>.md` capturado; "Proximo Passo Recomendado" versus handoff (o nosso ja e "oferta, nao reivindicacao", desenho que eles precisaram de um design doc, #959, para adotar); `MEMORY.md` versus `_rules/`, `gotchas/` e perfil; `DECISIONS.md` versus `decisions/` ADR fixada. Sem equivalente la: tarefas com evidencia, consenso com independencia declarada, specs, loop com portao, validador. Sem equivalente ca: captura automatica, busca, multi-maquina e time, compaction recap.
+- Ideias apresentadas ao usuario, A a F; escolhidas A a E, todas em texto: import real `@AGENTS.md` nas pontes (ponteiro em prosa nao carrega nada no inicio; Claude Code 2.1.277+ so le `AGENTS.md` sozinho sem `CLAUDE.md`); medir o orcamento de instrucoes do `AGENTS.md` (raiz com 319 linhas; literatura citada por eles poe aderencia confiavel em cerca de 150 a 200 instrucoes); memoria tratada como evidencia, nao instrucao; releitura de `SESSION.md` e `TASKS.md` apos compactacao; tipo "Armadilha" em `MEMORY.md`. Recusada F, receita de coexistencia: fica so a nota em `MEMORY.md`. Nao importar: hooks, MCP, servidor, SQLite, embeddings, decay, captura silenciosa, perfil cross-project, `wikisync` para dentro de `docs/`.
+- Registro: decisao em `DECISIONS.md`, referencia em `MEMORY.md`, T-087 a T-091 em `TASKS.md`, linha no `CHANGELOG.md`. Nenhum arquivo da skill mudou. Depois: `validate_structure.py . --strict` 0 erros e 0 avisos; `verify_repository.py` 74/74; zero travessao em `docs/*.md`, `AGENTS.md` e pontes.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/DECISIONS.md`, `docs/MEMORY.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- ai-memory e camada complementar fora do repositorio; nao mesclar; importar ideias por tarefa, nunca mecanismo. Registrada em `docs/DECISIONS.md`.
+
+### Aprendizados Para MEMORY.md
+
+- Entrada Reference sobre o ai-memory (o que e, precedencia que declara, nota de coexistencia). Promovida.
+
+### Pendencias
+
+- Do usuario: commitar.
+- T-087 a T-091 pedem bump 2.13.0: ordem, depois de T-078 a T-083 ou junto com T-084, para nao repetir a troca de "nao suba de novo" nas linhas delas.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, mandar T-078 ao loop como a sessao anterior ja recomendava; T-087, T-088, T-089 e T-091 numa sessao de chat so, depois, com um bump.
+- Motivo: a analise nao muda a fila da spec 0006; as adocoes sao texto do bloco core, das pontes e do template de `MEMORY.md`, e cabem numa rodada.
+
 ## 2026-10-17 - Claude (sessao lateral: T-086, skill 2.12.0 levando Passagem De Trabalho)
 
 ### Objetivo

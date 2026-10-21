@@ -530,3 +530,59 @@ Ate 3 tentativas por tarefa: na segunda e na terceira, continue o mesmo subagent
 
 Comece me dizendo, em cinco linhas, a ordem que vai seguir, o que vai me pedir "sim" primeiro e onde acha que vai travar.
 ```
+
+## Planejar O Adaptador Cloudroom Para Consenso E Loop (Subagentes Visiveis)
+
+Prompt para abrir uma sessao nova de **planejamento** (spec, nao execucao) de um recurso: quando a skill roda dentro do Cloudroom, `consenso.py` e `loop.sh` poderem usar um subagente do Cloudroom (`room-cli thread spawn`) como agente, em vez de uma CLI invocada direto, sem mudar o contrato dos dois scripts.
+
+Escrito em 2026-10-21, logo depois da bancada real de T-083, em que o usuario estranhou nao ver o agente na barra do Cloudroom: o `consenso.py` chamou `codex exec` como processo, invisivel na interface, e o sandbox read-only do Codex nem rodava no container. Reaproveitando em versao futura, atualize a versao da skill, os nomes de modelo e a sintaxe do `room-cli`, que envelhecem rapido.
+
+```text
+Contexto: /Users/adejaimejunioer/Dev/2026/ai-project-structure. Skill `ai-project-structure` 2.13.0, publicada. Sou o dono do projeto. Esta sessao PLANEJA; nao implementa.
+
+## O problema
+
+Em 2026-10-21 a bancada real do consenso (T-083) rodou dentro do Cloudroom. O `consenso.py` invocou `codex exec` direto, como processo filho: nada apareceu na barra de threads do Cloudroom, o sandbox read-only do Codex (bubblewrap) nao rodou no container, e os dois participantes cairam na varredura de segredo porque o log do Codex listou o codigo da propria regex (ver `docs/SESSION.md`, entrada de 2026-10-21, e a Armadilha em `docs/MEMORY.md`). Os subagentes Sonnet das outras tarefas, abertos por `room-cli thread spawn --shared-sandbox`, ficaram visiveis, com log, estado e custo pela assinatura do Claude.
+
+Pergunta a responder: quando a skill roda no Cloudroom, `consenso.py` e `loop.sh` devem poder usar um subagente do Cloudroom como agente? Minha hipotese: sim, mas como ADAPTADOR, nao como reescrita. Os dois scripts recebem `--agente "COMANDO"` e anexam o prompt como ultimo argumento (DEC-005 da spec 0006: o comando vem da chamada, a skill nao tem catalogo de modelo). Um wrapper que se comporte como CLI headless (recebe o prompt como ultimo argumento, imprime a resposta no stdout, sai com o exit code do agente) encaixa nos dois sem tocar neles. Confirme ou derrube a hipotese lendo o codigo antes de propor.
+
+## Leia antes de qualquer coisa
+
+1. `AGENTS.md` (secoes "Passagem De Trabalho", "Consenso Entre Modelos", "Loop").
+2. `docs/SESSION.md`, entrada de 2026-10-21 (as duas rodadas de T-083 e o que falhou no container).
+3. `docs/MEMORY.md`: secao User (perfis de loop e de consenso), Feedback (portabilidade nos tres sistemas; portao de bancada real exige comando executado), Armadilha (sandbox read-only do Codex).
+4. `docs/specs/0006-automacao-do-consenso.md`, DEC-001 a DEC-010, em especial DEC-003 (o que se isola sao as posicoes contemporaneas, por copia separada por participante, nunca por cegueira no prompt), DEC-005 (comando do agente vem da chamada) e DEC-010 (segredo).
+5. `docs/skills/ai-project-structure/scripts/consenso.py` (como monta a copia, o prompt e le stdout e stderr), `scripts/loop.sh` (linhas em que chama o agente, o `--tempo-maximo` e a deteccao de "mexeu em arquivo") e `references/consenso.md` e `references/loop.md`.
+6. A skill `room-cli` instalada na maquina (`~/.claude/skills/room-cli/SKILL.md`): `room-cli thread spawn --provider ... --model ... [--shared-sandbox] --prompt-file`, `room-cli thread output CHILD_ID`, `room-cli thread list`, `room-cli thread archive`. Confira na propria CLI o que existe hoje; nao confie no que esta escrito aqui.
+
+Confira o estado real antes de agir: `git status` limpo, `python3 docs/skills/ai-project-structure/evals/verify_repository.py` em 78/78, `python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict` em 0 erros e 0 avisos. Se divergir, pare e me diga.
+
+## O que ja esta decidido, e voce nao reabre
+
+- `consenso.py` e `loop.sh` continuam agnosticos de ferramenta: nenhum deles importa, detecta ou chama `room-cli` por dentro. O que entra e um comando a mais no catalogo de perfis do usuario em `docs/MEMORY.md`, apontando para o wrapper.
+- O isolamento do consenso continua sendo a copia por participante (DEC-003). Se o subagente do Cloudroom precisa rodar na copia, o wrapper tem de garantir isso (diretorio de trabalho, ou o caminho da copia no prompt, ja presente hoje) e a spec tem de dizer como se verifica, nao so afirmar.
+- O wrapper e distribuido pela skill (vai em `scripts/`), entao roda em Linux, macOS e Windows (Git Bash): bash puro ou python3 da biblioteca padrao; sem `sed -i`, `perl`, `timeout(1)`, `setsid`.
+- Sem `room-cli` no PATH, o wrapper sai com erro claro e codigo diferente de zero antes de qualquer coisa; `loop.sh` entao cai no exit 4 e `consenso.py` registra falha do participante. Nada "degrada" para outra ferramenta em silencio.
+- Custo e modelo continuam sendo do usuario: o wrapper recebe provider e modelo por flag, nunca por padrao embutido.
+
+## Perguntas que a spec precisa responder, com leitura de codigo e da CLI
+
+- P-1: `room-cli thread spawn` e assincrono (o pai e avisado quando o filho termina). Como o wrapper bloqueia ate o fim e recupera a resposta integral? (`room-cli thread output CHILD_ID` com polling, `--all`, limites de tamanho, o que acontece se o filho pergunta em vez de responder.)
+- P-2: `--shared-sandbox` roda "nesta sandbox e pasta". Qual pasta? Da para apontar o filho para a copia temporaria do consenso? Se nao, o isolamento por copia da DEC-003 sobrevive so pelo prompt, e isso a spec 0006 ja rejeitou. Diga o que e verificavel.
+- P-3: filho sem `--shared-sandbox` ganha sandbox propria com copia do codigo (commits e nao commitados). Isso serve ao consenso (isolamento ainda melhor) ou atrapalha (a copia do filho inclui `docs/CONSENSUS.md` inteiro e `docs/consensus/`, que a rodada 1 cega retem)? Em qual dos dois modos cada pacote (debate, achado, loop) deve rodar?
+- P-4: `loop.sh` decide se o agente "mexeu em arquivo" por `find -newer` no projeto e mata o agente por grupo de processos no `--tempo-maximo`. Com o trabalho acontecendo em outra sandbox, ou em outro processo que o wrapper so observa, os dois mecanismos ainda valem? O que o wrapper precisa fazer no SIGTERM (`room-cli thread stop`)?
+- P-5: o que fica registrado no manifesto do consenso quando o participante e um filho do Cloudroom: id da thread, provider, modelo, link? O bruto continua sendo o stdout do wrapper? E a varredura de segredo le o que?
+- P-6: visibilidade e limpeza: titulo da thread filha (tarefa ou pergunta), arquivar ao fim ou deixar para o usuario, e quantas threads uma rodada de N agentes abre.
+- P-7: vale para thread Local (Mac) tambem, ou so Cloud? No Mac, `room-cli thread spawn` sem `--machine cloud` abre filho local; com, abre na nuvem a partir do GitHub (exige push). O wrapper precisa saber onde esta?
+- P-8: evidencia: qual portao prova que o wrapper funciona sem gastar modelo (agente falso por tras do `room-cli`? mock do `room-cli` no PATH do teste?) e qual bancada real, com um modelo barato, fecha a spec.
+
+## Pronto quando
+
+1. Spec nova em `docs/specs/NNNN-slug.md` no modelo de `docs/specs/README.md`, `Status: Rascunho` ou `Definida` (eu decido), com problema, escopo e fora de escopo, criterios de aceite verificaveis, as decisoes DEC-NNN que voce propoe para P-1 a P-8 (com a alternativa rejeitada e o motivo), perguntas que continuam abertas e o plano de tarefas.
+2. Tarefas em `docs/TASKS.md` com ID, ordem, dependencia, criterio da spec, bump (e `scripts/`, entao exige bump) e o que e do agente de chat; cada uma com `(verifica: python3 docs/skills/ai-project-structure/evals/portao_tNNN.py)` e o portao escrito em `evals/`, rodado, e falhando hoje pelo motivo certo. Portao que passa antes do trabalho nao e portao.
+3. Uma rodada de consenso sobre P-2 e P-3 (sao as que mexem na DEC-003), com `consenso.py debate` e dois perfis de `docs/MEMORY.md` que eu confirmar; se estiver no Cloudroom, lembre que o Codex read-only nao roda la (Armadilha) e me pergunte o modo antes.
+4. `docs/SESSION.md` com a entrada da sessao e `docs/CHANGELOG.md` com a linha. Nao commite: eu commito depois de ler.
+5. Voce me mostrou o plano numa tabela (tarefa, o que entrega, portao, depende de, bump, parte do agente de chat) e parou.
+
+Comece me dizendo, em cinco linhas, como voce leu o problema: o que e o wrapper, o que ele nao pode tocar, e onde voce acha que o plano vai errar.
+```

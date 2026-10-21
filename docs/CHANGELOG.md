@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (skill 2.14.1: description dentro do padrao Agent Skills)
+
+- T-110: `description` do `SKILL.md` de 1479 para 985 caracteres, com texto aprovado pelo usuario; conserto do YAML invalido (": " em valor sem aspas) que a 2.14.0 publicou; etapa `verificar_frontmatter` no verificador (88 verificacoes).
+
 ## 2026-10-21 (skill 2.14.0: modulo opcional github e corrida incompleta no validador)
 
 - Spec 0007 `Concluida` e T-104: modulo `github` (assets em en e pt-BR, partial, pergunta 5, `references/github.md`, codigos `GITHUB-*`, fixture e evals 13 e 14), ativo nesta raiz; AVISO `CONSENSO-ORIGEM-CORRIDA-INCOMPLETA`. Subagentes Sonnet 5.5 executaram, o coordenador Opus 5.5 revisou e publicou: PR #6, tag `v2.14.0`, Release 2.14.0 pelo `release.yml` no push da tag, pela primeira vez. Verificador 84/84. T-110 aberta (`description` do `SKILL.md` acima de 1024 caracteres).

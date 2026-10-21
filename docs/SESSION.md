@@ -41,6 +41,41 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-10-21 - Claude Opus 5.5 (T-110: description do SKILL.md, skill 2.14.1)
+
+### Objetivo
+
+- Resolver a T-110 (`description` acima de 1024 caracteres) com o texto aprovado pelo usuario ("pode, com esse texto"), num patch 2.14.1, antes da 2.15.0 da spec 0008.
+
+### O Que Foi Feito
+
+- Conferido na fonte (agentskills.io/specification): `description` com no maximo 1024 caracteres e obrigatorio, cobrado pelo `skills-ref validate`.
+- Portao `portao_t110.py` escrito antes, 3/6 (1479 caracteres, versao 2.14.0).
+- Ao aplicar o texto, o parse com `yaml.safe_load` acusou erro: o texto novo e o `description` publicado na 2.14.0 tinham ": " num valor sem aspas. O da 2.14.0 veio da frase do modulo github na T-108. Troquei os dois-pontos (985 caracteres) e acrescentei ao verificador a etapa `verificar_frontmatter` (YAML seguro, teto de 1024, `name` do padrao). Aplicada ao `SKILL.md` da 2.14.0, ela reprova os dois defeitos. Verificador de 84 para 88.
+- Bump 2.14.1 (frontmatter, prosa, marcadores core, specs, loop e github nos assets, nos partials e na raiz) e secao no CHANGELOG da skill. Portao 7/7.
+- Feito pelo coordenador, sem subagente: um paragrafo e o bump.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/skills/ai-project-structure/SKILL.md`, `CHANGELOG.md`, `assets/AGENTS.md`, os tres partials, `evals/verify_repository.py`, `evals/portao_t110.py` (novo); `AGENTS.md`; `docs/TASKS.md`, `docs/MEMORY.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- Do usuario: o texto do `description`. Do coordenador: tirar os dois-pontos do texto aprovado (mesmo conteudo, pontuacao diferente) e cobrar o frontmatter no verificador.
+
+### Aprendizados Para MEMORY.md
+
+- Promovido (Armadilha): ferramenta que carrega a skill nao prova YAML valido; o frontmatter agora e cobrado pelo verificador.
+
+### Pendencias
+
+- Thread da spec 0008: rebasear o PR #5 sobre a 2.14.1 e seguir para a T-102 (2.15.0).
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): a thread da spec 0008.
+- Motivo: a 2.15.0 so esperava a 2.14.x.
+
 ## 2026-10-21 - Claude Opus 5.5 (coordenador) com subagentes Sonnet 5.5 (spec 0007 e T-104, skill 2.14.0)
 
 ### Objetivo

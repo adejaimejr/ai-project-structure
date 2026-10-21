@@ -149,6 +149,10 @@ Exemplo de entrada:
 
 ### Armadilha
 
+- **Tentou:** confiar que o frontmatter do `SKILL.md` estava valido porque o Claude Code carregava a skill e os portoes passavam, ate a 2.14.0 (2026-10-21).
+- **Aconteceu:** a T-108 pos no `description` a frase "camada GitHub do repositorio: comunidade"; o ": " num valor YAML sem aspas e invalido, e a 2.14.0 foi publicada assim. Nenhum portao fazia parse do frontmatter, e o Claude Code e tolerante. O `description` tambem passava do teto de 1024 do padrao Agent Skills desde a 2.13.0.
+- **Por que nao serve:** "a ferramenta carregou" nao prova YAML valido, e Codex e Gemini podem usar parser estrito. Texto em prosa com dois-pontos e natural em pt-BR, entao o erro volta.
+- **Data:** 2026-10-21. Desfecho: 2.14.1 com o texto sem ": " e a etapa `verificar_frontmatter` no verificador, que reprova o `SKILL.md` da 2.14.0. Ao editar o frontmatter, rode `yaml.safe_load` ou o verificador.
 - **Tentou:** deixar o subagente Sonnet da T-109 rodar sozinho os portoes demorados (o verificador instala a skill nos tres destinos e leva minutos), em 2026-10-21.
 - **Aconteceu:** ele mandou os portoes para segundo plano e encerrou o turno com "aguardo o resultado", sem saida nenhuma; a thread ficou ociosa e poderia acordar sozinha quando o segundo plano terminasse, mexendo nos arquivos durante o commit.
 - **Por que nao serve:** o retorno de um subagente e o relatorio que o coordenador revisa; sem a saida do portao, nao ha o que revisar.

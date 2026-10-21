@@ -318,3 +318,108 @@ Baseline de hoje: 71 de 71, 77 de 77, exit 0 sem erro e sem aviso. Os portoes no
 
 Comece me dizendo, em cinco linhas, como voce leu a spec: qual e o primitivo, o que e pacote em cima dele, e onde voce acha que o plano vai errar.
 ```
+
+## Rodar As Tarefas Pendentes Com Subagentes Sonnet Revisados Por Fable
+
+Prompt para abrir uma sessao nova cujo objetivo e **executar** a fila de tarefas abertas (T-078 a T-084 e T-087 a T-091) com um agente gestor em Fable 5.1 delegando cada tarefa a um subagente em Sonnet 5.5, um por vez, e revisando o que volta com portao, verificador e mutacao antes de fechar.
+
+Escrito em 2026-10-20, com a skill em 2.12.0 publicada, logo depois da analise do ai-memory que abriu T-087 a T-091. Reaproveitando em versao futura, atualize a versao da skill, a lista de tarefas abertas, os pisos das baterias e o alias de modelo dos subagentes, que envelhece rapido.
+
+```text
+Contexto: /Users/adejaimejunioer/Dev/2026/ai-project-structure. Skill `ai-project-structure` 2.12.0, publicada e instalada. Sou o dono do projeto.
+
+Voce e o agente gestor desta sessao, rodando em Fable 5.1. Voce nao executa as tarefas: delega cada uma a um subagente em Sonnet 5.5 (ferramenta Agent, `model: sonnet`, tipo general-purpose), revisa o que volta, roda os portoes e registra. So voce escreve em `docs/SESSION.md`, `docs/MEMORY.md`, `docs/DECISIONS.md`, `docs/CONSENSUS.md`, `docs/TASKS.md`, `AGENTS.md` da raiz e `docs/specs/`. Subagente nunca commita; voce tambem nao, sem eu pedir.
+
+## Leia antes de qualquer coisa
+
+1. `AGENTS.md` (ordem de leitura para mudanca relevante; secoes "Evidencia De Fechamento", "Passagem De Trabalho" e "Loop").
+2. `docs/SESSION.md`, entrada de 2026-10-20 (analise do ai-memory) e a anterior (T-086).
+3. `docs/TASKS.md`, secao "Proximas Tarefas": T-078 a T-084 e T-087 a T-091. O texto de cada tarefa e o contrato; nao resuma ao delegar, cole a linha inteira.
+4. `docs/MEMORY.md`, secao Feedback inteira: cada regra ali custou uma sessao. As que mais pegam aqui: portao novo so entra depois de voce quebrar de proposito o que ele pega; reverter mutacao de backup por `cp`, nunca `git checkout`; check de prosa exige que toda ocorrencia bata; tarefa apontada para verificador que ja passa nao vale, precisa de portao proprio.
+5. `docs/specs/0006-automacao-do-consenso.md` (DEC-003 a DEC-010) e `docs/skills/ai-project-structure/references/loop.md`, secao "A Evidencia Vale O Que O Portao Vale".
+6. `docs/skills/ai-project-structure/evals/portao_t086.py` e `portao_consenso_lib.py`: molde dos portoes.
+
+Confira o estado real antes de agir: `git status` limpo, `python3 docs/skills/ai-project-structure/evals/verify_repository.py` em 74/74, `python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict` em 0 erros e 0 avisos. Se algo divergir, pare e me diga.
+
+## O que ja esta decidido, e voce nao reabre
+
+- Versao atual da skill: 2.12.0, publicada. T-078 a T-083 acrescentam item na secao `## 2.12.0` do CHANGELOG da skill, sem bump. O bump para 2.13.0 acontece uma vez so, na fase 3, levando T-084, T-087, T-088, T-089 e T-091.
+- ai-memory (akitaonrails) nao entra como codigo nem dependencia (`docs/DECISIONS.md`, 2026-10-20). T-087 a T-091 importam ideias em texto.
+- Modelos: subagentes em `sonnet`; revisao e registro em voce (Fable). Confirme com `claude --help` que o alias `sonnet` resolve para Sonnet 5.5 antes do primeiro subagente; se nao, me pergunte. Nunca use nivel que abra delegacao automatica (ver nota sobre `ultra` em `MEMORY.md`).
+- Subagente trabalha nesta pasta, nao em worktree, um por vez, para que os portoes e as baterias (`test_consenso.py`, `test_loop.py`) vejam o estado real. Nunca dois subagentes escrevendo ao mesmo tempo: T-079, T-080, T-081 e T-082 tocam o mesmo `scripts/consenso.py` e a mesma bateria, com pisos cumulativos (40, 48, 56).
+
+## Fases e ordem
+
+### Fase 1: spec 0006, sem bump
+
+Ordem: T-078, T-079, T-080, T-081, T-082. Cada uma ja tem portao em `evals/portao_tNNN.py`, que hoje falha pelo motivo certo. Rode o portao antes de delegar e cole a saida da falha na delegacao.
+
+T-083 e tarefa de chat, nao de subagente: roda Codex e `cursor-agent` reais numa pergunta que eu preciso confirmar, e a comparacao de qualidade e `revisao-manual`. Antes dela: rotacionar `docs/CONSENSUS.md` (esta a poucos bytes do teto) e registrar os perfis de consenso em `MEMORY.md` com minha confirmacao. Chegando em T-083, pare e me pergunte a pergunta real da rodada; se eu nao estiver, mova T-083 para "Aguardando Usuario" com `**Pergunta:**` e `(bloqueada: AAAA-MM-DD)` e siga para a fase 3.
+
+### Fase 2: fechar o que a fase 1 deixou
+
+Para cada tarefa aprovada: linha em "Concluidas" com `Evidencia: tipo=comando; procedimento=<portao>; resultado=<saida real, nao resumo>`, item na secao 2.12.0 do CHANGELOG da skill (o subagente escreve esse item; voce confere), `verify_repository.py` e `--strict` verdes. Reinstalar nos tres destinos com `install.sh --sim` e conferir paridade por `cmp`.
+
+### Fase 3: rodada do bump 2.13.0
+
+Ordem: T-084 (timeout do `loop.sh`), T-087 (`@AGENTS.md` nas pontes), T-088 (memoria e evidencia), T-089 (recarga apos compactacao), T-091 (tipo Armadilha). Um bump so: `version` e prosa do `SKILL.md`, marcadores `core`, `specs` e `loop` em v2.13.0 nos assets, nos dois partials e nos tres blocos do `AGENTS.md` da raiz; secao `## 2.13.0` no CHANGELOG da skill com os cinco itens. Se T-083 ficou em "Aguardando Usuario", troque na linha dela "a versao ja e 2.12.0" por 2.13.0, como T-086 fez com T-078 a T-082.
+
+Antes de delegar qualquer tarefa desta fase, escreva voce o portao da rodada no molde de `portao_t086.py` (versao coerente em frontmatter, prosa, marcadores e CHANGELOG; bloco core da raiz byte a byte igual ao dos assets; pontes comecando com `@AGENTS.md`; paragrafos novos presentes nos dois `AGENTS.md`; tipo Armadilha nos dois `MEMORY.md`; raiz em `--strict`; verificador). Rode: tem de falhar hoje. Delegue com a saida.
+
+T-087 pede conferir a grafia do import no Gemini CLI (`@AGENTS.md` ou `@./AGENTS.md`) na documentacao antes de aplicar; o subagente registra na resposta o que conferiu e onde. Se nao conseguir confirmar, aplica so a linha do Claude e me pergunta a do Gemini.
+
+T-088 e T-089 mudam o bloco core: ate 6 linhas e ate 2 linhas, respectivamente. Sem travessao. Bloco core de assets e raiz identicos byte a byte.
+
+### Fase 4: T-090, medicao sem corte
+
+Subagente conta linhas e instrucoes por secao do bloco core de `AGENTS.md` (raiz e template) e aplica a cada linha o teste "remover isto faria o agente errar?", devolvendo uma tabela e uma proposta de quais trechos sairiam para `references/` ou para o cabecalho do arquivo de `docs/` que governam. Voce revisa a proposta, nao executa corte nenhum, e registra em `SESSION.md`. Evidencia `tipo=conferencia`. A decisao de cortar e minha, junto com T-082.
+
+## Como delegar (uma mensagem por tarefa)
+
+Siga o modelo de "Passagem De Trabalho" do `AGENTS.md`, com a linha da tarefa colada inteira:
+
+    Tarefa: <linha inteira de T-NNN em docs/TASKS.md>. Pronta quando: `python3 docs/skills/ai-project-structure/evals/portao_tNNN.py` sai 0 e `python3 docs/skills/ai-project-structure/evals/verify_repository.py` sai 0.
+    Estado: feito <o que as tarefas anteriores da rodada ja entregaram>; pendente <esta tarefa>. Saida atual do portao: <colar>.
+    Decisoes que valem aqui: <DEC-NNN da spec, ou "versao ja e 2.12.0, item na secao 2.12.0 do CHANGELOG da skill, sem bump" / "bump 2.13.0 ja feito por mim, nao mexa na versao">. Nao repetir: <tentativa anterior do mesmo subagente que falhou, com a saida do portao; "nenhuma" na primeira>.
+    Consulte antes de agir: AGENTS.md; docs/MEMORY.md (Feedback); docs/specs/0006-automacao-do-consenso.md; docs/skills/ai-project-structure/SKILL.md; references/loop.md; o portao da tarefa.
+    Confira o estado real do projeto (arquivos, testes, git) antes de agir: este resumo pode estar desatualizado.
+    Limites: nao edite docs/SESSION.md, docs/MEMORY.md, docs/DECISIONS.md, docs/CONSENSUS.md, docs/TASKS.md, AGENTS.md da raiz nem docs/specs/ (os testes escrevem CONSENSUS.md so em projetos temporarios); nao commite; nao crie __pycache__ (rode python com -B ou limpe); nenhum travessao (U+2014) em arquivo nenhum; nao apague teste, check, secao ou link para o portao passar: se a saida obvia for remover conteudo, pare e me pergunte na sua resposta final. Responda com: feito, pendente, aprendido, arquivos tocados, saida do portao e do verificador.
+
+Ate 3 tentativas por tarefa, como o loop: na segunda e na terceira, continue o mesmo subagente (SendMessage) com a saida da falha em "Nao repetir". Na terceira falha, nao feche a tarefa: registre em `SESSION.md` o que cada tentativa produziu e siga para a proxima.
+
+## Como revisar (voce, Fable, a cada retorno)
+
+1. `git diff --stat` e o diff inteiro. Mudanca fora do escopo da tarefa volta, mesmo que o portao passe.
+2. Rode o portao da tarefa, `verify_repository.py`, `validate_structure.py . --strict`, a bateria tocada (`test_consenso.py` ou `test_loop.py`), a busca por travessao (U+2014) nos arquivos tocados e `find . -name __pycache__`.
+3. Se a tarefa criou ou alterou check, portao ou fixture: quebre de proposito o que ele deveria pegar, com backup por `cp`, e veja acusar; volte do backup e confira por `cmp`. Registre cada mutacao e o que ela produziu na evidencia.
+4. Leia o item de CHANGELOG escrito pelo subagente: versao certa, sem travessao, conta o que mudou e por que.
+5. So depois mova a tarefa em `TASKS.md` com a evidencia real.
+
+Reprovou: devolva ao mesmo subagente com o motivo exato e a saida. Voce nao conserta no lugar dele, salvo ajuste de uma linha que voce registre como seu na evidencia.
+
+## Restricoes que ja custaram tempo aqui
+
+- `cursor-agent` e Codex nao entram nesta sessao, salvo em T-083 e com minha confirmacao: a rodada e Claude por assinatura.
+- Nunca `git checkout <arquivo>` para desfazer: ha trabalho nao commitado o tempo todo.
+- `SESSION.md` passa de 30KB rapido: rotacione para `docs/archive/SESSIONS-2026.md` e atualize o indice quando o validador avisar `ROTACAO`.
+- Portao verde nao e prova: e ausencia de objecao. Mutacao e leitura do diff sao parte do fechamento.
+
+## Como registrar, ao fim
+
+- `docs/SESSION.md`: uma entrada da sessao, no modelo do arquivo, com cada tarefa, tentativas, mutacoes e o que ficou aberto; "Aprendizados Para MEMORY.md" so com o que satisfaz o criterio de promocao.
+- `docs/TASKS.md`: concluidas com evidencia; bloqueadas em "Aguardando Usuario".
+- `docs/CHANGELOG.md` do projeto: uma secao por fase fechada.
+- `docs/MEMORY.md`: so se surgiu regra nova com motivo e quando aplicar.
+- Specs: `Status` da 0006 e "Evidencia De Conclusao" so se T-083 fechar.
+- Me entregue a mensagem de commit sugerida (padrao `feat:`/`fix:`/`docs:`) e espere meu sim.
+
+## Pronto quando
+
+- T-078 a T-082 concluidas com evidencia real e item na 2.12.0 do CHANGELOG da skill.
+- T-083 concluida, ou em "Aguardando Usuario" com a pergunta escrita.
+- Skill em 2.13.0 com T-084, T-087, T-088, T-089 e T-091, portao da rodada verde, reinstalada nos tres destinos com paridade por `cmp`.
+- T-090 com tabela e proposta em `SESSION.md`, sem corte.
+- `verify_repository.py` verde (o numero sobe com os checks novos; registre o total), `--strict` 0 e 0, zero travessao, zero `__pycache__`, nada commitado sem meu sim.
+
+Comece me dizendo, em cinco linhas, a ordem que vai seguir, qual portao roda primeiro e onde acha que a rodada vai travar.
+```

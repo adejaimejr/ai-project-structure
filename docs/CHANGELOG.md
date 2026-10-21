@@ -4,7 +4,7 @@ Historico de mudancas relevantes.
 
 ## 2026-10-20 (analise do ai-memory, decisao de nao mesclar)
 
-- Analise de `github.com/akitaonrails/ai-memory` contra a estrutura: sem relacao de origem, camadas complementares (ele e infraestrutura fora do repo e se poe abaixo do rules file; nos somos o rules file e o registro no repo), nao mesclar. Decisao em `docs/DECISIONS.md`, referencia em `docs/MEMORY.md`, cinco tarefas de adocao de ideias em `docs/TASKS.md` (T-087 pontes com `@AGENTS.md`, T-088 memoria e evidencia, T-089 recarga apos compactacao, T-090 orcamento de instrucoes, T-091 tipo Armadilha), escolhidas pelo usuario entre seis propostas. Nenhum arquivo da skill mudou; bump 2.13.0 fica para as tarefas. Validador `--strict` 0 erros e 0 avisos; verificador 74/74.
+- Analise de `github.com/akitaonrails/ai-memory` contra a estrutura: sem relacao de origem, camadas complementares (ele e infraestrutura fora do repo e se poe abaixo do rules file; nos somos o rules file e o registro no repo), nao mesclar. Decisao em `docs/DECISIONS.md`, referencia em `docs/MEMORY.md`, cinco tarefas de adocao de ideias em `docs/TASKS.md` (T-087 pontes com `@AGENTS.md`, T-088 memoria e evidencia, T-089 recarga apos compactacao, T-090 orcamento de instrucoes, T-091 tipo Armadilha), escolhidas pelo usuario entre seis propostas. Nenhum arquivo da skill mudou; bump 2.13.0 fica para as tarefas. Validador `--strict` 0 erros e 0 avisos; verificador 74/74. Prompt para a proxima rodada (gestor Fable 5.1, subagentes Sonnet 5.5, quatro fases, bump 2.13.0 na terceira) em `docs/PROMPTS.md`.
 
 ## 2026-10-17 (skill 2.12.0, T-086: bump levando Passagem De Trabalho)
 

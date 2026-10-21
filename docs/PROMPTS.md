@@ -423,3 +423,110 @@ Reprovou: devolva ao mesmo subagente com o motivo exato e a saida. Voce nao cons
 
 Comece me dizendo, em cinco linhas, a ordem que vai seguir, qual portao roda primeiro e onde acha que a rodada vai travar.
 ```
+
+## Aplicar A Camada GitHub E Abrir A Spec Do Modulo Github
+
+Prompt para abrir uma sessao nova cujo objetivo e **executar** a fase A da decisao de 2026-10-20 (CI, protecao de `main`, tags e releases, arquivos de comunidade em ingles, README em ingles) e abrir a spec 0007 do modulo opcional `github` da skill, sem bump. Gestor em Fable 5.1 delegando a escrita de arquivos a subagentes em Sonnet 5.5; toda acao externa espera o sim do usuario.
+
+Escrito em 2026-10-20, com a skill em 2.12.0 publicada, logo depois da comparacao com o ai-memory que abriu a decisao e T-092 a T-099. Reaproveitando em versao futura, atualize a versao da skill, os SHAs dos commits de bump e a lista de tarefas.
+
+```text
+Contexto: /Users/adejaimejunioer/Dev/2026/ai-project-structure. Skill `ai-project-structure` 2.12.0, publicada e instalada. Sou o dono do projeto e do repositorio github.com/adejaimejr/ai-project-structure.
+
+Voce e o agente gestor desta sessao, rodando em Fable 5.1. Objetivo: aplicar a camada GitHub decidida em 2026-10-20 (fase A) e abrir a spec do modulo `github` da skill (fase B, so a spec). Escrita de arquivos vai para subagentes em Sonnet 5.5 (ferramenta Agent, `model: sonnet`, tipo general-purpose), um por vez; toda acao externa (push, PR, merge, tag, release, ruleset, labels) e sua, e cada uma espera meu "sim" explicito, uma a uma.
+
+## Leia antes de qualquer coisa
+
+1. `AGENTS.md`: ordem de leitura para mudanca relevante, "Evidencia De Fechamento", "Passagem De Trabalho" e "Regras Do Projeto" (as seis regras da camada GitHub ja estao la).
+2. `docs/DECISIONS.md`, entrada "2026-10-20 - Camada GitHub do repositorio": a decisao inteira, com motivo e impacto. Nao reabra.
+3. `docs/SESSION.md`, entrada de 2026-10-20 sobre a camada GitHub: o diagnostico contra o ai-memory e o que ja foi feito.
+4. `docs/TASKS.md`, "Proximas Tarefas": T-092 a T-099. A linha de cada tarefa e o contrato; ao delegar, cole a linha inteira.
+5. `docs/QUALITY.md`, "Testes E Validacao": os dois portoes e a saida esperada.
+6. `docs/skills/ai-project-structure/README.md` (flags do `install.sh`, onde cada ferramenta le a skill) e o `CHANGELOG.md` da skill (formato `## X.Y.Z - AAAA-MM-DD`; a secao 2.12.0 e a fonte das notas da release).
+7. `docs/MEMORY.md`, secao Feedback inteira.
+8. Se ainda existir: `/Users/adejaimejunioer/.claude/plans/eu-preciso-de-uma-dynamic-lemur.md`, o plano completo com a comparacao e a fase B. O essencial esta aqui e nas tarefas.
+
+Confira o estado real antes de agir: `git status` (mudanca sem commit em `AGENTS.md`, `docs/DECISIONS.md`, `docs/PROJECT_CONTEXT.md`, `docs/ROADMAP.md`, `docs/PROMPTS.md`, `docs/SESSION.md`, `docs/TASKS.md` ou `docs/CHANGELOG.md` e o registro da decisao: me proponha o commit `docs: camada GitHub, decisao, regras e prompt` e espere meu sim antes de qualquer outra coisa), `python3 docs/skills/ai-project-structure/evals/verify_repository.py` em 74/74, `python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict` em 0 erros e 0 avisos.
+
+## O que ja esta feito, e voce nao refaz
+
+- Decisao registrada; "Regras Do Projeto" com as seis regras; `PROJECT_CONTEXT.md` com a excecao de idioma; `ROADMAP.md` atualizado.
+- No GitHub: descricao em ingles, nove topics, Wiki e Projects desligados; PR #1 fechado sem merge e a branch `cursor/setup-dev-environment-36f3` apagada (o diagnostico de portabilidade dele esta em T-093).
+
+## O que ja esta decidido, e voce nao reabre
+
+- Ingles so na camada GitHub: `README.md`, `docs/CONTRIBUTING.md`, `docs/SECURITY.md`, `docs/CODE_OF_CONDUCT.md`, `docs/PULL_REQUEST_TEMPLATE.md`, `.github/`, corpo de release. `README.pt-BR.md` e a versao em portugues. `AGENTS.md`, `docs/` e a skill seguem em pt-BR.
+- Raiz: so `README.md`, `README.pt-BR.md`, `LICENSE`, `.gitignore`, `.gitattributes` e `.github/`. Comunidade em `docs/`. Nada mais na raiz.
+- Travessao (U+2014) proibido em todo `.md`, em ingles inclusive. O verificador acusa.
+- Sem bump de versao nesta sessao. A 2.13.0 pertence a outra fila (prompt "Rodar As Tarefas Pendentes Com Subagentes Sonnet Revisados Por Fable"). O modulo `github` da skill e 2.14.0: nesta sessao so a spec 0007, nenhum asset, nenhuma linha em `SKILL.md`.
+- Conserto de `scripts/loop.sh` (T-093) e mudanca em arquivo distribuido e pede bump: nesta sessao so `evals/test_loop.py`. Se o CI em Linux ficar vermelho so por `loop.sh`, pare e me pergunte (patch 2.12.1 agora, ou esperar a 2.13.0); nao bumpe sozinho.
+- Actions fixadas por SHA completo com a versao em comentario; `permissions: contents: read` (so `release.yml` leva `contents: write`); `concurrency` cancelando rodada anterior do mesmo PR.
+
+## Fases e ordem
+
+### Fase 1: CI e portabilidade (T-092, T-093)
+
+Branch `ci/portoes` a partir de `main`. Subagente escreve `.github/workflows/ci.yml` e conserta `evals/test_loop.py`. Voce roda os dois portoes em macOS, abre o PR (com meu sim) e espera o CI nos dois SOs. Verde: merge (com meu sim). Vermelho em Linux: leia o log, devolva ao subagente com a saida; se a causa for `loop.sh`, vale a regra acima.
+
+### Fase 2: protecao e releases (T-094, T-095)
+
+Ruleset em `main` pela API (`gh api -X POST repos/adejaimejr/ai-project-structure/rulesets`): bloquear force push e delecao, exigir o check `ci`; sem review obrigatorio. Depois a tag `v2.12.0` em `7b8bbd7`, as tags retroativas e a Release 2.12.0 manual. Me mostre o comando de cada tag antes de rodar; a tag e anotada e leva `GIT_COMMITTER_DATE` igual a data do commit.
+
+### Fase 3: comunidade, release automatizada e README (T-096, T-097, T-098)
+
+Um subagente por tarefa, nesta ordem, numa branch `github/camada` e um PR so, para o CI rodar. T-098 por ultimo, porque os badges apontam para o workflow `ci`, a Release e o `LICENSE`.
+
+### Fase 4: spec 0007 (T-099)
+
+Voce escreve a spec, no modelo de `docs/specs/README.md`, em `Rascunho`, com as perguntas abertas listadas na tarefa. Nao responda as perguntas por inferencia; e so entao acrescente `(spec: 0007-modulo-github)` na linha de T-099, porque o validador exige que a spec exista.
+
+## Como delegar (uma mensagem por tarefa)
+
+Modelo de "Passagem De Trabalho" do `AGENTS.md`, com a linha da tarefa colada inteira:
+
+    Tarefa: <linha inteira de T-NNN em docs/TASKS.md>. Pronta quando: <o comando de verifica da tarefa, ou a leitura que eu vou fazer>.
+    Estado: feito <o que as tarefas anteriores ja entregaram>; pendente <esta tarefa>.
+    Decisoes que valem aqui: docs/DECISIONS.md, entrada "Camada GitHub do repositorio" de 2026-10-20; ingles na camada GitHub; sem travessao; sem bump; raiz minima com .github/ e comunidade em docs/. Nao repetir: <tentativa anterior que falhou e por que, ou "nenhuma">.
+    Consulte antes de agir: AGENTS.md (Regras Do Projeto); docs/QUALITY.md; docs/skills/ai-project-structure/README.md; <arquivos da tarefa>.
+    Confira o estado real do projeto (arquivos, testes, git) antes de agir: este resumo pode estar desatualizado.
+    Limites: toque so os arquivos da tarefa; nao edite docs/SESSION.md, docs/MEMORY.md, docs/DECISIONS.md, docs/TASKS.md, AGENTS.md nem nada em docs/skills/ fora do que a tarefa nomeia; nao commite; nao rode git push, gh nem tag; nao crie __pycache__.
+
+Ate 3 tentativas por tarefa: na segunda e na terceira, continue o mesmo subagente (SendMessage) com a saida da falha em "Nao repetir". Na terceira falha, registre em `SESSION.md` o que cada tentativa produziu e siga.
+
+## Como revisar (voce, Fable, a cada retorno)
+
+1. `git diff --stat` e o diff inteiro. Arquivo fora da tarefa volta.
+2. `verify_repository.py`, `validate_structure.py . --strict`, e `grep -rn $'\xe2\x80\x94' <arquivos tocados>` vazio, incluindo `.github/` e `README.md`.
+3. YAML de workflow: `actionlint` se existir na maquina; senao o proprio GitHub valida no push da branch (`gh run list` mostra a falha de sintaxe). Confira que cada `uses:` tem SHA de 40 caracteres e comentario `# vX.Y.Z`, resolvido por `gh api repos/<owner>/<action>/git/ref/tags/<tag>`.
+4. Texto em ingles: leia inteiro; frase que nao soa natural volta. Sem email pessoal, sem segredo; o unico contato e o link do Private Security Advisory.
+5. So depois mova a tarefa em `TASKS.md` com a evidencia real (saida do comando, nao resumo).
+
+## Restricoes que ja custaram tempo aqui
+
+- Nunca `git checkout <arquivo>` para desfazer: ha trabalho nao commitado o tempo todo. Reverta por backup com `cp`.
+- `(verifica:)` nao aceita parenteses no comando.
+- `SESSION.md` passa de 30KB rapido: rotacione para `docs/archive/SESSIONS-2026.md` e atualize o indice quando o validador avisar `ROTACAO`.
+- O verificador compara a instalacao real da skill com a fonte: nada desta sessao toca `docs/skills/ai-project-structure/` fora de `evals/`, entao ele continua em 74/74; se cair, alguem mexeu onde nao devia.
+- Tag errada no GitHub e lixo publico: confira `git show <sha>` de cada commit de bump antes de criar a tag.
+
+## Como registrar, ao fim
+
+- `docs/SESSION.md`: uma entrada, no modelo do arquivo, com cada tarefa, tentativas, o que ficou aberto e os links de PR, release e workflow.
+- `docs/TASKS.md`: concluidas com evidencia; o que depender de mim em "Aguardando Usuario" com a pergunta escrita.
+- `docs/CHANGELOG.md` do projeto: uma secao por fase fechada.
+- `docs/PROJECT_CONTEXT.md`, "Links Internos": linha para `CONTRIBUTING.md` quando ele existir. `docs/QUALITY.md`, checklist da estrutura: a linha da raiz passa a citar as excecoes.
+- `docs/MEMORY.md`: so se surgiu regra nova com motivo e quando aplicar.
+- Me entregue a mensagem de commit sugerida de cada PR (padrao `feat:`/`fix:`/`docs:`) e espere meu sim.
+
+## Pronto quando
+
+- `ci` verde em `ubuntu-latest` e `macos-latest` no `main`.
+- Ruleset ativo em `main`; `gh release list` mostra `v2.12.0` e `git tag -l` mostra v2.4.0 a v2.12.0.
+- `gh api repos/adejaimejr/ai-project-structure/community/profile --jq .health_percentage` em 100.
+- `README.md` em ingles com badges funcionando e `README.pt-BR.md` linkado na primeira linha.
+- `release.yml` no `main`, pronto para a tag da 2.13.0.
+- Spec 0007 em `Rascunho` com as perguntas abertas.
+- Verificador 74/74, `--strict` 0 e 0, zero travessao, nada commitado, pushado, tagueado ou publicado sem meu sim.
+
+Comece me dizendo, em cinco linhas, a ordem que vai seguir, o que vai me pedir "sim" primeiro e onde acha que vai travar.
+```

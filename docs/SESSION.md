@@ -41,6 +41,44 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-10-20 - Claude (camada GitHub: comparacao com o ai-memory, decisao e prompt)
+
+### Objetivo
+
+- Analisar como o repositorio `github.com/adejaimejr/ai-project-structure` e usado e apresentado no GitHub, contra `github.com/akitaonrails/ai-memory`, e propor o que fazer. Pedido do usuario: analise e plano; depois, so o prompt para outra sessao executar.
+
+### O Que Foi Feito
+
+- Levantamento pela API do GitHub nos dois repositorios (sem clonar o ai-memory) e mapa local por tres subagentes Explore: nosso lado (arquivos de comunidade, CI, versao, fluxo git), o lado deles (README, CONTRIBUTING, SECURITY, templates, 9 workflows, 137 tags `vX.Y.Z` anotadas, releases com checksums, Keep a Changelog) e a mecanica de modulo opcional da skill (`SKILL.md`, partials, `MARKER_RE`, `verify_repository.py`, evals), para o modulo `github` seguir o molde de specs e loop.
+- Diagnostico: 12 minors da skill no CHANGELOG e nenhuma tag nem Release; nenhum workflow (os dois portoes rodam so na maquina do mantenedor; o PR #1 mostrou que no Linux `sed -i ""` em `evals/test_loop.py:435` e `find -newer` em `scripts/loop.sh:173` derrubam o harness); descricao e topics vazios; health de comunidade 28% contra 85%; PR #1 de 4 linhas aberto ha 45 dias criando `.cursor/` na raiz; 73 commits diretos em `main`, nunca um PR integrado; `ROADMAP.md` parado em "lancar a v2". O que nao copiar: a maquinaria de binario Rust (Docker, AUR, RPM, Nix, CodeQL, gitleaks, branches `release/x.y`, README de 742 linhas). O plano completo, com a tabela comparativa e a fase B, ficou em `/Users/adejaimejunioer/.claude/plans/eu-preciso-de-uma-dynamic-lemur.md`.
+- Decisoes do usuario: ingles so na camada GitHub, com `README.pt-BR.md`; praticas de GitHub entram em "Regras Do Projeto" e viram modulo opcional `github` da skill; o modulo e 2.14.0, depois da 2.13.0, com spec 0007. Registrado em `docs/DECISIONS.md` (raiz minima com `.github/` e comunidade em `docs/`; tag e Release a cada bump; PR para mudanca na skill), seis regras em `AGENTS.md`, excecao de idioma e estado atual em `PROJECT_CONTEXT.md`, `ROADMAP.md` reescrito.
+- Executado no GitHub antes de o usuario pedir para parar: descricao em ingles, nove topics (`agents-md`, `agent-skills`, `claude-code`, `codex-cli`, `gemini-cli`, `multi-agent`, `context-engineering`, `markdown`, `ai-agents`), Wiki e Projects desligados; PR #1 fechado sem merge, com comentario, e a branch `cursor/setup-dev-environment-36f3` apagada (o commit `f330a8a` segue no objeto local e o GitHub oferece "Restore branch" no PR). Uma proposta de sessao para os arquivos de comunidade foi aberta e retirada.
+- A pedido do usuario ("so quero o prompt, nao e para executar"), o resto nao foi executado: virou T-092 a T-099 em `TASKS.md` e o prompt "Aplicar A Camada GitHub E Abrir A Spec Do Modulo Github" em `docs/PROMPTS.md`, no molde do prompt anterior (gestor Fable, subagentes Sonnet, acao externa so com sim do usuario).
+- Depois: `validate_structure.py . --strict` 0 erros e 0 avisos; `verify_repository.py` 74/74; zero travessao nos arquivos tocados.
+
+### Arquivos Criados Ou Alterados
+
+- `AGENTS.md` ("Regras Do Projeto"), `docs/DECISIONS.md`, `docs/PROJECT_CONTEXT.md`, `docs/ROADMAP.md`, `docs/TASKS.md` (T-092 a T-099), `docs/PROMPTS.md`, `docs/CHANGELOG.md`, `docs/SESSION.md`. Nenhum arquivo da skill.
+
+### Decisoes Tomadas
+
+- Camada GitHub do repositorio: raiz com `.github/` e dotfiles, comunidade em `docs/`, ingles por padrao com pt-BR opcional, tag e Release a cada bump, PR para mudanca na skill, modulo `github` na 2.14.0. Registrada em `docs/DECISIONS.md`.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum promovido. Candidato: plano aprovado em plan mode nao e licenca para executar; quando o pedido original era "analise e me apresente", perguntar se o passo seguinte e executar ou escrever o prompt, antes de tocar o GitHub.
+
+### Pendencias
+
+- Do usuario: commitar (sugestao: `docs: camada GitHub, decisao, regras e prompt`).
+- T-092 a T-099 na fila; a sessao que rodar o prompt abre a spec 0007 por ultimo.
+- `docs/QUALITY.md`, linha "A raiz mantem apenas os arquivos Markdown de entrada dos agentes", e "Links Internos" de `PROJECT_CONTEXT.md` ficam para T-096.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): sessao nova em Fable 5.1 com o prompt "Aplicar A Camada GitHub E Abrir A Spec Do Modulo Github" de `docs/PROMPTS.md`.
+- Motivo: as tarefas estao escritas com portao e ordem; o que falta e executar com o sim do usuario em cada acao externa.
+
 ## 2026-10-20 - Claude (analise do ai-memory de akitaonrails)
 
 ### Objetivo

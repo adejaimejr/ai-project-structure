@@ -16,10 +16,11 @@ Manter a estrutura Markdown multiagente (AGENTS.md + pontes + memoria em `docs/`
 - Estrutura v1 validada por tri-consenso (Claude + Gemini + Codex) em 2026-04-25.
 - Skill empacotada no Agent Skills Open Standard e instalada nas tres ferramentas em 2026-05-26.
 - v2 desenvolvida em 2026-08-20, inspirada na analise da metodologia specsfy: entrevista numerada, regra "Nunca Inferir", IDs T-NNN, blocos gerenciados com versao, validador Python, modulo opcional de specs e proibicao de travessao.
+- Skill em 2.12.0 (2026-10-17). Camada GitHub do repositorio (CI, tags e releases, protecao de `main`, arquivos de comunidade, README em ingles) em adocao desde 2026-10-20; vira o modulo opcional `github` da skill na 2.14.0 (spec 0007).
 
 ## Preferencias
 
-- Idioma padrao: portugues.
+- Idioma padrao: portugues. Excecao: a camada GitHub do repositorio (README da raiz, CONTRIBUTING, SECURITY, codigo de conduta, templates de issue e PR, workflows, releases, descricao e topics) e em ingles por padrao, com `README.pt-BR.md` como versao em portugues (decisao de 2026-10-20).
 - Manter instrucoes de IA centralizadas em `AGENTS.md`.
 - Manter historico de sessoes em `SESSION.md`.
 - Registrar consenso entre modelos em `CONSENSUS.md` quando necessario.

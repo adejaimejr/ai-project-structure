@@ -20,6 +20,30 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-10-20 - Camada GitHub do repositorio: raiz com `.github/`, ingles por padrao, tag e release a cada bump
+
+### Decisao
+
+- A regra de raiz minima (2026-04-25) ganha uma segunda excecao, alem de `README.md`, `LICENSE` e `.gitignore`: arquivos e diretorios de configuracao com ponto (`.github/`, `.gitattributes`) sao permitidos na raiz, e `README.pt-BR.md` acompanha o `README.md`. Arquivos de comunidade (`CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `PULL_REQUEST_TEMPLATE.md`) ficam em `docs/`, onde o GitHub tambem os reconhece; so templates de issue, `dependabot.yml` e workflows exigem `.github/`. Qualquer outro diretorio na raiz (`.cursor/`, `scripts/`) continua proibido.
+- A camada GitHub do repositorio (README da raiz, CONTRIBUTING, SECURITY, codigo de conduta, templates de issue e PR, workflows, corpo de release, descricao e topics) e escrita em ingles por padrao, com versao em portugues como opcao (`README.pt-BR.md`). `AGENTS.md`, a memoria em `docs/`, a skill e tudo o que ela gera continuam em pt-BR. A proibicao do travessao vale igual nos arquivos em ingles.
+- Todo bump da skill termina em tag anotada `vX.Y.Z` no commit do bump e em GitHub Release; a tag e consequencia do `version:` do `SKILL.md`, nunca uma versao paralela. As versoes 2.4.0 a 2.11.0, publicadas sem tag, recebem tags retroativas nos commits de bump; Release so da 2.12.0 em diante.
+- Mudanca na skill (qualquer arquivo em `docs/skills/ai-project-structure/` fora de `evals/`) entra em `main` por pull request, para o CI rodar os dois portoes em Linux e macOS antes do merge. Mudanca so em `docs/` da raiz pode ir direta em `main`. `main` nao aceita force push nem delecao.
+- As praticas acima entram agora em "Regras Do Projeto" de `AGENTS.md` e, na skill 2.14.0, viram o modulo opcional `github` (bloco gerenciado, assets em ingles e pt-BR, `references/github.md`), para projeto novo nascer com isso. Spec 0007.
+
+### Motivo
+
+- Comparacao com `github.com/akitaonrails/ai-memory` em 2026-10-20: este repositorio tinha 12 versoes minor no CHANGELOG da skill e nenhuma tag, nenhum workflow, descricao e topics vazios, health de comunidade em 28% e um PR de 4 linhas aberto ha 45 dias. Nada disso e defeito da estrutura; e ausencia da camada que o GitHub exibe primeiro.
+- Os dois portoes (`verify_repository.py` 74/74 e `validate_structure.py . --strict`) so rodavam na maquina do mantenedor, em macOS. O PR #1 mostrou que no Linux o harness falha por `sed -i ""` e `find -newer`; um CI em `ubuntu-latest` teria pego isso em setembro.
+- Ingles na camada GitHub e o que da alcance a um projeto publico; manter pt-BR dentro (regras, memoria, skill) preserva o publico atual e as decisoes anteriores sem traduzir a skill inteira.
+- Raiz minima continua valendo no espirito: `.github/` e configuracao, nao conteudo, e `docs/` ja e o lugar do que se le.
+
+### Impacto
+
+- `docs/PROJECT_CONTEXT.md` (idioma), `AGENTS.md` ("Regras Do Projeto"), `docs/ROADMAP.md` e `docs/QUALITY.md` mudam de texto agora; os templates da skill que descrevem a raiz minima so mudam na 2.14.0.
+- Arquivos novos: `.github/workflows/ci.yml` e `release.yml`, `.github/ISSUE_TEMPLATE/`, `.github/dependabot.yml`, `.gitattributes`, `docs/CONTRIBUTING.md`, `docs/SECURITY.md`, `docs/CODE_OF_CONDUCT.md`, `docs/PULL_REQUEST_TEMPLATE.md`, `README.pt-BR.md`; `README.md` reescrito em ingles.
+- O validador nao checa a raiz e nao muda; o verificador ja confere travessao em todo `.md` versionado, incluindo os novos.
+- PR #1 (`.cursor/environment.json`) fechado sem merge: viola a raiz minima e o fluxo nao usa Cursor Cloud Agent; o diagnostico de portabilidade dele vira tarefa.
+
 ## 2026-10-20 - ai-memory (akitaonrails) e camada complementar, fora do repositorio; nao mesclar
 
 ### Decisao

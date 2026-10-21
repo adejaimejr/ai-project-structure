@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-20 (camada GitHub: diagnostico, decisao, regras e prompt)
+
+- Comparacao de `github.com/adejaimejr/ai-project-structure` com `github.com/akitaonrails/ai-memory` pela API: 0 tags e 0 releases com a skill em 2.12.0, 0 workflows, descricao e topics vazios, health de comunidade 28%, PR #1 de 4 linhas aberto ha 45 dias, `ROADMAP.md` parado em "lancar a v2". Decisao em `docs/DECISIONS.md` (raiz minima com `.github/` e comunidade em `docs/`; camada GitHub em ingles com `README.pt-BR.md`; tag e Release a cada bump; PR para mudanca na skill; modulo `github` na 2.14.0), seis regras em "Regras Do Projeto" de `AGENTS.md`, excecao de idioma em `PROJECT_CONTEXT.md`, `ROADMAP.md` reescrito. Feito no GitHub: descricao, nove topics, Wiki e Projects desligados, PR #1 fechado e branch apagada. O resto nao foi executado a pedido do usuario: virou T-092 a T-099 e o prompt "Aplicar A Camada GitHub E Abrir A Spec Do Modulo Github" em `docs/PROMPTS.md`. Validador `--strict` 0 e 0; verificador 74/74.
+
 ## 2026-10-20 (analise do ai-memory, decisao de nao mesclar)
 
 - Analise de `github.com/akitaonrails/ai-memory` contra a estrutura: sem relacao de origem, camadas complementares (ele e infraestrutura fora do repo e se poe abaixo do rules file; nos somos o rules file e o registro no repo), nao mesclar. Decisao em `docs/DECISIONS.md`, referencia em `docs/MEMORY.md`, cinco tarefas de adocao de ideias em `docs/TASKS.md` (T-087 pontes com `@AGENTS.md`, T-088 memoria e evidencia, T-089 recarga apos compactacao, T-090 orcamento de instrucoes, T-091 tipo Armadilha), escolhidas pelo usuario entre seis propostas. Nenhum arquivo da skill mudou; bump 2.13.0 fica para as tarefas. Validador `--strict` 0 erros e 0 avisos; verificador 74/74. Prompt para a proxima rodada (gestor Fable 5.1, subagentes Sonnet 5.5, quatro fases, bump 2.13.0 na terceira) em `docs/PROMPTS.md`.

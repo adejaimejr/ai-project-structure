@@ -100,7 +100,7 @@ def main():
 
     verificador = ler(EVALS / "verify_repository.py")
     check(FIXTURE.is_dir() and (FIXTURE / "valido").is_dir() and (FIXTURE / "invalido").is_dir()
-          and '"github-project"' in verificador and INVALIDO in verificador and DIVERGENTE in verificador,
+          and '"github-project/' in verificador and INVALIDO in verificador and DIVERGENTE in verificador,
           "7. fixture github-project (valido e invalido) no verificador, com os dois codigos no oraculo")
 
     check(re.search(r"ai-project-structure:github:start", verificador) is not None

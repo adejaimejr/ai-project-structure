@@ -14,9 +14,10 @@ ai-project-structure/
 ├── SKILL.md            # instrucoes da skill (formato padrao, cross-tool; version no frontmatter)
 ├── assets/             # templates copiados para o projeto-alvo
 │   ├── AGENTS.md  CLAUDE.md  GEMINI.md
-│   ├── partials/       # blocos de insercao specs e loop (nunca copiados ao projeto)
+│   ├── partials/       # blocos de insercao specs, loop e github (nunca copiados ao projeto)
+│   ├── github/         # modulo opcional github: en/ e pt-BR/, copiados so quando ativado
 │   └── docs/...        # inclui docs/specs/README.md (modulo opcional)
-├── references/         # fluxos detalhados: atualizacao.md, specs.md, loop.md, consenso.md
+├── references/         # fluxos detalhados: atualizacao.md, specs.md, loop.md, consenso.md, github.md
 ├── scripts/
 │   ├── validate_structure.py   # validador (Python 3, so stdlib)
 │   ├── loop.sh                 # modulo de loop: orquestra uma rodada
@@ -185,6 +186,14 @@ A skill faz isso (nao e mais "edite na mao"): peca "atualiza este projeto para a
 versao mais nova da estrutura". O fluxo (`references/atualizacao.md`) detecta a
 versao pelos marcadores `ai-project-structure:core:start vX.Y.Z` em `AGENTS.md`,
 mostra diff por bloco e nunca sobrescreve sem confirmacao por item.
+
+## Modulo opcional github
+
+Peca "ativa o modulo github neste projeto" (ou responda a pergunta 5 do scaffold). A skill
+copia a camada GitHub de `assets/github/` (comunidade em `docs/`, templates de issue e PR,
+`dependabot.yml`, `ci.yml`) na lingua escolhida e insere o bloco `github` em `AGENTS.md`.
+Nunca ativa sem resposta explicita e nunca roda `gh`: o passo a passo, o checklist de
+configuracao do repositorio e o fluxo de versao estao em `references/github.md`.
 
 ## Versionamento
 

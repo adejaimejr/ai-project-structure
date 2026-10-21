@@ -51,7 +51,7 @@ Mostre o diff entre o `AGENTS.md` atual do projeto e o bloco `core` do template 
 
 ### v2 → v2.x (com marcadores)
 
-Para cada bloco (`core`; `specs` e `loop`, se existirem no projeto):
+Para cada bloco (`core`; `specs`, `loop` e `github`, se existirem no projeto):
 
 - conteudo identico ao template atual → pule em silencio;
 - conteudo diferente → mostre o diff **so do bloco** e pergunte: aplicar / pular / decidir depois. Bloco pulado vira tarefa em `TASKS.md`.
@@ -59,6 +59,8 @@ Para cada bloco (`core`; `specs` e `loop`, se existirem no projeto):
 Bloco `specs` ausente e usuario nao usa specs → nao ofereca a insercao; apenas mencione que o modulo existe.
 
 Bloco `loop` ausente → **nao ofereca a insercao**. O modulo de loop so entra a pedido explicito do usuario e depois do portao de `QUALITY.md` (ver `loop.md`). Atualizar nao e ocasiao para ativar modulo novo.
+
+Bloco `github` ausente → **nao ofereca a insercao** e nao copie `assets/github/`. Projeto sem o modulo nao precisa de nada na atualizacao; ele so entra a pedido explicito do usuario, pelo fluxo de `github.md`. Bloco `github` presente e em versao atras do `core` → mostre o diff so do bloco, como nos demais (o validador acusa a divergencia como `GITHUB-VERSAO-DIVERGENTE`).
 
 ## 5. PONTES
 

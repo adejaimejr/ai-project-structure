@@ -2,6 +2,37 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.14.0 - 2026-10-21
+
+Bump que leva o modulo opcional `github` (spec 0007) e a correcao de corrida incompleta na
+origem do consenso (T-104). Marcadores `core`, `specs`, `loop` e `github` em v2.14.0; o
+conteudo dos blocos core, specs e loop nao muda. Portoes: `evals/portao_t106.py` a
+`evals/portao_t109.py` (modulo github) e `evals/portao_t104.py` (T-104).
+
+- Modulo `github`, so com resposta explicita. `assets/github/` (`en/` e `pt-BR/`, mesma lista
+  nas duas linguas) traz os arquivos de comunidade em `docs/` (`CONTRIBUTING.md`,
+  `SECURITY.md`, `CODE_OF_CONDUCT.md`, `PULL_REQUEST_TEMPLATE.md`), `.github/ISSUE_TEMPLATE/`,
+  `dependabot.yml`, `ci.yml` e `.gitattributes`. O partial
+  `assets/partials/AGENTS-github-block.md` entra em `AGENTS.md` depois do ultimo bloco
+  gerenciado e antes de "## Regras Do Projeto". Arquivo que ja existe no projeto e pulado e
+  listado, nunca mesclado. A skill nao roda `gh` nem faz push, tag ou Release.
+- Pergunta 5 da entrevista do scaffold ("Ativar a camada GitHub?"): nao, sim em `en` ou sim
+  em `pt-BR`. "Avançar" ou silencio contam como nao responder, e a lingua nunca e inferida.
+- `references/github.md`: ativacao em projeto existente, placeholders `{{SKILL_VERSION}}` e
+  `{{QUALITY_COMMAND}}` do `ci.yml`, checklist de configuracao do repositorio pela CLI `gh`
+  (descricao, topics, ruleset de `main`, labels) e o fluxo de bump, tag e Release.
+- Validador: `GITHUB-MARCADOR-INVALIDO` (erro: bloco `github` sem marcadores pareados e versao
+  valida) e `GITHUB-VERSAO-DIVERGENTE` (aviso: bloco `github` em versao diferente do `core`).
+- Fixture `evals/fixtures/github-project` (`valido` e `invalido`) e evals 13 (ativar em
+  projeto existente, em portugues, sem `.gitattributes`) e 14 (scaffold novo com a camada
+  GitHub em ingles).
+- T-104: `CONSENSO-ORIGEM-CORRIDA-INCOMPLETA` (aviso). Entrada automatizada
+  (`**Origem:** automacao`) cujo `**Manifesto:**` resolve para uma corrida sem prova de
+  integridade passa a ser acusada: manifesto ilegivel, `status` diferente de `concluida`, ou
+  participante com `resultado: posicao` sem o `stdout.txt`. Falha registrada com stdout vazio
+  nao conta. So leitura: o validador nao retoma, limpa nem repara, e corrida que nenhuma
+  entrada cita continua sem diagnostico.
+
 ## 2.13.0 - 2026-10-21
 
 Bump que leva o timeout por tentativa do `loop.sh` (T-084) e as ideias importadas da

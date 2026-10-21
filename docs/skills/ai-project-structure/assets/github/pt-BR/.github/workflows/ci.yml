@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Downloads the ai-project-structure skill from the release that enabled
+      # this workflow ({{SKILL_VERSION}}). The .sha256 comes from the same release,
+      # so it proves the download is intact, not who published it.
+      - name: Validate structure (strict)
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          curl -fsSLO "https://github.com/adejaimejr/ai-project-structure/releases/download/v{{SKILL_VERSION}}/ai-project-structure-{{SKILL_VERSION}}.zip"
+          curl -fsSLO "https://github.com/adejaimejr/ai-project-structure/releases/download/v{{SKILL_VERSION}}/ai-project-structure-{{SKILL_VERSION}}.zip.sha256"
+          sha256sum -c "ai-project-structure-{{SKILL_VERSION}}.zip.sha256"
+          unzip -q "ai-project-structure-{{SKILL_VERSION}}.zip" -d skill
+          SKILL_DIR="$RUNNER_TEMP/skill/ai-project-structure"
+          cd "$GITHUB_WORKSPACE"
+          python3 "$SKILL_DIR"/scripts/validate_structure.py . --strict
+
+      # The command from "Testes E Validacao" in docs/QUALITY.md. Add any setup
+      # step it needs (language runtime, dependencies) before this one.
+      - name: Tests and validation
+        run: |
+          {{QUALITY_COMMAND}}

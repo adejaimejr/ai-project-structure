@@ -1,7 +1,7 @@
 ---
 name: ai-project-structure
-version: "2.13.0"
-description: Cria, atualiza e valida a estrutura Markdown multiagente (AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ com SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS etc) em projeto que sera tocado por varias IAs ou por varias sessoes. Use quando o pedido nomear essa estrutura ou seus arquivos ("estrutura multiagente", "scaffold Markdown multiagente", "AGENTS.md e docs/", "memoria do projeto em docs/") ou citar a skill pelo nome; e para converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ativar o modulo de specs (docs/specs/) em um projeto existente, ou ativar, rodar e configurar o modulo de loop (perfis de modelo e esforco por intencao e ferramenta), ou rodar uma rodada de consenso automatizada com outros modelos ("roda um consenso", "pede uma segunda opiniao a outros modelos", "revalida o achado com outro modelo", "retoma a rodada de consenso"). NAO dispare sozinha em pedido generico de criar projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto novo", "monta a base", "cria a pasta") que nao mencione a estrutura multiagente nem seus arquivos; decidir se o projeto precisa dela e de quem coordena (o usuario ou o agente gestor), e nesse caso, no maximo, ofereca a estrutura em uma linha. Esta skill cria os arquivos de fato, nao apenas explica como criar.
+version: "2.14.0"
+description: Cria, atualiza e valida a estrutura Markdown multiagente (AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ com SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS etc) em projeto que sera tocado por varias IAs ou por varias sessoes. Use quando o pedido nomear essa estrutura ou seus arquivos ("estrutura multiagente", "scaffold Markdown multiagente", "AGENTS.md e docs/", "memoria do projeto em docs/") ou citar a skill pelo nome; e para converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ativar o modulo de specs (docs/specs/) em um projeto existente, ou ativar, rodar e configurar o modulo de loop (perfis de modelo e esforco por intencao e ferramenta), ou ativar o modulo github (camada GitHub do repositorio: comunidade, templates, CI), ou rodar uma rodada de consenso automatizada com outros modelos ("roda um consenso", "pede uma segunda opiniao a outros modelos", "revalida o achado com outro modelo", "retoma a rodada de consenso"). NAO dispare sozinha em pedido generico de criar projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto novo", "monta a base", "cria a pasta") que nao mencione a estrutura multiagente nem seus arquivos; decidir se o projeto precisa dela e de quem coordena (o usuario ou o agente gestor), e nesse caso, no maximo, ofereca a estrutura em uma linha. Esta skill cria os arquivos de fato, nao apenas explica como criar.
 ---
 
 # AI Project Structure
@@ -13,7 +13,8 @@ A estrutura tem como nucleo:
 - memoria do projeto em `docs/` com `PROJECT_CONTEXT`, `SESSION`, `MEMORY`, `CONSENSUS`, `TASKS`, `DECISIONS`, `QUALITY`, `CHANGELOG` e `archive/`;
 - arquivos opcionais (`ARCHITECTURE`, `API`, `DATA_MODEL`, `GLOSSARY`, `ONBOARDING`, `ROADMAP`, `PROMPTS`, `STACK`);
 - modulo opcional de specs (`docs/specs/`) para trabalho tamanho-feature;
-- modulo opcional de loop, que executa uma tarefa verificavel sem supervisao. Nunca entra no scaffold e so pode ser ativado em projeto que ja tem comando real em "Testes E Validacao" de `QUALITY.md`.
+- modulo opcional de loop, que executa uma tarefa verificavel sem supervisao. Nunca entra no scaffold e so pode ser ativado em projeto que ja tem comando real em "Testes E Validacao" de `QUALITY.md`;
+- modulo opcional `github`, que entrega a camada GitHub do repositorio (arquivos de comunidade, templates de issue e PR, `dependabot.yml`, `ci.yml`). So entra com resposta explicita na pergunta 5; com ele ativo, a raiz minima admite tambem `.github/` e dotfiles de configuracao (como `.gitattributes`).
 
 A partir da versao 2.2.0 a estrutura tambem cobra que o trabalho seja verificavel:
 
@@ -51,7 +52,7 @@ Liste arquivos do destino que coincidem com algum arquivo da estrutura. Se houve
 
 Regra de ouro: se o pedido inicial do usuario ja respondeu uma pergunta, NAO a repita - registre a resposta e siga. Faca apenas as perguntas em aberto, numeradas, com opcoes numeradas. Toda pergunta aceita resposta livre. "Avançar" adia a resposta e vira pendencia registrada - **nunca autoriza inferir a resposta**.
 
-O usuario pode responder tudo de uma vez (ex: "1: minha-loja; 2: loja de camisetas; 3: 1; 4: 1").
+O usuario pode responder tudo de uma vez (ex: "1: minha-loja; 2: loja de camisetas; 3: 1; 4: 1; 5: 1").
 
 ```text
 **1. Qual o nome do projeto?**
@@ -72,9 +73,14 @@ O usuario pode responder tudo de uma vez (ex: "1: minha-loja; 2: loja de camiset
 **4. Ativar o modulo de specs (docs/specs/)?**
    1. Nao (recomendado) - da para ativar depois pedindo a esta skill
    2. Sim - cria docs/specs/README.md e insere o bloco de specs em AGENTS.md
+
+**5. Ativar a camada GitHub (modulo github)?**
+   1. Nao (recomendado) - da para ativar depois pedindo a esta skill
+   2. Sim, em ingles (en) - comunidade, templates, dependabot e ci.yml em ingles
+   3. Sim, em portugues (pt-BR) - os mesmos arquivos em portugues
 ```
 
-Sem preferencia clara nas perguntas 3 e 4, sugira as opcoes marcadas como recomendadas.
+Sem preferencia clara nas perguntas 3, 4 e 5, sugira as opcoes marcadas como recomendadas. Na pergunta 5, "Avançar" ou silencio contam como nao responder: o modulo `github` nao ativa sem resposta explicita, e a lingua nunca e escolhida por inferencia.
 
 Nao pergunte sobre git. **Nao inicialize repositorio git** a menos que o usuario peca explicitamente.
 
@@ -119,6 +125,8 @@ docs/STACK.md
 
 - copie `assets/docs/specs/README.md` para `docs/specs/README.md`;
 - insira o conteudo de `assets/partials/AGENTS-specs-block.md` em `AGENTS.md`, logo apos o marcador `<!-- ai-project-structure:core:end -->` e antes de "## Regras Do Projeto".
+
+**Modulo github (so se ativado na pergunta 5):** siga `references/github.md`: copie a lista da lingua escolhida de `assets/github/<lingua>/`, pergunte item a item `docs/CODE_OF_CONDUCT.md` (default sim) e `.gitattributes` (default nao), preencha `{{SKILL_VERSION}}` e `{{QUALITY_COMMAND}}` do `ci.yml` e insira o conteudo de `assets/partials/AGENTS-github-block.md` em `AGENTS.md`, depois do ultimo bloco gerenciado e antes de "## Regras Do Projeto". No scaffold novo nao ha arquivo pre-existente; em projeto existente, arquivo que ja existe e pulado e listado.
 
 **Nunca copie `assets/partials/` para o projeto-alvo** - e material de insercao da skill, nao template de arquivo.
 
@@ -186,8 +194,8 @@ Use a data de hoje no formato AAAA-MM-DD.
 No final, liste de forma curta:
 
 - caminho absoluto do destino;
-- nivel escolhido (completa ou minimal) e se o modulo de specs foi ativado;
-- versao da estrutura: 2.13.0;
+- nivel escolhido (completa ou minimal), se o modulo de specs foi ativado e se o modulo `github` foi ativado (e em que lingua);
+- versao da estrutura: 2.14.0;
 - arquivos criados (em arvore);
 - proximo passo sugerido: preencher os demais campos de `PROJECT_CONTEXT.md` e adicionar tarefas iniciais em `TASKS.md`;
 - oferta: "quer validar a estrutura? `python3 <dir-desta-skill>/scripts/validate_structure.py <destino>`".
@@ -262,6 +270,12 @@ Siga `references/loop.md`. **Nunca ative no scaffold**, em nenhum nivel, e nunca
 
 Antes de tocar qualquer arquivo, confira o portao: a secao "Testes E Validacao" de `docs/QUALITY.md` do projeto-alvo precisa ter comando executavel. Vazia, ou ainda com o texto do template, a ativacao e **recusada**, com o motivo dito ao usuario. Um loop sem portao real nao sabe se o trabalho ficou bom, e um portao falso e pior que nenhum.
 
+## Ativar O Modulo GitHub
+
+Siga `references/github.md`. **Nunca ative sem resposta explicita**: sem resposta na pergunta 5 (ou fora do scaffold, sem pedido claro do usuario), o modulo `github` nao ativa, e a lingua dos arquivos (`en` ou `pt-BR`) nunca e escolhida por inferencia.
+
+A skill copia arquivos e insere o bloco em `AGENTS.md`. Ela **nao roda `gh`** nem faz push, tag ou Release: a configuracao do repositorio e o fluxo de versao sao checklist em `references/github.md`, feitos pela pessoa ou pelo agente de chat com o sim dela. Arquivo que ja existe no projeto e pulado e listado, nunca mesclado.
+
 ## Arquivos Em `assets/`
 
 Os templates ficam em `assets/`:
@@ -274,6 +288,10 @@ assets/
   partials/
     AGENTS-specs-block.md   (material de insercao; nunca copiado ao projeto)
     AGENTS-loop-block.md    (idem, so quando o modulo de loop e ativado)
+    AGENTS-github-block.md  (idem, so quando o modulo github e ativado)
+  github/
+    en/  pt-BR/             (so copiado quando o modulo github e ativado; mesma lista nas duas linguas:
+                             docs/ com comunidade, .github/ com templates, dependabot.yml e ci.yml, .gitattributes)
   docs/
     README.md
     PROJECT_CONTEXT.md
@@ -313,7 +331,7 @@ Zero erros esperado em scaffold recem-criado. Se o Python nao estiver disponivel
 - todos os arquivos esperados foram criados no destino (lista do passo 4 conforme o nivel escolhido);
 - `PROJECT_CONTEXT.md` foi preenchido com nome e objetivo informados (ou "(A preencher.)" registrado como pendencia, se o usuario avancou);
 - `SESSION.md` recebeu a primeira entrada (passo 6) e nao apenas o template;
-- `AGENTS.md` contem os marcadores `ai-project-structure:core:start`/`end` (e `specs`, se ativado);
+- `AGENTS.md` contem os marcadores `ai-project-structure:core:start`/`end` (e `specs` e `github`, se ativados);
 - nenhum arquivo existente foi sobrescrito sem permissao;
 - `docs/archive/` existe (mesmo que so com `README.md`);
 - `docs/TASKS.md` tem a secao `## Aguardando Usuario` e a data preenchida no marcador `(convencoes-2-2-0-desde:)`;

@@ -1,6 +1,6 @@
 # Spec 0007 - Modulo opcional `github` (skill 2.14.0)
 
-**Status:** Definida
+**Status:** Em andamento
 **Criada em:** 2026-10-21
 **Esforco:** M. Toca validador, verificador, `SKILL.md`, assets, referencia, evals e fixture, mas tudo no molde ja existente dos modulos specs e loop; nenhum mecanismo novo.
 

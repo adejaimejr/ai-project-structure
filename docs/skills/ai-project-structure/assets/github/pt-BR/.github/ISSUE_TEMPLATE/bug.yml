@@ -1,0 +1,40 @@
+name: Relato de bug
+description: Algo nao funciona como esperado.
+labels: ["bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Versao
+      description: A tag da release ou o commit que voce esta usando.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Sistema operacional
+      placeholder: "Linux, macOS ou Windows"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos para reproduzir
+      description: Os comandos ou acoes exatos que levam ao problema.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Saida
+      description: O que aconteceu de fato. Cole a saida completa.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento esperado
+      description: O que voce esperava que acontecesse no lugar.
+    validations:
+      required: true

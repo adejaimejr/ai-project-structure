@@ -35,17 +35,40 @@ jobs:
       - name: Verify repository
         run: python3 docs/skills/ai-project-structure/evals/verify_repository.py
 
+  # Lints the workflows themselves. A bad expression (runner.temp in a job-level
+  # env) once made release.yml unparseable, and nothing here caught it.
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    env:
+      ACTIONLINT_VERSION: "1.7.12"
+      ACTIONLINT_SHA256: "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint workflows
+        run: |
+          set -euo pipefail
+          tarball="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -fsSLO "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/${tarball}"
+          echo "${ACTIONLINT_SHA256}  ${tarball}" | sha256sum -c
+          tar -xzf "$tarball" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -color
+
   # Single status check named "ci" for the main ruleset: matrix checks carry an
-  # "(os)" suffix, so this job aggregates them under one stable name.
+  # "(os)" suffix, so this job aggregates them (and actionlint) under one stable name.
   ci:
     name: ci
-    needs: gates
+    needs: [gates, actionlint]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Fail if any matrix job did not succeed
+      - name: Fail if any job did not succeed
         env:
           GATES_RESULT: ${{ needs.gates.result }}
+          ACTIONLINT_RESULT: ${{ needs.actionlint.result }}
         run: |
-          echo "gates result: $GATES_RESULT"
+          echo "gates result: $GATES_RESULT; actionlint result: $ACTIONLINT_RESULT"
           test "$GATES_RESULT" = "success"
+          test "$ACTIONLINT_RESULT" = "success"

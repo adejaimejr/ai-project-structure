@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (actionlint no CI e branches mergeadas apagadas)
+
+- `ci.yml` ganha o job `actionlint` (1.7.12 da Release oficial, conferido por sha256) e o agregador `ci` passa a depender dele, entao o check obrigatorio do ruleset cobre tambem os workflows. Mutacao com `runner.temp` no `env` do job, o bug que derrubou o `release.yml`, reprova. Branches ja mergeadas apagadas no GitHub e nesta sandbox (PRs #2 a #7).
+
 ## 2026-10-21 (spec 0008 Concluida)
 
 - Spec 0008 (adaptador Cloudroom) `Concluida` pelo usuario; skill 2.15.0 reinstalada nos tres destinos desta sandbox.

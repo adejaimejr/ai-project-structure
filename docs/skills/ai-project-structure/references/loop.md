@@ -53,6 +53,7 @@ Rodar sem supervisao nao e o modo padrao de nenhuma CLI: cada uma pede flags pro
 | Gemini CLI | `gemini --approval-mode yolo --skip-trust -p` |
 | Grok | `grok --always-approve -p` |
 | opencode (qualquer provedor) | `opencode run --auto -m <provedor>/<modelo>` |
+| Cloudroom (filho visivel, so em thread do Cloudroom) | `python3 <skill>/scripts/cloudroom_agente.py --provider <provedor> --model <modelo>` |
 
 Duas armadilhas que custam uma rodada inteira quando passam batido:
 

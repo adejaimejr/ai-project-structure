@@ -1,4 +1,4 @@
-<!-- ai-project-structure:github:start v2.14.1 -->
+<!-- ai-project-structure:github:start v2.15.0 -->
 ## Camada GitHub (Modulo Opcional Ativo)
 
 Este projeto tem a camada GitHub gerada pela skill: `.github/`, arquivos de comunidade em `docs/`, `ci.yml` e `dependabot.yml`.

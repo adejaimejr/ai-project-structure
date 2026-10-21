@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (skill 2.15.0: adaptador Cloudroom documentado, T-102; T-111 aberta para a bancada)
+
+- T-102: `references/cloudroom.md`, `SKILL.md`, `references/loop.md` e `references/consenso.md` apontando para o adaptador; bump 2.15.0 com secao no CHANGELOG da skill. PR #5 rebaseado sobre a 2.14.1. T-111 criada como tarefa real da bancada da T-103.
+
 ## 2026-10-21 (skill 2.14.1: description dentro do padrao Agent Skills)
 
 - T-110: `description` do `SKILL.md` de 1479 para 985 caracteres, com texto aprovado pelo usuario; conserto do YAML invalido (": " em valor sem aspas) que a 2.14.0 publicou; etapa `verificar_frontmatter` no verificador (88 verificacoes).

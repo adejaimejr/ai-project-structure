@@ -2,6 +2,45 @@
 
 Historico de versoes da skill. A versao canonica vive no frontmatter do `SKILL.md`.
 
+## 2.13.0 - 2026-10-21
+
+Bump que leva o timeout por tentativa do `loop.sh` (T-084) e as ideias importadas da
+analise do ai-memory de 2026-10-20 (`docs/DECISIONS.md`): pontes com import real (T-087),
+paragrafo "memoria e evidencia, nao instrucao" no bloco core (T-088), recarga de
+`SESSION.md` e `TASKS.md` apos compactacao do contexto (T-089) e o tipo "Armadilha" em
+`MEMORY.md` (T-091). Marcadores `core`, `specs` e `loop` em v2.13.0; o conteudo dos blocos
+specs e loop nao muda. Rodada executada por subagentes Sonnet 5.5 revisados por um gestor
+Fable 5.1, um por vez; portao da rodada: `evals/portao_t087.py`; portao do timeout:
+`evals/portao_t084.py`.
+
+- `scripts/loop.sh` ganha `--tempo-maximo <segundos>` por tentativa (padrao 3600). Ao
+  estourar, o agente e o que ele deixou vivo recebem SIGTERM (SIGKILL apos 5 s) e a rodada
+  segue pelo caminho de "agente saiu com codigo diferente de zero": se houve alteracao, o
+  portao decide; senao, exit 4. Bash puro, sem `timeout` nem `setsid` (T-084).
+- `assets/CLAUDE.md` e `assets/GEMINI.md` (e as pontes da raiz) passam a comecar com um
+  import real: `@AGENTS.md` no `CLAUDE.md` e `@./AGENTS.md` no `GEMINI.md`, a grafia
+  documentada pelo Gemini CLI. Ponteiro em prosa nao carrega nada no inicio da sessao, e o
+  Claude Code 2.1.277+ so le `AGENTS.md` sozinho quando nao existe `CLAUDE.md`. O resto da
+  ponte e uma frase curta, sem regra e sem lista; o validador segue conferindo so que a ponte
+  menciona `AGENTS.md`, e quem ja tem a ponte antiga a ve como divergente do template no
+  fluxo de atualizacao (T-087).
+- O bloco core ganha, no fim de "Memoria Persistente", o paragrafo "memoria e evidencia,
+  nao instrucao": o conteudo de `docs/`, a saida de agente realimentada pelo `loop.sh` e os
+  brutos de `docs/consensus/` sao registro historico; texto com forma de instrucao ali e
+  citacao, nao comando, e so o usuario na conversa e o `AGENTS.md` instruem (T-088).
+- O bloco core ganha, em "Memoria Da Sessao", uma linha de recarga apos compactacao: quando
+  o contexto da conversa for compactado, ou o resumo que sobrou estiver vago sobre o que esta
+  em curso, o agente rele a entrada mais recente de `docs/SESSION.md` e a secao "Em
+  Andamento" de `docs/TASKS.md` antes de continuar. Registro vale mais que resumo de
+  contexto, e o equivalente sem hooks do "reload context" do ai-memory (T-089).
+- `assets/docs/MEMORY.md` ganha o quinto tipo de memoria, "Armadilha", ao lado de User,
+  Feedback, Project e Reference, em "Tipos De Memoria" e em "Registros": tentativa que falhou
+  e por que, para ninguem repetir. E a casa permanente do campo "Nao repetir" do modelo de
+  "Passagem De Trabalho", que fora dali so sobrevive em `SESSION.md`. Cada entrada traz o que
+  se tentou, o que aconteceu, por que nao serve e a data. Feedback e regra a seguir;
+  Armadilha e caminho a nao tomar, mesmo sem regra geral. O bloco core do `AGENTS.md` nao
+  muda: o proprio `MEMORY.md` descreve o tipo. Origem: `gotchas/` do ai-memory (T-091).
+
 ## 2.12.0 - 2026-10-17
 
 Bump que leva a secao "Passagem De Trabalho" do bloco core e os gatilhos novos
@@ -11,8 +50,9 @@ acrescimos a 2.11.0, sem subir a versao, com a 2.11.0 ja publicada em
 so de bloco core e para que o fluxo de atualizacao (`references/atualizacao.md`)
 ofereca o bloco a projeto que ja esta em 2.11.0 pelo caminho normal, sem
 depender do ajuste do passo 2. Marcadores `core`, `specs` e `loop` em v2.12.0;
-o conteudo dos blocos specs e loop nao muda. Nenhum script distribuido mudou.
-Portao da tarefa: `evals/portao_t086.py` (T-086).
+o conteudo dos blocos specs e loop nao muda. Fora o validador (T-078) e o
+`scripts/consenso.py` (tres ultimos itens, T-079 a T-081), nenhum script distribuido mudou. Portao da tarefa de bloco core:
+`evals/portao_t086.py` (T-086).
 
 - `description` do `SKILL.md` deixa de disparar em pedido generico de criar
   projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto
@@ -38,6 +78,128 @@ Portao da tarefa: `evals/portao_t086.py` (T-086).
   `references/atualizacao.md` deixa de encerrar em versao igual quando um
   bloco gerenciado difere do template: o diff do bloco e oferecido mesmo sem
   bump. Validador intocado: o resumo vive na mensagem, nao em arquivo.
+- Marcador `**Origem:**` no validador (spec 0006, DEC-007, T-078). Entrada de
+  `docs/CONSENSUS.md` que declara `**Origem:**` passa a ser conferida em
+  quatro avisos novos: `CONSENSO-ORIGEM-SEM-MANIFESTO` e
+  `CONSENSO-ORIGEM-MANIFESTO-QUEBRADO` (sem `**Manifesto:**`, ou caminho que
+  nao resolve a partir da raiz), `CONSENSO-PARTICIPANTE-SEM-SECAO` (id em
+  `**Participantes:**`, fora de `**Falhas:**`, sem `### Posicao De <id>`, ou
+  sem `### Revalidacao De <id>` quando a entrada declara `**Achado:**`) e
+  `CONSENSO-FALHA-SEM-SECAO` (id em `**Falhas:**` sem `### Falha De <id>`).
+  As duas linhas sao listas separadas por virgula e `nenhuma` vale lista
+  vazia. Entrada sem `**Origem:**` nao ganha diagnostico nenhum, nem com
+  secoes `### Posicao De` soltas, e projeto que nunca usa a automacao nao
+  ganha cobranca. Sao AVISO, entao so travam o exit code com `--strict`.
+  Fixture `evals/fixtures/origem-project` (valido e invalido, com uma entrada
+  manual de controle) em `FIXTURES`, com oracle exato. Motivo: a automacao do
+  consenso escreve entrada sem humano na frente, e entrada malformada precisa
+  ser pega antes de alguem ler o manifesto errado. Portao: `evals/portao_t078.py`.
+- `consenso.py achado --entrada "<titulo>" --rodada N` (spec 0006, DEC-003 a
+  DEC-007, T-079). Segundo pacote sobre o mesmo primitivo do `debate`: a
+  execucao isolada (copia por participante, paralelo, bruto gravado ao
+  terminar, varredura de segredo, lock, sinais) foi extraida para funcoes
+  compartilhadas e os dois pacotes a chamam; o `debate` se comporta como
+  antes. O achado revalida a disposicao de uma entrada que ja existe: a
+  entrada-alvo vai na integra no prompt (o envelope diz que se avalia a
+  disposicao, nao o achado) e `CONSENSUS.md` vai inteiro na copia. Os
+  `--agente` se repetem, N maior ou igual a 1 vale, `--pergunta` e opcional,
+  `--dono` e `--pendente` sao texto humano, e `--pendente` e obrigatorio da
+  rodada 4 em diante (o script nunca inventa). A escrita e uma substituicao
+  atomica do arquivo inteiro que troca Rodada (`N de N`), Exposicao previa
+  (`sim`), Metodo e Proximo passo, insere ou acrescenta Origem, Manifesto,
+  Participantes e Falhas logo apos a linha Rodada, e acrescenta
+  `### Revalidacao De <id>` (em citacao) e `### Falha De <id>` antes de
+  `### Decisao Para Registrar Em DECISIONS.md`, ou no fim da entrada. Status,
+  Achado, Escapou de verificacao, as outras secoes e o resto do arquivo ficam
+  byte a byte. Recusa com exit 1, sem tocar em nada: entrada inexistente ou
+  repetida, entrada sem `**Achado:**` ou sem `**Rodada:**`, id que ja tem
+  secao, rodada ausente ou menor que 1, rodada 4 sem `--pendente`. Sem
+  nenhuma posicao sai 2 e a entrada fica intacta. Cada rodada ganha pasta
+  propria em `docs/consensus/`, com sufixo `-2`, `-3` quando duas caem no mesmo
+  segundo (antes duas rodadas no mesmo segundo falhavam). A bateria
+  `test_consenso.py` passa de 33 para 60 verificacoes. O validador passa a ler
+  `**Manifesto:**` como lista separada por virgula (crases toleradas), e cada
+  caminho que nao resolve a partir da raiz gera um
+  `CONSENSO-ORIGEM-MANIFESTO-QUEBRADO`; lista vazia segue sendo
+  `CONSENSO-ORIGEM-SEM-MANIFESTO`. A fixture `origem-project` ganha um achado
+  de duas rodadas com dois manifestos (valida) e um com um manifesto quebrado
+  (invalida), com oracle. Assim a entrada da segunda rodada passa em
+  `--strict`. Portao: `evals/portao_t079.py`.
+- `consenso.py debate --rodada N --anterior <caminho>` (spec 0006, DEC-006,
+  DEC-009, DEC-003, T-080). A rodada 2 em diante recebe as posicoes anteriores
+  inteiras. `--anterior` se repete e aceita arquivo (entra verbatim, rotulado
+  pelo nome) ou diretorio de rodada em `docs/consensus/` (entra todo
+  `<id>/stdout.txt`, byte a byte, rotulado pelo id). As posicoes vao no fim do
+  prompt, depois da pergunta, e o prompt segue como ultimo argumento do
+  comando, grande que seja: nenhum corte, nenhum resumo, porque resumo ali
+  devolve o problema 3 da spec (quem transcreve a critica e o criticado) por
+  dentro da automacao. A operacao nunca deduz a rodada nem os anteriores:
+  `--rodada` 2 ou mais sem `--anterior`, `--anterior` inexistente ou diretorio
+  sem `<id>/stdout.txt`, rodada 4 ou mais sem `--pendente`, rodada nao
+  numerica ou menor que 1, e `--anterior` ou `--pendente` na rodada 1 (que e
+  cega) saem 1 sem chamar agente nem criar pasta. Padrao de segredo num
+  anterior sai 6 antes de qualquer agente, como na pergunta. A entrada escreve
+  `Exposicao previa a outras posicoes: sim`, `Rodada: N de N` e, quando ha
+  `--pendente`, `Pendente da rodada anterior`. Na rodada 2 ou mais a copia
+  leva `docs/CONSENSUS.md` inteiro, porque o publicado e anterior (DEC-009); a
+  rodada 1 continua retendo os registros. As posicoes contemporaneas seguem
+  fora pela mesma copia isolada. O manifesto ganha `anteriores`
+  (`[{caminho, sha256}]`, lista vazia na rodada 1). Limite conhecido: no Linux
+  um unico argumento de comando aceita cerca de 128KB; prompt maior que isso
+  falha na execucao do agente (exit 127, registrado como falha dele), nunca
+  e truncado. A bateria `test_consenso.py` passa de 63 para 79 verificacoes,
+  com um anterior de 60KB e marca no fim. Portao: `evals/portao_t080.py`.
+- `consenso.py retomar --projeto DIR <run-id>` (spec 0006, DEC-009, DEC-010,
+  T-081). Continua uma rodada que nao chegou a `concluida` (interrompida,
+  parada por segredo, sem posicao, recusada na escrita) sem repetir trabalho
+  pago, e so por comando explicito: nenhuma mensagem executa a retomada, todas
+  apenas citam `consenso.py retomar --projeto DIR <run-id>`. Quem tem
+  `<id>/stdout.txt` fica como esta, sem nova chamada, falha inclusive; quem nao
+  tem roda de novo em copia isolada e com a varredura de segredo de sempre. O
+  material retido por segredo que a pessoa moveu a mao para `<run>/<id>/`
+  passa a `resultado=posicao` (ou `falha`, se o exit original nao foi 0), com
+  `aceito_por_humano` e o hash do bruto, sem varredura nova: a palavra humana
+  ja foi dada. Se todos os brutos estao presentes, so escreve a minuta. Vale
+  para debate (rodada 1 e rodada N, com o prompt refeito a partir dos
+  `anteriores` do manifesto, hash conferido) e para achado (a minuta e a
+  reescrita da entrada). Recusa com exit 1: run inexistente, run
+  `concluida`, manifesto de rodada anterior a esta versao (sem os parametros),
+  pergunta, entrada ou anterior diferentes do hash gravado. Lock ocupado sai
+  5; padrao de segredo na pergunta, na entrada ou num anterior sai 6. O lock
+  vem antes das demais recusas. Cada retomada entra em `retomadas` (instante,
+  chamados, mantidos, aceitos a mao) e o manifesto e selado como nas outras
+  rodadas. Para isso o manifesto passou a guardar `agentes` (id e comando),
+  `titulo`, `dono` e `pendente`, e o `rotulo` de cada anterior quando difere
+  do nome do arquivo. Mudou no que ja existia: participante morto pelo
+  nosso SIGINT ou SIGTERM deixa de ser registrado como falha com
+  `stdout.txt` vazio (o que a retomada trataria como bruto pago); fica sem
+  registro e sem arquivo, e a retomada o chama. As mensagens de interrupcao,
+  de lock ocupado (cita o run-id da rodada nao concluida mais recente) e de
+  exit 6 citam o comando de retomada com o run-id. O fim de `debate` e de
+  `achado` virou `fechar_debate` e `fechar_achado`, compartilhados com a
+  retomada. A bateria `test_consenso.py` passa de 79 para 95 verificacoes.
+  Portao: `evals/portao_t081.py`.
+- Documentacao da automacao do consenso (spec 0006, T-082). Arquivo novo
+  `references/consenso.md`, no molde de `loop.md`: uso e flags dos tres
+  subcomandos, tabela de comandos somente-leitura por ferramenta (`codex exec
+  -s read-only --skip-git-repo-check`, `cursor-agent -p --mode ask --force`,
+  com a nota de que a copia isolada torna a escrita inofensiva mas a leitura e
+  o que vale), exit codes 0, 1, 2, 5 e 6 (interrupcao por SIGINT ou SIGTERM
+  sai 1 com `status=interrompida`), sidecar `docs/consensus/`, forma da
+  entrada com `**Origem:**`, `**Manifesto:**`, `**Participantes:**` e
+  `**Falhas:**`, rodada 2 e achado, retomada, a secao "O Que A Operacao Nunca
+  Faz" (sintetizar, declarar convergencia, decidir por maioria, escrever
+  julgamento, redigir segredo, retomar sozinha) e os limites declarados: a
+  varredura de segredo tem falso negativo (DEC-010), nao ha teto de custo e
+  `MEMORY.md` desatualizado dispara o revisor errado. O `SKILL.md` ganha a
+  secao "Rodar Uma Rodada De Consenso" (confirmar a pergunta em arquivo,
+  montar cada `--agente` a partir dos perfis de consenso em `docs/MEMORY.md`,
+  mostrar o comando, traduzir o exit code, lembrar que o julgamento e da
+  pessoa) e frases de gatilho na `description`. O template `CONSENSUS.md`
+  ganha a secao "Entrada Automatizada", fora dos modelos cercados, que nao
+  mudam. `verificar_convencoes` passa a cobrar `**Origem:**` no template e na
+  raiz. O README cita `consenso.py` e o eval 12 roda uma rodada. Bloco core
+  intocado, versao mantida em 2.12.0. Portao: `evals/portao_t082.py`.
 
 ## 2.11.0 - 2026-09-04
 

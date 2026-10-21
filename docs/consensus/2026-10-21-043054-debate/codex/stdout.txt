@@ -1,0 +1,7 @@
+O validador deve avisar somente quando uma entrada de `docs/CONSENSUS.md` apontar para o diretório incompleto.
+
+Isso preserva a DEC-009: o material bruto e o manifesto podem existir no repositório desde o início, e uma corrida só é retomada por comando explícito. Portanto, uma pasta isolada, inclusive com manifesto `em-andamento`, `interrompida`, participante sem `stdout.txt` ou sem manifesto, não prova corrupção nem exige intervenção.
+
+Já uma referência em `CONSENSUS.md` transforma aquele diretório em evidência declarada de uma rodada. Nesse caso, a incompletude quebra a rastreabilidade e o aviso é apropriado.
+
+Avisar sempre criaria falso positivo durante uma rodada legítima em andamento. Ignorar sempre permitiria referências documentais quebradas sem detecção.

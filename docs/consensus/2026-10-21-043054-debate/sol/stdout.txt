@@ -1,0 +1,5 @@
+Não consegui ler a cópia: as tentativas de acesso falharam antes de executar os comandos, com `bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted`.
+
+Sem ler `scripts/validate_structure.py`, `consenso.py` e a DEC-009 completa, não tenho base para emitir o parecer solicitado. Escolher uma opção agora contrariaria sua exigência de leitura e a regra “Nunca Inferir”.
+
+É necessário restabelecer o acesso à cópia ou fornecer o conteúdo desses arquivos. Nenhum arquivo foi alterado.

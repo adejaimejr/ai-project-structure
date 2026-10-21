@@ -4,7 +4,239 @@ Debates antigos de `docs/CONSENSUS.md`, rotacionados em 2026-09-02 e de novo em 
 
 Cobre os dois debates de 2026-04-25, a revisao da spec 0003 de 2026-09-02, e do dia 2026-09-03 o achado `0005-A1` e a rodada das seis perguntas da spec 0006, todos `resolvido`, mais as rodadas de P-7/P-8 e P-9 da spec 0006, que continuam `aberto` (calibragem com o usuario, T-053) e foram rotacionadas por tamanho. Os de 2026-04-25 sao anteriores a versao 2.2.0 e nao trazem os campos declarativos de metodo, exposicao previa e rodada; o de 2026-09-02 e a primeira entrada do repositorio que os traz.
 
-<!-- REVAL-5, resolvida sem defeito, rotacionada em 2026-09-03 por tamanho do CONSENSUS.md; as outras seis entradas REVAL-* continuam la. -->
+<!-- REVAL-5, resolvida sem defeito, rotacionada em 2026-09-03 por tamanho do CONSENSUS.md. REVAL-1 a REVAL-4, todas resolvido, rotacionadas em 2026-10-21 pelo mesmo motivo, antes de T-083; REVAL-6 e REVAL-7 continuam la. -->
+
+## 2026-09-03 - REVAL-1: o contrato do bloco core promete o que o validador nao cobra
+
+**Achado:** REVAL-1
+
+**Status:** resolvido
+
+**Resolvido em:** 2026-09-03, proposta aceita item a item pelo usuario (T-059); decisao em `docs/DECISIONS.md`, conserto em T-069, T-070 e T-071.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 1 da revalidacao adversarial da skill 2.5.1. Grok 4.6 (`cursor-agent -p --mode ask --force --model cursor-grok-4.6-xhigh`) atacou o bloco core num worktree com as entradas contemporaneas de `CONSENSUS.md` retiradas. Claude Fable selou posicao antes de rodar qualquer agente e conferiu cada item no codigo, com projeto minimo montado a partir de `assets/` e `validate_structure.py --strict --codigos`. Bruto em `docs/archive/revalidacao-2026-09-03/`.
+
+### O Que Foi Encontrado
+
+Regra do core violavel sem nenhum diagnostico, cada uma reproduzida com exit 0 em `--strict`:
+
+- **Evidencia de fechamento.** Linha em Concluidas sem prefixo de data nao e cobrada (`check_evidence`, `done_date is None`). A migracao real de v1 (superficie 5) produziu exatamente isso: `T-004` sem data, sem evidencia, validador limpo.
+- **Forma da evidencia.** O core diz que "o validador confere a forma da evidencia". Basta uma sub-linha que comece com `Evidencia:`; `tipo=`, `procedimento=` e `resultado=` nao sao exigidos. `(verifica: )` vazio anula o unico ERRO da regra, porque string vazia esta contida em qualquer texto. `resultado=` vazio passa.
+- **Aguardando Usuario.** O core exige `**Pergunta:**`, `**Resposta:**` e `(bloqueada:)`; so a pergunta e cobrada. Sem `(bloqueada:)`, `TASK-BLOQUEADA-ANTIGA` nunca dispara.
+- **Pontes imutaveis.** `check_bridges` so confere a substring `AGENTS.md`. Ponte com regra de produto, arquitetura e estilo passa.
+- **Rodada 2 com exposicao `nao`.** O core diz que da rodada 2 em diante a exposicao "deve ser declarada como sim"; nenhum cruzamento existe. `**Proximo passo:**` vazio satisfaz "com dono claro".
+- **Travessao "em qualquer texto".** So `AGENTS.md`, as pontes e `docs/**/*.md`. `README.md` da raiz e qualquer `.py` passam.
+- **Cerca aberta.** Um ` ``` ` sem par esconde do validador tudo ate o fim do arquivo: ID duplicado e concluida sem evidencia somem.
+- **Marcadores.** `MARKER_RE` casa so `core|specs`; bloco `loop` despareado ou sem versao passa. Marcadores invertidos (end antes de start) passam.
+- **Modulo incoerente.** Bloco specs em `AGENTS.md` sem `docs/specs/` nao acusa.
+- **Leitura obrigatoria.** O core manda ler `docs/ARCHITECTURE.md` sem "se existir"; o scaffold minimal nao cria o arquivo.
+
+Nao verificavel por desenho (e o core ja admite parte disso): ordem de leitura, Nunca Inferir, escopo, desempate, veracidade dos campos de independencia, "achado so vira tarefa depois da disposicao". Contradicoes de texto: core aceita pergunta aberta "como tarefa em TASKS.md **ou** na spec", o bloco specs manda registrar na spec; o gatilho "trabalho relevante atualiza SESSION.md" nao abre excecao para o loop, que e proibido de escrever la; a rotacao por 30KB pode obrigar a arquivar menos de 5 entradas.
+
+### Disposicao
+
+- Cada item e conserto pequeno no validador, mas o **nivel** de cada diagnostico novo e cobranca nova em projeto existente, e isso e calibragem do usuario (mesmo criterio de T-054). Proposta para decisao: data ausente em Concluidas, `(verifica: )` vazio, marcador invertido e loop despareado viram ERRO (sao contradicao estrutural); forma da evidencia, `Resposta`/`(bloqueada:)` ausentes, rodada 2 com `nao`, proximo passo vazio e cerca aberta viram AVISO; travessao fora de `docs/` e ponte com regra ficam como estao, com o texto do core dizendo o alcance real. `ARCHITECTURE.md` ganha "quando existir" no core.
+
+### Revalidacao
+
+- Claude Fable, familia diferente de quem achou: cada item reproduzido em projeto minimo com o comando em `docs/archive/revalidacao-2026-09-03/s1-claude-verifica-grok.txt` e `s2-claude-falsos-negativos.txt`. Nenhum item ficou como "nao confirmado". Ressalva de metodo: a transcricao e do Claude, que tambem opinou; o bruto do Grok esta ao lado para conferencia.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: `verify_repository.py` 44 de 44 e a raiz em `--strict`, em todas as versoes desde a 2.2.0.
+- Mecanismo do ponto cego: cada check nasceu com fixture para o caso **novo** daquela versao, nunca para o contrato inteiro do bloco core. O core foi escrito como promessa e o validador como amostra, e ninguem cruzou os dois linha a linha. A raiz, dogfood, nunca produziu nenhum dos documentos errados acima.
+- Conserto de portao proposto: tabela contrato-para-codigo em `evals/` (cada regra verificavel do core aponta o codigo de diagnostico que a cobra, ou declara "nao verificavel") e uma fixture por codigo. Ver REVAL-4.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Nenhuma ate o usuario calibrar os niveis.
+
+## 2026-09-03 - REVAL-2: o validador tem falso negativo em quase toda regra que nao nasceu com fixture
+
+**Achado:** REVAL-2
+
+**Status:** resolvido
+
+**Resolvido em:** 2026-09-03, niveis decididos em T-059 (decisao em `docs/DECISIONS.md`, conserto em T-069 e T-070); tracebacks e codigo morto em T-064.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 2. Codex (`codex exec -s read-only -m gpt-5.6-sol -c model_reasoning_effort="xhigh"`) atacou `validate_structure.py` com o `main` real sobre `assets/` e overlays em memoria, porque o sandbox recusou escrever em `/tmp`. Claude escreveu dez documentos-que-passam antes de ler o Codex (`s2-claude-falsos-negativos.txt`) e reproduziu cada achado novo em projeto de verdade (`s2-claude-verifica-codex.txt`). Os itens que Grok tambem achou na superficie 1 estao em REVAL-1 e nao se repetem aqui.
+
+### O Que Foi Encontrado
+
+Documento errado que passa limpo em `--strict`, alem dos de REVAL-1:
+
+- `SESSION.md`, `CONSENSUS.md` e `TASKS.md` **vazios** (zero bytes) passam: os parsers devolvem colecoes vazias. O proprio `assets/` passa com so o INFO da data.
+- Spec `Concluida` com a secao "Evidencia De Conclusao" **vazia** passa: o check so recusa a substring `(a preencher`. Qualquer texto que nao seja isso, como `- banana`, satisfaz.
+- `T-1` e aceito como ID (`\d+`); segunda `(prioridade: lixo)` na mesma linha nao e olhada; `(spec: 0001-NNNN-ausente)` e ignorado porque contem `NNNN` em qualquer posicao; `(bloqueada:)` fora de "Aguardando Usuario" e aceito.
+- `T-001` vivo e `T-001` em `docs/archive/TASKS-*.md` nao sao duplicidade: o archive so entra na conferencia de specs.
+- Status de spec no meio de um paragrafo (`... contem **Status:** Rascunho`) e aceito: a regex nao esta ancorada.
+- Regra anti-drift das specs (`status vive so em TASKS.md`) nao tem check nenhum: `- T-001: tarefa (status: concluida) [x] feito` dentro da spec passa.
+- Entrada de `CONSENSUS.md` na rodada 2 com exposicao `nao`, `Proximo passo` vazio e secao "Por Que Nada Pegou Antes" sem conteudo passa.
+
+Traceback em vez de diagnostico:
+
+- Arquivo fora de UTF-8 (`MEMORY.md` em latin-1): `read()` so captura `OSError`, `UnicodeDecodeError` derruba o script inteiro.
+- Rotulo com acento combinante (`**Metodo:́**`, U+0301): `field_value` normaliza antes de fazer `split(":**")` e cai em `IndexError`.
+
+Falso positivo: heading ATX com fechamento (`### Objetivo ###`), valido em CommonMark, gera `SESSAO-SEM-HEADINGS`. Exemplo em cerca `~~~` (nao ```) e lido como entrada real.
+
+Codigo morto: `ENTRY_RE` (linha 59) e `DATE_RE` (linha 70) nunca sao usados.
+
+### Disposicao
+
+- Tracebacks, codigo morto, `~~~`, ATX fechado, `NNNN` em qualquer posicao e ancoragem do Status: conserto sem decisao, com fixture ou teste para cada (T-064).
+- Arquivo vazio, evidencia de spec vazia, `T-1`, duplicidade com archive, `(bloqueada:)` fora de secao e anti-drift: cada um e cobranca nova em projeto existente; entram na mesma calibragem de REVAL-1 (T-059), com a proposta de ERRO para vazio e duplicidade com archive, AVISO para o resto.
+
+### Revalidacao
+
+- Claude Fable, familia diferente. Todos os itens reproduzidos em projeto minimo montado de `assets/` com `--strict --codigos`; os dois tracebacks reproduzidos com o `stderr` capturado. Nada nao confirmado. A transcricao e do Claude; o bruto do Codex esta ao lado.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: `verify_repository.py` 44 de 44 em todas as versoes; sete fixtures com oracle exato.
+- Mecanismo do ponto cego: o oracle exato prova que a fixture produz **exatamente** o que declara, e nada sobre o que o check deveria pegar fora dela. Fixture nasce por feature (2.2.0, 2.4.0), nunca por regra; e o documento "errado de um jeito que ninguem escreveu ainda" nunca entrou em fixture nenhuma.
+- Conserto de portao proposto: o de REVAL-4.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Nenhuma ate a calibragem.
+
+## 2026-09-03 - REVAL-3: o loop escreve o que o comando nao comprova em quatro caminhos, e perde trabalho em tres
+
+**Achado:** REVAL-3
+
+**Status:** resolvido
+
+**Resolvido em:** 2026-09-03, T-061 respondida pelo usuario (opcao c, e `--seco` sem `agente=`); decisao em `docs/DECISIONS.md`, conserto em T-060 e T-072.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 3. Gemini 3.7 Flash (`cursor-agent -p --mode ask --force --model gemini-3.7-flash-high`) atacou `loop.sh`, `loop_task.py` e `references/loop.md`. Claude rodou nove entradas hostis com agente falso (`s3-claude-hostil.txt`) antes de ler o Gemini, e depois conferiu os tres achados que nao tinha (`s3-claude-verifica-gemini.txt`).
+
+### O Que Foi Encontrado
+
+Evidencia que o comando nao comprova:
+
+- **Comando com parenteses e truncado e o truncado e executado.** `VERIFICA_RE` para no primeiro `)`. `(verifica: python3 -c "print(1)")` vira `python3 -c "print(1"`, o portao roda isso e falha por sintaxe, e o mesmo regex no validador aceita a evidencia truncada.
+- **`procedimento=` nao e o comando que rodou.** `loop.sh` captura o comando antes do agente e `cmd_fechar` rele a linha depois. Agente que troca `(verifica: bash portao.sh)` por `(verifica: true)` fecha com `procedimento=true; resultado=exit 0; suite-real-passou`, e `--strict` aceita.
+- **`--seco --agente "claude -p"` grava `agente=claude -p`** sem o agente ter rodado. O comentario do codigo diz que `agente` e "fato conhecido com certeza".
+- **`fechar` e `bloquear` apagam as sub-linhas preexistentes** da tarefa (notas, contexto), contra "nao sobrescreva conteudo existente sem preservar".
+
+Trabalho perdido ou exit errado:
+
+- **Saida de portao maior que o limite de argumento** (1.2MB no macOS) faz a tentativa 2 falhar com `Argument list too long`, e o loop reporta exit 4 "agente mal configurado".
+- **Bytes fora de UTF-8 na saida do portao** derrubam `cmd_fechar` com traceback; portao verde, tarefa nao fecha, exit 1.
+- **`.loop-pergunta` vazio**: exit 1 em vez de 3, tarefa nao bloqueada, arquivo fica no disco.
+- Agente que remove o marcador `(verifica:)`: portao verde, fecho falha, exit 1.
+- Agente que so apaga arquivo e sai 1: `find -newer` nao ve, exit 4.
+
+Documentacao: a tabela de exit codes de `references/loop.md` nao tem o exit 4; `--agente` relativo com `--projeto` em outro diretorio falha depois do `cd`. Portao que mente (`true`) e por desenho, e a evidencia deixa visivel (`procedimento=true`), como `references/loop.md` ja diz.
+
+### Disposicao
+
+- Conserto direto, sem decisao (T-060): capturar a linha da tarefa junto com o comando no arranque e passar para `fechar` (ou `fechar` recusar se a linha mudou); preservar sub-linhas em `fechar`/`bloquear`; `errors="replace"` na leitura de saida e de pergunta; realimentacao por arquivo ou truncada ao mesmo limite do `resultado`; pergunta vazia vira exit 3 com pergunta "(vazia)" ou exit proprio, e o arquivo some; exit 4 documentado. Teste de mutacao para cada um.
+- Decisao do usuario (T-061): `(verifica:)` com parenteses e mudanca de formato (ex: exigir o comando entre crases, ou aceitar ate o ultimo `)` da linha); `--seco` com `--agente` e proibir a combinacao ou nao gravar `agente=`.
+
+### Revalidacao
+
+- Claude Fable, familia diferente. Os nove cenarios de Claude e os tres do Gemini rodaram de verdade com `loop.sh` e agente falso; saidas em `docs/archive/revalidacao-2026-09-03/`. Nada nao confirmado.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: `test_loop.py` 58 de 58, e tres bancadas reais com portao verde na tentativa 1.
+- Mecanismo do ponto cego: a bateria cobre o caminho feliz de cada exit code e nunca entrada hostil; os agentes reais das bancadas eram cooperativos e os portoes curtos. A evidencia registra o que **a linha diz** no fim, e ninguem perguntou se a linha ainda era a mesma do inicio.
+- Conserto de portao proposto: casos hostis em `test_loop.py` (parenteses, saida enorme, nao UTF-8, pergunta vazia, agente que edita a propria tarefa, sub-linhas preexistentes).
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Nenhuma ate o usuario decidir o formato de `(verifica:)`.
+
+## 2026-09-03 - REVAL-4: o portao dos evals e cego para 29 dos 39 diagnosticos e para o prompt do loop
+
+**Achado:** REVAL-4
+
+**Status:** resolvido
+
+**Resolvido em:** 2026-09-04, T-065 fechada pelo loop (Codex `gpt-5.6-terra`, tentativa 1, portao proprio `evals/portao_t065.py`): 39 de 39 codigos com oracle, `ETAPAS` com manifesto, inventario de fixtures, prompt assertado, versao em prosa. As 11 mutacoes cegas de 2026-09-03 refeitas: todas pegas.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 4, a mais importante. Claude executou 16 mutacoes com backup por `cp` antes de ler qualquer agente (`mutacoes-claude.txt`); Codex (mesmo perfil de REVAL-2), somente leitura, **previu** mutacoes e uma tabela de cobertura dos 39 codigos; Claude executou depois as 8 previsoes que ainda nao tinha rodado (`mutacoes-claude-rodada2.txt`). 24 mutacoes no total, cada uma revertida do backup e conferida por SHA-256.
+
+### O Que Foi Encontrado
+
+Mutacao que passa verde no `verify_repository.py` (44 de 44), com a promessa quebrada:
+
+- Desligar `check_session` (M1), `check_em_dash` do validador (M2), `check_bridges` (M3), `check_evidence` (M5), `check_markers_values` (M9), `check_rotation` (M10): seis checks inteiros somem sem um unico FALHA. Codex previu os seis antes de ver o resultado.
+- Remover a chamada de `verificar_fixtures` (M17): o resumo cai de 44 para 30 e o exit continua 0. Nao ha manifesto de etapas nem total esperado.
+- Esvaziar `test_loop.py` (M18): imprime `0/0 verificacoes passaram`, exit 0, e o verificador aceita.
+- Tirar `debate-project` do `FIXTURES` (M19): a fixture continua no disco e ninguem nota. Apagar `assets/docs/STACK.md` (M20): o destino e comparado com a fonte ja reduzida.
+- Versao em prosa (`SKILL.md:186`, `CHANGELOG.md:11`) desatualizada (M8): so frontmatter, marcadores e heading do CHANGELOG sao conferidos.
+- No prompt do `loop.sh`: mandar o agente trabalhar na `T-999` (M22), remover "nao apague o que falha" e a proibicao de editar memoria (M23): 58 de 58. A unica assercao sobre o conteudo do prompt e a realimentacao da falha. `references/loop.md` diz que essas regras estao no prompt **porque** o portao nao as pega; o teste do prompt tambem nao.
+- `loop_task`: leftover de `.loop-pergunta` nao removido (M12), truncagem de `resultado` desligada (M13), `bloquear` aceitando tarefa ja bloqueada (M24): 58 de 58.
+
+Cobertura positiva (tabela do Codex, conferida contra as mutacoes): **10 de 39** codigos tem fixture que acusa se o check sumir. A raiz em `--strict` sai limpa e nao cobre nenhum.
+
+Pegou, como devia: `check_markers` (M4, via `ESTRUTURA-V1`), `check_waiting` (M6), `TASK-ID-DUPLICADO` (M7), `check_specs` (M11), `.loop-pergunta` ignorado (M14), secoes elegiveis (M15), ordem de captura do comando (M16), eval removido do `evals.json` (M21).
+
+Efeitos colaterais achados pelo caminho, os dois de suspeita do Codex e confirmados por execucao: `verify_repository.py` afirma "nunca escreve no repositorio" e gravava `scripts/__pycache__` na fonte via `py_compile`, que o `install.sh` copiava para os tres destinos (6 arquivos por instalacao); e `loop_task.escrever`, da 2.5.1, troca o modo do `TASKS.md` de 664 para 600 porque `mkstemp` cria com 0600 e `os.replace` nao preserva. `evals.json` ainda pede marcador `v2.2.0` nos evals 1, 2, 3 e 5, e o eval 7 nao conhece os codigos da 2.5.0.
+
+### Disposicao
+
+- Aplicado hoje, sem bump (arquivos nao distribuidos): `verify_repository.py` confere os scripts com `ast.parse` e roda a bateria com `PYTHONDONTWRITEBYTECODE`, ganhou o check "nenhum `__pycache__` dentro da skill" e o piso de 58 verificacoes na bateria do loop; `test_loop.py` nao grava bytecode; `install.sh` apaga `__pycache__` do destino; `evals.json` em 2.5.1 com os codigos; README da skill corrigido. Mutacao M18 refeita depois: pega.
+- Fica para T-065: manifesto de cobertura codigo-para-fixture com uma fixture por codigo (29 faltam), manifesto de etapas do verificador, inventario de fixtures no disco contra o `FIXTURES`, assercao do conteudo do prompt no `test_loop.py`, e a versao em prosa entrar em `verificar_versao`.
+- Fica para T-060 (distribuido, exige 2.5.2): preservar o modo do arquivo em `escrever`, com teste.
+
+### Revalidacao
+
+- Claude executou; Codex previu as cegas. As previsoes bateram nas 8 que os dois cobriram, e o Codex ainda apontou as duas suspeitas que viraram achado. Familia diferente nos dois sentidos.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: 44 de 44 e 58 de 58, lidos como "cobertura" em todas as sessoes desde a 2.2.0, inclusive nas tres rodadas de consenso de hoje.
+- Mecanismo do ponto cego: o numero total e dinamico e nunca foi comparado com nada, entao verificacao que some nao e regressao; fixture so nasce quando um check nasce, e o contrato do validador nunca foi enumerado contra as fixtures; a bateria do loop assere exit code e arquivos, nunca o texto que o agente recebe. "Mutacao antes de portao novo" virou regra em `MEMORY.md` hoje, mas so para portao **novo**: ninguem mutacionou os antigos.
+- Conserto de portao proposto: o manifesto de T-065, e a regra de que todo codigo em `CODIGOS` precisa de fixture que o produza, cobrada pelo proprio `verify_repository.py`.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Proposta: "codigo de diagnostico sem fixture que o produza nao entra em `CODIGOS`". Depende do usuario.
+
 
 ## 2026-09-03 - REVAL-5: os tres fluxos funcionam contra a copia instalada; o que sobra e texto
 

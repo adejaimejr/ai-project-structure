@@ -62,8 +62,8 @@ HOJE_RE = re.compile(r"\{\{HOJE([+-]\d+)?\}\}")
 
 # A bateria do loop tinha 58 verificacoes em 2026-09-03. Menos que isso e teste que
 # sumiu; ao acrescentar testes, suba o piso junto.
-LOOP_TESTES_MINIMO = 74
-CONSENSO_TESTES_MINIMO = 32
+LOOP_TESTES_MINIMO = 83
+CONSENSO_TESTES_MINIMO = 95
 
 # Criterio de aceite da spec 0005: o aviso do ponto cego e permanente no bloco
 # core, entao todo projeto paga a leitura dele. Quatro linhas e o teto.
@@ -166,6 +166,27 @@ FIXTURES = {
             "2026-09-03 - Achado sem identificador e com valor invalido",
             "AVISO|ACHADO-ESCAPOU-INVALIDO|docs/CONSENSUS.md|"
             "2026-09-03 - Achado sem identificador e com valor invalido",
+        ],
+    },
+    # Os checks de Origem tambem sao AVISO. A entrada manual de controle (primeira
+    # da invalida) tem secoes `### Posicao De` soltas e nao recebe diagnostico.
+    "origem-project/valido": {"strict": True, "exit": 0, "diagnosticos": []},
+    "origem-project/invalido": {
+        "strict": True,
+        "exit": 1,
+        "diagnosticos": [
+            "AVISO|CONSENSO-ORIGEM-SEM-MANIFESTO|docs/CONSENSUS.md|"
+            "2026-09-03 - Automatizada sem ponte para o manifesto",
+            "AVISO|CONSENSO-ORIGEM-MANIFESTO-QUEBRADO|docs/CONSENSUS.md|"
+            "2026-09-03 - Automatizada com ponte que nao resolve",
+            "AVISO|CONSENSO-PARTICIPANTE-SEM-SECAO|docs/CONSENSUS.md|"
+            "2026-09-03 - Automatizada com participante sem secao",
+            "AVISO|CONSENSO-FALHA-SEM-SECAO|docs/CONSENSUS.md|"
+            "2026-09-03 - Automatizada com falha sem secao propria",
+            "AVISO|CONSENSO-PARTICIPANTE-SEM-SECAO|docs/CONSENSUS.md|"
+            "2026-09-03 - Achado automatizado sem revalidacao",
+            "AVISO|CONSENSO-ORIGEM-MANIFESTO-QUEBRADO|docs/CONSENSUS.md|"
+            "2026-09-03 - Achado automatizado com um dos manifestos que nao resolve",
         ],
     },
     # Fixtures de cobertura: uma por area do validador, inclusive casos que
@@ -656,7 +677,8 @@ def verificar_convencoes(res, verbose=False):
 
     campos = ("**Metodo:**", "**Exposicao previa a outras posicoes:**", "**Rodada:**",
               "**Achado:**", "**Escapou de verificacao:**",
-              "**Pendente da rodada anterior:**", "Por Que Nada Pegou Antes")
+              "**Pendente da rodada anterior:**", "Por Que Nada Pegou Antes",
+              "**Origem:**")
     for rotulo, path in (("template", ASSETS / "docs" / "CONSENSUS.md"),
                          ("raiz", ROOT / "docs" / "CONSENSUS.md")):
         texto = read(path)

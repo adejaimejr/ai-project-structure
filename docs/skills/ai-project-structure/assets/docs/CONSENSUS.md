@@ -46,6 +46,17 @@ Rodada verde e ausencia de objecao, nao prova de que funciona. Modelos que leem 
 
 Por isso N rodadas verdes nao valem confianca proporcional a N: elas medem quantas vezes ninguem objetou. Quando um achado escapa da verificacao que ja existia, o conserto e no portao, e nao so no achado.
 
+## Entrada Automatizada
+
+Quando a rodada e rodada por `consenso.py` (da skill `ai-project-structure`), a entrada nasce de uma minuta escrita pelo script, nao por um modelo. Ela e a mesma entrada do modelo abaixo, com campos a mais que ligam o texto ao que a execucao comprova:
+
+- `**Origem:**` `automacao`. Marca a entrada como automatizada. O validador so cobra os campos abaixo de quem declara este.
+- `**Manifesto:**` caminho, a partir da raiz, do manifesto de cada rodada (`docs/consensus/<run-id>/manifesto.json`), separados por virgula. Ali ficam o comando integral, o diretorio, o exit code e os hashes de insumo e saida; a entrada traz so a ponte.
+- `**Participantes:**` ids dos agentes que rodaram, separados por virgula. Cada id tem a secao `### Posicao De <id>` (na revalidacao de achado, `### Revalidacao De <id>`).
+- `**Falhas:**` ids que falharam, ou `nenhuma`. Cada id tem a secao `### Falha De <id>`, no lugar da posicao.
+
+O bruto de cada agente fica em `docs/consensus/<run-id>/<id>/stdout.txt` e **nao pode ir para o `.gitignore`**: sem ele ninguem confere a posicao. As posicoes entram literais, em citacao, sem resumo. As secoes de julgamento nascem com "(A preencher.)" e sao de quem le: o script nao sintetiza, nao declara convergencia e nao decide por maioria. A entrada nasce com `**Status:** aberto`. Os campos `Metodo`, `Exposicao previa a outras posicoes` e `Rodada` passam a descrever um fato da execucao; o validador continua checando a forma, nunca a veracidade.
+
 ## Modelo De Debate
 
 ```md

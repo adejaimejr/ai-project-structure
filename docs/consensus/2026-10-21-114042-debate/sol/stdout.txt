@@ -1,0 +1,30 @@
+Minha recomendação é **avisar somente quando uma entrada automatizada de `docs/CONSENSUS.md` aponta para a corrida incompleta**, preservando o opt-in por `**Origem:**`. O diagnóstico deve ser AVISO, coerente com a DEC-007.
+
+A DEC-009 torna a existência de material incompleto no repositório um estado previsto. Ela não exige que toda corrida seja retomada ou publicada. Avisar sempre transformaria uma execução legítima, ou uma interrupção preservada corretamente, em falha de `--strict`.
+
+O código confirma essa distinção:
+
+- `abrir_rodada()` cria a pasta antes da gravação do manifesto. Existe uma janela legítima com pasta sem `manifesto.json`.
+- `_rodar_debate()` grava o manifesto como `em-andamento` antes de executar os agentes. Os arquivos `stdout.txt` aparecem conforme cada participante termina.
+- Uma interrupção pode deixar participantes sem registro nem stdout, deliberadamente. `_retomar()` identifica esses participantes e só os chama mediante comando explícito.
+- `fechar_debate()` publica a minuta antes de selar o manifesto como `concluida`.
+
+Esses comportamentos estão em [consenso.py](/tmp/consenso-5emyxgmf/projeto/docs/skills/ai-project-structure/scripts/consenso.py:385). Portanto, incompletude isolada não comprova defeito.
+
+Eu adotaria esta regra:
+
+| Situação | Comportamento |
+|---|---|
+| Corrida sem referência em entrada automatizada | Não emitir diagnóstico de incompletude |
+| Entrada aponta para manifesto ausente | AVISO, como já ocorre |
+| Entrada aponta para manifesto ilegível ou com status `em-andamento` ou `interrompida` | AVISO de proveniência incompleta |
+| Entrada aponta para corrida cujo bruto esperado está ausente | AVISO, identificando corrida e participante |
+| Stdout existe, mas está vazio por falha registrada | Não considerar incompleto apenas pelo tamanho |
+
+Hoje, [check_consensus_origem()](/tmp/consenso-5emyxgmf/projeto/docs/skills/ai-project-structure/scripts/validate_structure.py:572) verifica a existência do manifesto, mas explicitamente não examina seu conteúdo. Assim, **a opção intermediária exige ampliar a verificação**: um manifesto existente pode esconder status incompleto ou ausência do bruto. Ignorar esses problemas mesmo depois da publicação enfraquece a ponte de proveniência da DEC-008.
+
+Há uma ressalva de concorrência: como a minuta e o manifesto são gravados separadamente, o validador pode observar a entrada recém-publicada antes do status `concluida`. O aviso deve descrever o estado observado, sem afirmar corrupção ou abandono. Uma nova validação após o encerramento resolve essa janela. Eu não acrescentaria heurísticas de idade ou existência do lock: o lock é por projeto e pode ficar órfão.
+
+O custo aceito dessa escolha é deixar corridas interrompidas sem referência fora do diagnóstico padrão. Se houver necessidade de descobrir material esquecido, isso cabe numa inspeção explícita de corridas pendentes. Não deve impor a obrigação de retomar, apagar ou publicar material para obter validação verde.
+
+O validador também não deve retomar corridas, limpar locks ou reparar artefatos. A DEC-009 reserva a retomada ao comando humano explícito.

@@ -87,6 +87,17 @@ printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
 sleep 2
 """
 
+AGENTE_DORME = """#!/usr/bin/env bash
+printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
+sleep 60
+"""
+
+AGENTE_TRABALHA_E_DORME = """#!/usr/bin/env bash
+printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
+echo "trabalho feito" > "$PWD/rascunho.txt"
+sleep 60
+"""
+
 AGENTE_QUEBRADO = """#!/usr/bin/env bash
 # agente mal configurado: falha e nao mexe em nada, como uma CLI que recusa
 # rodar sem a flag certa
@@ -430,9 +441,49 @@ def testar_lock(res):
         res.check(not lock.exists(), "I: lock removido ao terminar a rodada")
 
 
+def testar_tempo_maximo(res):
+    """T-084: agente travado nao segura a rodada; o estouro segue o caminho do exit diferente de zero."""
+    # J: dorme sem mexer em nada: SIGTERM no limite e exit 4
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        agente = agente_falso(tmp, AGENTE_DORME)
+        log = Path(tmp) / "prompts.txt"
+        inicio = time.monotonic()
+        code, out = rodar_loop(root, agente, log, extra=("--tempo-maximo", "2"))
+        dur = time.monotonic() - inicio
+        res.check(code == 4 and dur < 30, "J: agente que dorme estoura --tempo-maximo e sai 4",
+                  f"exit {code} em {dur:.1f}s")
+        res.check("SIGTERM" in out and "tempo maximo" in out, "J: a saida cita o limite e o SIGTERM")
+        res.check(len(prompts(log)) == 1, "J: exit 4 nao queima as outras tentativas")
+
+    # K: trabalhou e depois travou: o portao decide e fecha a tarefa
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        agente = agente_falso(tmp, AGENTE_TRABALHA_E_DORME)
+        log = Path(tmp) / "prompts.txt"
+        inicio = time.monotonic()
+        code, out = rodar_loop(root, agente, log, extra=("--tempo-maximo", "2"))
+        dur = time.monotonic() - inicio
+        texto = (root / "docs" / "TASKS.md").read_text(encoding="utf-8")
+        res.check(code == 0 and dur < 30 and "Evidencia:" in texto,
+                  "K: agente que trabalha e trava e encerrado no limite e o portao fecha a tarefa",
+                  f"exit {code} em {dur:.1f}s")
+        res.check("portao decide" in out, "K: a saida avisa que o portao decide")
+
+    # L: valor invalido sai 1 sem chamar o agente
+    with tempfile.TemporaryDirectory() as tmp:
+        root = montar(tmp)
+        agente = agente_falso(tmp, AGENTE_NORMAL)
+        log = Path(tmp) / "prompts.txt"
+        codes = [rodar_loop(root, agente, log, extra=("--tempo-maximo", v))[0] for v in ("abc", "0")]
+        res.check(codes == [1, 1] and not prompts(log), "L: --tempo-maximo invalido sai 1 sem chamar o agente",
+                  f"exits {codes}")
+
+
 AGENTE_TROCA_VERIFICA = """#!/usr/bin/env bash
 printf '%s\\n=====\\n' "$1" >> "$LOG_PROMPT"
-sed -i "" "s/(verifica: bash portao.sh)/(verifica: true)/" docs/TASKS.md
+# python3, nao sed: `sed -i` difere entre GNU e BSD e o teste roda em Linux, macOS e Windows
+python3 -c "import pathlib; p = pathlib.Path('docs/TASKS.md'); p.write_text(p.read_text(encoding='utf-8').replace('(verifica: bash portao.sh)', '(verifica: true)'), encoding='utf-8')"
 """
 
 AGENTE_PERGUNTA_VAZIA = """#!/usr/bin/env bash
@@ -562,6 +613,7 @@ def main(argv=None):
     testar_escrita_atomica(res)
     testar_loop(res)
     testar_lock(res)
+    testar_tempo_maximo(res)
     testar_hostil(res)
     print(f"Modulo de loop: {res.total - res.falhas}/{res.total} verificacoes passaram.")
     return 1 if res.falhas else 0

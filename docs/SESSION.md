@@ -41,6 +41,48 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-10-21 - Claude Fable 5.1 (gestor) com subagentes Sonnet 5.5 (fila T-078 a T-091, skill 2.13.0)
+
+### Objetivo
+
+- Executar o prompt "Rodar As Tarefas Pendentes Com Subagentes Sonnet Revisados Por Fable" de `docs/PROMPTS.md`: fase 1 da spec 0006 (T-078 a T-082) sem bump, T-083 como tarefa de chat, bump 2.13.0 levando T-084, T-087, T-088, T-089 e T-091, e T-090 como medicao. Sessao Cloud (Cloudroom, sandbox Linux); subagentes por `room-cli thread spawn --provider claude-code --model claude-sonnet-5-5 --shared-sandbox`, um por vez na mesma pasta, cada um com a linha inteira da tarefa, a saida do portao e os limites; revisao do gestor a cada retorno: diff inteiro, portao, verificador, `--strict`, bateria tocada, travessao, `__pycache__`, e mutacoes com backup por `cp` e volta por `cmp`.
+
+### O Que Foi Feito
+
+- **Baseline divergiu e foi consertada antes de delegar**: o verificador saia 73/74 porque o fixture H1 de `test_loop.py` usava `sed -i ""` (sintaxe BSD), que o GNU sed do Linux rejeita. Troquei por `perl` e o usuario corrigiu: "tem que rodar no linux, mac e windows"; ficou `python3 -c`, em `test_loop.py` e em `portao_t060.py`. Regra promovida para `MEMORY.md`.
+- **Fase 1, sem bump, itens na 2.12.0 do CHANGELOG da skill.** T-078 (validador com `**Origem:**`, 4 avisos, fixture `origem-project`): tentativa 1, portao 14/14, 3 mutacoes acusadas. T-079 (`consenso.py achado`): tentativa 1 saiu 12/12, mas a entrada da segunda rodada (lista de manifestos) reprovava em `--strict`, apontado pelo proprio subagente; acrescentei o check 5c ao portao (12/13) e a tentativa 2 fez o validador ler `**Manifesto:**` como lista, bateria 63; 3 mutacoes. T-080 (`debate --rodada N --anterior`, anteriores na integra): 10/10, bateria 79, 3 mutacoes (anterior truncado, rodada 2 retendo registros, rodada 2 sem anterior). T-081 (`retomar`): 11/11, bateria 95, 3 mutacoes; mudanca de comportamento registrada: participante morto pelo proprio sinal fica sem registro para a retomada chama-lo. T-082 (`references/consenso.md`, secao no SKILL.md, "Entrada Automatizada" no template, `verificar_convencoes` cobrando `**Origem:**`): 8/8; copiei a secao para `docs/CONSENSUS.md` da raiz; 3 mutacoes. Pisos do verificador subidos por mim para os totais reais: consenso 32 para 95, loop 74 para 83. Nota: o check 5 de `portao_t082.py` le a secao mais recente do CHANGELOG da skill, entao depois do bump 2.13.0 ele reporta 7/8; a evidencia de T-082 (8/8) foi colhida antes do bump, e o item dela continua na 2.12.0.
+- **T-083, bancada real: duas rodadas no mesmo dia.** Rotacionei `docs/CONSENSUS.md` (REVAL-1 a REVAL-4 para o archive, 30186 para 11780 bytes). O usuario trocou o segundo agente: cursor-agent (Grok) estava sem tokens, entra Codex `gpt-6.1-sol` (slug conferido em `~/.codex/models_cache.json`); perfis `Codex, consenso` e `Codex Sol, consenso` em `MEMORY.md`; `portao_t083.py` passou a cobrar o perfil do Sol no lugar do Grok. **Rodada 1** (run `2026-10-21-043054-debate`, 48s, `-s read-only`): saiu `concluida` com exit 0, mas o sandbox read-only do Codex usa bubblewrap, que falha no container (`bwrap: loopback: Failed RTM_NEWADDR`): o Sol recusou ("nao consegui ler a copia", 503 bytes, 35.851 tokens) e o terra opinou sem nenhum `exec` no stderr (793 bytes, 10.978 tokens). O portao passou 4/4 por 3 bytes acima do piso de 500. Endureci o portao: cada participante com posicao precisa de ao menos um comando executado no log (regex `exec` / comando / `succeeded`, testada contra o log real de uma sonda), e a rodada falha passou a reprovar (2/4). Sonda: `codex exec -s danger-full-access` executa comandos aqui. Movi T-083 para "Aguardando Usuario" com a pergunta. **Rodada 2** (run `2026-10-21-114042-debate`), depois do "sim" do usuario para rodar com `-s danger-full-access` (a copia por participante e temporaria, a escrita e inofensiva): 1m49s ate parar com exit 6, os dois participantes retidos por segredo. Falso positivo: o stderr do Codex lista o codigo de `consenso.py` e a regex de chave PEM casou consigo mesma; nada casou no stdout. Conferi o material (posicoes de 1466 e 3205 bytes, 6 e 15 comandos executados), movi a mao para `<run>/codex/` e `<run>/sol/` e rodei `consenso.py retomar`: 0,1s, `aceitos_a_mao=codex,sol`, minuta escrita, `concluida`. Portao 4/4. As duas posicoes convergiram sem se ver: avisar so quando uma entrada automatizada aponta para a corrida (AVISO, coerente com DEC-007), estendendo o check para status do manifesto e bruto ausente; o Sol acrescentou a janela de concorrencia entre minuta e manifesto e recusou heuristica por idade ou lock. Comparacao com 2026-09-03 (Codex `sol` e Grok `xhigh`, bruto nao preservado, uma sessao inteira): qualidade comparavel, com bruto, manifesto com hashes e tempo medido a favor da automacao. T-083 concluida com `tipo=revisao-manual`; "Evidencia De Conclusao" da spec 0006 preenchida e `Concluida` proposta (o `Status` e do usuario). A entrada da rodada 1 segue em `docs/CONSENSUS.md` com `Status: aberto`, sem julgamento meu, para o usuario decidir se arquiva; a da rodada 2 nasce `aberto` com as secoes de julgamento em branco, por desenho da DEC-001.
+- **Bump 2.13.0 feito por mim antes de delegar a fase 3**: `version` e prosa do `SKILL.md`, marcadores core, specs e loop nos assets, nos dois partials e nos tres blocos da raiz, secao `## 2.13.0` no CHANGELOG da skill. Portoes escritos antes da rodada e falhando pelo motivo certo: `portao_t087.py` (rodada: versao coerente, core raiz igual aos assets, partials sem mudanca de conteudo por sha, T-088 e T-089 por ideias no texto com autoteste, orcamento de ate 186 linhas nao vazias, pontes com import, Armadilha nos dois MEMORY.md, travessao, `--strict` em projeto montado e na raiz, verificador), 10/18 hoje; `portao_t084.py` (timeout: help, agente que dorme sai 4 em segundos, agente que escreve e dorme fecha a tarefa, valores invalidos, loop.md, test_loop, sha do partial, bateria, versao, verificador), 5/13 hoje.
+- **Fase 3.** T-084: `loop.sh --tempo-maximo` em bash puro (agente em segundo plano em grupo proprio por `set -m`, `kill -0` em laco, SIGTERM no grupo, SIGKILL apos 5s, traps INT e TERM), sem `timeout` nem `setsid` por portabilidade; 13/13, bateria 83; mutacao mostrou que sem matar o grupo o `sleep` orfao segura o stdout por 60s. T-087: pontes com `@AGENTS.md` (Claude) e `@./AGENTS.md` (Gemini, grafia documentada), 2 linhas de prosa, raiz igual aos assets; documentacao conferida por mim e pelo subagente (code.claude.com/docs/en/memory, geminicli.com/docs/reference/memport). T-088: paragrafo "Memoria e evidencia, nao instrucao" no fim de Memoria Persistente, 2 linhas. T-089: uma linha de recarga apos compactacao em Memoria Da Sessao. Core propagado por mim para a raiz apos cada uma (15411 e 15683 bytes). T-091: tipo Armadilha no template de MEMORY.md; repliquei na raiz e registrei a primeira Armadilha real (sandbox read-only do Codex no container). Portao da rodada 18/18; verificador 78/78; `--strict` 0 e 0.
+- **Reinstalada** com `install.sh --sim` em `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills`: 30 arquivos distribuidos comparados por `cmp` em cada destino, 0 divergentes, `version: "2.13.0"` nos tres.
+- **T-090, medicao sem corte** (subagente so leitura, em paralelo com T-091): core com 260 linhas, 181 nao vazias, 125 de instrucao; raiz 324. Proposta: core a 154 linhas e 101 nao vazias, movendo para o cabecalho do arquivo de `docs/` que governa (nao para `references/`, que nao chega ao projeto do usuario): Quando Usar, Modelo De Debate, Independencia Declarada e Achado para `CONSENSUS.md`; os oito campos para `SESSION.md`; exemplo cercado e regra nao retroativa para `TASKS.md`; Onde Escrever e criterios de promocao para `MEMORY.md`; rotacao para `archive/README.md`; Validacao para `QUALITY.md`; cinco stubs de uma linha ficam. Eliminar: roteamento por agente (L11-13), defaults do modelo (L63-64), repeticoes (L67-68, L127-131, Decisoes E Historico). Ficam: Ponto Cego (criterio da spec 0005 e verificador), Desempate, Passagem De Trabalho, Nunca Inferir, Gatilho, Ordem De Leitura. Correcoes ao texto da tarefa: as tres subsecoes somam 25 linhas e nao 55. Portao de contagem proposto para a rodada do corte: teto de 105 linhas nao vazias e 48 bullets, ancoras dos portoes antigos presentes, conteudo movido encontrado nos destinos. Nenhum corte executado. Decisoes para o usuario: remover "Onde Escrever" inteiro (maior risco); Ponto Cego fica; Validacao para QUALITY.md ou comprimida; apagar L63-64; segunda rodada nos blocos loop e specs (34 e 22 linhas).
+- Registro: `SESSION.md` rotacionado (tres entradas de 2026-10-17 para o archive, indice com 51), `TASKS.md` (dez concluidas, fila vazia), `MEMORY.md` (perfis, Armadilha, duas regras), `CHANGELOG.md` do projeto. Nada commitado.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `README.md`, `scripts/validate_structure.py`, `scripts/consenso.py`, `scripts/loop.sh`, `references/loop.md`, `references/consenso.md` (novo), `assets/AGENTS.md`, `assets/CLAUDE.md`, `assets/GEMINI.md`, `assets/partials/AGENTS-specs-block.md`, `assets/partials/AGENTS-loop-block.md`, `assets/docs/CONSENSUS.md`, `assets/docs/MEMORY.md`; `evals/verify_repository.py`, `evals/test_consenso.py`, `evals/test_loop.py`, `evals/evals.json`, `evals/portao_t060.py`, `evals/portao_t079.py`, `evals/portao_t083.py`, `evals/portao_t084.py` (novo), `evals/portao_t087.py` (novo), `evals/fixtures/origem-project/` (novo).
+- Projeto: `AGENTS.md` (bloco core e marcadores), `CLAUDE.md`, `GEMINI.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/MEMORY.md`, `docs/CONSENSUS.md`, `docs/CHANGELOG.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/CONSENSUS-2026.md`, `docs/archive/README.md`, `docs/consensus/2026-10-21-043054-debate/` e `docs/consensus/2026-10-21-114042-debate/` (novos, as duas rodadas de T-083).
+- Instalacao: `~/.claude/skills`, `~/.agents/skills`, `~/.gemini/skills` desta sandbox.
+
+### Decisoes Tomadas
+
+- Do usuario, no chat: fixtures e scripts tem de rodar em Linux, macOS e Windows; T-083 sem cursor-agent (sem tokens), segundo agente Codex `gpt-6.1-sol`; repetir a bancada nesta sandbox em `-s danger-full-access`. Nenhuma decisao formal nova em `DECISIONS.md`.
+- Do gestor, registradas na evidencia: pisos das baterias no verificador iguais aos totais reais; check 5c em `portao_t079.py`; exigencia de comando executado em `portao_t083.py`; bump 2.13.0 antes de delegar a fase 3.
+
+### Aprendizados Para MEMORY.md
+
+- Promovidos (Feedback): portabilidade nos tres sistemas (sem `sed -i`, `perl`, `timeout`, `setsid`); portao de bancada real exige evidencia de leitura do repositorio, nao tamanho de saida. Promovido (Armadilha): sandbox read-only do Codex nao roda no container Cloudroom, e agente que le `consenso.py` na copia dispara a varredura de segredo pelo log (falso positivo previsto na DEC-010). Promovidos (User): perfis `Codex, consenso` e `Codex Sol, consenso`.
+
+### Pendencias
+
+- Do usuario: commitar; preencher o julgamento da entrada da rodada 2 em `docs/CONSENSUS.md` (Pontos De Acordo, Consenso Final, Decisao) e decidir se a posicao convergente vira tarefa no validador; decidir se arquiva a entrada da rodada 1 (falha de ambiente); mudar o `Status` da spec 0006 para `Concluida` se aceitar a evidencia; decidir o corte de T-090 (cinco perguntas acima).
+- Fila de `docs/TASKS.md` vazia em "Proximas Tarefas" e em "Aguardando Usuario".
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario, para commitar, julgar a entrada da rodada 2 e fechar a spec 0006; depois qualquer agente de chat para a rodada do corte de T-090, se aprovada, com o portao de contagem proposto.
+- Motivo: tudo o que nao depende de decisao humana esta feito; o que sobra e julgamento de consenso, status da spec e decisao de corte.
+
 ## 2026-10-20 - Claude (camada GitHub: comparacao com o ai-memory, decisao e prompt)
 
 ### Objetivo
@@ -158,121 +200,3 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Agente sugerido (ou "qualquer agente"): qualquer agente, para mandar T-078 ao loop; os portoes delas aceitam 2.11.0 ou acima e o verificador esta verde.
 - Motivo: o bump era o unico bloqueio de versao; a spec 0006 segue de onde parou.
 
-## 2026-10-17 - Claude (passagem de trabalho entre gestor e subagentes)
-
-### Objetivo
-
-- Dar a estrutura um protocolo leve de passagem de trabalho entre um agente gestor e seus subagentes no Cloudroom, usando a skill Handoff (davidondrej) como referencia de metodo, sem copia-la nem exigir a instalacao dela. Restricoes do pedido: nenhum documento permanente novo, subagente nao le a skill inteira, o resumo leva so o contexto da tarefa e funciona com os agentes em sandboxes diferentes.
-
-### O Que Foi Feito
-
-- Leitura: `AGENTS.md`, `SESSION.md`, `MEMORY.md`, `TASKS.md`, `SKILL.md`, `references/atualizacao.md` e `loop.md`, o prompt do `loop.sh`, o envelope do `consenso.py`, `verify_repository.py` e as referencias do `room-cli` sobre sandboxes (filho Cloud de pai Local tem sandbox propria e parte do GitHub).
-- Diagnostico: a estrutura nao tinha regra de delegacao. O unico envelope de passagem existente e o prompt do `loop.sh`, que ja carrega tarefa, portao, saida da falha anterior e proibicoes, mas pressupoe filesystem compartilhado. O principio ja escrito em `loop.md` ("regra critica vai no prompt, nao so no bloco") e o mesmo que vale aqui: o que o subagente precisa chega na mensagem, porque ler arquivo e opcional e arquivo temporario de outra sandbox nem existe.
-- Mudanca minima: secao `## Passagem De Trabalho` no bloco core de `AGENTS.md` (assets e raiz), entre "Memoria Persistente" e "Consenso Entre Modelos": 19 linhas, 1362 bytes. Um paragrafo com a premissa (outra sandbox; o resumo viaja na mensagem; `docs/` segue como registro e o resumo aponta para ele), um modelo de cinco linhas (tarefa e criterio de conclusao, estado feito e pendente, decisoes e tentativas a nao repetir, arquivos a consultar por caminho, conferir o estado real antes de agir) e quatro bullets (estado em vez de ordens; so o contexto da tarefa, sem repetir regras nem colar `docs/`; sem segredo; retorno pelo mesmo canal e registro por quem delegou). Validador intocado: o resumo vive na mensagem, nao em arquivo, e nenhum script o ve.
-- Sem bump: item na secao 2.11.0 do CHANGELOG da skill, como nas duas sessoes anteriores, porque T-078 a T-083 mandam nao subir a versao. Custo dessa escolha: a 2.11.0 publicada no GitHub (`origin/main` igual a `main`) passa a ter dois conteudos de bloco core, e o passo 2 de `atualizacao.md` encerrava em versao igual sem olhar o bloco. Conserto de uma linha no passo 2: versao igual e bloco diferente do template segue para o passo 4 so com aquele bloco, com diff e confirmacao. O bump virou T-086.
-- Verificacao: `verify_repository.py` 74/74 antes e depois; `validate_structure.py . --strict` 0 erros e 0 avisos; scaffold minimal montado dos assets em pasta temporaria passa em `--strict` com a secao dentro; zero travessao e cercas pareadas no bloco core. Mutacoes com backup por `cp` e volta conferida por `cmp`: secao removida so dos assets, verificador 73/74 ("bloco core identico" falha); travessao dentro da secao nos dois arquivos, 70/74 (strict da raiz, as duas baterias e o check de travessao). Reinstalada nos tres destinos com `install.sh --sim`, paridade por `cmp`.
-- `SESSION.md` passaria de 30KB: as duas entradas mais antigas (2.10.0 com T-054, T-056, T-058 e T-055; 2.9.1 com T-062 e T-073) foram para `docs/archive/SESSIONS-2026.md`, indice atualizado (46 entradas). A primeira rotacao, de uma entrada so, deixou o arquivo em 31KB e o validador avisou `ROTACAO`.
-
-### Arquivos Criados Ou Alterados
-
-- Skill: `assets/AGENTS.md` (secao nova no core), `references/atualizacao.md` (passo 2), `CHANGELOG.md` (item na 2.11.0).
-- Projeto: `AGENTS.md` (mesma secao), `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/DECISIONS.md`, `docs/TASKS.md` (T-086), `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`.
-- Instalacao: `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills`.
-
-### Decisoes Tomadas
-
-- Contexto de delegacao viaja na mensagem, nunca em arquivo temporario nem em documento novo; `docs/` segue como registro. Registrada em `docs/DECISIONS.md`.
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum. A premissa do Cloudroom (subagente em outra sandbox) ficou escrita no proprio `AGENTS.md`, onde todo agente a le.
-
-### Pendencias
-
-- T-086: bump da skill levando a secao, para o fluxo de atualizacao oferecer o bloco a projeto ja em 2.11.0 e para a 2.11.0 publicada nao ter dois conteudos; depende de T-078 a T-083 liberarem o "nao suba", ou vai junto com T-084.
-- Cloudroom, fora deste repositorio: continua pendente, da sessao anterior, o template de delegacao do gestor para a skill (nomear a estrutura e pre-responder a entrevista); a secao nova cobre a parte geral.
-- Do usuario: commitar.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente, para mandar T-078 ao loop com o verificador verde; o gestor no Cloudroom passa a delegar com o resumo da secao nova.
-- Motivo: a secao nao bloqueia nada; T-078 e a proxima da spec 0006 e o verificador esta verde.
-
-## 2026-10-17 - Claude (T-085: fixture aguardando-project com data relativa)
-
-### Objetivo
-
-- Fechar T-085: `verify_repository.py` em 71/74 porque a fixture `aguardando-project` tinha `(bloqueada: 2026-09-01)` absoluto e o validador compara com `date.today()` (limite 30 dias). Envelhecimento, nao regressao: validador e fixture intocados desde setembro. Bloqueava os portoes de T-078 a T-083, que rodam o verificador pela base `portao_consenso_lib.py`.
-
-### O Que Foi Feito
-
-- Portao antes do conserto: `evals/portao_t085.py`, molde de `portao_t058.py`, 9 checks. Com a data real saiu 3/9 pelo motivo certo (tres datas absolutas; verificador sem `materializar_fixture`; 71/74).
-- Solucao (b) da tarefa, so em `evals/`, sem bump: token `{{HOJE-N}}` na fixture, materializado em pasta temporaria por `materializar_fixture(origem, destino, hoje)` em `verify_repository.py`, que absorveu as trocas de `{{TRAVESSAO}}` e `{{UTF8_INVALIDO}}`. `valido` e `invalido` usam `{{HOJE-7}}`; `invalido` ganhou T-007 com `{{HOJE-45}}`, bloqueada antiga de proposito, e `TASK-BLOQUEADA-ANTIGA|T-007` entrou no oracle (ate aqui so `cobertura-tarefas`, com 2000-01-01, produzia o codigo). `validate_structure.py` intocado: em projeto real o check segue relativo a hoje. README da fixture explica o token.
-- Opcao (a), data de referencia no validador, descartada: toca `scripts/`, exige bump e reinstalacao, e T-078 a T-083 mandam nao subir a 2.11.0 nao commitada.
-- Depois: portao 9/9, verificador 74/74, raiz `--strict` com 0 erros e 0 avisos, sem `__pycache__`.
-- Mutacoes, backup por `cp` e volta conferida por `cmp`: data absoluta de volta em `valido`, 6/9 (1a, 1b, 3d; verificador 72/74); `hoje` forcado para daqui a um ano no verificador, 6/9 (1c, 2a, 3d; 73/74); para um ano atras, 6/9 (1b, 2b, 3d; 71/74). O parametro `hoje` existe so para o portao viajar no tempo pela mesma funcao do verificador.
-
-### Arquivos Criados Ou Alterados
-
-- Skill, nao distribuidos: `evals/portao_t085.py` (novo), `evals/verify_repository.py`, `evals/fixtures/aguardando-project/README.md`, `valido/docs/TASKS.md` e `invalido/docs/TASKS.md` da mesma fixture.
-- Projeto: `docs/TASKS.md` (T-085 concluida), `docs/SESSION.md`, `docs/CHANGELOG.md`.
-
-### Decisoes Tomadas
-
-- Nenhuma formal. Escolha de implementacao dentro da tarefa: fixture relativa em vez de flag no validador.
-
-### Aprendizados Para MEMORY.md
-
-- Confirmado o candidato da sessao anterior: fixture com data absoluta sob check relativo a `date.today()` envelhece sozinha e derruba o verificador sem regressao; data que o validador compara com hoje entra na fixture como token relativo, materializado no teste. Nao promovido aqui: `MEMORY.md` fora do escopo pedido.
-
-### Pendencias
-
-- Promover o aprendizado acima para `MEMORY.md`.
-- CHANGELOG da skill (secao 2.11.0) sem item desta mudanca: `evals/` nao e distribuido e o escopo pedido nao o incluia; decidir se entra.
-- Do usuario: commitar (2.11.0 inteira, gatilhos e T-085 seguem nao commitados).
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente, para mandar T-078 ao loop com o verificador verde.
-- Motivo: a causa alheia dos portoes vermelhos saiu; o que falhar agora e da propria tarefa.
-
-## 2026-10-17 - Claude (gatilhos da skill para o fluxo gestor e subagentes no Cloudroom)
-
-### Objetivo
-
-- Revisar os gatilhos da skill `ai-project-structure` para o uso no Cloudroom, onde um agente gestor coordena subagentes em sandbox: o gestor decide quando um projeto precisa da estrutura, os subagentes so a executam quando recebem essa tarefa, e o pedido direto do usuario continua valendo. Analise e proposta antes de qualquer edicao, a pedido do usuario; aplicacao depois da aprovacao.
-
-### O Que Foi Feito
-
-- Leitura: `AGENTS.md`, `SESSION.md`, `MEMORY.md`, `SKILL.md`, `agents/openai.yaml`, `evals.json`, `install.sh`, `verify_repository.py` (so checa `version` no frontmatter, nunca a `description`) e as referencias do `room-cli` (skills chegam aos agentes pelos roots globais `~/.claude/skills` e `~/.agents/skills`; `.bb/AGENTS.md` na raiz do workspace injeta instrucao em toda thread).
-- Diagnostico: a `description` do frontmatter e a unica superficie de roteamento, e a skill nao sabe quem a chama; a tarefa do gestor chega ao subagente como se fosse o pedido do usuario. As frases genericas ("cria projeto", "inicia projeto novo", "scaffold projeto", "estrutura inicial", "monta a base do projeto", "cria a pasta do projeto", "projeto de IA") faziam um subagente mandado fazer scaffold de codigo abrir a entrevista ou criar `AGENTS.md` e `docs/` sem pedido, tirando a decisao do gestor. Os gatilhos especificos (estrutura multiagente, atualizar, validar, specs, loop) nao conflitam.
-- Proposta aprovada e aplicada: `description` reescrita com clausula positiva estreita (nomear a estrutura ou seus arquivos, citar a skill, fluxos de atualizar, validar, specs e loop) e clausula negativa (pedido generico nao dispara; quem coordena decide; no maximo oferecer a estrutura em uma linha). Escalar YAML plano, sem `": "` nem travessao; Claude Code releu a skill com o texto novo na mesma sessao. Comentario do `openai.yaml` atualizado, `allow_implicit_invocation` segue `true`. Eval 2 passa a nomear a estrutura no prompt; eval 4 ("Inicia projeto novo aqui.") passa a esperar oferta e confirmacao antes da entrevista; eval 11 novo, negativo (projeto Node com Vite nao aciona). Item na secao 2.11.0 do CHANGELOG da skill, sem bump: a 2.11.0 nao foi commitada e T-078 a T-083 pedem para nao subir; os portoes aceitam "2.11.0 ou acima".
-- Casos ambiguos decididos com o usuario: "inicia projeto novo" sozinho sai dos gatilhos (custa um turno de confirmacao no chat direto); "scaffold projeto" e "estrutura inicial" saem por casarem com scaffold de codigo; "projeto de IA" e "repo de IA" saem porque projeto sobre IA nao e projeto para varias IAs. Travas mecanicas (`allow_implicit_invocation: false` no Codex, `disable-model-invocation` no Claude Code, esta a confirmar na documentacao) rejeitadas por exigirem invocar a skill pelo nome e quebrarem o pedido direto em linguagem natural.
-- Verificacao: `validate_structure.py . --strict` sem problema; frontmatter com tres chaves; zero travessao nos quatro arquivos. `verify_repository.py` em **71/74**: as tres falhas sao `TASK-BLOQUEADA-ANTIGA` na fixture `aguardando-project` (`valido` em `--strict` e as contagens exatas de `valido` e `invalido`), porque o validador compara `(bloqueada:)` com `date.today()` e as datas de setembro da fixture passaram do limite. Nada a ver com esta mudanca: validador e fixture intocados desde 2026-09-04. Virou T-085, prioridade alta, porque `portao_consenso_lib.py` roda o verificador e toda rodada de loop de T-078 a T-083 ficaria vermelha por causa alheia.
-- Reinstalada nos tres destinos com `install.sh --sim` (divergencia listada em cada um: `SKILL.md` e `agents/openai.yaml`); paridade conferida por `cmp` nos dois arquivos, nos tres destinos.
-- Rotacao: `SESSION.md` passaria de 30KB com esta entrada; as tres entradas mais antigas (2.9.0 com T-064 e T-063, 2.8.1 com T-060, 2.8.0 com T-072 e T-071) foram para `docs/archive/SESSIONS-2026.md`, indice do archive atualizado (44 entradas).
-
-### Arquivos Criados Ou Alterados
-
-- Skill: `SKILL.md` (description), `agents/openai.yaml` (comentario), `evals/evals.json` (evals 2, 4 e 11), `CHANGELOG.md` (item na 2.11.0).
-- Projeto: `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/DECISIONS.md`, `docs/TASKS.md` (T-085), `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`.
-- Instalacao: `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills`.
-
-### Decisoes Tomadas
-
-- Gatilho da skill nao decide se um projeto ganha a estrutura; quem coordena decide. Registrada em `docs/DECISIONS.md`.
-
-### Aprendizados Para MEMORY.md
-
-- Nenhum promovido. Candidato ainda em hipotese: fixture com data absoluta sob check relativo a `date.today()` envelhece sozinha e derruba o verificador sem regressao real; vira regra se T-085 confirmar o conserto.
-
-### Pendencias
-
-- T-085 (fixture `aguardando-project` envelhecendo; verificador em 71/74) antes de qualquer rodada de loop de T-078 a T-083.
-- Do usuario: commitar. A 2.11.0 inteira continua nao commitada, e esta sessao soma a mudanca de gatilhos.
-- Cloudroom, fora deste repositorio: linha em `.bb/AGENTS.md` do workspace repetindo a regra, e template de delegacao do gestor nomeando a estrutura e pre-respondendo as quatro perguntas da entrevista (nome, objetivo, minimal ou completa, specs), para o subagente nao travar perguntando ao gestor.
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): qualquer agente de chat, para T-085 antes de mandar T-078 ao loop; portao proprio escrito antes da rodada.
-- Motivo: verificador vermelho por causa alheia esconde regressao real, e todos os portoes abertos passam por ele.

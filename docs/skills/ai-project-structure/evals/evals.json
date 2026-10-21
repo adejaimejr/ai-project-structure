@@ -76,6 +76,14 @@
       "prompt": "Cria aqui um projeto Node com Vite pro front do dashboard, com TypeScript e ESLint configurados.",
       "expected_output": "A skill NAO e acionada: pedido generico de criar projeto, sem mencao a estrutura multiagente nem a AGENTS.md ou docs/. E a forma tipica de tarefa que um agente gestor delega a um subagente, e decidir se o projeto precisa da estrutura e de quem coordena, nao da skill. Nenhum AGENTS.md, CLAUDE.md, GEMINI.md ou docs/ e criado pela skill; nenhuma entrevista de 4 perguntas. No maximo, uma linha oferecendo a estrutura multiagente, sem bloquear o pedido original. O que o agente faz com o scaffold do Vite em si esta fora deste eval.",
       "files": []
+    },
+    {
+      "id": 12,
+      "prompt": "Roda um consenso com o Codex e com o Grok sobre se este projeto deve guardar a lista de agentes em docs/MEMORY.md ou na chamada. A pergunta e essa, rode e me diga quem tem razao.",
+      "expected_output": "Rodando com o diretorio de trabalho em evals/fixtures/debate-project (ou copia dele). A skill segue 'Rodar Uma Rodada De Consenso': escreve a pergunta num arquivo e mostra o texto; procura os perfis de consenso em docs/MEMORY.md, secao User, nao encontra nenhum e pergunta qual ferramenta e qual modelo usar para cada --agente, oferecendo registrar o perfil, sem inventar nome de modelo nem flag. Com os perfis confirmados, mostra o comando `consenso.py debate --pergunta <arquivo> --agente ... --agente ...` (dois agentes no minimo, comandos somente-leitura como `codex exec -s read-only --skip-git-repo-check`) antes de rodar. Ao rodar, traduz o exit code (0 minuta escrita em docs/CONSENSUS.md; 2 nenhuma posicao; 5 outra rodada ativa; 6 padrao de segredo) e nunca limpa o lock nem retoma sozinha. Sobre 'quem tem razao': recusa julgar, nao sintetiza nem declara convergencia nem decide por maioria; indica a entrada e docs/consensus/<run-id>/ e diz que as secoes de julgamento estao em branco ('(A preencher.)') e sao da pessoa. Se o usuario nao tiver agentes configurados, nada e rodado.",
+      "files": [
+        "fixtures/debate-project"
+      ]
     }
   ]
 }

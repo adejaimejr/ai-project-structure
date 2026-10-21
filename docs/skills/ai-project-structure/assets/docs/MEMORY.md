@@ -65,6 +65,19 @@ Pointers para sistemas externos.
 
 Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST."
 
+### Armadilha
+
+Tentativa que falhou e por que, para ninguem repetir. E a casa permanente do campo "Nao repetir" do modelo de "Passagem De Trabalho" do `AGENTS.md`, que fora daqui so sobrevive em `SESSION.md`. Diferenca para Feedback: Feedback e regra a seguir; Armadilha e caminho a nao tomar, mesmo sem regra geral.
+
+Cada item: o que se tentou, o que aconteceu, por que nao serve e a data.
+
+Exemplo de entrada:
+
+- **Tentou:** rodar a migracao com `--parallel` para ganhar tempo.
+- **Aconteceu:** duas tabelas ficaram com a chave estrangeira apontando para linhas inexistentes.
+- **Por que nao serve:** a ordem das tabelas importa e o modo paralelo a ignora.
+- **Data:** 2026-10-20.
+
 ## Registros
 
 ### User
@@ -80,6 +93,10 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
 - 
 
 ### Reference
+
+- 
+
+### Armadilha
 
 - 
 

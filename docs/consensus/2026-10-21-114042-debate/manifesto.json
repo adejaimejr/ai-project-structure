@@ -1,0 +1,124 @@
+{
+  "versao": 1,
+  "run_id": "2026-10-21-114042-debate",
+  "modo": "debate",
+  "rodada": 1,
+  "projeto": "/code/ai-project-structure",
+  "inicio": "2026-10-21T11:40:42+00:00",
+  "fim": "2026-10-21T11:43:51+00:00",
+  "status": "concluida",
+  "pergunta": {
+    "arquivo": "/tmp/pergunta_t083.txt",
+    "sha256": "a4513a1294f00d190e948acd1642edfea074037a5ca4cc232d29bfd3954ec75b"
+  },
+  "excluidos_da_copia": [
+    "docs/consensus/",
+    ".consenso-lock",
+    "__pycache__/"
+  ],
+  "participantes": [
+    {
+      "id": "codex",
+      "comando": [
+        "codex",
+        "exec",
+        "-s",
+        "danger-full-access",
+        "--skip-git-repo-check",
+        "-m",
+        "gpt-5.6-terra",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ],
+      "diretorio": "/tmp/consenso-ftb8z2pu/projeto",
+      "inicio": "2026-10-21T11:40:42+00:00",
+      "fim": "2026-10-21T11:42:31+00:00",
+      "exit": 0,
+      "prompt": "codex/prompt.txt",
+      "sha256_prompt": "9a048b05128a7cc3acf497ff572eb249c9ccbbf7f10fcced7bbbf13d1a4bb5c3",
+      "resultado": "posicao",
+      "stdout": "codex/stdout.txt",
+      "sha256_stdout": "2c7320c4b40d24f29a1916cbf367edc252e816f5d762425db8ae2d4c055e4390",
+      "travessoes_substituidos": 0,
+      "aceito_por_humano": true,
+      "stderr": "codex/stderr.txt"
+    },
+    {
+      "id": "sol",
+      "comando": [
+        "codex",
+        "exec",
+        "-s",
+        "danger-full-access",
+        "--skip-git-repo-check",
+        "-m",
+        "gpt-6.1-sol",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ],
+      "diretorio": "/tmp/consenso-5emyxgmf/projeto",
+      "inicio": "2026-10-21T11:40:42+00:00",
+      "fim": "2026-10-21T11:41:49+00:00",
+      "exit": 0,
+      "prompt": "sol/prompt.txt",
+      "sha256_prompt": "9576c512919825b612a16f996ccdfed53d305acf6f4bc4efcd3eaa002a66d130",
+      "resultado": "posicao",
+      "stdout": "sol/stdout.txt",
+      "sha256_stdout": "72e79a729e5ec07dee5b3a06e33b1901306ebe619ce2b1220b578d7eb187bbf0",
+      "travessoes_substituidos": 0,
+      "aceito_por_humano": true,
+      "stderr": "sol/stderr.txt"
+    }
+  ],
+  "minuta": {
+    "arquivo": "docs/CONSENSUS.md",
+    "entrada": "2026-10-21 - Diretorio de corrida incompleto em docs/consensus/ (T-083, segunda rodada 1 cega, sandbox sem bubblewrap)",
+    "sha256_antes": "c7bfdd6432b2fb28778b0cbb27b32fc2dfb0e9a0cd89857051106a03847210b0",
+    "sha256_depois": "2c7bd5eb09717ecc658783366dcb42a5cb6d179ebd6a24ef1e07af4286f53344"
+  },
+  "anteriores": [],
+  "titulo": "Diretorio de corrida incompleto em docs/consensus/ (T-083, segunda rodada 1 cega, sandbox sem bubblewrap)",
+  "dono": "usuario",
+  "pendente": "",
+  "agentes": [
+    {
+      "id": "codex",
+      "comando": [
+        "codex",
+        "exec",
+        "-s",
+        "danger-full-access",
+        "--skip-git-repo-check",
+        "-m",
+        "gpt-5.6-terra",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ]
+    },
+    {
+      "id": "sol",
+      "comando": [
+        "codex",
+        "exec",
+        "-s",
+        "danger-full-access",
+        "--skip-git-repo-check",
+        "-m",
+        "gpt-6.1-sol",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ]
+    }
+  ],
+  "retomadas": [
+    {
+      "instante": "2026-10-21T11:43:51+00:00",
+      "chamados": [],
+      "mantidos": [],
+      "aceitos_a_mao": [
+        "codex",
+        "sol"
+      ]
+    }
+  ]
+}

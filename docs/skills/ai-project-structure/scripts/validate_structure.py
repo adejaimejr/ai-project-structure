@@ -114,6 +114,11 @@ CODIGOS = {
     "CONSENSO-STATUS-INVALIDO",
     "CONSENSO-ABERTO-SEM-PROXIMO-PASSO",
     "CONSENSO-RODADA-EXPOSICAO-INVALIDA",
+    # CONSENSUS.md, entrada automatizada (marcador **Origem:**)
+    "CONSENSO-ORIGEM-SEM-MANIFESTO",
+    "CONSENSO-ORIGEM-MANIFESTO-QUEBRADO",
+    "CONSENSO-PARTICIPANTE-SEM-SECAO",
+    "CONSENSO-FALHA-SEM-SECAO",
     # CONSENSUS.md, achado
     "ACHADO-SEM-IDENTIFICADOR",
     "ACHADO-SEM-ESCAPOU",
@@ -555,6 +560,68 @@ def check_consensus_achado(title, body, report):
         )
 
 
+def id_list(value):
+    """Ids de uma linha '**Participantes:**' ou '**Falhas:**', separados por virgula.
+
+    `nenhuma` (e linha vazia) valem lista vazia. O id e livre (DEC-007 da spec
+    0006), entao so se tira o acento, a caixa e as crases em volta."""
+    ids = [part.strip().strip("`").strip() for part in (value or "").split(",")]
+    return [i for i in ids if i and normalize(i) != "nenhuma"]
+
+
+def check_consensus_origem(root, title, body, report):
+    """Forma da entrada automatizada (spec 0006), cobrada so de quem declara '**Origem:**'.
+
+    Entrada manual nao ganha nada, mesmo com secoes '### Posicao De' soltas:
+    sem o campo, esta funcao sai sem escrever nada (DEC-007). Confere presenca
+    de ponte e de secao, nunca o conteudo da posicao nem do manifesto."""
+    rel = "docs/CONSENSUS.md"
+    if field_value(body, "Origem") is None:
+        return
+    # Lista separada por virgula: a rodada seguinte de um achado acrescenta o manifesto dela.
+    manifestos = [m.strip("` ") for m in (field_value(body, "Manifesto") or "").split(",")]
+    manifestos = [m for m in manifestos if m]
+    if not manifestos:
+        report.aviso(
+            rel, "CONSENSO-ORIGEM-SEM-MANIFESTO",
+            f"Entrada '{title}' declara '**Origem:**' sem '**Manifesto:**' com o "
+            "caminho do manifesto da execucao.",
+            title,
+        )
+    for manifesto in manifestos:
+        alvo = (root / manifesto).resolve()
+        if root.resolve() not in alvo.parents or not alvo.is_file():
+            report.aviso(
+                rel, "CONSENSO-ORIGEM-MANIFESTO-QUEBRADO",
+                f"Entrada '{title}' aponta '**Manifesto:** {manifesto}', que nao "
+                "resolve a partir da raiz do projeto.",
+                title,
+            )
+    headings = {normalize(h) for h in ATX_HEADING_RE.findall(body)}
+    achado = field_value(body, "Achado") is not None
+    prefixo = "Revalidacao De" if achado else "Posicao De"
+    falhas = id_list(field_value(body, "Falhas"))
+    falhos = {normalize(i) for i in falhas}
+    for ident in id_list(field_value(body, "Participantes")):
+        if normalize(ident) in falhos:
+            continue
+        if normalize(f"{prefixo} {ident}") not in headings:
+            report.aviso(
+                rel, "CONSENSO-PARTICIPANTE-SEM-SECAO",
+                f"Entrada '{title}' lista '{ident}' em '**Participantes:**', fora de "
+                f"'**Falhas:**', sem a secao '{prefixo} {ident}'.",
+                title,
+            )
+    for ident in falhas:
+        if normalize(f"Falha De {ident}") not in headings:
+            report.aviso(
+                rel, "CONSENSO-FALHA-SEM-SECAO",
+                f"Entrada '{title}' lista '{ident}' em '**Falhas:**' sem a secao "
+                f"'Falha De {ident}'.",
+                title,
+            )
+
+
 def check_consensus(root, report, adopted=None):
     text = read(root / "docs" / "CONSENSUS.md", report, root)
     if text is None:
@@ -570,6 +637,9 @@ def check_consensus(root, report, adopted=None):
         # O formato de achado nao depende da data de adocao: a entrada opta por
         # ele ao declarar '**Achado:**', e quem nunca declara nunca e cobrado.
         check_consensus_achado(title, body, report)
+        # A forma da entrada automatizada tambem e opt-in: so quem declara
+        # '**Origem:**' e cobrado.
+        check_consensus_origem(root, title, body, report)
         status_match = re.search(r"\*\*Status:\*\*\s*(.+)$", body, re.MULTILINE)
         if not status_match:
             report.aviso(

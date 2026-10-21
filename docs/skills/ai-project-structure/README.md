@@ -16,17 +16,19 @@ ai-project-structure/
 │   ├── AGENTS.md  CLAUDE.md  GEMINI.md
 │   ├── partials/       # blocos de insercao specs e loop (nunca copiados ao projeto)
 │   └── docs/...        # inclui docs/specs/README.md (modulo opcional)
-├── references/         # fluxos detalhados: atualizacao.md, specs.md, loop.md
+├── references/         # fluxos detalhados: atualizacao.md, specs.md, loop.md, consenso.md
 ├── scripts/
 │   ├── validate_structure.py   # validador (Python 3, so stdlib)
 │   ├── loop.sh                 # modulo de loop: orquestra uma rodada
-│   └── loop_task.py            # modulo de loop: edicoes em TASKS.md
+│   ├── loop_task.py            # modulo de loop: edicoes em TASKS.md
+│   └── consenso.py             # rodada de consenso: debate, achado e retomar, com agentes isolados
 ├── agents/
 │   └── openai.yaml     # metadado OPCIONAL do Codex (UI + politica de invocacao)
 ├── evals/
 │   ├── evals.json      # suite local de teste da skill (nao vai para a instalacao)
 │   ├── verify_repository.py    # prova a integridade deste repositorio
 │   ├── test_loop.py    # bateria do modulo de loop, com agente falso
+│   ├── test_consenso.py # bateria do consenso.py, com agente falso
 │   ├── portao_t065.py  # portao da T-065: prova que o verificador cobre os 39 codigos
 │   └── fixtures/       # projetos de teste (v1-project, broken-project, aguardando-project, achado-project, debate-project, cobertura-*)
 ├── CHANGELOG.md        # historico de versoes da skill

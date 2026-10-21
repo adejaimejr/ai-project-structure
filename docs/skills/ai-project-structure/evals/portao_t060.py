@@ -116,7 +116,7 @@ def secao(r, nome):
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         # 1. agente troca o verifica na propria linha
-        r, ag = montar(tmp, "c1", agente_corpo='sed -i "" "s/(verifica: bash portao.sh)/(verifica: true)/" docs/TASKS.md\n',
+        r, ag = montar(tmp, "c1", agente_corpo='python3 -c "import pathlib; p = pathlib.Path(\'docs/TASKS.md\'); p.write_text(p.read_text(encoding=\'utf-8\').replace(\'(verifica: bash portao.sh)\', \'(verifica: true)\'), encoding=\'utf-8\')"\n',
                        portao_corpo="echo suite-real; exit 0\n")
         code, out = rodar(r, ag)
         conc = secao(r, "Concluidas")

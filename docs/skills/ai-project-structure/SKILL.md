@@ -1,7 +1,7 @@
 ---
 name: ai-project-structure
-version: "2.12.0"
-description: Cria, atualiza e valida a estrutura Markdown multiagente (AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ com SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS etc) em projeto que sera tocado por varias IAs ou por varias sessoes. Use quando o pedido nomear essa estrutura ou seus arquivos ("estrutura multiagente", "scaffold Markdown multiagente", "AGENTS.md e docs/", "memoria do projeto em docs/") ou citar a skill pelo nome; e para converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ativar o modulo de specs (docs/specs/) em um projeto existente, ou ativar, rodar e configurar o modulo de loop (perfis de modelo e esforco por intencao e ferramenta). NAO dispare sozinha em pedido generico de criar projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto novo", "monta a base", "cria a pasta") que nao mencione a estrutura multiagente nem seus arquivos; decidir se o projeto precisa dela e de quem coordena (o usuario ou o agente gestor), e nesse caso, no maximo, ofereca a estrutura em uma linha. Esta skill cria os arquivos de fato, nao apenas explica como criar.
+version: "2.13.0"
+description: Cria, atualiza e valida a estrutura Markdown multiagente (AGENTS.md, CLAUDE.md, GEMINI.md e memoria em docs/ com SESSION, MEMORY, CONSENSUS, DECISIONS, TASKS etc) em projeto que sera tocado por varias IAs ou por varias sessoes. Use quando o pedido nomear essa estrutura ou seus arquivos ("estrutura multiagente", "scaffold Markdown multiagente", "AGENTS.md e docs/", "memoria do projeto em docs/") ou citar a skill pelo nome; e para converter um diretorio existente para esta estrutura, ATUALIZAR um projeto que ja usa a estrutura para a versao mais nova da skill, VALIDAR a estrutura existente, ativar o modulo de specs (docs/specs/) em um projeto existente, ou ativar, rodar e configurar o modulo de loop (perfis de modelo e esforco por intencao e ferramenta), ou rodar uma rodada de consenso automatizada com outros modelos ("roda um consenso", "pede uma segunda opiniao a outros modelos", "revalida o achado com outro modelo", "retoma a rodada de consenso"). NAO dispare sozinha em pedido generico de criar projeto, pasta, repositorio ou scaffold ("cria projeto", "inicia projeto novo", "monta a base", "cria a pasta") que nao mencione a estrutura multiagente nem seus arquivos; decidir se o projeto precisa dela e de quem coordena (o usuario ou o agente gestor), e nesse caso, no maximo, ofereca a estrutura em uma linha. Esta skill cria os arquivos de fato, nao apenas explica como criar.
 ---
 
 # AI Project Structure
@@ -187,7 +187,7 @@ No final, liste de forma curta:
 
 - caminho absoluto do destino;
 - nivel escolhido (completa ou minimal) e se o modulo de specs foi ativado;
-- versao da estrutura: 2.12.0;
+- versao da estrutura: 2.13.0;
 - arquivos criados (em arvore);
 - proximo passo sugerido: preencher os demais campos de `PROJECT_CONTEXT.md` e adicionar tarefas iniciais em `TASKS.md`;
 - oferta: "quer validar a estrutura? `python3 <dir-desta-skill>/scripts/validate_structure.py <destino>`".
@@ -236,6 +236,25 @@ Quando o usuario pedir para rodar o loop em uma tarefa (ex: "roda o loop na T-04
 A tabela de comandos por ferramenta, as armadilhas de flag e o formato dos perfis estao em `references/loop.md`.
 
 **Configurar os perfis**: quando o usuario pedir para ver, trocar ou criar perfil ("configura os perfis do loop", "que modelo o loop esta usando", "quero trocar o modelo"), siga a secao "Configurar Os Perfis" de `references/loop.md`. Ela mostra o que existe hoje, pergunta o que mudar com opcoes numeradas e confirma os nomes de modelo na propria CLI antes de gravar.
+
+## Rodar Uma Rodada De Consenso
+
+Quando o usuario pedir uma segunda opiniao de outros modelos (ex: "roda um consenso sobre isso", "pede ao Codex e ao Grok", "revalida o achado N10 com outro modelo", "retoma a rodada"), **monte a chamada de `scripts/consenso.py` para ele**. A pessoa nao deve precisar lembrar flags.
+
+1. **Confirme a pergunta em arquivo.** `debate` recebe `--pergunta` como caminho. Se a pergunta ainda esta so na conversa, escreva-a num arquivo, mostre o texto e peca confirmacao antes de rodar. Para achado, confirme o titulo exato da entrada em `docs/CONSENSUS.md`.
+2. **Leia os perfis de consenso** em `docs/MEMORY.md`, secao `## User`, e monte cada `--agente ID "COMANDO"` a partir deles. Nunca invente modelo nem flag: sem perfil, pergunte qual ferramenta e qual modelo e ofereca registrar o perfil. Comando somente-leitura por ferramenta esta em `references/consenso.md`. Debate pede dois agentes ou mais; achado, um ou mais.
+3. **Pergunte a rodada** quando nao for a primeira, e quais posicoes anteriores entram (`--anterior`). O script nunca deduz o numero nem os anteriores; da rodada 4 em diante, `--pendente` e texto da pessoa.
+4. **Mostre o comando antes de rodar**, para a pessoa corrigir. Lembre que nao ha teto de custo: N agentes e modelo caro gastam plano dela.
+
+```bash
+<dir-desta-skill>/scripts/consenso.py debate --projeto . --pergunta pergunta.txt \
+  --agente codex "<perfil de consenso do Codex>" --agente grok "<perfil de consenso do Grok>"
+```
+
+5. **Rode e traduza o exit code**: 0 a rodada fechou e a minuta (ou a revalidacao) esta em `docs/CONSENSUS.md`; 2 nenhum agente deu posicao, `CONSENSUS.md` intacto; 5 outra rodada ativa no projeto, nada foi alterado; 6 padrao de segredo, a rodada parou e o material esta fora do projeto. Exit 1 e erro de uso ou rodada interrompida; a mensagem cita o comando de retomada. Em 5 e 6, mostre a mensagem do script e **nunca limpe o lock nem retome por conta propria**: retomar e comando explicito da pessoa.
+6. **Entregue sem julgar.** As secoes de julgamento (`Pontos De Acordo`, `Riscos E Tradeoffs`, `Consenso Final`, `Decisao Para Registrar Em DECISIONS.md`) nascem com "(A preencher.)" e sao da pessoa. Nao resuma as posicoes como se fossem consenso, nao declare convergencia e nao decida por maioria; diga onde estao a entrada e o sidecar `docs/consensus/<run-id>/` e deixe a pessoa ler.
+
+Limites, ditos sempre que couber: a varredura de segredo tem falso negativo, nao ha teto de custo e `docs/MEMORY.md` desatualizado dispara o revisor errado. Uso, exit codes, forma da entrada, retomada e "O Que A Operacao Nunca Faz" estao em `references/consenso.md`.
 
 ## Ativar O Modulo De Loop
 

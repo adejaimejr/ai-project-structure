@@ -16,6 +16,10 @@
 #                       prompt entra como ultimo argumento. Argumentos com
 #                       espaco dentro de aspas nao sao suportados.
 #   --tentativas N      padrao 3.
+#   --tempo-maximo S    segundos por tentativa; padrao 3600. Ao estourar, o
+#                       agente (e o que ele deixou vivo) recebe SIGTERM e o
+#                       portao decide, como em qualquer agente que sai com
+#                       codigo diferente de zero.
 #   --projeto DIR       padrao: diretorio atual.
 #   --seco              nao chama o agente; util para testar o ciclo.
 #
@@ -24,7 +28,8 @@
 #   1  erro de uso, ou tarefa nao elegivel (sem `(verifica:)`, ja concluida, inexistente)
 #   2  portao falhou em todas as tentativas; nada foi movido, nada foi escrito
 #   3  o agente sinalizou falta de contexto; a tarefa foi para "Aguardando Usuario"
-#   4  o agente falhou e nao mexeu em nada; provavelmente esta mal configurado
+#   4  o agente falhou (ou estourou --tempo-maximo) e nao mexeu em nada;
+#      provavelmente esta mal configurado
 #   5  ja existe outra rodada ativa neste projeto
 #
 # O que este script NUNCA faz: escolher a tarefa sozinho, fechar tarefa sem
@@ -37,7 +42,7 @@ HELPER="$SCRIPT_DIR/loop_task.py"
 ARQUIVO_PERGUNTA=".loop-pergunta"
 ARQUIVO_LOCK=".loop-lock"
 
-TAREFA=""; AGENTE=""; TENTATIVAS=3; PROJETO="$PWD"; SECO=0
+TAREFA=""; AGENTE=""; TENTATIVAS=3; TEMPO_MAXIMO=3600; PROJETO="$PWD"; SECO=0
 
 uso() { sed -n 's/^# \{0,1\}//p' "$0" | sed '/^!/d'; }
 
@@ -46,6 +51,7 @@ while [ $# -gt 0 ]; do
     --tarefa)     TAREFA="${2:-}"; shift 2 ;;
     --agente)     AGENTE="${2:-}"; shift 2 ;;
     --tentativas) TENTATIVAS="${2:-}"; shift 2 ;;
+    --tempo-maximo) TEMPO_MAXIMO="${2:-}"; shift 2 ;;
     --projeto)    PROJETO="${2:-}"; shift 2 ;;
     --seco)       SECO=1; shift ;;
     -h|--help)    uso; exit 0 ;;
@@ -62,6 +68,11 @@ erro() { echo "[ERRO] $*" >&2; exit 1; }
 case "$TENTATIVAS" in
   ''|*[!0-9]*) erro "--tentativas precisa ser um inteiro positivo." ;;
   0) erro "--tentativas precisa ser maior que zero." ;;
+esac
+
+case "$TEMPO_MAXIMO" in
+  ''|*[!0-9]*) erro "--tempo-maximo precisa ser um inteiro positivo, em segundos." ;;
+  0) erro "--tempo-maximo precisa ser maior que zero." ;;
 esac
 
 PROJETO="$(cd "$PROJETO" && pwd)"
@@ -81,9 +92,23 @@ if ! mkdir "$LOCK_DIR" 2>/dev/null; then
 fi
 
 TMP=""
+AGENTE_PID=""
+
+# Encerra o grupo do agente, e nao so o processo dele: um filho que sobra
+# (um `sleep`, uma CLI presa em reconexao) segura o stdout da rodada. O agente
+# roda em grupo proprio (set -m, ver abaixo), entao -PID alcanca todos. Se o
+# sistema nao der grupo (Git Bash), cai para o PID sozinho.
+encerrar_agente() {
+  kill -TERM -- "-$AGENTE_PID" 2>/dev/null || kill -TERM "$AGENTE_PID" 2>/dev/null || true
+}
+
 # O lock nasce vazio. rmdir evita apagar conteudo que nao foi criado pelo
-# loop, caso outra coisa tenha sido posta nele durante a rodada.
-trap 'if [ -n "$TMP" ]; then rm -rf "$TMP"; fi; rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
+# loop, caso outra coisa tenha sido posta nele durante a rodada. Ctrl-C e
+# SIGTERM no loop viram exit para o trap EXIT rodar e nao deixar agente orfao,
+# ja que o agente nao esta mais no grupo do terminal.
+trap 'if [ -n "$AGENTE_PID" ]; then encerrar_agente; fi; if [ -n "$TMP" ]; then rm -rf "$TMP"; fi; rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 TMP="$(mktemp -d)"
 
 if [ "$SECO" -eq 0 ]; then
@@ -101,7 +126,7 @@ LINHA_TAREFA="$(python3 "$HELPER" linha "$PROJETO" "$TAREFA")" || exit 1
 echo "Tarefa:  $TAREFA"
 echo "Projeto: $PROJETO"
 echo "Portao:  $COMANDO"
-echo "Limite:  $TENTATIVAS tentativa(s)"
+echo "Limite:  $TENTATIVAS tentativa(s), $TEMPO_MAXIMO s cada"
 
 SINAL="$PROJETO/$ARQUIVO_PERGUNTA"
 if [ -f "$SINAL" ]; then
@@ -165,8 +190,38 @@ $FALHA_ANTERIOR"
     echo "(modo seco: agente nao chamado)"
   else
     MARCA="$TMP/marca-$n"; : > "$MARCA"
-    AGENTE_CODIGO=0
-    ( cd "$PROJETO" && "${AGENTE_ARGS[@]}" "$PROMPT" </dev/null ) || AGENTE_CODIGO=$?
+    AGENTE_CODIGO=0; ESTOUROU=0
+    # Em segundo plano e em grupo proprio (set -m), para o tempo poder ser
+    # vigiado e o SIGTERM alcancar tambem os filhos. Bash puro: timeout(1) e
+    # setsid nao existem no macOS.
+    set -m
+    ( cd "$PROJETO" && "${AGENTE_ARGS[@]}" "$PROMPT" </dev/null ) &
+    AGENTE_PID=$!
+    set +m
+    LIMITE=$(( SECONDS + TEMPO_MAXIMO ))
+    while kill -0 "$AGENTE_PID" 2>/dev/null; do
+      if [ "$SECONDS" -ge "$LIMITE" ]; then
+        ESTOUROU=1
+        echo
+        echo "[AVISO] o agente passou do tempo maximo de $TEMPO_MAXIMO s (--tempo-maximo); enviando SIGTERM."
+        encerrar_agente
+        # Quem ignora SIGTERM leva SIGKILL depois de 5 s.
+        GRACA=$(( SECONDS + 5 ))
+        while kill -0 "$AGENTE_PID" 2>/dev/null && [ "$SECONDS" -lt "$GRACA" ]; do
+          sleep 0.2 2>/dev/null || sleep 1
+        done
+        if kill -0 "$AGENTE_PID" 2>/dev/null; then
+          kill -KILL -- "-$AGENTE_PID" 2>/dev/null || kill -KILL "$AGENTE_PID" 2>/dev/null || true
+        fi
+        break
+      fi
+      sleep 0.2 2>/dev/null || sleep 1
+    done
+    wait "$AGENTE_PID" 2>/dev/null || AGENTE_CODIGO=$?
+    AGENTE_PID=""
+    # Agente que terminou o trabalho e travou pode sair 0 depois do SIGTERM
+    # (trap); mesmo assim o estouro conta como saida anormal.
+    if [ "$ESTOUROU" -eq 1 ] && [ "$AGENTE_CODIGO" -eq 0 ]; then AGENTE_CODIGO=143; fi
     # Agente que falhou E nao mexeu em nada nunca rodou de verdade. Insistir
     # so queima tentativa e portao; o problema esta no comando, nao na tarefa.
     if [ "$AGENTE_CODIGO" -ne 0 ]; then
@@ -174,6 +229,10 @@ $FALHA_ANTERIOR"
       if [ -z "$MEXEU" ]; then
         echo
         echo "[ERRO] o agente saiu com codigo $AGENTE_CODIGO e nao alterou nenhum arquivo." >&2
+        if [ "$ESTOUROU" -eq 1 ]; then
+          echo "Ele foi encerrado por SIGTERM ao estourar o tempo maximo de $TEMPO_MAXIMO s." >&2
+          echo "Se a ferramenta precisa de mais tempo, aumente --tempo-maximo." >&2
+        fi
         echo "A causa esta na saida dele, acima. As duas mais comuns sao o comando" >&2
         echo "de --agente estar incompleto para uso nao supervisionado (ver a tabela" >&2
         echo "por ferramenta em references/loop.md) e a ferramenta ter recusado por" >&2

@@ -38,6 +38,7 @@ Uma rodada trata **uma** tarefa:
 ```bash
 loop.sh --tarefa T-042 --agente "claude -p"
 loop.sh --tarefa T-042 --agente "codex exec" --tentativas 5
+loop.sh --tarefa T-042 --agente "claude -p" --tempo-maximo 1800
 loop.sh --tarefa T-042 --agente "gemini -p" --projeto /caminho/do/projeto
 ```
 
@@ -73,6 +74,7 @@ O modelo e o esforco tambem entram por aqui, e cada CLI tem a propria flag (`--m
 - `--tarefa` (obrigatorio): o `T-NNN`.
 - `--agente` (obrigatorio): comando headless da ferramenta que voce usa. O script nao assume nenhuma. O prompt entra como ultimo argumento. Argumento com espaco dentro de aspas nao e suportado.
 - `--tentativas` (padrao 3).
+- `--tempo-maximo` (padrao 3600): segundos que cada tentativa do agente pode durar. Ao estourar, o `loop.sh` envia SIGTERM ao agente e ao que ele deixou vivo, espera 5 s e usa SIGKILL em quem ignorar. Depois segue o caminho de qualquer agente que sai com codigo diferente de zero: se ele alterou arquivos, o portao decide; se nao alterou nada, exit 4. Existe porque uma CLI pode terminar o trabalho e ficar presa em reconexao, sem processo filho, e sem limite a rodada esperaria para sempre. Valor que nao seja inteiro maior que zero sai 1 antes de chamar o agente. E mecanica do script, nao regra do agente: o bloco de loop do `AGENTS.md` nao fala dele. O controle de tempo e bash puro (sem `timeout` nem `setsid`, que o macOS nao tem); no Git Bash do Windows o SIGTERM pode alcancar so o processo do agente, nao os filhos dele.
 - `--projeto` (padrao: diretorio atual).
 - `--seco`: roda o ciclo sem chamar o agente, para testar portao e fluxo.
 
@@ -84,7 +86,7 @@ Exit codes, distintos de proposito para dar para ramificar por fora:
 | 1 | erro de uso, ou tarefa nao elegivel (sem `(verifica:)`, ja concluida, inexistente) |
 | 2 | portao falhou em todas as tentativas; nada movido, nada escrito |
 | 3 | o agente sinalizou falta de contexto; tarefa em "Aguardando Usuario" |
-| 4 | o agente falhou sem alterar arquivo; provavelmente o comando esta mal configurado |
+| 4 | o agente falhou (ou estourou `--tempo-maximo`) sem alterar arquivo; provavelmente o comando esta mal configurado |
 | 5 | outra rodada ja esta ativa no mesmo projeto; nenhum arquivo foi alterado por esta chamada |
 
 Qualquer caminho diferente de sucesso sai diferente de zero, o que deixa a composicao por fora funcionar:

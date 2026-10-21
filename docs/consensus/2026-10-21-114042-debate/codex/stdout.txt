@@ -1,0 +1,11 @@
+Minha posição: avisar somente quando `docs/CONSENSUS.md` apontar para a corrida.
+
+DEC-009 torna diretórios incompletos um estado normal: o manifesto nasce como `em-andamento`, o bruto é salvo antes da minuta e uma interrupção preserva esse material no repositório sem alterar `CONSENSUS.md`. Avisar sempre transformaria uma rodada legítima em andamento em falso positivo, inclusive se alguém rodar o validador durante a execução.
+
+O escopo correto é a integridade de uma alegação publicada:
+
+- Sem ponte em `CONSENSUS.md`: ignorar pasta sem manifesto, manifesto não concluído e participante sem `stdout.txt`. O `consenso.py retomar` é o mecanismo explícito para inspecionar e continuar esse estado.
+- Com ponte em `**Manifesto:**`: avisar se o manifesto não existe, não pode ser lido, não tem `status: concluida`, ou se um participante registrado como artefato da rodada não tem o `stdout.txt` esperado. Uma entrada publicada jamais deveria apontar para corrida ainda em curso, pois o script só escreve a minuta no fim e só marca `concluida` depois dela.
+- Severidade: AVISO, bloqueante apenas em `--strict`, coerente com os checks opt-in de `**Origem:**` da DEC-007.
+
+Hoje o validador já segue parcialmente esse limite: só verifica se o caminho de manifesto citado resolve. Ele não varre `docs/consensus/` nem interpreta o conteúdo do manifesto. Eu estenderia essa verificação vinculada, sem adicionar uma varredura global do sidecar.

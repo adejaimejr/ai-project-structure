@@ -7,7 +7,7 @@
    Disposicao, entrada de controle e resto do arquivo byte a byte; 2. o revisor ve a entrada-alvo
    na copia e a recebe na integra no prompt; 3. --strict limpo depois; 4. entrada inexistente,
    sem --rodada ou rodada 4 sem --pendente: exit 1 e nada muda; com --pendente a linha entra;
-   5. id repetido recusado; id novo acrescenta as listas; 6. N=1 aceito, manifesto modo=achado
+   5. id repetido recusado; id novo acrescenta as listas e o arquivo segue limpo em --strict; 6. N=1 aceito, manifesto modo=achado
    com a entrada; 7. revisor unico falhando: exit 2 e entrada intacta; 8. bateria >= 40;
    9. versao; 10. verificador.
 """
@@ -130,6 +130,10 @@ def main():
               and campo(e3, "Rodada") == "3 de 3",
               "5b. id novo acrescenta secao, Participantes e o segundo manifesto, mantendo a revalidacao anterior",
               f"exit {code_novo} part={campo(e3, 'Participantes')} manifestos={manifs} rodada={campo(e3, 'Rodada')}")
+        # 5c (gestor, 2026-10-21): a lista de manifestos que a segunda rodada produz e a forma que a tarefa
+        # manda escrever, e o criterio da spec diz que o que a operacao escreve passa em --strict sem aviso.
+        code_v3, linhas3, _ = validar(r, "--strict", "--codigos")
+        check(code_v3 == 0 and not linhas3, "5c. --strict limpo depois da segunda rodada, com dois manifestos na lista", "; ".join(linhas3)[:160])
 
         # 4: elegibilidade.
         r4, c4 = preparar(tmp, "c4")

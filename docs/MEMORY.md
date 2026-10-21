@@ -65,6 +65,19 @@ Pointers para sistemas externos.
 
 Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST."
 
+### Armadilha
+
+Tentativa que falhou e por que, para ninguem repetir. E a casa permanente do campo "Nao repetir" do modelo de "Passagem De Trabalho" do `AGENTS.md`, que fora daqui so sobrevive em `SESSION.md`. Diferenca para Feedback: Feedback e regra a seguir; Armadilha e caminho a nao tomar, mesmo sem regra geral.
+
+Cada item: o que se tentou, o que aconteceu, por que nao serve e a data.
+
+Exemplo de entrada:
+
+- **Tentou:** rodar a migracao com `--parallel` para ganhar tempo.
+- **Aconteceu:** duas tabelas ficaram com a chave estrangeira apontando para linhas inexistentes.
+- **Por que nao serve:** a ordem das tabelas importa e o modo paralelo a ignora.
+- **Data:** 2026-10-20.
+
 ## Registros
 
 ### User
@@ -78,6 +91,8 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
   - Codex, executar: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="high"`
   - Codex, executar-dificil: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="xhigh"`
   - Codex, executar-muito-dificil: `codex exec -s workspace-write --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="max"`
+  - Codex, consenso: `codex exec -s read-only --skip-git-repo-check -m gpt-5.6-terra -c model_reasoning_effort="high"`. Perfil somente-leitura para `consenso.py` (spec 0006); registrado em 2026-10-21 para T-083, com confirmacao do usuario.
+  - Codex Sol, consenso: `codex exec -s read-only --skip-git-repo-check -m gpt-6.1-sol -c model_reasoning_effort="high"`. Segundo agente da bancada de T-083, escolhido pelo usuario em 2026-10-21 no lugar do `cursor-agent` (Grok), que estava sem tokens. Slug conferido em `~/.codex/models_cache.json` (codex-cli 0.163.0). Sol e caro: use em consenso quando o usuario pedir, nao como padrao.
   - Grok, planejar: `grok --always-approve -m grok-4.6 --effort xhigh -p`. O `xhigh` e o teto do Grok, e planejar merece o teto.
   - Grok, executar: `grok --always-approve -m grok-4.6 --effort high -p`
   - Grok, executar-dificil: `grok --always-approve -m grok-4.6 --effort xhigh -p`
@@ -109,6 +124,8 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
 - **Regra:** tarefa cuja saida exige editar arquivo que o prompt do loop proibe (`AGENTS.md`, `SESSION.md`, `MEMORY.md`, `DECISIONS.md`, `CONSENSUS.md`, specs) nao vai para o loop: essa parte e do agente de chat, e o loop recebe so o resto. **Por que:** em 2026-09-04 a T-055 mandava copiar os modelos para `docs/CONSENSUS.md` e o `terra` editou o arquivo proibido porque a tarefa dizia para editar; a proibicao do prompt nao resiste a instrucao contraria na propria tarefa. **Quando aplicar:** ao montar ou refinar qualquer tarefa que vai para o `loop.sh`.
 - **Regra:** portao de tarefa que casa texto por regex e testado contra um texto de exemplo escrito por voce **antes** da rodada. **Por que:** em 2026-09-04 dois bugs de regex no portao de T-062 (`.*` no titulo com `re.S`, titulo sem `re.I`) fizeram o texto certo do agente reprovar; ele gastou uma tentativa e renomeou dois headings para satisfazer a regex em vez do leitor. **Quando aplicar:** todo `portao_t0NN.py` que confere prosa ou heading.
 - **Regra:** antes de mandar uma tarefa para o loop, rode o comando declarado em verifica; se ele ja sai 0, escreva um portao proprio que falhe hoje e aponte a tarefa para ele. **Por que:** em 2026-09-04 a T-065 apontava para `verify_repository.py`, que ja passava com 46 de 46; o loop teria fechado a tarefa verde com trabalho zero, e a evidencia seria real e vazia ao mesmo tempo. **Quando aplicar:** toda tarefa cujo portao e um verificador geral do repositorio, e nao um teste do trabalho pedido.
+- **Regra:** tudo que a skill distribui ou testa (scripts, baterias, fixtures de agente falso, comandos de exemplo) roda em Linux, macOS e Windows (Git Bash): nada de `sed -i` (sintaxe BSD e GNU divergem), `perl`, `timeout(1)` ou `setsid` (nao existem no macOS); edicao de arquivo em fixture e por `python3 -c`, e processo com limite de tempo e bash puro (`kill -0`, `kill -TERM`, `wait`). **Por que:** em 2026-10-21 o fixture H1 de `test_loop.py` usava `sed -i ""` e quebrava no GNU sed da sandbox Linux (73/74 no verificador), o conserto por `perl` foi recusado pelo usuario ("tem que rodar no linux, mac e windows"). **Quando aplicar:** ao escrever ou revisar qualquer script, teste ou fixture da skill, inclusive o que subagente entrega.
+- **Regra:** portao de bancada real (rodada com agente de verdade) exige evidencia de que o agente leu o repositorio, por exemplo ao menos um comando executado no log dele, e nunca so tamanho de saida. **Por que:** em 2026-10-21 o `portao_t083.py` passou 4/4 com uma recusa de 503 bytes ("nao consegui ler a copia") e uma posicao escrita sem nenhum `exec`, porque o piso era 500 bytes; o sandbox read-only do Codex nao rodava no container e nada no portao via isso. **Quando aplicar:** todo portao que valida saida de modelo real (consenso, bancada, eval com agente), antes de declarar a rodada valida.
 - **Regra:** nunca usar o caractere travessao (em dash, U+2014) em textos do projeto ou da skill; usar dois-pontos, ponto-e-virgula, virgula, parenteses ou hifen simples. **Por que:** pedido explicito do usuario em 2026-08-20; o validador da skill acusa ocorrencias como erro. **Quando aplicar:** qualquer texto escrito neste repositorio e nos templates que a skill gera.
 
 ### Project
@@ -127,3 +144,10 @@ Exemplo de entrada: "Issues do produto X sao trackeadas no Linear projeto INGEST
 - specsfy (inspiracao da v2 da skill): github.com/promovaweb/specsfy. Metodologia SDD pt-BR; analisada em 2026-08-20; o que importamos e o que descartamos esta em `docs/DECISIONS.md` e no CHANGELOG da skill.
 - ai-memory (akitaonrails): github.com/akitaonrails/ai-memory. Memoria de longo prazo para CLIs de agente: binario Rust com servidor MCP/HTTP, hooks de ciclo de vida em mais de vinte harnesses, wiki Markdown propria fora do repo e indice SQLite FTS5; zero LLM e dado local por padrao. Analisado em 2026-10-20: camada complementar, nao mesclar (decisao em `docs/DECISIONS.md`); ideias importadas em T-087 a T-091. Precedencia que ele declara: usuario, rules file do repo, memoria dele, perfil cross-project; nunca edita `AGENTS.md` e nao duplica registro de decisao mantido no repo. Se um dia alguem instalar ao lado da estrutura: `ai-memory install-instructions --target AGENTS.md` (o auto-detect dele escreve em `CLAUDE.md` quando existe, o que fere "Arquivos-Ponte Sao Imutaveis"); o bloco dele fica entre `<!-- ai-memory:start -->` e `<!-- ai-memory:end -->`, fora dos nossos marcadores; regras, decisoes e tarefas seguem em `AGENTS.md`, `DECISIONS.md` e `TASKS.md`; nao exportar o `wikisync` dele para dentro de `docs/`.
 
+
+### Armadilha
+
+- **Tentou:** rodar a bancada real do consenso (T-083) nesta sandbox Cloudroom com os perfis somente-leitura do Codex (`codex exec -s read-only`), em 2026-10-21.
+- **Aconteceu:** o sandbox read-only do Codex usa bubblewrap, que falha no container (`bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted`); o Sol recusou por nao conseguir ler a copia e o terra opinou sem executar nenhum comando. O portao de T-083 passou mesmo assim, por 3 bytes acima do piso de 500, e foi endurecido para exigir ao menos um `exec` no stderr de cada participante.
+- **Por que nao serve:** parecer sem leitura do repositorio nao e segunda opiniao, e um piso de bytes nao distingue recusa de posicao. Neste container so `codex exec -s danger-full-access` executa comandos; a copia isolada e temporaria torna a escrita inofensiva, mas trocar o modo e decisao do usuario, nao do agente.
+- **Data:** 2026-10-21. Desfecho: com autorizacao do usuario, a rodada foi refeita em `-s danger-full-access` e funcionou (6 e 15 comandos executados); os dois participantes cairam na varredura de segredo por falso positivo, porque o log do Codex (stderr) lista o codigo de `consenso.py` e a regex de chave PEM casa consigo mesma. Agente que le `consenso.py` ou `validate_structure.py` na copia vai disparar a varredura: e o fluxo da DEC-010 (conferir, mover a mao, `retomar`), nao defeito.

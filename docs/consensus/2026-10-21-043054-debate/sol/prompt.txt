@@ -1,0 +1,8 @@
+Participante: sol
+Copia isolada do projeto: /tmp/consenso-9lvbpg9p/projeto
+Esta e uma copia somente-leitura do projeto: leia o que precisar. Nao edite nada fora da sua resposta.
+Responda em portugues, sem travessao. A resposta inteira no stdout sera reproduzida sem resumo. Nenhuma posicao contemporanea esta disponivel por construcao.
+
+Pergunta:
+
+O que o validador (scripts/validate_structure.py) deve fazer com um diretorio de corrida incompleto em docs/consensus/ (manifesto com status em-andamento ou interrompida, participante sem stdout.txt, ou pasta sem manifesto.json)? Opcoes em jogo: ignorar por completo (como hoje), avisar so quando uma entrada de docs/CONSENSUS.md aponta para ele, ou avisar sempre que existir. Considere a DEC-009 da spec 0006 (bruto e manifesto moram no repositorio desde o inicio; retomada so por comando explicito) e o custo de falso positivo numa rodada legitimamente em andamento. Leia o codigo do validador e do consenso.py na copia antes de responder.

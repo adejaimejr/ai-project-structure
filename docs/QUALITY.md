@@ -14,7 +14,7 @@ Use este arquivo como checklist de qualidade antes de finalizar trabalho relevan
 
 ## Checklist Para Estrutura Multiagente
 
-- A raiz mantem apenas os arquivos Markdown de entrada dos agentes.
+- A raiz mantem apenas os arquivos Markdown de entrada dos agentes, mais as excecoes de `README.md`, `README.pt-BR.md`, `LICENSE`, `.gitignore` e configuracao com ponto (`.github/`, `.gitattributes`); comunidade vive em `docs/`.
 - `CLAUDE.md` aponta para `AGENTS.md` sem duplicar regras.
 - `GEMINI.md` aponta para `AGENTS.md` sem duplicar regras.
 - `AGENTS.md` proibe regras de produto, arquitetura ou processo nos arquivos-ponte.

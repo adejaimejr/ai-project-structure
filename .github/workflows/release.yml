@@ -1,0 +1,210 @@
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  # Publishes a tag whose commit predates this workflow (a tag push runs the
+  # workflow file of the tagged commit, so older tags never trigger it).
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release, vX.Y.Z"
+        required: true
+
+# Only workflow with write access: it publishes the GitHub Release.
+permissions:
+  contents: write
+
+# A release is never cancelled halfway.
+concurrency:
+  group: release-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      OUT: ${{ runner.temp }}/release
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}
+
+      - name: Check tag matches SKILL.md version
+        run: |
+          python3 - <<'PY'
+          import os, re, sys
+
+          tag = os.environ["TAG"]
+          if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", tag):
+              sys.exit(f"error: tag '{tag}' is not in the vX.Y.Z format")
+
+          version = None
+          with open("docs/skills/ai-project-structure/SKILL.md", encoding="utf-8") as f:
+              for n, line in enumerate(f):
+                  line = line.rstrip("\n")
+                  if n == 0:
+                      if line != "---":
+                          sys.exit("error: SKILL.md has no frontmatter")
+                      continue
+                  if line == "---":
+                      break
+                  m = re.fullmatch(r"version:\s*[\"']?([^\"'\s]+)[\"']?\s*", line)
+                  if m:
+                      version = m.group(1)
+                      break
+          if version is None:
+              sys.exit("error: SKILL.md frontmatter has no 'version:' field")
+          if tag[1:] != version:
+              sys.exit(f"error: tag '{tag}' does not match SKILL.md version '{version}'")
+          print(f"ok: tag {tag} matches SKILL.md version {version}")
+          PY
+
+      - name: Package skill
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          ZIP="ai-project-structure-${VERSION}.zip"
+          mkdir -p "$OUT"
+          rm -f "$OUT/$ZIP" "$OUT/$ZIP.sha256"
+          python3 - "$OUT/$ZIP" <<'PY'
+          import os, sys, zipfile
+
+          root = "docs/skills"
+          top = "ai-project-structure"
+          items = ["SKILL.md", "assets", "agents", "scripts", "references", "install.sh", "README.md"]
+
+          def keep(name):
+              return name != "__pycache__" and not name.endswith(".pyc") and name != ".DS_Store"
+
+          files = []
+          for item in items:
+              path = os.path.join(root, top, item)
+              if os.path.isfile(path):
+                  files.append(path)
+                  continue
+              if not os.path.isdir(path):
+                  sys.exit(f"error: missing {path}")
+              for dirpath, dirnames, filenames in os.walk(path):
+                  dirnames[:] = sorted(d for d in dirnames if keep(d))
+                  files += [os.path.join(dirpath, n) for n in sorted(filenames) if keep(n)]
+
+          with zipfile.ZipFile(sys.argv[1], "w", zipfile.ZIP_DEFLATED) as z:
+              for path in files:
+                  z.write(path, os.path.relpath(path, root))
+          print(f"ok: {len(files)} files in {sys.argv[1]}")
+          PY
+          (cd "$OUT" && sha256sum "$ZIP" > "$ZIP.sha256")
+          cat "$OUT/$ZIP.sha256"
+
+      - name: Extract CHANGELOG section
+        run: |
+          python3 - <<'PY'
+          import os, re, sys
+
+          version = os.environ["TAG"][1:]
+          out = os.environ["OUT"]
+          prefix = f"## {version} - "
+
+          with open("docs/skills/ai-project-structure/CHANGELOG.md", encoding="utf-8") as f:
+              lines = f.read().splitlines()
+
+          section = []
+          found = False
+          in_fence = False
+          for line in lines:
+              if line.startswith("```"):
+                  in_fence = not in_fence
+              if not found:
+                  if line.startswith(prefix):
+                      found = True
+                      section.append(line)
+                  continue
+              if line.startswith("## ") and not in_fence:
+                  break
+              section.append(line)
+
+          if not found:
+              sys.exit(f"error: CHANGELOG.md has no section '{prefix}AAAA-MM-DD'")
+          while section and not section[-1].strip():
+              section.pop()
+
+          os.makedirs(out, exist_ok=True)
+          with open(os.path.join(out, "changelog-section.md"), "w", encoding="utf-8") as f:
+              f.write("\n".join(section) + "\n")
+          print(f"ok: extracted {len(section)} lines for {version}")
+          PY
+
+      - name: Compose release body
+        run: |
+          python3 - <<'PY'
+          import os, re
+
+          tag = os.environ["TAG"]
+          version = tag[1:]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          name = repo.split("/", 1)[1]
+          out = os.environ["OUT"]
+          zip_name = f"ai-project-structure-{version}.zip"
+
+          with open(os.path.join(out, "changelog-section.md"), encoding="utf-8") as f:
+              section = f.read().rstrip("\n")
+
+          # GitHub heading anchor: lowercase, drop punctuation, spaces to hyphens.
+          heading = section.splitlines()[0].lstrip("# ").strip().lower()
+          anchor = re.sub(r"\s", "-", re.sub(r"[^\w\s-]", "", heading))
+          changelog_url = (
+              f"https://github.com/{repo}/blob/{tag}"
+              f"/docs/skills/ai-project-structure/CHANGELOG.md#{anchor}"
+          )
+
+          fence = "`" * 3
+          body = f"""Release {version} of the ai-project-structure skill.
+
+          ## Install
+
+          {fence}bash
+          git clone --branch {tag} https://github.com/{repo}.git
+          cd {name}/docs/skills/ai-project-structure
+          ./install.sh
+          {fence}
+
+          The installer copies the skill to the three tools (Claude Code, Codex CLI and Gemini CLI). It needs bash and Python 3.
+
+          ## Checksum
+
+          Download the zip and its `.sha256` file into the same folder and run:
+
+          {fence}bash
+          sha256sum -c {zip_name}.sha256
+          {fence}
+
+          ## Changes
+
+          Full history: [CHANGELOG.md]({changelog_url})
+
+          """
+          body += section + "\n"
+
+          with open(os.path.join(out, "body.md"), "w", encoding="utf-8") as f:
+              f.write(body)
+          print(body)
+          PY
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          ZIP="ai-project-structure-${VERSION}.zip"
+          gh release create "$TAG" \
+            --title "ai-project-structure $VERSION" \
+            --notes-file "$OUT/body.md" \
+            --latest \
+            "$OUT/$ZIP" \
+            "$OUT/$ZIP.sha256"

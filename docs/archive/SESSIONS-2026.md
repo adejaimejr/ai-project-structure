@@ -16,6 +16,127 @@ Cobre de 2026-04-25 (criacao da estrutura multiagente e validacao por tri-consen
 
 <!-- Rotacionadas em 2026-10-21: as tres entradas abaixo vieram de docs/SESSION.md por tamanho: 2026-10-17 - Claude (passagem de trabalho entre gestor e subagentes); 2026-10-17 - Claude (T-085: fixture aguardando-project com data relativa); 2026-10-17 - Claude (gatilhos da skill para o fluxo gestor e subagentes no Cloudroom). -->
 
+<!-- Rotacionada em 2026-10-21 (segunda rotacao do dia): a entrada de 2026-10-17 abaixo (T-086, skill 2.12.0 levando Passagem De Trabalho) veio de docs/SESSION.md por tamanho. -->
+
+<!-- Rotacionadas em 2026-10-21, terceira vez: as duas entradas de 2026-10-20 abaixo (camada GitHub e analise do ai-memory) vieram de docs/SESSION.md por tamanho. -->
+
+## 2026-10-20 - Claude (camada GitHub: comparacao com o ai-memory, decisao e prompt)
+
+### Objetivo
+
+- Analisar como o repositorio `github.com/adejaimejr/ai-project-structure` e usado e apresentado no GitHub, contra `github.com/akitaonrails/ai-memory`, e propor o que fazer. Pedido do usuario: analise e plano; depois, so o prompt para outra sessao executar.
+
+### O Que Foi Feito
+
+- Levantamento pela API do GitHub nos dois repositorios (sem clonar o ai-memory) e mapa local por tres subagentes Explore: nosso lado (arquivos de comunidade, CI, versao, fluxo git), o lado deles (README, CONTRIBUTING, SECURITY, templates, 9 workflows, 137 tags `vX.Y.Z` anotadas, releases com checksums, Keep a Changelog) e a mecanica de modulo opcional da skill (`SKILL.md`, partials, `MARKER_RE`, `verify_repository.py`, evals), para o modulo `github` seguir o molde de specs e loop.
+- Diagnostico: 12 minors da skill no CHANGELOG e nenhuma tag nem Release; nenhum workflow (os dois portoes rodam so na maquina do mantenedor; o PR #1 mostrou que no Linux `sed -i ""` em `evals/test_loop.py:435` e `find -newer` em `scripts/loop.sh:173` derrubam o harness); descricao e topics vazios; health de comunidade 28% contra 85%; PR #1 de 4 linhas aberto ha 45 dias criando `.cursor/` na raiz; 73 commits diretos em `main`, nunca um PR integrado; `ROADMAP.md` parado em "lancar a v2". O que nao copiar: a maquinaria de binario Rust (Docker, AUR, RPM, Nix, CodeQL, gitleaks, branches `release/x.y`, README de 742 linhas). O plano completo, com a tabela comparativa e a fase B, ficou em `/Users/adejaimejunioer/.claude/plans/eu-preciso-de-uma-dynamic-lemur.md`.
+- Decisoes do usuario: ingles so na camada GitHub, com `README.pt-BR.md`; praticas de GitHub entram em "Regras Do Projeto" e viram modulo opcional `github` da skill; o modulo e 2.14.0, depois da 2.13.0, com spec 0007. Registrado em `docs/DECISIONS.md` (raiz minima com `.github/` e comunidade em `docs/`; tag e Release a cada bump; PR para mudanca na skill), seis regras em `AGENTS.md`, excecao de idioma e estado atual em `PROJECT_CONTEXT.md`, `ROADMAP.md` reescrito.
+- Executado no GitHub antes de o usuario pedir para parar: descricao em ingles, nove topics (`agents-md`, `agent-skills`, `claude-code`, `codex-cli`, `gemini-cli`, `multi-agent`, `context-engineering`, `markdown`, `ai-agents`), Wiki e Projects desligados; PR #1 fechado sem merge, com comentario, e a branch `cursor/setup-dev-environment-36f3` apagada (o commit `f330a8a` segue no objeto local e o GitHub oferece "Restore branch" no PR). Uma proposta de sessao para os arquivos de comunidade foi aberta e retirada.
+- A pedido do usuario ("so quero o prompt, nao e para executar"), o resto nao foi executado: virou T-092 a T-099 em `TASKS.md` e o prompt "Aplicar A Camada GitHub E Abrir A Spec Do Modulo Github" em `docs/PROMPTS.md`, no molde do prompt anterior (gestor Fable, subagentes Sonnet, acao externa so com sim do usuario).
+- Depois: `validate_structure.py . --strict` 0 erros e 0 avisos; `verify_repository.py` 74/74; zero travessao nos arquivos tocados.
+
+### Arquivos Criados Ou Alterados
+
+- `AGENTS.md` ("Regras Do Projeto"), `docs/DECISIONS.md`, `docs/PROJECT_CONTEXT.md`, `docs/ROADMAP.md`, `docs/TASKS.md` (T-092 a T-099), `docs/PROMPTS.md`, `docs/CHANGELOG.md`, `docs/SESSION.md`. Nenhum arquivo da skill.
+
+### Decisoes Tomadas
+
+- Camada GitHub do repositorio: raiz com `.github/` e dotfiles, comunidade em `docs/`, ingles por padrao com pt-BR opcional, tag e Release a cada bump, PR para mudanca na skill, modulo `github` na 2.14.0. Registrada em `docs/DECISIONS.md`.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum promovido. Candidato: plano aprovado em plan mode nao e licenca para executar; quando o pedido original era "analise e me apresente", perguntar se o passo seguinte e executar ou escrever o prompt, antes de tocar o GitHub.
+
+### Pendencias
+
+- Do usuario: commitar (sugestao: `docs: camada GitHub, decisao, regras e prompt`).
+- T-092 a T-099 na fila; a sessao que rodar o prompt abre a spec 0007 por ultimo.
+- `docs/QUALITY.md`, linha "A raiz mantem apenas os arquivos Markdown de entrada dos agentes", e "Links Internos" de `PROJECT_CONTEXT.md` ficam para T-096.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): sessao nova em Fable 5.1 com o prompt "Aplicar A Camada GitHub E Abrir A Spec Do Modulo Github" de `docs/PROMPTS.md`.
+- Motivo: as tarefas estao escritas com portao e ordem; o que falta e executar com o sim do usuario em cada acao externa.
+
+## 2026-10-20 - Claude (analise do ai-memory de akitaonrails)
+
+### Objetivo
+
+- Responder se `github.com/akitaonrails/ai-memory` tem relacao com o ai-project-structure, se algo de la vale importar e se os dois deveriam ser mesclados.
+
+### O Que Foi Feito
+
+- Leitura do ai-memory pela API do GitHub, sem clonar: README, `AGENTS.md`, `INSTALL_FOR_AGENTS.md`, `DATA_HANDLING.md`, `docs/usage.md` (precedencia regras, memoria, perfil; compaction recap), `docs/cookbook.md`, `docs/comparison.md`, `docs/design-rules-promotion.md`, `docs/design-handoff-offer-not-claim.md`, as quatro Agent Skills de roteamento (`handoff`, `durable-pages`, `retrieval`, `learning-maintenance`), o README do companion `wikisync` e o snippet que ele injeta em `AGENTS.md` (`routing_snippet.rs`). Mapa do nosso lado por subagente Explore (layout, scripts, modelo de memoria, tarefas abertas, limites reconhecidos).
+- O que ele e: binario Rust (11,9 mil stars, MIT) com servidor MCP/HTTP, hooks de ciclo de vida em mais de vinte harnesses, wiki Markdown propria em `<data_dir>/wiki/` com indice SQLite FTS5 (vetores opcionais), handoff tipado claim-once, perfil cross-project, decay e compactacao reversiveis, zero LLM e dado local por padrao.
+- Veredito: sem relacao de origem (nenhum cita o outro; linhagens distintas), convergencia de desenho (`AGENTS.md` canonico, `CLAUDE.md` ponte, Markdown fonte). Camadas diferentes: nos somos o rules file e o registro revisado dentro do repo; ele e infraestrutura fora do repo que, pela precedencia que declara (usuario, rules file, memoria, perfil), fica abaixo de `AGENTS.md` e diz nao duplicar registro de decisao mantido no repo. Nao mesclar.
+- Sobreposicao real: `SESSION.md` curado versus `sessions/<id>.md` capturado; "Proximo Passo Recomendado" versus handoff (o nosso ja e "oferta, nao reivindicacao", desenho que eles precisaram de um design doc, #959, para adotar); `MEMORY.md` versus `_rules/`, `gotchas/` e perfil; `DECISIONS.md` versus `decisions/` ADR fixada. Sem equivalente la: tarefas com evidencia, consenso com independencia declarada, specs, loop com portao, validador. Sem equivalente ca: captura automatica, busca, multi-maquina e time, compaction recap.
+- Ideias apresentadas ao usuario, A a F; escolhidas A a E, todas em texto: import real `@AGENTS.md` nas pontes (ponteiro em prosa nao carrega nada no inicio; Claude Code 2.1.277+ so le `AGENTS.md` sozinho sem `CLAUDE.md`); medir o orcamento de instrucoes do `AGENTS.md` (raiz com 319 linhas; literatura citada por eles poe aderencia confiavel em cerca de 150 a 200 instrucoes); memoria tratada como evidencia, nao instrucao; releitura de `SESSION.md` e `TASKS.md` apos compactacao; tipo "Armadilha" em `MEMORY.md`. Recusada F, receita de coexistencia: fica so a nota em `MEMORY.md`. Nao importar: hooks, MCP, servidor, SQLite, embeddings, decay, captura silenciosa, perfil cross-project, `wikisync` para dentro de `docs/`.
+- Registro: decisao em `DECISIONS.md`, referencia em `MEMORY.md`, T-087 a T-091 em `TASKS.md`, linha no `CHANGELOG.md`. Nenhum arquivo da skill mudou. Depois: `validate_structure.py . --strict` 0 erros e 0 avisos; `verify_repository.py` 74/74; zero travessao em `docs/*.md`, `AGENTS.md` e pontes.
+- Pedido seguinte do usuario: prompt para a proxima sessao executar a fila (T-078 a T-084, T-087 a T-091) com gestor em Fable 5.1 e subagentes em Sonnet 5.5, um por vez, revisados por portao, verificador e mutacao. Entregue no chat e salvo em `docs/PROMPTS.md`, secao "Rodar As Tarefas Pendentes Com Subagentes Sonnet Revisados Por Fable".
+
+### Arquivos Criados Ou Alterados
+
+- `docs/DECISIONS.md`, `docs/MEMORY.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/PROMPTS.md`.
+
+### Decisoes Tomadas
+
+- ai-memory e camada complementar fora do repositorio; nao mesclar; importar ideias por tarefa, nunca mecanismo. Registrada em `docs/DECISIONS.md`.
+
+### Aprendizados Para MEMORY.md
+
+- Entrada Reference sobre o ai-memory (o que e, precedencia que declara, nota de coexistencia). Promovida.
+
+### Pendencias
+
+- Do usuario: commitar.
+- T-087 a T-091 pedem bump 2.13.0: ordem, depois de T-078 a T-083 ou junto com T-084, para nao repetir a troca de "nao suba de novo" nas linhas delas.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): sessao nova em Fable 5.1 com o prompt "Rodar As Tarefas Pendentes Com Subagentes Sonnet Revisados Por Fable" de `docs/PROMPTS.md`, que cobre T-078 a T-084 e T-087 a T-091 em quatro fases, com um bump (2.13.0) na terceira.
+- Motivo: a analise nao muda a fila da spec 0006; as adocoes sao texto do bloco core, das pontes e do template de `MEMORY.md`, e cabem numa rodada depois da spec.
+
+## 2026-10-17 - Claude (sessao lateral: T-086, skill 2.12.0 levando Passagem De Trabalho)
+
+### Objetivo
+
+- Fechar T-086: subir a skill para 2.12.0 levando a secao "Passagem De Trabalho" do bloco core, que entrou na 2.11.0 sem bump com a 2.11.0 ja publicada em `origin/main`. Sessao lateral aberta pela sessao do protocolo de handoff, com o briefing no formato da propria secao nova.
+
+### O Que Foi Feito
+
+- Pre-condicoes do briefing: `git status` tinha `AGENTS.md`, `assets/AGENTS.md` e `SESSION.md` sem commit; parei e pedi o commit (fdafa73, arvore limpa). Confirmacao do usuario, relayada pela sessao gestora: "Sim, 2.12.0 agora" (bump antes de T-078 a T-083) e "Migrar os dois" (itens pos-publicacao da 2.11.0 para a secao nova).
+- Portao antes do bump: `evals/portao_t086.py`, molde de `portao_t058.py` sobre `portao_consenso_lib.py` (`versao_coerente("2.12.0")`), 8 checks: versao coerente em frontmatter, prosa, marcadores dos assets e CHANGELOG; secao mais recente do CHANGELOG cita "Passagem De Trabalho"; tres marcadores da raiz na versao do frontmatter; bloco core da raiz byte a byte igual ao dos assets e com a secao dentro; T-078 a T-083 sem "a versao ja e 2.11.0" (T-078 a T-082 apontando para a nova; T-083 nunca teve a frase); raiz `--strict`; verificador. Com a arvore de hoje saiu 6/8 pelo motivo certo (1a e 4).
+- Bump: `version: "2.12.0"` e `versao da estrutura: 2.12.0` no `SKILL.md`; marcadores `core`, `specs` e `loop` em v2.12.0 em `assets/AGENTS.md`, nos dois partials e nos tres blocos do `AGENTS.md` da raiz, conteudo dos blocos intocado; comentario do `agents/openai.yaml` ("Desde a 2.12.0", porque o item dos gatilhos migrou). CHANGELOG da skill: secao `## 2.12.0 - 2026-10-17` com paragrafo explicando a migracao e os dois itens movidos da 2.11.0 (gatilhos da `description`; secao Passagem De Trabalho e passo 2 de `atualizacao.md`); a 2.11.0 fica so com o que foi publicado.
+- `docs/TASKS.md`: nas linhas de T-078 a T-082, "a versao ja e 2.11.0, nao suba de novo, acrescente um item na secao `## 2.11.0`" e "o `AGENTS.md` da raiz ja esta em v2.11.0" passam a 2.12.0 (16 trocas; T-082 tambem "item no CHANGELOG 2.12.0"). T-083 nao tinha a frase. T-077, concluida, fica como registro historico.
+- Depois: portao 8/8, `verify_repository.py` 74/74, `validate_structure.py . --strict` 0 erros e 0 avisos, sem `__pycache__`, sem travessao nos arquivos tocados.
+- Mutacoes, backup por `cp` e volta conferida por `cmp`: marcador core da raiz de volta a v2.11.0, 5/8 (2, 3a, 6 com 72/74); secao Passagem De Trabalho removida so da raiz, 6/8 (3a, 6 com 73/74); T-080 de volta a 2.11.0, 7/8 (4); prosa do `SKILL.md` em 2.11.0, 6/8 (1a, 6 com 73/74).
+- Reinstalada com `install.sh --sim`: 33 arquivos distribuidos comparados por `cmp` em `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills`, 0 divergentes, `version: "2.12.0"` nos tres.
+- `SESSION.md` passaria de 30KB com esta entrada: as duas entradas de 2026-09-04 (plano da spec 0006 com T-075 a T-077 e a 2.11.0; respostas de T-053 e T-074) foram para `docs/archive/SESSIONS-2026.md`, indice atualizado (48 entradas). Ficam 4 aqui.
+
+### Arquivos Criados Ou Alterados
+
+- Skill: `SKILL.md`, `CHANGELOG.md`, `agents/openai.yaml`, `assets/AGENTS.md`, `assets/partials/AGENTS-specs-block.md`, `assets/partials/AGENTS-loop-block.md`; `evals/portao_t086.py` (novo, nao distribuido).
+- Projeto: `AGENTS.md` (so os tres marcadores), `docs/TASKS.md` (T-086 concluida; T-078 a T-082), `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/README.md`.
+- Instalacao: `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills`.
+
+### Decisoes Tomadas
+
+- Do usuario, dentro da tarefa: bump 2.12.0 antes de T-078 a T-083, e os dois itens escritos depois da publicacao migram da 2.11.0 para a 2.12.0 no CHANGELOG da skill. Nenhuma decisao formal nova em `DECISIONS.md`.
+
+### Aprendizados Para MEMORY.md
+
+- Candidato, nao promovido (fora do escopo pedido): bloco gerenciado que muda com a versao ja publicada precisa do bump na mesma sessao; adiar o bump por regra de outras tarefas deixou a versao publicada com dois conteudos e custou uma tarefa propria para desfazer.
+
+### Pendencias
+
+- Do usuario: commitar (nada commitado nem pushado nesta sessao).
+- T-078 a T-083 seguem na fila, agora com a regra "a versao ja e 2.12.0, nao suba de novo".
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): qualquer agente, para mandar T-078 ao loop; os portoes delas aceitam 2.11.0 ou acima e o verificador esta verde.
+- Motivo: o bump era o unico bloqueio de versao; a spec 0006 segue de onde parou.
+
 ## 2026-10-17 - Claude (passagem de trabalho entre gestor e subagentes)
 
 ### Objetivo

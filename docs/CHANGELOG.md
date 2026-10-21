@@ -2,6 +2,11 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (camada GitHub escrita e revisada, spec 0007 aberta; acoes externas aguardando o usuario)
+
+- Fase A da decisao de 2026-10-20, escrita por subagentes Sonnet 5.5 e revisada pelo gestor Fable 5.1, ainda sem commit: `.github/workflows/ci.yml` (T-092: matriz Ubuntu e macOS rodando os dois portoes, actions por SHA, job agregador `ci`), `.github/workflows/release.yml` (T-097: tag igual ao `SKILL.md`, zip com `.sha256`, secao do CHANGELOG no corpo, `gh release create --latest`; simulado localmente com `v2.13.0`), arquivos de comunidade em ingles em `docs/` e `.github/` mais `.gitattributes` (T-096; Covenant 2.1 conferido contra o oficial), `README.md` em ingles e `README.pt-BR.md` (T-098). `PROJECT_CONTEXT.md` ganha o link de `CONTRIBUTING.md`; a linha da raiz em `QUALITY.md` cita as excecoes.
+- Spec 0007 (`docs/specs/0007-modulo-github.md`) em `Rascunho` com P-1 a P-4 abertas; T-099 concluida. T-092 a T-098 em "Aguardando Usuario": branch, PR, merge, ruleset, treze tags (v2.4.0 a v2.13.0) e Releases dependem do sim do usuario. `SESSION.md` rotacionado (indice com 52). Verificador 78/78; `--strict` 0 e 0.
+
 ## 2026-10-21 (skill 2.13.0; fase 1 da spec 0006 fechada por subagentes Sonnet revisados por Fable)
 
 - Fase 1 da spec 0006, sem bump (itens na secao 2.12.0 do CHANGELOG da skill): T-078 (marcador `**Origem:**` no validador, quatro avisos novos, fixture `origem-project`), T-079 (`consenso.py achado`, bateria de 33 para 60; o validador passou a ler `**Manifesto:**` como lista na segunda tentativa, depois de o gestor endurecer o portao), T-080 (`debate --rodada N --anterior`, anteriores na integra, bateria 79), T-081 (`consenso.py retomar`, bateria 95) e T-082 (`references/consenso.md`, secao "Rodar Uma Rodada De Consenso" no SKILL.md, "Entrada Automatizada" no template e na raiz de CONSENSUS.md, `verificar_convencoes` cobrando `**Origem:**`). Pisos do verificador subidos para os totais reais: consenso 95, loop 83.

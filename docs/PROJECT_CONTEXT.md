@@ -52,3 +52,4 @@ Manter a estrutura Markdown multiagente (AGENTS.md + pontes + memoria em `docs/`
 - Qualidade: `QUALITY.md`
 - Specs: `specs/`
 - Fonte da skill: `skills/ai-project-structure/`
+- Contribuicao: `CONTRIBUTING.md`

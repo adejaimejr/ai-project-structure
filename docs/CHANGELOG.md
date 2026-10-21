@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (spec 0008 commitada; spec 0006 concluida; ordem entre 0007 e 0008)
+
+- Planejamento da spec 0008 commitado como a outra thread deixou. Spec 0006 `Concluida`. Consenso da T-083: rodada 1 arquivada (falha de ambiente), rodada 2 resolvida com decisao e T-104 (AVISO de proveniencia incompleta no validador). Ordem: spec 0007 na 2.14.0 depois da T-105 (P-1 a P-4); T-100 e T-101 em branch sem merge ate `v2.14.0`; T-102 na 2.15.0.
+
 ## 2026-10-21 (spec 0008 em Rascunho: adaptador Cloudroom para o loop, consenso fora)
 
 - Spec `docs/specs/0008-adaptador-cloudroom.md` com DEC-001 a DEC-008: `scripts/cloudroom_agente.py` faz um filho `room-cli thread spawn --shared-sandbox` se comportar como CLI headless para o `--agente` do `loop.sh`, sem mudar `loop.sh` nem `consenso.py`; o consenso fica fora porque nenhum modo do `room-cli` prende o filho na copia por participante (0006/DEC-003). T-100 a T-103 com portoes escritos e falhando pelo motivo certo, sobre o `room-cli` falso `evals/mock_room_cli.py`. Sem bump nesta sessao. Rodada 1 cega sobre P-2 e P-3 (`gpt-6-luna` e `gpt-5.6-terra`) concordou com o recorte e restringiu a DEC-004 a `--projeto` igual a pasta da thread; a 0008 entra na 2.15.0, depois da 0007.

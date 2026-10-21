@@ -20,6 +20,21 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-10-21 - Validador avisa corrida incompleta so quando uma entrada de CONSENSUS.md aponta para ela
+
+### Decisao
+
+- `validate_structure.py` emite AVISO de proveniencia incompleta quando uma entrada com `**Origem:** automacao` aponta, pelo `**Manifesto:**`, para manifesto ilegivel, com status diferente de `concluida`, ou com participante registrado sem `stdout.txt`. Stdout vazio por falha registrada no manifesto nao conta como ausente.
+- Corrida em `docs/consensus/` sem entrada que aponte para ela nao gera diagnostico. O validador nao retoma, nao limpa lock e nao repara.
+
+### Motivo
+
+- Consenso da T-083, segunda rodada 1 cega (`docs/CONSENSUS.md`), com Codex e Codex Sol convergindo sem se ver; ratificado pelo usuario no chat. A DEC-009 da spec 0006 faz de corrida incompleta um estado previsto, entao avisar sempre daria falso positivo em rodada legitima; ignorar sempre deixaria entrada publicada apontar para prova incompleta.
+
+### Impacto
+
+- T-104, codigo em `scripts/`, entra no proximo bump da skill. Validacao no meio de uma rodada pode ver o aviso por um instante (janela entre minuta e manifesto); validar de novo resolve.
+
 ## 2026-10-21 - O adaptador Cloudroom nao entra no consenso enquanto o Cloudroom nao isolar um filho por pasta
 
 ### Decisao

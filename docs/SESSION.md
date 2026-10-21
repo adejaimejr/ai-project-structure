@@ -41,6 +41,44 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-10-21 - Claude Opus 5.5 (coordenacao entre as specs 0007 e 0008)
+
+### Objetivo
+
+- Organizar o trabalho depois de duas threads agirem na mesma pasta sobre as mesmas pendencias: o usuario parou a thread do planejamento da spec 0008 e pediu a esta que arrumasse o estado e dissesse o que mandar para la.
+
+### O Que Foi Feito
+
+- Conferido que a outra thread parou (nada escrito desde 17:06, nenhum `scripts/cloudroom_agente.py`, nenhum filho aberto). Portoes na arvore como ela deixou: validador `--strict` 0 e 0, verificador 78/78, T-100 0/17, T-101 0/6, T-102 3/14, T-103 1/4, todos falhando porque o adaptador nao existe.
+- Commit `65153b2`: o planejamento da spec 0008 como a outra thread deixou, sem alteracao (spec com DEC-001 a DEC-009, `mock_room_cli.py`, quatro portoes, rodada cega `2026-10-21-161813-debate`, decisao do adaptador fora do consenso, rotacoes).
+- Item 5 da lista que esta thread propos (0008 na 2.14.0) cancelado: contradizia a DEC-009 da spec 0008, que o usuario ja tinha decidido na outra thread (0007 primeiro, na 2.14.0; 0008 na 2.15.0). Vale a decisao registrada.
+- Item 3: entrada da rodada 1 da T-083 `arquivado` (falha de ambiente, julgamento escrito); entrada da rodada 2 `resolvido`, julgamento redigido por esta thread e ratificado pelo usuario; decisao em `DECISIONS.md`; T-104 aberta para o validador.
+- Item 4: spec 0006 `Concluida` (evidencia ja preenchida, nenhuma tarefa aberta).
+- Ordem entre specs escrita no backlog: nota na T-100 (branch propria, PR sem merge ate `v2.14.0`, porque o zip da Release empacota `scripts/` inteiro); T-105 em "Aguardando Usuario" com P-1 a P-4 da spec 0007 e a recomendacao.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/CONSENSUS.md`, `docs/DECISIONS.md`, `docs/TASKS.md`, `docs/specs/0006-automacao-do-consenso.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- Do usuario, no chat: "divide assim" (thread da 0008 com T-100 a T-103; esta com o resto), itens 1 a 4 como recomendado.
+- Do agente: o PR de T-100 e T-101 so mergeia depois da tag `v2.14.0`; a outra thread nao cria T-ID novo.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum promovido. Candidato: duas threads na mesma pasta sem dono declarado por arquivo repetem trabalho; so promover se repetir.
+
+### Pendencias
+
+- Do usuario: T-105 (P-1 a P-4 da spec 0007).
+- Thread da spec 0008: T-100 e T-101 em branch, PR aberto sem merge.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): a thread da spec 0008 (Sonnet executa, Opus revisa) para T-100 e T-101; esta thread para a spec 0007 depois da T-105.
+- Motivo: as duas frentes so se cruzam em `verify_repository.py` e no bump, e a ordem acima resolve as duas.
+
 ## 2026-10-21 - Claude Opus 5.5 (execucao da camada GitHub: PRs, tags e Releases)
 
 ### Objetivo

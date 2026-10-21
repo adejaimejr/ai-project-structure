@@ -1,6 +1,6 @@
 # Spec 0006 - Automacao do consenso: independencia por construcao
 
-**Status:** Em andamento
+**Status:** Concluida
 **Criada em:** 2026-09-03
 **Esforco:** G, porque toca tres coisas ao mesmo tempo: execucao de agente, escrita em arquivo de memoria, e os campos que a 2.2.0 criou justamente para denunciar consenso fraco. Virou `Definida` em 2026-09-04, com as dez perguntas respondidas (DEC-001 a DEC-010). Passou a `Em andamento` no mesmo dia, com o plano de T-075 a T-083 aprovado e T-075 fechada pelo loop.
 

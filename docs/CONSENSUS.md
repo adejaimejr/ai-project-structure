@@ -150,9 +150,9 @@ As entradas anteriores a 2026-09-03 (e as duas rodadas de P-7/P-8 e P-9 da spec 
 
 ## 2026-10-21 - Diretorio de corrida incompleto em docs/consensus/ (T-083)
 
-**Status:** aberto
+**Status:** arquivado
 
-**Proximo passo:** usuario le as posicoes e preenche as secoes de julgamento
+**Proximo passo:** nenhum; arquivada pelo usuario em 2026-10-21 no chat, sobre proposta do Opus: falha de ambiente, refeita na entrada seguinte.
 
 **Metodo:** pareceres-independentes
 
@@ -200,25 +200,25 @@ As entradas anteriores a 2026-09-03 (e as duas rodadas de P-7/P-8 e P-9 da spec 
 
 ### Pontos De Acordo
 
-- (A preencher.)
+- Nenhum julgavel: so um participante leu o codigo. O sandbox read-only do Codex (bubblewrap) nao roda no container Cloudroom; o `sol` recusou por nao conseguir ler a copia, e o `codex` opinou sem nenhum comando executado no stderr (Armadilha em `docs/MEMORY.md`).
 
 ### Riscos E Tradeoffs
 
-- (A preencher.)
+- Tratar esta rodada como segunda opiniao seria consenso de um modelo so, e ainda sem leitura do repositorio. O portao de T-083 passou nela por 3 bytes e foi endurecido para exigir comando executado por participante.
 
 ### Consenso Final
 
-- (A preencher.)
+- Nenhum. Rodada arquivada como falha de ambiente; a pergunta foi refeita em `-s danger-full-access` na entrada seguinte, que e a que vale.
 
 ### Decisao Para Registrar Em DECISIONS.md
 
-- (A preencher.)
+- Nenhuma.
 
 ## 2026-10-21 - Diretorio de corrida incompleto em docs/consensus/ (T-083, segunda rodada 1 cega, sandbox sem bubblewrap)
 
-**Status:** aberto
+**Status:** resolvido
 
-**Proximo passo:** usuario le as posicoes e preenche as secoes de julgamento
+**Proximo passo:** nenhum; ratificado pelo usuario em 2026-10-21 no chat, sobre texto redigido pelo Opus (coordenador, nao participante). Trabalho em T-104.
 
 **Metodo:** pareceres-independentes
 
@@ -295,19 +295,24 @@ As entradas anteriores a 2026-09-03 (e as duas rodadas de P-7/P-8 e P-9 da spec 
 
 ### Pontos De Acordo
 
-- (A preencher.)
+- Os dois, sem se ver: avisar so quando uma entrada de `docs/CONSENSUS.md` aponta para a corrida pelo `**Manifesto:**`; corrida sem referencia nao gera diagnostico, porque a DEC-009 da spec 0006 faz de material incompleto no repositorio um estado previsto.
+- Severidade AVISO, bloqueante so em `--strict`, coerente com os checks opt-in de `**Origem:**` (DEC-007 da spec 0006).
+- O check atual so confere se o manifesto citado existe; o conserto e estender esse check vinculado (status do manifesto e bruto do participante), sem varredura global de `docs/consensus/`.
+- O validador nao retoma, nao limpa lock e nao repara artefato: retomada e por comando explicito.
 
 ### Riscos E Tradeoffs
 
-- (A preencher.)
+- Janela de concorrencia (levantada so pelo `sol`): `fechar_debate()` publica a minuta antes de selar o manifesto como `concluida`, entao uma validacao no meio pode ver entrada nova com manifesto `em-andamento`. O aviso descreve o estado observado, sem afirmar corrupcao; validar de novo depois do fim resolve. Heuristica por idade ou por lock foi recusada (o lock e por projeto e pode ficar orfao).
+- Custo aceito: corrida interrompida e nunca publicada fica fora do diagnostico padrao. Achar material esquecido cabe numa inspecao explicita, nao no validador.
+- `stdout.txt` vazio por falha registrada no manifesto nao conta como bruto ausente.
 
 ### Consenso Final
 
-- (A preencher.)
+- AVISO de proveniencia incompleta quando uma entrada com `**Origem:** automacao` aponta para manifesto ilegivel, com status diferente de `concluida`, ou com participante registrado sem `stdout.txt`; nada para corrida sem referencia. Convergencia forte: rodada cega, dois participantes com 6 e 15 comandos executados.
 
 ### Decisao Para Registrar Em DECISIONS.md
 
-- (A preencher.)
+- Copiada em 2026-10-21: "Validador avisa corrida incompleta so quando uma entrada de CONSENSUS.md aponta para ela".
 
 ## 2026-10-21 - Spec 0008, P-2 e P-3: adaptador Cloudroom e isolamento por copia (rodada 1 cega)
 

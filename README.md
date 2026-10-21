@@ -1,30 +1,32 @@
+[Leia em portugues](README.pt-BR.md)
+
 # AI Project Structure
 
-Estrutura Markdown multiagente para projetos tocados por várias IAs, mais a skill instalável que cria essa estrutura em qualquer projeto novo. Uma única fonte funciona em **Claude Code**, **Codex CLI** e **Gemini CLI** (Agent Skills Open Standard).
+A multi-agent Markdown structure for projects touched by several AIs, plus an installable skill that creates it in any project.
 
-A pergunta que a estrutura responde: **o que o próximo modelo precisa saber para não repetir o trabalho do anterior?**
+[![Release](https://img.shields.io/github/v/release/adejaimejr/ai-project-structure)](https://github.com/adejaimejr/ai-project-structure/releases/latest) [![CI](https://github.com/adejaimejr/ai-project-structure/actions/workflows/ci.yml/badge.svg)](https://github.com/adejaimejr/ai-project-structure/actions/workflows/ci.yml) [![License](https://img.shields.io/github/license/adejaimejr/ai-project-structure)](LICENSE)
 
-## Como Funciona
+## Why
 
-- `AGENTS.md` é a fonte central de regras; `CLAUDE.md` e `GEMINI.md` são pontes imutáveis que apontam para ele.
-- A memória do projeto vive em `docs/`, separada por função:
+The structure answers one question: **what does the next model need to know so it does not repeat the previous one's work?**
 
-| Arquivo | Função |
-| --- | --- |
-| `PROJECT_CONTEXT.md` | O que o projeto **é** |
-| `SESSION.md` | O que **aconteceu** (cronológico, continuidade entre sessões) |
-| `MEMORY.md` | O que o projeto **aprendeu** (User / Feedback / Project / Reference) |
-| `DECISIONS.md` | O que foi **decidido** formalmente |
-| `TASKS.md` | O que está **em aberto** (IDs `T-NNN`, fonte única de status) |
-| `CONSENSUS.md` | Debate entre modelos, com status e regra de desempate |
-| `STACK.md` | Com o que o projeto é **construído** e onde consultar cada tecnologia |
-| `specs/` | O que **será construído** (módulo opcional, uma spec leve por feature) |
+- One source of rules (`AGENTS.md`) works for Claude Code, Codex CLI and Gemini CLI. No three-way drift.
+- Project memory lives in plain Markdown in `docs/`, split by function: what happened, what was learned, what was decided, what is open.
+- When context is missing, the agent asks. It never fills the gap with a plausible guess.
 
-- Regras operacionais: atualização por gatilho (só o arquivo cuja função foi acionada), dois níveis de leitura (trivial vs relevante), rotação para `docs/archive/`, e a regra **Nunca Inferir** (faltou contexto, o agente pergunta; nunca preenche por inferência).
+## Supported tools
 
-## Instalação Da Skill
+The skill follows the Agent Skills Open Standard: one `SKILL.md`, installed in three places.
 
-Requisitos: bash e Python 3 (somente biblioteca padrão).
+| Tool | Global install path | Per-project path | Entry file |
+| --- | --- | --- | --- |
+| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` | `CLAUDE.md` (imports `AGENTS.md`) |
+| Codex CLI | `~/.agents/skills/` | `<repo>/.agents/skills/` | `AGENTS.md` directly |
+| Gemini CLI | `~/.gemini/skills/` | `<repo>/.gemini/skills/` | `GEMINI.md` (imports `AGENTS.md`) |
+
+## Quick start
+
+You need bash and Python 3 (standard library only).
 
 ```bash
 git clone https://github.com/adejaimejr/ai-project-structure.git
@@ -32,36 +34,71 @@ cd ai-project-structure/docs/skills/ai-project-structure
 ./install.sh
 ```
 
-Instala nas três ferramentas (`~/.claude/skills/`, `~/.agents/skills/`, `~/.gemini/skills/`). Flags: `--project`, `--claude`, `--codex`, `--gemini`, `--uninstall`. Detalhes em [docs/skills/ai-project-structure/README.md](docs/skills/ai-project-structure/README.md).
+Then, in any project, ask your agent in Portuguese (the skill is written in pt-BR):
 
-## Uso
+> Cria a estrutura multiagente aqui
 
-A skill dispara por linguagem natural:
+The skill runs a short interview with numbered options (answering "1 2 3" is enough) and creates the files. It never runs `git init` and never overwrites anything without asking.
 
-- "Inicia um projeto novo aqui chamado minha-loja, objetivo X. Estrutura minimal."
-- "Atualiza este projeto para a versão mais nova da estrutura."
-- "Valida a estrutura deste projeto."
-- "Ativa o módulo de specs aqui."
-
-Ela faz uma entrevista com perguntas e opções numeradas (responder "1 2 3" basta) e cria os arquivos de fato. Nunca inicializa git nem sobrescreve nada sem confirmação.
-
-Validador e progresso:
+Validate a project:
 
 ```bash
-python3 ~/.claude/skills/ai-project-structure/scripts/validate_structure.py <projeto>
-python3 ~/.claude/skills/ai-project-structure/scripts/validate_structure.py <projeto> --progress
+python3 ~/.claude/skills/ai-project-structure/scripts/validate_structure.py <project>
 ```
 
-O modo padrão valida a estrutura com exit code (bom para gate); `--progress` mostra uma projeção somente-leitura de tarefas e specs.
+Add `--strict` to make warnings fail, or `--progress` for a read-only view of tasks and specs.
 
-## Este Repositório
+## How it works
 
-O próprio repositório usa a estrutura que distribui (dogfood): as regras estão em [AGENTS.md](AGENTS.md), o histórico em [docs/SESSION.md](docs/SESSION.md) e [docs/CHANGELOG.md](docs/CHANGELOG.md), as specs reais em [docs/specs/](docs/specs/). A fonte canônica da skill fica em [docs/skills/ai-project-structure/](docs/skills/ai-project-structure/), com versão no frontmatter do `SKILL.md` e changelog próprio.
+`AGENTS.md` holds the rules. `CLAUDE.md` and `GEMINI.md` are immutable bridges that point to it. Memory is split by function:
 
-## Inspirações
+| File in `docs/` | Function |
+| --- | --- |
+| `PROJECT_CONTEXT.md` | What the project **is** |
+| `SESSION.md` | What **happened**, in order, for continuity between sessions |
+| `MEMORY.md` | What the project **learned** |
+| `DECISIONS.md` | What was formally **decided** |
+| `TASKS.md` | What is **open**: IDs `T-NNN`, the single source of status |
+| `CONSENSUS.md` | Debate between models, with status and a tie-break rule |
+| `STACK.md` | What the project is **built with** and where to read about it |
+| `specs/` | What **will be built** (optional module, one light spec per feature) |
 
-A v2 da skill foi inspirada na análise do [Specsfy](https://github.com/promovaweb/specsfy) (metodologia SDD em pt-BR), de onde adaptamos entrevista numerada, blocos gerenciados, validação por script e specs de arquivo único, sem importar a cerimônia completa. O que foi importado e o que foi descartado está registrado em [docs/DECISIONS.md](docs/DECISIONS.md).
+Operating rules: update only the file whose function was triggered, two reading depths (trivial or relevant change), rotation into `docs/archive/`, and evidence required to close a task.
 
-## Licença
+## Docs
+
+The skill, the generated structure and the project memory in `docs/` are in Brazilian Portuguese. This README, the contributing guide and the GitHub layer are in English.
+
+For users:
+
+| Document | What it covers |
+| --- | --- |
+| [Skill README](docs/skills/ai-project-structure/README.md) | Install flags, paths, validator, repository verifier |
+| [Skill CHANGELOG](docs/skills/ai-project-structure/CHANGELOG.md) | Version history of the skill |
+| [SECURITY](docs/SECURITY.md) | Scope, supported versions, how to report |
+
+For contributors:
+
+| Document | What it covers |
+| --- | --- |
+| [CONTRIBUTING](docs/CONTRIBUTING.md) | Setup, gates, pull request flow |
+| [AGENTS](AGENTS.md) | The rules every agent follows here |
+| [QUALITY](docs/QUALITY.md) | Quality bar and checks |
+| [DECISIONS](docs/DECISIONS.md) | Formal decisions, with reasons |
+| [TASKS](docs/TASKS.md) | The live backlog |
+| [SESSION](docs/SESSION.md) | Chronological log of agent sessions |
+| [specs](docs/specs/) | Feature specs |
+
+This repository uses the structure it ships (dogfood). The canonical skill source is [docs/skills/ai-project-structure/](docs/skills/ai-project-structure/).
+
+## Inspirations
+
+Skill v2 was inspired by [Specsfy](https://github.com/promovaweb/specsfy), a spec-driven method in pt-BR. We adapted its numbered interview, managed blocks, script validation and single-file specs, without the full ceremony. The comparison with [akitaonrails/ai-memory](https://github.com/akitaonrails/ai-memory) is what led to the GitHub layer of this repository; see [docs/DECISIONS.md](docs/DECISIONS.md).
+
+## Security
+
+Report vulnerabilities as described in [docs/SECURITY.md](docs/SECURITY.md).
+
+## License
 
 [MIT](LICENSE).

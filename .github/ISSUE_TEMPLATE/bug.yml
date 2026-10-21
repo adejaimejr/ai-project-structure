@@ -1,0 +1,57 @@
+name: Bug report
+description: Something in the skill, its scripts or the generated structure does not work as expected.
+labels: ["bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Skill version
+      description: The `version` field in `docs/skills/ai-project-structure/SKILL.md`, or the release tag you installed.
+      placeholder: "2.13.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: tool
+    attributes:
+      label: AI tool
+      description: The tool that was reading or running the skill.
+      options:
+        - Claude Code
+        - Codex CLI
+        - Gemini CLI
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - macOS
+        - Windows (Git Bash)
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: The exact command you ran, or the request you made to the agent.
+      placeholder: "python3 docs/skills/ai-project-structure/scripts/validate_structure.py . --strict"
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: What actually happened. Paste the full output.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen instead.
+    validations:
+      required: true

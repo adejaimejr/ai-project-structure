@@ -41,7 +41,7 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
-## 2026-10-21 - Claude Opus 5.5 (gestor) com subagente Sonnet 5.5 (spec 0008: T-102, skill 2.15.0)
+## 2026-10-21 - Claude Opus 5.5 (gestor) com subagente Sonnet 5.5 (spec 0008: T-102, T-103 e T-111, skill 2.15.0)
 
 ### Objetivo
 
@@ -51,6 +51,8 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 - Rebase do PR #5 sobre `ee5d37a`: `verify_repository.py` mesclou sozinho; conflitos so de acrescimo em `TASKS.md`, `SESSION.md` e `CHANGELOG.md`, resolvidos mantendo os dois lados (as entradas da 2.14.x por cima). Verificador 91/91. Push com `--force-with-lease` na branch do PR (o rebase pedido exige reescrever a branch).
 - T-102 pelo subagente `cr_child_bd31beace8f3c42cf456c429`: `references/cloudroom.md`, `SKILL.md`, `references/loop.md`, `references/consenso.md`, bump 2.15.0 e CHANGELOG da skill. Portao 14/14; revisado pelo gestor.
+- PR #5 com `ci` verde em Linux e macOS (o macOS tinha falhado antes so por falta de runner hospedado, refeito), squash `0a2b7df` em `main`, tag anotada `v2.15.0` no commit do bump, `release.yml` verde e Release 2.15.0 publicada com zip e `.sha256` (download para conferir o hash foi negado por permissao nesta sessao).
+- T-103: perfil `Cloudroom, executar:` em `docs/MEMORY.md`; `loop.sh` na T-111 com o adaptador (Sonnet) e `--projeto` igual a pasta da thread: thread `cr_child_df8b3b07c04c3d38c10c65d7` visivel com o titulo `loop T-111`, verde na tentativa 1, exit 0; `find -newer` a partir da marca devolveu so `evals/portao_t102.py` (escrito pelo filho) e `docs/TASKS.md` (pelo loop). T-111 fechada pelo loop, T-103 com `tipo=revisao-manual`; portao T-103 4/4. Evidencia De Conclusao da spec preenchida; `Concluida` proposta ao usuario.
 - T-111 criada com o sim do usuario, para ser a tarefa real da bancada da T-103: o check 1 do `portao_t102.py` imprime "secao faltando" mesmo verde. `portao_t111.py` escrito antes, com autoteste da regex, 2/3 pelo motivo certo.
 
 ### Arquivos Criados Ou Alterados
@@ -64,15 +66,17 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 ### Aprendizados Para MEMORY.md
 
-- Nenhum novo. O subagente confirmou a Armadilha ja registrada: portao, bateria e verificador juntos passam de 120 s e o shell manda para segundo plano; rodar cada um separado.
+- Candidato, nao promovido: a CLI real (cloudroom 0.1.67) mostra estados que o mock nao tem (`starting_turn` com `busy=true`, `sleeping` depois do fim); o adaptador funcionou porque decide por `busy`, nao por `state`. Se o mock for revisto, acrescentar os dois.
+- O subagente confirmou a Armadilha ja registrada: portao, bateria e verificador juntos passam de 120 s e o shell manda para segundo plano; rodar cada um separado.
 
 ### Pendencias
 
-- Merge do PR #5, tag `v2.15.0` e Release; depois a T-103 com a T-111 pelo loop.
+- Do usuario: `Status` da spec 0008 (esta em `Rascunho`; todas as tarefas fechadas e a evidencia de conclusao preenchida, proposta `Concluida`).
+- Reinstalar a skill 2.15.0 nos destinos globais (`install.sh --sim`), se o usuario quiser; nao feito nesta sessao.
 
 ### Proximo Passo Recomendado
 
-- Agente sugerido: esta thread, para merge, tag e a bancada (Sonnet pelo adaptador, Opus revisa). Qualquer agente serve se tiver contexto suficiente.
+- Agente sugerido: o usuario decide o `Status` da spec 0008; nenhuma tarefa da spec em aberto. Qualquer agente serve se tiver contexto suficiente.
 
 ## 2026-10-21 - Claude Opus 5.5 (T-110: description do SKILL.md, skill 2.14.1)
 

@@ -75,5 +75,5 @@ Julgados na mao:
 
 ## Evidencia De Conclusao
 
-- Verificacao: (A preencher.)
-- Resultado: (A preencher.)
+- Verificacao: `portao_t100.py` a `portao_t103.py` e `portao_t111.py` em `main` depois da skill 2.15.0 (PR #5, squash `0a2b7df`, tag `v2.15.0`, Release publicada pelo `release.yml`); `verify_repository.py`; `validate_structure.py . --strict`; bancada real da T-103 (loop na T-111 pelo adaptador, thread `cr_child_df8b3b07c04c3d38c10c65d7`, escrita conferida por `find -newer` na pasta da thread).
+- Resultado: T-100 17/17, T-101 6/6, T-102 14/14, T-103 4/4, T-111 3/3 (fechada pelo loop na tentativa 1); verificador 91/91; `--strict` 0 erros e 0 avisos. Criterio julgado na mao: sim, a thread filha apareceu na barra com o titulo `loop T-111` e escreveu so em `$PROJETO`. Mudar o `Status` para `Concluida` e decisao do usuario: proposto em 2026-10-21.

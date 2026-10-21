@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (skill 2.15.0 publicada; bancada real do adaptador Cloudroom, T-103 e T-111)
+
+- PR #5 mergeado (`0a2b7df`), tag `v2.15.0` e Release pelo `release.yml`. Bancada real: `loop.sh` fechou a T-111 pelo adaptador, com a thread filha visivel e a escrita conferida no disco; perfil `Cloudroom, executar:` em `MEMORY.md`. Spec 0008 com todas as tarefas fechadas e `Concluida` proposta.
+
 ## 2026-10-21 (skill 2.15.0: adaptador Cloudroom documentado, T-102; T-111 aberta para a bancada)
 
 - T-102: `references/cloudroom.md`, `SKILL.md`, `references/loop.md` e `references/consenso.md` apontando para o adaptador; bump 2.15.0 com secao no CHANGELOG da skill. PR #5 rebaseado sobre a 2.14.1. T-111 criada como tarefa real da bancada da T-103.

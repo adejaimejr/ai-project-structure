@@ -68,8 +68,9 @@ autoteste(RE_PERFIL, "`python3 <skill>/scripts/cloudroom_agente.py --provider cl
 
 def main():
     texto = norm(ler(REF)) if REF.is_file() else ""
-    check(REF.is_file() and RE_USO.search(texto) and RE_EXIT.search(texto) and RE_LIMITES.search(texto),
-          "1. references/cloudroom.md existe com secoes de uso, exit codes e limites", "ausente" if not REF.is_file() else "secao faltando")
+    ref_ok = REF.is_file() and RE_USO.search(texto) and RE_EXIT.search(texto) and RE_LIMITES.search(texto)
+    check(ref_ok, "1. references/cloudroom.md existe com secoes de uso, exit codes e limites",
+          "" if ref_ok else ("ausente" if not REF.is_file() else "secao faltando"))
     check(bool(REF.is_file() and RE_LINHA_143.search(texto) and all(re.search(r"^\|\s*%s\s*\|" % c, texto, re.M) for c in ("0", "1", "2"))),
           "1b. tabela de exit codes com 0, 1, 2 e 143")
     m_limites = RE_LIMITES.search(texto) if texto else None

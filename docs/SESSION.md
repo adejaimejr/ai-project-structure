@@ -67,7 +67,7 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 
 ### Pendencias
 
-- Opcionais, sem tarefa aberta: instalar a 2.15.0 no Mac; apagar as branches ja mergeadas no GitHub; `actionlint` no CI quando `.github/workflows/` mudar.
+- Opcionais, sem tarefa aberta: instalar a 2.15.0 no Mac. Feitos depois, a pedido do usuario: branches ja mergeadas apagadas (`ci/portoes`, `github/camada`, `fix/release-out`, `spec-0007/github`, `fix/description-t110`, `spec-0008/adaptador`, no GitHub e locais) e job `actionlint` no `ci.yml` (versao fixa com sha256, o agregador `ci` depende dele; mutacao com `runner.temp` no `env` do job reprova).
 
 ### Proximo Passo Recomendado
 

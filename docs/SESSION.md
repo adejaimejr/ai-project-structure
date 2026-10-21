@@ -116,6 +116,43 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Agente sugerido (ou "qualquer agente"): a thread da spec 0008, para rebasear o PR #5 e fazer a T-102; Sonnet executa, Opus revisa.
 - Motivo: a DEC-009 da spec 0008 so esperava a 2.14.0, que saiu.
 
+## 2026-10-21 - Claude Opus 5.5 (gestor) com subagentes Sonnet 5.5 (spec 0008: T-100 e T-101)
+
+### Objetivo
+
+- Executar so T-100 e T-101 da spec 0008, como pediu a thread de coordenacao: branch propria `spec-0008/adaptador`, PR aberto com `ci` verde nos dois sistemas, sem merge ate a tag `v2.14.0`; sem tocar `SKILL.md`, CHANGELOG da skill, versao nem `assets/`. Sonnet executa, Opus revisa (papeis em `docs/MEMORY.md`).
+
+### O Que Foi Feito
+
+- Estado conferido antes: `main` limpo em `a1e370f`, adaptador inexistente, T-100 0/17 e T-101 0/6.
+- T-100 pelo subagente `cr_child_6cf7253bdcde35eb49218731` (Sonnet 5.5, `--shared-sandbox`): `scripts/cloudroom_agente.py`. Parou em 16/17 e apontou defeito do portao: o check 11 passava 262145 bytes num argumento so, e o Linux limita cada argumento a 131072 bytes. Consertei o portao (runpy num subprocesso, prompt lido de arquivo) e o detalhe do check 1 que imprimia "import fora da stdlib" mesmo passando. 17/17; cinco mutacoes no adaptador, todas acusadas.
+- T-101 pelo subagente `cr_child_8b37e51c58deeda7350a346d`: `evals/test_cloudroom_agente.py` (56 verificacoes, `loop.sh` de ponta a ponta incluido) e etapa em `verify_repository.py` (81/81). 22 mutacoes do subagente, todas acusadas; uma minha (sem `--all`), acusada.
+- T-100 e T-101 em "Concluidas" com evidencia; commit, push e PR nesta branch.
+
+### Arquivos Criados Ou Alterados
+
+- Criados: `docs/skills/ai-project-structure/scripts/cloudroom_agente.py`, `docs/skills/ai-project-structure/evals/test_cloudroom_agente.py`.
+- Alterados: `docs/skills/ai-project-structure/evals/portao_t100.py`, `docs/skills/ai-project-structure/evals/verify_repository.py`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal. Do gestor: o conserto do check 11 e no portao, nao no adaptador (o limite e do sistema operacional, e o adaptador ja recusa acima de 262144 bytes).
+
+### Aprendizados Para MEMORY.md
+
+- Candidato, nao promovido: no Linux nenhum argumento passa de 131072 bytes, entao prompt acima disso nao chega a nenhum agente pelo `loop.sh` (que passa o prompt por argv); portao que testa prompt grande tem de passar por arquivo. Promover se aparecer de novo fora desta spec.
+- O subagente registrou: filho que pergunta na resposta sem gravar `.loop-pergunta` nao leva a tarefa para "Aguardando Usuario", o portao decide; e o exit 4 no `--tempo-maximo` depende de o adaptador nao escrever nada no projeto.
+
+### Pendencias
+
+- Merge do PR so depois da tag `v2.14.0` (spec 0007). T-102 e T-103 esperam a 2.14.0.
+- Riscos para a bancada real (T-103): `busy` falso sem `reply` tres vezes seguidas vira exit 2 (se a CLI real reportar ocioso antes do turno comecar); SIGTERM ao grupo que derrube o proprio `room-cli spawn` sai 1, nao 143.
+- `Status` da spec 0008 segue `Rascunho`; passar a `Em andamento` (ou `Definida` antes) e do usuario.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido: a thread de coordenacao, para a spec 0007 e a tag `v2.14.0`; depois esta frente faz o merge e a T-102 (Sonnet executa, Opus revisa). Qualquer agente serve se tiver contexto suficiente.
+
 ## 2026-10-21 - Claude Opus 5.5 (coordenacao entre as specs 0007 e 0008)
 
 ### Objetivo

@@ -41,6 +41,62 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-10-21 - Claude Opus 5.5 (execucao da camada GitHub: PRs, tags e Releases)
+
+### Objetivo
+
+- Executar as acoes externas de T-092 a T-098 depois do "sim para tudo" do usuario, na ordem da entrada anterior (camada GitHub escrita e revisada). Sessao Cloud (Cloudroom), na mesma pasta em que outra sessao planejava a spec 0008 sem commitar: os commits sairam de `git worktree` em `/tmp` e levaram so os arquivos e trechos desta camada.
+
+### O Que Foi Feito
+
+- **PR #2** (`ci/portoes`, so `.github/workflows/ci.yml`): `ci` verde em ubuntu-latest (1m03s) e macos-latest, squash em `main` como `3b7a03b`. O `find -newer` de `loop.sh` nao quebrou no Linux: T-093 fecha sem patch.
+- **Tags**: doze anotadas, v2.4.0 a v2.12.0, com `GIT_COMMITTER_DATE` da data de cada commit; cada SHA conferido contra o `version:` do `SKILL.md` naquele commit. Depois do PR #3, `v2.13.0` em `a480ed0`.
+- **Furo no plano anterior, achado antes de taguear**: push de tag roda o workflow que existe no commit tagueado, e `a480ed0` e anterior ao `release.yml`; a tag `v2.13.0` nunca disparava a Release. Conserto no PR #3: `workflow_dispatch` com entrada `tag` (checkout `refs/tags/<tag>`, `TAG` e `concurrency` pela entrada).
+- **PR #3** (`github/camada`): comunidade, `release.yml`, READMEs, spec 0007 e o registro da sessao anterior, sem os trechos da sessao da spec 0008 (montados por script a partir da arvore compartilhada); validador `--strict` 0 e 0 e verificador 78/78 no worktree; `ci` verde nos dois sistemas; squash `c19197d`. CI de `main` em `c19197d`: success.
+- **Token sem permissao**: `POST .../rulesets` e `gh workflow run release.yml` deram HTTP 403 (o token tem contents e pull requests, nao Administration nem Actions: write). Releases 2.12.0 e 2.13.0 publicadas rodando localmente os passos do proprio `release.yml` (lidos do YAML por script) no checkout de cada tag, 2.12.0 antes para a 2.13.0 ficar Latest: 35 e 36 arquivos, `sha256sum -c` OK no asset baixado. A 2.12.0 ganhou zip e checksum em vez do corpo manual planejado.
+- **Ruleset**: ao montar o JSON, apareceu que check obrigatorio em ruleset tambem rejeita push direto em `main`, contra a regra de `AGENTS.md` que deixa mudanca so em `docs/` ir direta. Proposta em T-094: dois rulesets (abaixo). Nada criado.
+- Conferencias: perfil de comunidade em 100; badge do CI `passing`; badge de Release em v2.13.0.
+- Registro: T-092, T-093, T-095, T-096 e T-098 em Concluidas com evidencia; T-094 e T-097 continuam em "Aguardando Usuario" com pergunta nova; Armadilha nova em `MEMORY.md`; linha no `CHANGELOG.md`. Commit de docs direto em `main`.
+
+### Rulesets Propostos (T-094)
+
+```bash
+gh api -X POST repos/adejaimejr/ai-project-structure/rulesets --input - <<'JSON'
+{"name": "main", "target": "branch", "enforcement": "active",
+ "conditions": {"ref_name": {"include": ["~DEFAULT_BRANCH"], "exclude": []}},
+ "rules": [{"type": "deletion"}, {"type": "non_fast_forward"}], "bypass_actors": []}
+JSON
+gh api -X POST repos/adejaimejr/ai-project-structure/rulesets --input - <<'JSON'
+{"name": "main-ci", "target": "branch", "enforcement": "active",
+ "conditions": {"ref_name": {"include": ["~DEFAULT_BRANCH"], "exclude": []}},
+ "rules": [{"type": "required_status_checks", "parameters": {"strict_required_status_checks_policy": false,
+   "do_not_enforce_on_create": false, "required_status_checks": [{"context": "ci", "integration_id": 15368}]}}],
+ "bypass_actors": [{"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}]}
+JSON
+```
+
+### Arquivos Criados Ou Alterados
+
+- Pelo PR #3: `.github/workflows/release.yml` (`workflow_dispatch`). Por este commit: `docs/TASKS.md`, `docs/SESSION.md`, `docs/MEMORY.md`, `docs/CHANGELOG.md`. No GitHub: tags v2.4.0 a v2.13.0, Releases 2.12.0 e 2.13.0, branches `ci/portoes` e `github/camada` (mergeadas, nao apagadas).
+
+### Decisoes Tomadas
+
+- Do usuario: "sim para tudo". Do agente, registradas na evidencia: `workflow_dispatch` no `release.yml`; Releases pelos passos do workflow rodados localmente; dois rulesets propostos, nao criados.
+
+### Aprendizados Para MEMORY.md
+
+- Promovido (Armadilha): tag em commit anterior ao workflow nao o dispara; o token `gh` da sandbox nao tem Administration nem Actions: write.
+
+### Pendencias
+
+- Do usuario: T-094 (concordar com os dois rulesets e cria-los, ou conceder Administration: write); T-097 (evidencia de run real do workflow na `v2.14.0`, ou conceder Actions: write). Refletidas em "Aguardando Usuario".
+- O trabalho da sessao da spec 0008 continua sem commit na arvore compartilhada, como ela pediu.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido (ou "qualquer agente"): o usuario, para T-094; depois qualquer agente com `gh` autenticado e permissao de admin.
+- Motivo: o que resta da camada GitHub e permissao de repositorio, que so o dono concede.
+
 ## 2026-10-21 - Claude Fable 5.1 (gestor) com subagentes Sonnet 5.5 (camada GitHub, T-092 a T-099)
 
 ### Objetivo

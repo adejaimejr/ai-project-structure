@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (camada GitHub publicada: CI, tags, Releases 2.12.0 e 2.13.0)
+
+- PR #2 (`ci.yml`, T-092 e T-093) e PR #3 (comunidade, `release.yml`, READMEs, spec 0007; T-096 a T-099) mergeados com `ci` verde em Linux e macOS. Tags anotadas v2.4.0 a v2.13.0; Releases 2.12.0 e 2.13.0 com zip e `.sha256`, pelos passos do `release.yml` rodados localmente. O `release.yml` ganhou `workflow_dispatch` com entrada `tag`. Perfil de comunidade em 100. Ruleset (T-094) e evidencia de run real do workflow (T-097) aguardam o usuario: o token desta sandbox nao tem Administration nem Actions: write.
+
 ## 2026-10-21 (camada GitHub escrita e revisada, spec 0007 aberta; acoes externas aguardando o usuario)
 
 - Fase A da decisao de 2026-10-20, escrita por subagentes Sonnet 5.5 e revisada pelo gestor Fable 5.1, ainda sem commit: `.github/workflows/ci.yml` (T-092: matriz Ubuntu e macOS rodando os dois portoes, actions por SHA, job agregador `ci`), `.github/workflows/release.yml` (T-097: tag igual ao `SKILL.md`, zip com `.sha256`, secao do CHANGELOG no corpo, `gh release create --latest`; simulado localmente com `v2.13.0`), arquivos de comunidade em ingles em `docs/` e `.github/` mais `.gitattributes` (T-096; Covenant 2.1 conferido contra o oficial), `README.md` em ingles e `README.pt-BR.md` (T-098). `PROJECT_CONTEXT.md` ganha o link de `CONTRIBUTING.md`; a linha da raiz em `QUALITY.md` cita as excecoes.

@@ -41,6 +41,37 @@ As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`
 - Motivo: 
 ```
 
+## 2026-10-21 - Claude Opus 5.5 (spec 0008 Concluida e skill 2.15.0 reinstalada)
+
+### Objetivo
+
+- Aplicar o "pode fazer" do usuario as duas pendencias da entrada anterior: `Status` da spec 0008 e reinstalacao da 2.15.0.
+
+### O Que Foi Feito
+
+- Spec 0008 em `Concluida`, com a nota de status e a Evidencia De Conclusao apontando a decisao do usuario.
+- `install.sh --sim` nesta sandbox: `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills` sairam de 2.14.1 para `version: "2.15.0"`, com `scripts/cloudroom_agente.py` e `references/cloudroom.md` nos tres. A maquina do usuario (Mac) nao foi tocada.
+
+### Arquivos Criados Ou Alterados
+
+- `docs/specs/0008-adaptador-cloudroom.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`.
+
+### Decisoes Tomadas
+
+- Do usuario: spec 0008 `Concluida`; reinstalar.
+
+### Aprendizados Para MEMORY.md
+
+- Nenhum.
+
+### Pendencias
+
+- Nenhuma da spec 0008. Se o usuario quiser a 2.15.0 no Mac, e rodar `install.sh` la (ou `room-cli mac run`).
+
+### Proximo Passo Recomendado
+
+- Agente sugerido: qualquer agente, para o que o usuario pedir em seguida; a frente da spec 0008 esta fechada.
+
 ## 2026-10-21 - Claude Opus 5.5 (gestor) com subagente Sonnet 5.5 (spec 0008: T-102, T-103 e T-111, skill 2.15.0)
 
 ### Objetivo

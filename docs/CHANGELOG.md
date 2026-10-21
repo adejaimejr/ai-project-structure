@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (spec 0008 Concluida)
+
+- Spec 0008 (adaptador Cloudroom) `Concluida` pelo usuario; skill 2.15.0 reinstalada nos tres destinos desta sandbox.
+
 ## 2026-10-21 (skill 2.15.0 publicada; bancada real do adaptador Cloudroom, T-103 e T-111)
 
 - PR #5 mergeado (`0a2b7df`), tag `v2.15.0` e Release pelo `release.yml`. Bancada real: `loop.sh` fechou a T-111 pelo adaptador, com a thread filha visivel e a escrita conferida no disco; perfil `Cloudroom, executar:` em `MEMORY.md`. Spec 0008 com todas as tarefas fechadas e `Concluida` proposta.

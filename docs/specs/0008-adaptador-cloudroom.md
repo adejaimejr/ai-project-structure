@@ -1,8 +1,8 @@
 # Spec 0008 - Adaptador Cloudroom: subagente visivel como agente do loop
 
-**Status:** Rascunho
+**Status:** Concluida
 **Criada em:** 2026-10-21
-**Nota de status:** o usuario decidiu em 2026-10-21 manter `Rascunho` ate outro modelo avaliar a spec, antes de implementar.
+**Nota de status:** o usuario manteve `Rascunho` ate outro modelo avaliar a spec (revisao abaixo) e, com as tarefas fechadas e a Evidencia De Conclusao preenchida, passou a spec para `Concluida` em 2026-10-21 ("pode fazer" no chat).
 **Revisao:** Codex `gpt-6-luna`, em 2026-10-21, pela thread filha `cr_child_b0709855d0672dc1fec76ac7` (so leitura). Tres achados: o mock aceita `--request-id` e o portao T-100 nao barrava flag extra (o `--request-id` existe na CLI real, conferido sem abrir filho, entao o mock ficou; o check 4a passou a recusar qualquer flag fora de DEC-003 e DEC-006); os checks de limites do portao T-102 aceitavam palavra solta (passaram a exigir o sentido na mesma frase, com autoteste e contraexemplo, e a mutacao com texto ao contrario reprova); P-D aberta (nao aplicado: segue aberta ate o usuario ratificar a entrada de consenso). Veredito do revisor: falta isso para `Definida`.
 **Esforco:** M, porque e um script novo distribuido mais bateria, documentacao e bump, sem mexer em `loop.sh` nem em `consenso.py`; o que pesa e provar o comportamento sem gastar modelo e fechar com uma bancada real.
 
@@ -76,4 +76,4 @@ Julgados na mao:
 ## Evidencia De Conclusao
 
 - Verificacao: `portao_t100.py` a `portao_t103.py` e `portao_t111.py` em `main` depois da skill 2.15.0 (PR #5, squash `0a2b7df`, tag `v2.15.0`, Release publicada pelo `release.yml`); `verify_repository.py`; `validate_structure.py . --strict`; bancada real da T-103 (loop na T-111 pelo adaptador, thread `cr_child_df8b3b07c04c3d38c10c65d7`, escrita conferida por `find -newer` na pasta da thread).
-- Resultado: T-100 17/17, T-101 6/6, T-102 14/14, T-103 4/4, T-111 3/3 (fechada pelo loop na tentativa 1); verificador 91/91; `--strict` 0 erros e 0 avisos. Criterio julgado na mao: sim, a thread filha apareceu na barra com o titulo `loop T-111` e escreveu so em `$PROJETO`. Mudar o `Status` para `Concluida` e decisao do usuario: proposto em 2026-10-21.
+- Resultado: T-100 17/17, T-101 6/6, T-102 14/14, T-103 4/4, T-111 3/3 (fechada pelo loop na tentativa 1); verificador 91/91; `--strict` 0 erros e 0 avisos. Criterio julgado na mao: sim, a thread filha apareceu na barra com o titulo `loop T-111` e escreveu so em `$PROJETO`. `Concluida` pelo usuario em 2026-10-21.

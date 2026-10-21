@@ -1,0 +1,27 @@
+## P-2: `--shared-sandbox` não preserva o isolamento da DEC-003
+
+Discordo da DEC-002 como conclusão sobre o modo compartilhado. A evidência sustenta que o filho não começa na pasta de trabalho corrente do processo que o chamou: começa na pasta da thread pai. Portanto, passar o caminho da cópia no prompt, ou fazer `cd` antes de chamar `room-cli`, não prende o filho nessa cópia.
+
+Isso quebra o isolamento de `consenso.py`. O script cria uma cópia por participante, remove `docs/consensus/` e, no debate, retém os registros anteriores de `docs/CONSENSUS.md`. Mas o adaptador chamado como agente receberia um prompt que aponta para uma cópia e abriria o filho no espaço compartilhado da thread pai. O caminho no prompt não impede o filho de ler outros arquivos disponíveis nesse espaço. Como `consenso.py` grava cada bruto assim que o participante termina, um participante posterior também poderia alcançar a posição anterior se ela estiver nesse espaço. Isso contraria tanto a DEC-003 da 0006 quanto o critério de aceite que exige isolamento verificável sem confiar no relato do agente.
+
+O que sobra verificável com a proposta atual é uma afirmação de escopo: o adaptador não será usado nos perfis de debate e achado, e a documentação explicará o motivo. Isso não demonstra isolamento; evita alegá-lo. A alternativa verificável já existe no código: deixar `consenso.py` chamar os agentes diretamente, preservando a cópia separada por participante, a retenção dos registros no debate e a gravação dos brutos fora das cópias de execução. Para voltar a considerar Cloudroom no consenso, seria necessário um modo de execução que comprovadamente desse a cada filho um espaço distinto, com captura da resposta integral e sem acesso às posições contemporâneas. Os fatos fornecidos não mostram que a CLI ofereça isso.
+
+## P-3: sandbox própria não serve aos três pacotes automatizados
+
+Concordo com a DEC-003 em excluir o modo sem `--shared-sandbox` dos pacotes automatizados, mas ajustaria a explicação: pelo comportamento medido, ele não é apenas inconveniente. O adaptador não consegue obter a resposta pelo `thread output`; recebe somente a nota de que as respostas chegam como mensagens quando os turnos terminam. Logo, não consegue cumprir o contrato de CLI do wrapper, que precisa devolver a resposta pelo stdout e um exit code.
+
+Para o consenso, há também um problema de isolamento e proveniência. A cópia privada leva o conteúdo existente, incluindo `docs/CONSENSUS.md` e `docs/consensus/`. Ela não fornece a cópia específica por participante, preparada por `consenso.py` segundo o debate ou o achado. Além disso, sem a resposta no processo, `consenso.py` não pode gravar o bruto e o manifesto quando o participante termina, como exige a DEC-009 da 0006.
+
+Para o loop, o filho trabalha numa cópia em outra branch. O `loop.sh` verifica alterações com `find -newer` na árvore de `$PROJETO` e executa o portão ali. Alterações feitas apenas na cópia privada não satisfazem esse fluxo. A falta de resposta capturável também impede o adaptador de entregar ao loop a saída esperada.
+
+Assim, minha recomendação por pacote é:
+
+| Pacote | Modo recomendado |
+|---|---|
+| Debate | Nenhum modo Cloudroom medido. Manter os agentes diretos de `consenso.py`. |
+| Achado | Nenhum modo Cloudroom medido. Manter os agentes diretos de `consenso.py`. |
+| Loop | `--shared-sandbox`, condicionado a o espaço compartilhado corresponder ao projeto que o loop precisa alterar. |
+
+Há uma ressalva importante à DEC-004 da spec 0008: o `loop.sh` aceita `--projeto DIR` e roda o comando do agente após `cd "$PROJETO"`, mas o `room-cli` medido inicia o filho na pasta da thread pai, independentemente do diretório do chamador. Portanto, não está demonstrado que o filho sempre alterará o `$PROJETO` indicado. A bancada descrita em T-103 pode validar o caso em que o projeto coincide com a pasta compartilhada da thread; não sustenta, sozinha, uma alegação para qualquer `--projeto`. Eu restringiria a documentação a esse caso demonstrado, ou exigiria que o critério real prove que o filho altera o caminho indicado pelo loop e que o `find -newer` o detecta.
+
+Em resumo: manteria o adaptador restrito ao loop e fora do consenso, mas mudaria os fundamentos registrados. Para o consenso, `--shared-sandbox` falha no isolamento por participante; sem compartilhamento, falha na coleta mecânica da resposta e no acesso à cópia preparada para cada participante. Para o loop, o compartilhamento é o único modo plausível entre os dois, mas sua compatibilidade com `--projeto` precisa ser delimitada ao que a bancada real comprovar.

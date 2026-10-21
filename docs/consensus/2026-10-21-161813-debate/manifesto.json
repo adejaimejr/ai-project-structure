@@ -1,0 +1,124 @@
+{
+  "versao": 1,
+  "run_id": "2026-10-21-161813-debate",
+  "modo": "debate",
+  "rodada": 1,
+  "projeto": "/code/ai-project-structure",
+  "inicio": "2026-10-21T16:18:13+00:00",
+  "fim": "2026-10-21T16:27:28+00:00",
+  "status": "concluida",
+  "pergunta": {
+    "arquivo": "/tmp/consenso-0008/pergunta.txt",
+    "sha256": "e7de54acf55e260c777c3c18aef30c3e8100b36b3f34bca6c4705ee00af85015"
+  },
+  "excluidos_da_copia": [
+    "docs/consensus/",
+    ".consenso-lock",
+    "__pycache__/"
+  ],
+  "participantes": [
+    {
+      "id": "luna",
+      "comando": [
+        "codex",
+        "exec",
+        "-s",
+        "danger-full-access",
+        "--skip-git-repo-check",
+        "-m",
+        "gpt-6-luna",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ],
+      "diretorio": "/tmp/consenso-r66rm85b/projeto",
+      "inicio": "2026-10-21T16:18:13+00:00",
+      "fim": "2026-10-21T16:18:46+00:00",
+      "exit": 0,
+      "prompt": "luna/prompt.txt",
+      "sha256_prompt": "26dec959f7e4821f82af7e649b237fd410b0b264298970d39d4257f0a9ee49de",
+      "resultado": "posicao",
+      "stdout": "luna/stdout.txt",
+      "sha256_stdout": "24cc16c90f9d943f4809f9e56f747e913380ab5f858b702abf8ccb628f393622",
+      "travessoes_substituidos": 0,
+      "aceito_por_humano": true,
+      "stderr": "luna/stderr.txt"
+    },
+    {
+      "id": "terra",
+      "comando": [
+        "codex",
+        "exec",
+        "-s",
+        "danger-full-access",
+        "--skip-git-repo-check",
+        "-m",
+        "gpt-5.6-terra",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ],
+      "diretorio": "/tmp/consenso-tmly9kyu/projeto",
+      "inicio": "2026-10-21T16:18:13+00:00",
+      "fim": "2026-10-21T16:21:18+00:00",
+      "exit": 0,
+      "prompt": "terra/prompt.txt",
+      "sha256_prompt": "cd939d9af2872157d7d616c773ab5a4cd043a32c5ab3e6ce5a059ae6062843ef",
+      "resultado": "posicao",
+      "stdout": "terra/stdout.txt",
+      "sha256_stdout": "c5ce1bd8c93bb61c26390d1199a7c600826cc3c13acec11e31855688fb420f41",
+      "travessoes_substituidos": 0,
+      "aceito_por_humano": true,
+      "stderr": "terra/stderr.txt"
+    }
+  ],
+  "minuta": {
+    "arquivo": "docs/CONSENSUS.md",
+    "entrada": "2026-10-21 - Spec 0008, P-2 e P-3: adaptador Cloudroom e isolamento por copia (rodada 1 cega)",
+    "sha256_antes": "2c7bd5eb09717ecc658783366dcb42a5cb6d179ebd6a24ef1e07af4286f53344",
+    "sha256_depois": "be4a74f532a9dfdc58432dc8a3a5768eba0f167512b841809d6218eec9f67601"
+  },
+  "anteriores": [],
+  "titulo": "Spec 0008, P-2 e P-3: adaptador Cloudroom e isolamento por copia (rodada 1 cega)",
+  "dono": "usuario (ratificar DEC-002 e DEC-003 da spec 0008)",
+  "pendente": "",
+  "agentes": [
+    {
+      "id": "luna",
+      "comando": [
+        "codex",
+        "exec",
+        "-s",
+        "danger-full-access",
+        "--skip-git-repo-check",
+        "-m",
+        "gpt-6-luna",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ]
+    },
+    {
+      "id": "terra",
+      "comando": [
+        "codex",
+        "exec",
+        "-s",
+        "danger-full-access",
+        "--skip-git-repo-check",
+        "-m",
+        "gpt-5.6-terra",
+        "-c",
+        "model_reasoning_effort=\"high\""
+      ]
+    }
+  ],
+  "retomadas": [
+    {
+      "instante": "2026-10-21T16:27:28+00:00",
+      "chamados": [],
+      "mantidos": [],
+      "aceitos_a_mao": [
+        "luna",
+        "terra"
+      ]
+    }
+  ]
+}

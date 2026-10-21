@@ -4,7 +4,7 @@ Registro cronologico inverso das sessoes de IA.
 
 Sempre adicione a sessao mais recente no topo.
 
-As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`. Este arquivo mantem as 4 mais recentes.
+As entradas mais antigas foram rotacionadas para `docs/archive/SESSIONS-2026.md`. Este arquivo mantem as 3 mais recentes.
 
 ## Modelo Para Nova Sessao
 
@@ -98,6 +98,55 @@ JSON
 - Agente sugerido (ou "qualquer agente"): qualquer agente com contexto, para a spec 0007 (modulo `github`, skill 2.14.0) ou a execucao da spec 0008; a tag `v2.14.0` sera o primeiro push de tag a disparar o `release.yml`.
 - Motivo: a camada GitHub do repositorio esta completa; o proximo trabalho e a skill.
 
+## 2026-10-21 - Claude Opus 5.5 (planejamento da spec 0008, adaptador Cloudroom)
+
+### Objetivo
+
+- Executar o prompt "Planejar O Adaptador Cloudroom Para Consenso E Loop (Subagentes Visiveis)" de `docs/PROMPTS.md`: spec, tarefas e portoes, sem implementar. Sessao Cloud (Cloudroom, sandbox Linux), retomada por outro processo do Claude Code depois de o primeiro bater no limite de gasto.
+
+### O Que Foi Feito
+
+- Estado inicial: o working tree nao estava limpo, como o prompt pedia; tinha a camada GitHub da sessao anterior, ainda sem commit e esperando o usuario. Segui sem mexer nela, exceto pela rotacao de `SESSION.md`.
+- Sondas na CLI real (cloudroom 0.1.67): `spawn` volta na hora com JSON e recusa opcao desconhecida; filho com `--shared-sandbox` roda na pasta da thread pai (o filho `cr_child_0fd8860dd542df3fb95f7b70` imprimiu `/code/ai-project-structure`) e nao ha opcao de diretorio; `thread output` sem `--all` corta a resposta em cerca de 2000 caracteres; filho em sandbox propria (`thr_...`) nao aparece em `thread list`, e `thread output` devolve so uma nota.
+- Hipotese do prompt conferida no codigo: vale para o `loop.sh` (o prompt dele ja traz o caminho absoluto do projeto, e o `find -newer` enxerga o que o filho escreve no mesmo sistema de arquivos) e cai para o `consenso.py` (o filho nao fica preso na copia por participante, e le o projeto real onde o bruto do primeiro participante e gravado; isolamento so por prompt, que a 0006/DEC-003 rejeitou).
+- Spec `docs/specs/0008-adaptador-cloudroom.md` em `Rascunho`, com DEC-001 a DEC-008 para P-1 a P-8, cada uma com a alternativa rejeitada, e as perguntas abertas P-A a P-D.
+- `room-cli` falso `evals/mock_room_cli.py` e portoes `portao_t100.py` a `portao_t103.py`, rodados e falhando pelo motivo certo: T-100 0/17 (script ausente), T-101 0/6 (sem bateria, sem etapa, sem adaptador), T-102 1/13 (sem referencia, sem bump; so "sem travessao" passa, porque nada foi tocado), T-103 falha nos checks de perfil, bancada e evidencia.
+- Tres defeitos meus achados no caminho e corrigidos: o check 3 de `portao_t100.py` tirava do PATH so o `room-cli` falso, e o real (`/usr/local/bin/room-cli`) abriria um filho de verdade quando o adaptador existisse; agora usa PATH vazio. `portao_t102.py` tinha o travessao literal (o verificador acusou; agora escapado). As rodadas dos portoes deixaram `evals/__pycache__` (o verificador acusou; removido).
+- `SESSION.md` rotacionado (31KB com 4 entradas): as duas entradas de 2026-10-20 foram para `docs/archive/SESSIONS-2026.md`, indice atualizado para 54.
+- T-100 a T-103 em "Proximas Tarefas".
+- Respostas do usuario no chat: (1) consenso nesta sandbox com Codex em `-s danger-full-access`; (2) spec fica em `Rascunho` para outro modelo avaliar antes de implementar; (3) a spec 0007 (github) sai primeiro, na 2.14.0, e esta na 2.15.0; (4) Sonnet executa, Opus valida e coordena, Codex `gpt-6-luna` da a segunda opiniao. Viraram DEC-009 da spec, `NOVA = "2.15.0"` em `portao_t102.py`, perfil `Codex Luna, consenso` e a linha de papeis em `MEMORY.md`.
+- Rodada de consenso `2026-10-21-161813-debate` (rodada 1 cega, `luna` = `gpt-6-luna` e `terra` = `gpt-5.6-terra`, ambos `high`): parou em exit 6 com os dois retidos por segredo. Falso positivo conhecido: so `_RE_PEM` no stderr (1 casamento no luna, 4 no terra), porque o log do Codex lista o codigo de `consenso.py`; stdout dos dois limpo. Os dois leram o repositorio (3 e 5 `exec`). Com o ok do usuario, movi o material para `docs/consensus/2026-10-21-161813-debate/` e rodei `retomar`: `aceitos_a_mao=luna,terra`, `concluida`, entrada em `docs/CONSENSUS.md` com `Status: aberto` e julgamento em branco. Os dois concordaram com DEC-002 e DEC-003 e acharam, sem se ver, o mesmo excesso na DEC-004: a sonda prova o diretorio inicial do filho, nao a escrita num `--projeto` arbitrario.
+- Com o ok do usuario, DEC-004 restrita a `--projeto` igual a pasta da thread; criterio da bancada passa a conferir no sistema de arquivos onde o filho escreveu; T-102 e T-103 ajustadas; check 1e novo em `portao_t102.py`.
+- Mutacao no `portao_t102.py` (um `references/cloudroom.md` temporario, sem e com a frase da pasta da thread, apagado depois) achou um bug do proprio portao: `texto.split(<int>)` dava `TypeError` assim que a referencia existisse com secao de limites, e a T-102 nunca passaria. Corrigido para fatiar a partir do heading; nas duas mutacoes 1, 1b, 1c e 1d passaram e 1e reprovou sem a frase e passou com ela.
+- `docs/CONSENSUS.md` rotacionado (REVAL-6 e REVAL-7, `resolvido`, para o archive) e `SESSION.md` de novo (a entrada da fila T-078 a T-091 para o archive): os dois tinham passado de 30KB.
+- Revisao da spec pelo Codex `gpt-6-luna` como thread filha visivel (`room-cli thread spawn --provider codex --model gpt-6-luna --reasoning-level high --shared-sandbox`, `cr_child_b0709855d0672dc1fec76ac7`, so leitura, sem arquivo tocado). Dos tres achados, dois aplicados nos portoes (4a de T-100 recusa flag fora da spec; 1c e 1e de T-102 exigem o sentido, com autoteste, contraexemplo e mutacao de tres textos: certo passa, ao contrario e palavra solta reprovam) e um nao (P-D segue aberta ate a ratificacao do usuario). Premissa do revisor conferida antes de aceitar: `--request-id` existe na CLI real (sem prompt ela devolve a ajuda; opcao inventada da `Unknown option`), entao o mock ficou como estava.
+- Ratificacao pelo usuario ("ok" no chat) do texto de julgamento que eu redigi: entrada de consenso da spec 0008 `resolvido`, DEC-002 e DEC-003 marcadas ratificadas, P-D fechada, decisao nova em `docs/DECISIONS.md` (o adaptador nao entra no consenso enquanto o Cloudroom nao isolar um filho por pasta).
+- No meio da sessao, outra sessao commitou a camada GitHub (`3b7a03b`, `c19197d`, `1ebec7d`) e, como commitou `SESSION.md` e o archive inteiros, levou junto a primeira versao desta entrada e a primeira rotacao. Nao reverti nada; spec, portoes, mock, tarefas e a rodada seguem sem commit.
+
+### Arquivos Criados Ou Alterados
+
+- Criados: `docs/specs/0008-adaptador-cloudroom.md`, `docs/skills/ai-project-structure/evals/mock_room_cli.py`, `portao_t100.py`, `portao_t101.py`, `portao_t102.py`, `portao_t103.py`.
+- Criados tambem: `docs/consensus/2026-10-21-161813-debate/` (bruto e manifesto da rodada).
+- Alterados: `docs/TASKS.md`, `docs/SESSION.md`, `docs/CHANGELOG.md`, `docs/MEMORY.md`, `docs/CONSENSUS.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/CONSENSUS-2026.md`, `docs/archive/README.md`.
+
+### Decisoes Tomadas
+
+- Nenhuma formal: DEC-001 a DEC-008 sao propostas da spec em `Rascunho`. A principal: o adaptador serve so ao loop; o consenso continua chamando CLIs direto.
+
+### Aprendizados Para MEMORY.md
+
+- Candidato, nao promovido (ainda nao consolidado): teste que simula "sem `room-cli`" tirando so o falso do PATH acha o real em `/usr/local/bin` na sandbox Cloudroom e abre filho de verdade; o cenario tem de usar PATH vazio.
+- O comportamento do `room-cli` nas sondas ja esta na spec 0008 (DEC-001 a DEC-003); vira fato de `MEMORY.md` so depois da bancada real de T-103.
+
+### Pendencias
+
+- Passar a spec para `Definida`: do usuario (revisao do `gpt-6-luna` feita e ratificacao fechada).
+- Os portoes so foram vistos falhando; nenhum foi visto passando, porque isso exigiria escrever o adaptador. O risco e um check impossivel de satisfazer, e a primeira rodada de T-100 mostra.
+
+### Proximo Passo Recomendado
+
+- Agente sugerido: Sonnet executa T-100 (subagente Cloudroom em `--shared-sandbox`), com Opus revisando diff, portao, verificador e mutacoes. Motivo: T-100 e T-101 tem portao mecanico e nao tocam arquivo proibido ao loop. Qualquer agente serve se tiver contexto suficiente.
+
 ## 2026-10-21 - Claude Fable 5.1 (gestor) com subagentes Sonnet 5.5 (camada GitHub, T-092 a T-099)
 
 ### Objetivo
@@ -155,46 +204,3 @@ GIT_COMMITTER_DATE='2026-10-21 11:58:04 +0000' git tag -a v2.13.0 a480ed0 -m 'sk
 
 - Agente sugerido (ou "qualquer agente"): o usuario responde os sins; qualquer agente com `gh` autenticado executa a ordem acima e move T-092 a T-098 para "Concluidas" com a saida real de cada comando de `(verifica:)`.
 - Motivo: todo o trabalho local esta escrito e revisado; o que resta e acao externa, que o prompt reservou ao sim do usuario.
-
-## 2026-10-21 - Claude Fable 5.1 (gestor) com subagentes Sonnet 5.5 (fila T-078 a T-091, skill 2.13.0)
-
-### Objetivo
-
-- Executar o prompt "Rodar As Tarefas Pendentes Com Subagentes Sonnet Revisados Por Fable" de `docs/PROMPTS.md`: fase 1 da spec 0006 (T-078 a T-082) sem bump, T-083 como tarefa de chat, bump 2.13.0 levando T-084, T-087, T-088, T-089 e T-091, e T-090 como medicao. Sessao Cloud (Cloudroom, sandbox Linux); subagentes por `room-cli thread spawn --provider claude-code --model claude-sonnet-5-5 --shared-sandbox`, um por vez na mesma pasta, cada um com a linha inteira da tarefa, a saida do portao e os limites; revisao do gestor a cada retorno: diff inteiro, portao, verificador, `--strict`, bateria tocada, travessao, `__pycache__`, e mutacoes com backup por `cp` e volta por `cmp`.
-
-### O Que Foi Feito
-
-- **Baseline divergiu e foi consertada antes de delegar**: o verificador saia 73/74 porque o fixture H1 de `test_loop.py` usava `sed -i ""` (sintaxe BSD), que o GNU sed do Linux rejeita. Troquei por `perl` e o usuario corrigiu: "tem que rodar no linux, mac e windows"; ficou `python3 -c`, em `test_loop.py` e em `portao_t060.py`. Regra promovida para `MEMORY.md`.
-- **Fase 1, sem bump, itens na 2.12.0 do CHANGELOG da skill.** T-078 (validador com `**Origem:**`, 4 avisos, fixture `origem-project`): tentativa 1, portao 14/14, 3 mutacoes acusadas. T-079 (`consenso.py achado`): tentativa 1 saiu 12/12, mas a entrada da segunda rodada (lista de manifestos) reprovava em `--strict`, apontado pelo proprio subagente; acrescentei o check 5c ao portao (12/13) e a tentativa 2 fez o validador ler `**Manifesto:**` como lista, bateria 63; 3 mutacoes. T-080 (`debate --rodada N --anterior`, anteriores na integra): 10/10, bateria 79, 3 mutacoes (anterior truncado, rodada 2 retendo registros, rodada 2 sem anterior). T-081 (`retomar`): 11/11, bateria 95, 3 mutacoes; mudanca de comportamento registrada: participante morto pelo proprio sinal fica sem registro para a retomada chama-lo. T-082 (`references/consenso.md`, secao no SKILL.md, "Entrada Automatizada" no template, `verificar_convencoes` cobrando `**Origem:**`): 8/8; copiei a secao para `docs/CONSENSUS.md` da raiz; 3 mutacoes. Pisos do verificador subidos por mim para os totais reais: consenso 32 para 95, loop 74 para 83. Nota: o check 5 de `portao_t082.py` le a secao mais recente do CHANGELOG da skill, entao depois do bump 2.13.0 ele reporta 7/8; a evidencia de T-082 (8/8) foi colhida antes do bump, e o item dela continua na 2.12.0.
-- **T-083, bancada real: duas rodadas no mesmo dia.** Rotacionei `docs/CONSENSUS.md` (REVAL-1 a REVAL-4 para o archive, 30186 para 11780 bytes). O usuario trocou o segundo agente: cursor-agent (Grok) estava sem tokens, entra Codex `gpt-6.1-sol` (slug conferido em `~/.codex/models_cache.json`); perfis `Codex, consenso` e `Codex Sol, consenso` em `MEMORY.md`; `portao_t083.py` passou a cobrar o perfil do Sol no lugar do Grok. **Rodada 1** (run `2026-10-21-043054-debate`, 48s, `-s read-only`): saiu `concluida` com exit 0, mas o sandbox read-only do Codex usa bubblewrap, que falha no container (`bwrap: loopback: Failed RTM_NEWADDR`): o Sol recusou ("nao consegui ler a copia", 503 bytes, 35.851 tokens) e o terra opinou sem nenhum `exec` no stderr (793 bytes, 10.978 tokens). O portao passou 4/4 por 3 bytes acima do piso de 500. Endureci o portao: cada participante com posicao precisa de ao menos um comando executado no log (regex `exec` / comando / `succeeded`, testada contra o log real de uma sonda), e a rodada falha passou a reprovar (2/4). Sonda: `codex exec -s danger-full-access` executa comandos aqui. Movi T-083 para "Aguardando Usuario" com a pergunta. **Rodada 2** (run `2026-10-21-114042-debate`), depois do "sim" do usuario para rodar com `-s danger-full-access` (a copia por participante e temporaria, a escrita e inofensiva): 1m49s ate parar com exit 6, os dois participantes retidos por segredo. Falso positivo: o stderr do Codex lista o codigo de `consenso.py` e a regex de chave PEM casou consigo mesma; nada casou no stdout. Conferi o material (posicoes de 1466 e 3205 bytes, 6 e 15 comandos executados), movi a mao para `<run>/codex/` e `<run>/sol/` e rodei `consenso.py retomar`: 0,1s, `aceitos_a_mao=codex,sol`, minuta escrita, `concluida`. Portao 4/4. As duas posicoes convergiram sem se ver: avisar so quando uma entrada automatizada aponta para a corrida (AVISO, coerente com DEC-007), estendendo o check para status do manifesto e bruto ausente; o Sol acrescentou a janela de concorrencia entre minuta e manifesto e recusou heuristica por idade ou lock. Comparacao com 2026-09-03 (Codex `sol` e Grok `xhigh`, bruto nao preservado, uma sessao inteira): qualidade comparavel, com bruto, manifesto com hashes e tempo medido a favor da automacao. T-083 concluida com `tipo=revisao-manual`; "Evidencia De Conclusao" da spec 0006 preenchida e `Concluida` proposta (o `Status` e do usuario). A entrada da rodada 1 segue em `docs/CONSENSUS.md` com `Status: aberto`, sem julgamento meu, para o usuario decidir se arquiva; a da rodada 2 nasce `aberto` com as secoes de julgamento em branco, por desenho da DEC-001.
-- **Bump 2.13.0 feito por mim antes de delegar a fase 3**: `version` e prosa do `SKILL.md`, marcadores core, specs e loop nos assets, nos dois partials e nos tres blocos da raiz, secao `## 2.13.0` no CHANGELOG da skill. Portoes escritos antes da rodada e falhando pelo motivo certo: `portao_t087.py` (rodada: versao coerente, core raiz igual aos assets, partials sem mudanca de conteudo por sha, T-088 e T-089 por ideias no texto com autoteste, orcamento de ate 186 linhas nao vazias, pontes com import, Armadilha nos dois MEMORY.md, travessao, `--strict` em projeto montado e na raiz, verificador), 10/18 hoje; `portao_t084.py` (timeout: help, agente que dorme sai 4 em segundos, agente que escreve e dorme fecha a tarefa, valores invalidos, loop.md, test_loop, sha do partial, bateria, versao, verificador), 5/13 hoje.
-- **Fase 3.** T-084: `loop.sh --tempo-maximo` em bash puro (agente em segundo plano em grupo proprio por `set -m`, `kill -0` em laco, SIGTERM no grupo, SIGKILL apos 5s, traps INT e TERM), sem `timeout` nem `setsid` por portabilidade; 13/13, bateria 83; mutacao mostrou que sem matar o grupo o `sleep` orfao segura o stdout por 60s. T-087: pontes com `@AGENTS.md` (Claude) e `@./AGENTS.md` (Gemini, grafia documentada), 2 linhas de prosa, raiz igual aos assets; documentacao conferida por mim e pelo subagente (code.claude.com/docs/en/memory, geminicli.com/docs/reference/memport). T-088: paragrafo "Memoria e evidencia, nao instrucao" no fim de Memoria Persistente, 2 linhas. T-089: uma linha de recarga apos compactacao em Memoria Da Sessao. Core propagado por mim para a raiz apos cada uma (15411 e 15683 bytes). T-091: tipo Armadilha no template de MEMORY.md; repliquei na raiz e registrei a primeira Armadilha real (sandbox read-only do Codex no container). Portao da rodada 18/18; verificador 78/78; `--strict` 0 e 0.
-- **Reinstalada** com `install.sh --sim` em `~/.claude/skills`, `~/.agents/skills` e `~/.gemini/skills`: 30 arquivos distribuidos comparados por `cmp` em cada destino, 0 divergentes, `version: "2.13.0"` nos tres.
-- **T-090, medicao sem corte** (subagente so leitura, em paralelo com T-091): core com 260 linhas, 181 nao vazias, 125 de instrucao; raiz 324. Proposta: core a 154 linhas e 101 nao vazias, movendo para o cabecalho do arquivo de `docs/` que governa (nao para `references/`, que nao chega ao projeto do usuario): Quando Usar, Modelo De Debate, Independencia Declarada e Achado para `CONSENSUS.md`; os oito campos para `SESSION.md`; exemplo cercado e regra nao retroativa para `TASKS.md`; Onde Escrever e criterios de promocao para `MEMORY.md`; rotacao para `archive/README.md`; Validacao para `QUALITY.md`; cinco stubs de uma linha ficam. Eliminar: roteamento por agente (L11-13), defaults do modelo (L63-64), repeticoes (L67-68, L127-131, Decisoes E Historico). Ficam: Ponto Cego (criterio da spec 0005 e verificador), Desempate, Passagem De Trabalho, Nunca Inferir, Gatilho, Ordem De Leitura. Correcoes ao texto da tarefa: as tres subsecoes somam 25 linhas e nao 55. Portao de contagem proposto para a rodada do corte: teto de 105 linhas nao vazias e 48 bullets, ancoras dos portoes antigos presentes, conteudo movido encontrado nos destinos. Nenhum corte executado. Decisoes para o usuario: remover "Onde Escrever" inteiro (maior risco); Ponto Cego fica; Validacao para QUALITY.md ou comprimida; apagar L63-64; segunda rodada nos blocos loop e specs (34 e 22 linhas).
-- Pedido seguinte do usuario: um subagente do Cloudroom poderia ser o agente do `consenso.py` e do `loop.sh`? Resposta no chat: sim, como adaptador (wrapper que se comporta como CLI headless), sem tocar no contrato dos scripts. Prompt de planejamento salvo em `docs/PROMPTS.md`, secao "Planejar O Adaptador Cloudroom Para Consenso E Loop (Subagentes Visiveis)".
-- Registro: `SESSION.md` rotacionado (tres entradas de 2026-10-17 para o archive, indice com 51), `TASKS.md` (dez concluidas, fila vazia), `MEMORY.md` (perfis, Armadilha, duas regras), `CHANGELOG.md` do projeto. Nada commitado.
-
-### Arquivos Criados Ou Alterados
-
-- Skill: `SKILL.md`, `CHANGELOG.md`, `README.md`, `scripts/validate_structure.py`, `scripts/consenso.py`, `scripts/loop.sh`, `references/loop.md`, `references/consenso.md` (novo), `assets/AGENTS.md`, `assets/CLAUDE.md`, `assets/GEMINI.md`, `assets/partials/AGENTS-specs-block.md`, `assets/partials/AGENTS-loop-block.md`, `assets/docs/CONSENSUS.md`, `assets/docs/MEMORY.md`; `evals/verify_repository.py`, `evals/test_consenso.py`, `evals/test_loop.py`, `evals/evals.json`, `evals/portao_t060.py`, `evals/portao_t079.py`, `evals/portao_t083.py`, `evals/portao_t084.py` (novo), `evals/portao_t087.py` (novo), `evals/fixtures/origem-project/` (novo).
-- Projeto: `AGENTS.md` (bloco core e marcadores), `CLAUDE.md`, `GEMINI.md`, `docs/TASKS.md`, `docs/SESSION.md`, `docs/MEMORY.md`, `docs/CONSENSUS.md`, `docs/CHANGELOG.md`, `docs/archive/SESSIONS-2026.md`, `docs/archive/CONSENSUS-2026.md`, `docs/archive/README.md`, `docs/consensus/2026-10-21-043054-debate/` e `docs/consensus/2026-10-21-114042-debate/` (novos, as duas rodadas de T-083).
-- Instalacao: `~/.claude/skills`, `~/.agents/skills`, `~/.gemini/skills` desta sandbox.
-
-### Decisoes Tomadas
-
-- Do usuario, no chat: fixtures e scripts tem de rodar em Linux, macOS e Windows; T-083 sem cursor-agent (sem tokens), segundo agente Codex `gpt-6.1-sol`; repetir a bancada nesta sandbox em `-s danger-full-access`. Nenhuma decisao formal nova em `DECISIONS.md`.
-- Do gestor, registradas na evidencia: pisos das baterias no verificador iguais aos totais reais; check 5c em `portao_t079.py`; exigencia de comando executado em `portao_t083.py`; bump 2.13.0 antes de delegar a fase 3.
-
-### Aprendizados Para MEMORY.md
-
-- Promovidos (Feedback): portabilidade nos tres sistemas (sem `sed -i`, `perl`, `timeout`, `setsid`); portao de bancada real exige evidencia de leitura do repositorio, nao tamanho de saida. Promovido (Armadilha): sandbox read-only do Codex nao roda no container Cloudroom, e agente que le `consenso.py` na copia dispara a varredura de segredo pelo log (falso positivo previsto na DEC-010). Promovidos (User): perfis `Codex, consenso` e `Codex Sol, consenso`.
-
-### Pendencias
-
-- Do usuario: commitar; preencher o julgamento da entrada da rodada 2 em `docs/CONSENSUS.md` (Pontos De Acordo, Consenso Final, Decisao) e decidir se a posicao convergente vira tarefa no validador; decidir se arquiva a entrada da rodada 1 (falha de ambiente); mudar o `Status` da spec 0006 para `Concluida` se aceitar a evidencia; decidir o corte de T-090 (cinco perguntas acima).
-- Fila de `docs/TASKS.md` vazia em "Proximas Tarefas" e em "Aguardando Usuario".
-
-### Proximo Passo Recomendado
-
-- Agente sugerido (ou "qualquer agente"): o usuario, para commitar, julgar a entrada da rodada 2 e fechar a spec 0006; depois qualquer agente de chat para a rodada do corte de T-090, se aprovada, com o portao de contagem proposto.
-- Motivo: tudo o que nao depende de decisao humana esta feito; o que sobra e julgamento de consenso, status da spec e decisao de corte.

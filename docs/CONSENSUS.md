@@ -148,105 +148,6 @@ Rodada verde e ausencia de objecao, nao prova de que funciona. Modelos que leem 
 
 As entradas anteriores a 2026-09-03 (e as duas rodadas de P-7/P-8 e P-9 da spec 0006, que continuam `aberto` aguardando calibragem do usuario em T-053) foram rotacionadas para `docs/archive/CONSENSUS-2026.md`. Abaixo ficam os dois achados mais recentes da revalidacao adversarial de 2026-09-03 (REVAL-6 e REVAL-7). A entrada REVAL-5 (fluxos de scaffold, atualizacao e specs), unica que fechou `resolvido` sem defeito, foi rotacionada no mesmo dia para `docs/archive/CONSENSUS-2026.md` por tamanho; REVAL-1 a REVAL-4, todas `resolvido`, foram rotacionadas para o mesmo arquivo em 2026-10-21, antes da bancada real da automacao do consenso (T-083), porque o arquivo estava a poucos bytes do teto de 30KB.
 
-## 2026-09-03 - REVAL-6: templates entregues ficaram atras do bloco core, e um deles ensina o anti-padrao
-
-**Achado:** REVAL-6
-
-**Status:** resolvido
-
-**Resolvido em:** 2026-09-03, `CONVENCOES-DATA-INVALIDA` sobe para AVISO por T-059 (T-070); consertos de texto em T-063.
-
-**Metodo:** pareceres-independentes
-
-**Exposicao previa a outras posicoes:** nao
-
-**Rodada:** 1 de 1
-
-**Escapou de verificacao:** sim
-
-### Contexto
-
-- Superficie 6. Grok 4.6 (mesmo perfil de REVAL-1) atacou todos os arquivos de `assets/`, montando projeto minimal e completo com specs e simulando o dia seguinte. Claude fez o mesmo antes de ler o Grok (`s6-claude-dia-seguinte.txt`) e conferiu os achados novos no template.
-
-### O Que Foi Encontrado
-
-- **Irmaos de T-055**: `QUALITY.md` (checklists), `PROMPTS.md`, `ONBOARDING.md` e `README.md` nao mencionam evidencia de fechamento, Aguardando Usuario, campos de independencia nem achado. O prompt "Solicitar Consenso Entre Modelos" pede posicao sem `Metodo`, `Exposicao previa` e `Rodada`: quem o segue produz entrada que falha em `--strict`. O modelo de sessao corta a nota "qualquer agente serve se tiver contexto suficiente" que o core pede.
-- **Sobras do meta-projeto**: `assets/docs/ARCHITECTURE.md` lista `docs/skills/` como modulo do projeto-alvo; `GLOSSARY.md` define skill como "ensinar o Codex".
-- **Core manda ler `docs/ARCHITECTURE.md`** e o nivel minimal, recomendado, nao o cria.
-- **Placeholder `AAAA-MM-DD` esquecido** no marcador de adocao e so INFO, `--strict` passa, e a cobranca de evidencia fica desligada no projeto inteiro.
-- **O unico exemplo de evidencia** no template e `tipo=comando; procedimento=pytest -q` numa estrutura cuja unica tarefa real e de conteudo, que o core manda fechar com `revisao-manual` ou `conferencia`.
-- Copia literal do Modelo De Debate (com os valores em uniao `aberto | resolvido | arquivado`) e do modelo de linha concluida (com `(spec: 0001-login-social)`) falha em `--strict`; o segundo e ERRO por spec inexistente. Baixa: modelo e forma, nao valor, mas o exemplo de spec e uma armadilha real.
-- Dia 0, 1 e 2 com os templates preenchidos passam em `--strict`; `partials/` nunca e copiado, e nenhuma instrucao leva a copiar a pasta.
-
-### Disposicao
-
-- Texto: atualizar QUALITY, PROMPTS, ONBOARDING, README e SESSION dos assets para a 2.2.0/2.4.0; limpar ARCHITECTURE e GLOSSARY; trocar o exemplo de evidencia por um de `revisao-manual` ao lado do de comando; tirar `(spec: 0001-login-social)` do modelo de linha; core ganhar "quando existir" em ARCHITECTURE.md. Nada disso muda contrato.
-- Decisao do usuario (T-059): `CONVENCOES-DATA-INVALIDA` sobe para AVISO (e `--strict` passa a travar scaffold que pulou o 5b) ou fica INFO.
-
-### Revalidacao
-
-- Claude Fable conferiu cada linha citada nos assets e reproduziu o placeholder e o dia seguinte. Nada nao confirmado.
-
-### Por Que Nada Pegou Antes
-
-- O que passou verde: `verify_repository.py` confere que os templates de `TASKS.md` e `CONSENSUS.md` carregam as convencoes atuais, por substring, e nada mais dos assets.
-- Mecanismo do ponto cego: a paridade e verificada so nos arquivos que mudaram na 2.2.0 e na 2.4.0; os outros templates nunca entraram no portao, e o dogfood da raiz reescreveu os proprios `QUALITY.md` e `PROMPTS.md` sem propagar para o asset.
-- Conserto de portao proposto: `verificar_convencoes` cobrir todos os templates que citam regra do core, com a lista de termos por arquivo.
-
-### Decisao Para Registrar Em DECISIONS.md
-
-- Nenhuma ate a calibragem do INFO.
-
-## 2026-09-03 - REVAL-7: a distribuicao funciona, mas o README ensinava instalacao quebrada e o instalador levava bytecode
-
-**Achado:** REVAL-7
-
-**Status:** resolvido
-
-**Resolvido em:** 2026-09-03, T-067 respondida pelo usuario (aviso e confirmacao quando o destino diverge); decisao em `docs/DECISIONS.md`, conserto em T-073.
-
-**Metodo:** pareceres-independentes
-
-**Exposicao previa a outras posicoes:** nao
-
-**Rodada:** 1 de 1
-
-**Escapou de verificacao:** sim
-
-### Contexto
-
-- Superficie 7. Codex rodou 312 mil tokens e morreu na cota do plano ("You've hit your usage limit") antes do relatorio; a superficie foi refeita com a mesma familia por outra assinatura, GPT-5.6 via `cursor-agent -p --mode ask --force --model gpt-5.6-sol-high`. Claude exercitou o `install.sh` de verdade em HOME falso antes de ler qualquer agente (`s7-claude-install.txt`) e conferiu as strings do binario do Codex 0.152.1.
-
-### O Que Foi Encontrado
-
-- **README da skill**: "Instalacao manual" copiava so `SKILL.md`, `assets` e `agents`, sem `scripts/` e `references/`; quem seguisse ficava sem validador, atualizacao, specs e loop. A lista de fixtures parava em tres (faltavam `achado-project` e `debate-project`). Corrigido hoje.
-- **`__pycache__` distribuido**: `scripts/__pycache__` (gravado pelo proprio verificador, ver REVAL-4) ia junto em `cp -R`, seis arquivos por instalacao. Corrigido hoje no `install.sh`.
-- **Idempotente, mas nao seguro**: rodar duas vezes da arvore identica; destino editado localmente (`SKILL.md`, `validate_structure.py`) e sobrescrito sem aviso; arquivo extra na raiz do destino sobrevive para sempre (so `assets/`, `agents/`, `scripts/` e `references/` sao apagados antes da copia).
-- **Falha parcial**: com `assets/` do destino sem permissao de escrita, o `SKILL.md` ja foi trocado quando o `rm -rf` falha, e o destino fica em 2.5.1 no frontmatter com `assets/` da versao anterior. Nao ha copia atomica nem rollback.
-- `--uninstall` em HOME vazio imprime "removido" para cada destino que nao existia; `--all` funcionava e nao estava no cabecalho (adicionado hoje).
-- `agents/openai.yaml`: o binario do Codex 0.152.1 contem `policy.allow_implicit_invocation` e o texto "When false, the skill is not injected into..."; a chave e lida. O comportamento real de invocacao implicita nao foi exercitado com uma sessao do Codex, por cota.
-- CHANGELOG da skill: a entrada 2.3.0 lista exit codes 0 a 3 e o exit 4 aparece so em item posterior; a 2.5.1 repete a versao em prosa. Nada descreve comportamento que o codigo nao tenha.
-- Achados so do GPT-5.6, conferidos: `install.sh --help` omite `--global` e `--help` (o cabecalho e a ajuda sao o mesmo texto); o comentario de `agents/openai.yaml` o chama de "parte do Agent Skills Open Standard" e o proprio Codex o descreve como "extended, product-specific config"; falha forcada no terceiro `cp` deixa `SKILL.md` e `assets/` novos com `scripts/` e `references/` velhos, e uma reinstalacao completa recupera. `codex help skills` nao existe na 0.152.1.
-
-### Disposicao
-
-- Aplicado hoje, sem bump: README, `install.sh` (`__pycache__` e `--all` no cabecalho), `evals.json`.
-- Decisao do usuario (T-067): avisar ou recusar quando o destino diverge da fonte; copiar para temporario e trocar com `mv` no fim; apagar arquivo extra na raiz do destino.
-
-### Revalidacao
-
-- GPT-5.6 (cursor), familia diferente de Claude, achou por conta propria os mesmos quatro itens centrais (transacionalidade, `__pycache__`, instalacao manual, versao em prosa) e mais tres pequenos, todos conferidos no codigo por Claude. Nada nao confirmado.
-
-### Por Que Nada Pegou Antes
-
-- O que passou verde: `verificar_install` compara os tres destinos entre si e com a fonte, ignorando `__pycache__` de proposito (`IGNORADOS`), entao o bytecode distribuido nunca apareceu no diff. O README nunca teve check.
-- Mecanismo do ponto cego: o portao ignora exatamente o artefato que estava vazando, e testa so o caminho feliz do `install.sh` (destino novo, sem falha, sem edicao local).
-- Conserto de portao proposto: `verificar_install` conferir que o destino nao contem `__pycache__` (feito indiretamente hoje, pelo check na fonte) e exercitar reinstalacao sobre destino sujo.
-
-### Decisao Para Registrar Em DECISIONS.md
-
-- Nenhuma.
-
 ## 2026-10-21 - Diretorio de corrida incompleto em docs/consensus/ (T-083)
 
 **Status:** aberto
@@ -407,3 +308,139 @@ As entradas anteriores a 2026-09-03 (e as duas rodadas de P-7/P-8 e P-9 da spec 
 ### Decisao Para Registrar Em DECISIONS.md
 
 - (A preencher.)
+
+## 2026-10-21 - Spec 0008, P-2 e P-3: adaptador Cloudroom e isolamento por copia (rodada 1 cega)
+
+**Status:** resolvido
+
+**Proximo passo:** nenhum; ratificado pelo usuario em 2026-10-21 no chat, sobre texto redigido pelo Opus (coordenador, nao participante).
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Origem:** automacao
+
+**Manifesto:** docs/consensus/2026-10-21-161813-debate/manifesto.json
+
+**Participantes:** luna, terra
+
+**Falhas:** nenhuma
+
+### Contexto
+
+- Modo: debate
+- Rodada: 1 de 1
+- N: 2
+- Data: 2026-10-21
+- Manifesto: docs/consensus/2026-10-21-161813-debate/manifesto.json
+
+### Pergunta Ou Decisao
+
+> Spec 0008 (docs/specs/0008-adaptador-cloudroom.md, em Rascunho), perguntas P-2 e P-3.
+> 
+> Contexto: a skill quer que `loop.sh` e `consenso.py` possam usar um subagente do Cloudroom (`room-cli thread spawn`) como agente, por um wrapper `scripts/cloudroom_agente.py` que se comporta como CLI headless, sem mudar os dois scripts. A spec propoe (DEC-002 e DEC-003) que o wrapper sirva so ao loop e que o consenso fique fora.
+> 
+> Fatos medidos com a CLI real (cloudroom 0.1.67, 2026-10-21), que voce nao consegue reproduzir daqui e deve tomar como dados:
+> - `room-cli thread spawn` aceita so `--provider --model --reasoning-level --service-tier --title --shared-sandbox|--top-level --prompt|--prompt-file` e recusa qualquer outra opcao; nao ha opcao de diretorio.
+> - Com `--shared-sandbox`, o filho rodou na pasta da thread pai: pedido para imprimir `pwd`, respondeu `/code/ai-project-structure`, independentemente de onde o pai estava.
+> - Sem `--shared-sandbox`, o filho ganha sandbox propria com copia do codigo (commits e nao commitados) em outra branch; nao aparece em `thread list`, e `thread output` devolve so a nota "Its replies arrive as messages when its turns end".
+> 
+> P-2: com `--shared-sandbox`, da para manter o isolamento por copia por participante da DEC-003 da spec 0006 (docs/specs/0006-automacao-do-consenso.md)? Se nao, o que sobra e verificavel?
+> P-3: o modo sem `--shared-sandbox` serve ao consenso, atrapalha, ou e inviavel? Em qual modo cada pacote (debate, achado, loop) deve rodar, ou nenhum?
+> 
+> Leia o codigo antes de opinar: `docs/skills/ai-project-structure/scripts/consenso.py` (copia, prompt, gravacao do bruto), `scripts/loop.sh` (como chama o agente, `find -newer`, `--tempo-maximo`) e as DEC-003 e DEC-009 da spec 0006. Concorde ou discorde de DEC-002 e DEC-003 da spec 0008 com motivo, aponte o que estiver errado ou faltando, e proponha alternativa verificavel se houver. Responda em portugues, sem o caractere travessao.
+
+### Posicao De luna
+
+> ## P-2: `--shared-sandbox` não preserva o isolamento da DEC-003
+> 
+> Discordo da DEC-002 como conclusão sobre o modo compartilhado. A evidência sustenta que o filho não começa na pasta de trabalho corrente do processo que o chamou: começa na pasta da thread pai. Portanto, passar o caminho da cópia no prompt, ou fazer `cd` antes de chamar `room-cli`, não prende o filho nessa cópia.
+> 
+> Isso quebra o isolamento de `consenso.py`. O script cria uma cópia por participante, remove `docs/consensus/` e, no debate, retém os registros anteriores de `docs/CONSENSUS.md`. Mas o adaptador chamado como agente receberia um prompt que aponta para uma cópia e abriria o filho no espaço compartilhado da thread pai. O caminho no prompt não impede o filho de ler outros arquivos disponíveis nesse espaço. Como `consenso.py` grava cada bruto assim que o participante termina, um participante posterior também poderia alcançar a posição anterior se ela estiver nesse espaço. Isso contraria tanto a DEC-003 da 0006 quanto o critério de aceite que exige isolamento verificável sem confiar no relato do agente.
+> 
+> O que sobra verificável com a proposta atual é uma afirmação de escopo: o adaptador não será usado nos perfis de debate e achado, e a documentação explicará o motivo. Isso não demonstra isolamento; evita alegá-lo. A alternativa verificável já existe no código: deixar `consenso.py` chamar os agentes diretamente, preservando a cópia separada por participante, a retenção dos registros no debate e a gravação dos brutos fora das cópias de execução. Para voltar a considerar Cloudroom no consenso, seria necessário um modo de execução que comprovadamente desse a cada filho um espaço distinto, com captura da resposta integral e sem acesso às posições contemporâneas. Os fatos fornecidos não mostram que a CLI ofereça isso.
+> 
+> ## P-3: sandbox própria não serve aos três pacotes automatizados
+> 
+> Concordo com a DEC-003 em excluir o modo sem `--shared-sandbox` dos pacotes automatizados, mas ajustaria a explicação: pelo comportamento medido, ele não é apenas inconveniente. O adaptador não consegue obter a resposta pelo `thread output`; recebe somente a nota de que as respostas chegam como mensagens quando os turnos terminam. Logo, não consegue cumprir o contrato de CLI do wrapper, que precisa devolver a resposta pelo stdout e um exit code.
+> 
+> Para o consenso, há também um problema de isolamento e proveniência. A cópia privada leva o conteúdo existente, incluindo `docs/CONSENSUS.md` e `docs/consensus/`. Ela não fornece a cópia específica por participante, preparada por `consenso.py` segundo o debate ou o achado. Além disso, sem a resposta no processo, `consenso.py` não pode gravar o bruto e o manifesto quando o participante termina, como exige a DEC-009 da 0006.
+> 
+> Para o loop, o filho trabalha numa cópia em outra branch. O `loop.sh` verifica alterações com `find -newer` na árvore de `$PROJETO` e executa o portão ali. Alterações feitas apenas na cópia privada não satisfazem esse fluxo. A falta de resposta capturável também impede o adaptador de entregar ao loop a saída esperada.
+> 
+> Assim, minha recomendação por pacote é:
+> 
+> | Pacote | Modo recomendado |
+> |---|---|
+> | Debate | Nenhum modo Cloudroom medido. Manter os agentes diretos de `consenso.py`. |
+> | Achado | Nenhum modo Cloudroom medido. Manter os agentes diretos de `consenso.py`. |
+> | Loop | `--shared-sandbox`, condicionado a o espaço compartilhado corresponder ao projeto que o loop precisa alterar. |
+> 
+> Há uma ressalva importante à DEC-004 da spec 0008: o `loop.sh` aceita `--projeto DIR` e roda o comando do agente após `cd "$PROJETO"`, mas o `room-cli` medido inicia o filho na pasta da thread pai, independentemente do diretório do chamador. Portanto, não está demonstrado que o filho sempre alterará o `$PROJETO` indicado. A bancada descrita em T-103 pode validar o caso em que o projeto coincide com a pasta compartilhada da thread; não sustenta, sozinha, uma alegação para qualquer `--projeto`. Eu restringiria a documentação a esse caso demonstrado, ou exigiria que o critério real prove que o filho altera o caminho indicado pelo loop e que o `find -newer` o detecta.
+> 
+> Em resumo: manteria o adaptador restrito ao loop e fora do consenso, mas mudaria os fundamentos registrados. Para o consenso, `--shared-sandbox` falha no isolamento por participante; sem compartilhamento, falha na coleta mecânica da resposta e no acesso à cópia preparada para cada participante. Para o loop, o compartilhamento é o único modo plausível entre os dois, mas sua compatibilidade com `--projeto` precisa ser delimitada ao que a bancada real comprovar.
+
+### Posicao De terra
+
+> Discordo de usar o adaptador no consenso e concordo com DEC-002 e DEC-003, com uma ressalva de escopo para o loop.
+> 
+> **P-2: `--shared-sandbox` não preserva o isolamento da DEC-003.** O `consenso.py` cria uma cópia temporária por participante, remove `docs/consensus/` dela e, no debate de rodada 1, retém os registros de `CONSENSUS.md`. Porém o Cloudroom inicia o filho no workspace da thread pai, não no `cwd` da chamada do wrapper nem na cópia passada ao `executa()`.
+> 
+> Assim, o caminho da cópia no prompt é somente instrução. Não impede o filho de ler o projeto real. Isso viola a propriedade relevante da DEC-003: separar o material acessível a cada participante, não apenas pedir que ignore conteúdo.
+> 
+> Também conflita diretamente com a DEC-009. Enquanto os participantes executam em paralelo, `rodar_participantes()` grava `stdout.txt`, `stderr.txt` e `manifesto.json` no `docs/consensus/<run>/` real assim que cada um termina. Um filho compartilhado ainda em execução pode ler esse sidecar. Logo, “bruto e manifesto gravados onde agentes contemporâneos não alcançam” deixa de ser verdadeiro.
+> 
+> O que sobra verificável é mais estreito:
+> 
+> - O orquestrador criou cópias distintas e registrou seus caminhos no manifesto.
+> - O wrapper chamou o Cloudroom em modo compartilhado e coletou uma resposta.
+> - A política pode proibir perfis de consenso que apontem para o wrapper.
+> 
+> Nada disso prova que o participante trabalhou na cópia, nem que não leu a posição contemporânea.
+> 
+> **P-3: sem `--shared-sandbox` é inviável para o contrato atual do wrapper.** Embora dê uma sandbox própria, o processo que chama `room-cli` não consegue consultar a saída, esperar uma conclusão observável nem receber o exit code do filho. A resposta vai como mensagem para a thread pai, fora do stdout do wrapper. Além disso, a alteração fica em outra branch, então o `find -newer` e o portão do `loop.sh` observam o projeto pai inalterado.
+> 
+> A cópia implícita desse modo também não é a cópia preparada por `consenso.py`: ela não garante a exclusão de `docs/consensus/`, a retenção dos registros na rodada 1, nem a entrada exata de achado que deve ficar visível.
+> 
+> Minha matriz é:
+> 
+> | Pacote | Modo recomendado |
+> |---|---|
+> | Debate | Nenhum modo Cloudroom atual. Manter CLI direta executada na cópia por participante. |
+> | Achado | Nenhum modo Cloudroom atual. Manter CLI direta, com a entrada sob revisão no material isolado. |
+> | Loop | `--shared-sandbox`, desde que o projeto alvo seja o workspace da thread pai. |
+> | Sem compartilhamento | Nenhum dos três. |
+> 
+> A ressalva para o loop é importante: DEC-004 afirma que o filho pode editar o caminho absoluto de `$PROJETO`. A sonda de `pwd` prova apenas o diretório inicial do filho, não que qualquer valor de `--projeto` seja montado e gravável pelo filho. O adaptador deve documentar e testar o pré-requisito: ele serve para executar o loop no projeto da thread Cloudroom que o iniciou. Não deve prometer funcionar com um projeto arbitrário passado por `--projeto`.
+> 
+> A alternativa verificável para permitir consenso no futuro exige uma capacidade nova do Cloudroom, não um ajuste de prompt:
+> 
+> 1. `spawn` precisa aceitar uma raiz de workspace ou uma cópia privada por participante.
+> 2. Essa raiz deve ser a única árvore do projeto montada ao filho, sem acesso ao projeto pai e ao sidecar contemporâneo.
+> 3. A API precisa expor polling programático de resposta, estado e erro para esse tipo de filho.
+> 4. A bancada precisa demonstrar, por observação do ambiente e não pela declaração do modelo, que a escrita relativa cai na cópia certa e que `docs/consensus/<run>/` do pai não está acessível.
+> 
+> Enquanto isso não existir, o caminho direto já usado por `consenso.py` é a alternativa correta: ele inicia o comando com `cwd` igual à cópia específica, registra prompt, saída, hashes e diretório no manifesto, e preserva o desenho de DEC-003 e DEC-009.
+> 
+> Portanto, manter DEC-002 é correto. Manter DEC-003 também é correto, mas eu acrescentaria explicitamente que a inviabilidade do modo sem compartilhamento é do contrato headless atual, e que o suporte do modo compartilhado ao loop é limitado ao workspace da thread pai.
+
+### Pontos De Acordo
+
+- Os dois concordam que o adaptador serve so ao `loop.sh`. No consenso, o modo compartilhado quebra o isolamento por copia (o filho le o projeto real e o bruto do outro participante gravado em `docs/consensus/`), e o modo de sandbox propria nao devolve a resposta ao processo que chamou.
+- Os dois acharam, sem um ver o outro, o mesmo excesso na DEC-004 da spec 0008: a sonda de `pwd` prova so o diretorio inicial do filho, entao o loop so e garantido quando o `--projeto` e a pasta da thread.
+
+### Riscos E Tradeoffs
+
+- O consenso continua invisivel no Cloudroom, que era parte do motivo original da spec 0008.
+- Ele so volta a ser opcao se o Cloudroom ganhar uma pasta isolada por filho, sem acesso ao projeto pai, e um jeito programatico de ler a resposta dele (requisitos listados pelo `terra`).
+
+### Consenso Final
+
+- DEC-002 e DEC-003 da spec 0008 ratificadas. DEC-004 restrita a `--projeto` igual a pasta da thread, ja aplicada na spec, nas tarefas T-102 e T-103 e no `portao_t102.py`.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Sim: "O adaptador Cloudroom nao entra no consenso enquanto o Cloudroom nao isolar um filho por pasta", registrada em `docs/DECISIONS.md` em 2026-10-21.

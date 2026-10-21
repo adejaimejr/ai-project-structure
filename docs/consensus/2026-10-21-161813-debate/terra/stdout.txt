@@ -1,0 +1,41 @@
+Discordo de usar o adaptador no consenso e concordo com DEC-002 e DEC-003, com uma ressalva de escopo para o loop.
+
+**P-2: `--shared-sandbox` não preserva o isolamento da DEC-003.** O `consenso.py` cria uma cópia temporária por participante, remove `docs/consensus/` dela e, no debate de rodada 1, retém os registros de `CONSENSUS.md`. Porém o Cloudroom inicia o filho no workspace da thread pai, não no `cwd` da chamada do wrapper nem na cópia passada ao `executa()`.
+
+Assim, o caminho da cópia no prompt é somente instrução. Não impede o filho de ler o projeto real. Isso viola a propriedade relevante da DEC-003: separar o material acessível a cada participante, não apenas pedir que ignore conteúdo.
+
+Também conflita diretamente com a DEC-009. Enquanto os participantes executam em paralelo, `rodar_participantes()` grava `stdout.txt`, `stderr.txt` e `manifesto.json` no `docs/consensus/<run>/` real assim que cada um termina. Um filho compartilhado ainda em execução pode ler esse sidecar. Logo, “bruto e manifesto gravados onde agentes contemporâneos não alcançam” deixa de ser verdadeiro.
+
+O que sobra verificável é mais estreito:
+
+- O orquestrador criou cópias distintas e registrou seus caminhos no manifesto.
+- O wrapper chamou o Cloudroom em modo compartilhado e coletou uma resposta.
+- A política pode proibir perfis de consenso que apontem para o wrapper.
+
+Nada disso prova que o participante trabalhou na cópia, nem que não leu a posição contemporânea.
+
+**P-3: sem `--shared-sandbox` é inviável para o contrato atual do wrapper.** Embora dê uma sandbox própria, o processo que chama `room-cli` não consegue consultar a saída, esperar uma conclusão observável nem receber o exit code do filho. A resposta vai como mensagem para a thread pai, fora do stdout do wrapper. Além disso, a alteração fica em outra branch, então o `find -newer` e o portão do `loop.sh` observam o projeto pai inalterado.
+
+A cópia implícita desse modo também não é a cópia preparada por `consenso.py`: ela não garante a exclusão de `docs/consensus/`, a retenção dos registros na rodada 1, nem a entrada exata de achado que deve ficar visível.
+
+Minha matriz é:
+
+| Pacote | Modo recomendado |
+|---|---|
+| Debate | Nenhum modo Cloudroom atual. Manter CLI direta executada na cópia por participante. |
+| Achado | Nenhum modo Cloudroom atual. Manter CLI direta, com a entrada sob revisão no material isolado. |
+| Loop | `--shared-sandbox`, desde que o projeto alvo seja o workspace da thread pai. |
+| Sem compartilhamento | Nenhum dos três. |
+
+A ressalva para o loop é importante: DEC-004 afirma que o filho pode editar o caminho absoluto de `$PROJETO`. A sonda de `pwd` prova apenas o diretório inicial do filho, não que qualquer valor de `--projeto` seja montado e gravável pelo filho. O adaptador deve documentar e testar o pré-requisito: ele serve para executar o loop no projeto da thread Cloudroom que o iniciou. Não deve prometer funcionar com um projeto arbitrário passado por `--projeto`.
+
+A alternativa verificável para permitir consenso no futuro exige uma capacidade nova do Cloudroom, não um ajuste de prompt:
+
+1. `spawn` precisa aceitar uma raiz de workspace ou uma cópia privada por participante.
+2. Essa raiz deve ser a única árvore do projeto montada ao filho, sem acesso ao projeto pai e ao sidecar contemporâneo.
+3. A API precisa expor polling programático de resposta, estado e erro para esse tipo de filho.
+4. A bancada precisa demonstrar, por observação do ambiente e não pela declaração do modelo, que a escrita relativa cai na cópia certa e que `docs/consensus/<run>/` do pai não está acessível.
+
+Enquanto isso não existir, o caminho direto já usado por `consenso.py` é a alternativa correta: ele inicia o comando com `cwd` igual à cópia específica, registra prompt, saída, hashes e diretório no manifesto, e preserva o desenho de DEC-003 e DEC-009.
+
+Portanto, manter DEC-002 é correto. Manter DEC-003 também é correto, mas eu acrescentaria explicitamente que a inviabilidade do modo sem compartilhamento é do contrato headless atual, e que o suporte do modo compartilhado ao loop é limitado ao workspace da thread pai.

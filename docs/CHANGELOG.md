@@ -2,6 +2,10 @@
 
 Historico de mudancas relevantes.
 
+## 2026-10-21 (spec 0008 em Rascunho: adaptador Cloudroom para o loop, consenso fora)
+
+- Spec `docs/specs/0008-adaptador-cloudroom.md` com DEC-001 a DEC-008: `scripts/cloudroom_agente.py` faz um filho `room-cli thread spawn --shared-sandbox` se comportar como CLI headless para o `--agente` do `loop.sh`, sem mudar `loop.sh` nem `consenso.py`; o consenso fica fora porque nenhum modo do `room-cli` prende o filho na copia por participante (0006/DEC-003). T-100 a T-103 com portoes escritos e falhando pelo motivo certo, sobre o `room-cli` falso `evals/mock_room_cli.py`. Sem bump nesta sessao. Rodada 1 cega sobre P-2 e P-3 (`gpt-6-luna` e `gpt-5.6-terra`) concordou com o recorte e restringiu a DEC-004 a `--projeto` igual a pasta da thread; a 0008 entra na 2.15.0, depois da 0007.
+
 ## 2026-10-21 (camada GitHub publicada: CI, tags, Releases 2.12.0 e 2.13.0)
 
 - PR #2 (`ci.yml`, T-092 e T-093) e PR #3 (comunidade, `release.yml`, READMEs, spec 0007; T-096 a T-099) mergeados com `ci` verde em Linux e macOS. Tags anotadas v2.4.0 a v2.13.0; Releases 2.12.0 e 2.13.0 com zip e `.sha256`, pelos passos do `release.yml` rodados localmente. O `release.yml` ganhou `workflow_dispatch` com entrada `tag`. Perfil de comunidade em 100. Ruleset (T-094) e evidencia de run real do workflow (T-097) aguardam o usuario: o token desta sandbox nao tem Administration nem Actions: write.

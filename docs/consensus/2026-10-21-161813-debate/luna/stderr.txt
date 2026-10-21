@@ -1,0 +1,1542 @@
+Reading additional input from stdin...
+OpenAI Codex v0.163.0
+--------
+workdir: /tmp/consenso-r66rm85b/projeto
+model: gpt-6-luna
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: high
+reasoning summaries: none
+session id: 01a15f41-8dd1-7c32-9170-c33e217ef8e9
+--------
+user
+Participante: luna
+Copia isolada do projeto: /tmp/consenso-r66rm85b/projeto
+Esta e uma copia somente-leitura do projeto: leia o que precisar. Nao edite nada fora da sua resposta.
+Responda em portugues, sem travessao. A resposta inteira no stdout sera reproduzida sem resumo. Nenhuma posicao contemporanea esta disponivel por construcao.
+
+Pergunta:
+
+Spec 0008 (docs/specs/0008-adaptador-cloudroom.md, em Rascunho), perguntas P-2 e P-3.
+
+Contexto: a skill quer que `loop.sh` e `consenso.py` possam usar um subagente do Cloudroom (`room-cli thread spawn`) como agente, por um wrapper `scripts/cloudroom_agente.py` que se comporta como CLI headless, sem mudar os dois scripts. A spec propoe (DEC-002 e DEC-003) que o wrapper sirva so ao loop e que o consenso fique fora.
+
+Fatos medidos com a CLI real (cloudroom 0.1.67, 2026-10-21), que voce nao consegue reproduzir daqui e deve tomar como dados:
+- `room-cli thread spawn` aceita so `--provider --model --reasoning-level --service-tier --title --shared-sandbox|--top-level --prompt|--prompt-file` e recusa qualquer outra opcao; nao ha opcao de diretorio.
+- Com `--shared-sandbox`, o filho rodou na pasta da thread pai: pedido para imprimir `pwd`, respondeu `/code/ai-project-structure`, independentemente de onde o pai estava.
+- Sem `--shared-sandbox`, o filho ganha sandbox propria com copia do codigo (commits e nao commitados) em outra branch; nao aparece em `thread list`, e `thread output` devolve so a nota "Its replies arrive as messages when its turns end".
+
+P-2: com `--shared-sandbox`, da para manter o isolamento por copia por participante da DEC-003 da spec 0006 (docs/specs/0006-automacao-do-consenso.md)? Se nao, o que sobra e verificavel?
+P-3: o modo sem `--shared-sandbox` serve ao consenso, atrapalha, ou e inviavel? Em qual modo cada pacote (debate, achado, loop) deve rodar, ou nenhum?
+
+Leia o codigo antes de opinar: `docs/skills/ai-project-structure/scripts/consenso.py` (copia, prompt, gravacao do bruto), `scripts/loop.sh` (como chama o agente, `find -newer`, `--tempo-maximo`) e as DEC-003 e DEC-009 da spec 0006. Concorde ou discorde de DEC-002 e DEC-003 da spec 0008 com motivo, aponte o que estiver errado ou faltando, e proponha alternativa verificavel se houver. Responda em portugues, sem o caractere travessao.
+
+2026-10-21T16:18:15.001439Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"n8n MCP Server\", resource_metadata=\"https://workflow-i92tech.i92tecnologia.com.br/.well-known/oauth-protected-resource/mcp-server/http\"" })
+codex
+Vou ler a spec 0008, as decisões da 0006 e os trechos de `consenso.py` e `loop.sh` que determinam cópia, execução e captura de saída. Depois avalio P-2 e P-3 usando os fatos da CLI que você forneceu.
+exec
+/bin/bash -lc "sed -n '1,240p' docs/specs/0008-adaptador-cloudroom.md && sed -n '1,260p' docs/specs/0006-automacao-do-consenso.md && sed -n '1,280p' docs/skills/ai-project-structure/scripts/consenso.py && sed -n '1,300p' scripts/loop.sh" in /tmp/consenso-r66rm85b/projeto
+ exited 2 in 0ms:
+# Spec 0008 - Adaptador Cloudroom: subagente visivel como agente do loop
+
+**Status:** Rascunho
+**Criada em:** 2026-10-21
+**Esforco:** M, porque e um script novo distribuido mais bateria, documentacao e bump, sem mexer em `loop.sh` nem em `consenso.py`; o que pesa e provar o comportamento sem gastar modelo e fechar com uma bancada real.
+
+## Problema E Resultado Esperado
+
+- Problema: na bancada real de T-083 (2026-10-21, sandbox Cloudroom), o `consenso.py` chamou `codex exec` como processo filho. Nada apareceu na barra de threads do Cloudroom, o sandbox read-only do Codex nao rodou no container (Armadilha em `docs/MEMORY.md`) e o usuario nao tinha como acompanhar log, estado ou custo. Os subagentes Sonnet das outras tarefas, abertos por `room-cli thread spawn --shared-sandbox`, ficaram visiveis, com log e estado. O mesmo vale para o `loop.sh`: hoje o agente de uma rodada de loop e sempre um processo invisivel.
+- Hipotese de partida (do prompt de planejamento): um wrapper que se comporte como CLI headless (prompt como ultimo argumento, resposta no stdout, exit code do agente) encaixa em `consenso.py` e `loop.sh` sem tocar neles.
+- O que a leitura do codigo e as sondas na CLI real (cloudroom 0.1.67, 2026-10-21) mostraram: a hipotese **vale para o `loop.sh` e cai para o `consenso.py`**. O loop so precisa que o agente mexa no projeto e saia; o filho em `--shared-sandbox` faz isso no mesmo sistema de arquivos. O consenso precisa que cada participante rode na propria copia (0006/DEC-003), e nenhum dos dois modos do `room-cli` entrega isso de forma verificavel (DEC-002 e DEC-003 abaixo).
+- Resultado esperado: `scripts/cloudroom_agente.py`, distribuido pela skill, que transforma um filho do Cloudroom em agente headless para o `--agente` do `loop.sh`; o loop roda visivel na barra do Cloudroom, sem mudar uma linha de `loop.sh`, e o `consenso.py` continua com CLIs chamadas direto, com o motivo escrito.
+
+## Escopo
+
+### Incluido
+
+- `scripts/cloudroom_agente.py`: python3 so com biblioteca padrao, sem `sed -i`, `perl`, `timeout(1)` nem `setsid`.
+- `room-cli` falso em `evals/mock_room_cli.py` (nao distribuido), que imita a CLI real como respondeu nas sondas: spawn imediato com JSON, resposta cortada sem `--all`, filho de sandbox propria ilegivel, `stop` e `archive`.
+- Bateria `evals/test_cloudroom_agente.py` com etapa e piso em `verify_repository.py`, cobrindo o adaptador sozinho e o `loop.sh` de ponta a ponta com o filho falso.
+- `references/cloudroom.md` (uso, exit codes, limites), linha na tabela de ferramentas de `references/loop.md`, nota em `references/consenso.md`, mencao no `SKILL.md`, bump e secao no CHANGELOG da skill.
+- Perfil `Cloudroom, executar:` em `docs/MEMORY.md` e uma bancada real com modelo escolhido pelo usuario (parte do agente de chat).
+
+### Fora Do Escopo
+
+- **Usar o adaptador como participante do `consenso.py`** (debate ou achado). Motivo em DEC-002 e DEC-003. Reabrir exige spec propria e uma forma verificavel de prender o filho na copia.
+- Qualquer mudanca em `loop.sh` ou `consenso.py`: nenhum dos dois importa, detecta ou chama `room-cli` (decidido antes desta spec).
+- Filho em sandbox propria (sem `--shared-sandbox`), `--top-level` e `--machine cloud`.
+- Thread Local (Mac): o adaptador nao foi exercitado la; fica dito nos limites (DEC-007).
+- Escolher modelo ou provider por padrao: os dois vem por flag, do usuario.
+- Fallback para outra ferramenta quando `room-cli` falta: nada degrada em silencio.
+
+## Criterios De Aceite
+
+Verificaveis por comando:
+
+- `portao_t100.py` 17/17: o adaptador sozinho contra o `room-cli` falso (sem `room-cli` no PATH sai 1 antes de qualquer chamada; resposta integral no stdout, inclusive acima de 2000 caracteres; `--shared-sandbox` e `--prompt-file` acrescentados por ele; filho falho sai 2; SIGTERM vira `thread stop` em ate 5 s e exit 143; titulo; `--arquivar`; flags proibidas recusadas; prompt acima de 262144 bytes recusado).
+- `portao_t101.py` 6/6: bateria com ao menos 20 verificacoes no verificador, `loop.sh` fechando uma tarefa com o adaptador como `--agente` e `--tempo-maximo` parando o filho.
+- `portao_t102.py` 10/10: documentacao, bump coerente, `install.sh` distribuindo o script, sem travessao, `--strict` limpo.
+- Nenhuma bateria nem portao chama o `room-cli` real: o falso vem primeiro no PATH, e o cenario "sem `room-cli`" usa PATH vazio, porque o real mora em `/usr/local/bin` na sandbox.
+- `verify_repository.py` em exit 0 e `validate_structure.py . --strict` com 0 erros e 0 avisos.
+
+Julgados na mao:
+
+- Bancada real (`portao_t103.py` confere so a forma): uma rodada de `loop.sh` com o adaptador e modelo escolhido pelo usuario fecha uma tarefa verde, a thread filha aparece na barra do Cloudroom com o titulo da tarefa, e a evidencia cita o id `cr_child_...`.
+
+## Decisoes
+
+- **DEC-001 (P-1, como o adaptador bloqueia e recupera a resposta):** `spawn` com `--shared-sandbox --prompt-file <temporario>` (prompt inteiro em arquivo, sem limite de argv nem problema de aspas; o teto de 262144 bytes e da CLI, e o adaptador repassa a mensagem dela com exit 1), depois polling de `room-cli thread output ID --all` a cada `--intervalo` segundos (padrao 10) ate `busy` falso. `state` ocioso com `reply`: imprime a resposta integral mais uma quebra de linha e sai 0. `error` preenchido ou estado de falha ou parada: stderr com o erro do filho, stdout vazio, exit 2. O adaptador nao tem timeout proprio: quem limita e o `--tempo-maximo` do loop. Filho que pergunta em vez de responder sai 0 com a pergunta no stdout; o adaptador nao distingue, e o loop ja manda gravar a pergunta em `.loop-pergunta`. Sem `--all`, a CLI corta a resposta em cerca de 2000 caracteres com o aviso `[... reply truncated ...]` (sonda de 2026-10-21). Rejeitadas: esperar a mensagem que o Cloudroom manda ao pai quando o filho termina (chega para o agente de chat, nao para um processo, entao o wrapper nao a enxerga) e responder perguntas do filho por `thread tell` (no loop nao ha ninguem para responder).
+- **DEC-002 (P-2, `--shared-sandbox` e o consenso):** o filho roda na pasta da thread pai, nao na pasta corrente de quem o chamou: a sonda de 2026-10-21 (filho `cr_child_0fd8860dd542df3fb95f7b70`, pedido para imprimir `pwd`) respondeu `/code/ai-project-structure`, e o `spawn` nao tem opcao de diretorio ("Other options are refused, not ignored"). Para o consenso, a copia por participante sobreviveria so como caminho no prompt, e a 0006/DEC-003 rejeitou isolamento por pedido de cegueira. Pior: o filho le o projeto real, onde o `consenso.py` grava o bruto de cada participante assim que ele encerra (0006/DEC-009), entao o segundo participante alcanca a posicao do primeiro. O verificavel aqui e negativo: nenhum perfil de consenso aponta para o adaptador, e `references/consenso.md` diz por que. Rejeitada: o adaptador fazer `cd` na copia e repassar o caminho (o filho nao herda o `cd`; seria isolamento por prompt com outro nome).
+- **DEC-003 (P-3, sandbox propria e o modo de cada pacote):** filho sem `--shared-sandbox` ganha id `thr_...`, nao aparece em `thread list` e `thread output` devolve so a nota "Its replies arrive as messages when its turns end" (sonda de 2026-10-21). O adaptador nao consegue esperar nem coletar a resposta, entao o modo esta fora para os tres pacotes. Mesmo que coletasse, a copia do filho leva `docs/CONSENSUS.md` inteiro e `docs/consensus/`, que a rodada 1 cega retem (0006/DEC-003), e o trabalho dele fica em outra branch, longe do portao do loop. Decisao: loop roda em `--shared-sandbox`, que o adaptador acrescenta sempre; debate e achado nao usam o adaptador. `--top-level`, `--prompt` e `--prompt-file` vindos de fora sao recusados com exit 1; o adaptador aceita so `--provider` (obrigatorio), `--model`, `--reasoning-level`, `--service-tier`, `--titulo`, `--arquivar` e `--intervalo`, e recusa o resto, como a propria CLI.
+- **DEC-004 (P-4, "mexeu em arquivo" e `--tempo-maximo`):** os dois mecanismos do `loop.sh` continuam valendo. O filho em `--shared-sandbox` escreve no mesmo sistema de arquivos, no caminho absoluto de `$PROJETO` que o prompt do loop ja traz, entao o `find -newer` enxerga o trabalho. No estouro, o loop manda SIGTERM ao grupo; o adaptador trata SIGTERM e SIGINT chamando `room-cli thread stop ID` e sai 143 em ate 5 s, antes do SIGKILL do loop. Limite aceito: SIGKILL nao se trata, e o filho seguiria vivo; por isso o id sai no stderr desde o spawn, para quem precisar parar a mao. Rejeitada: mudar o `loop.sh` para conhecer o filho (quebra a decisao de agnosticismo).
+- **DEC-005 (P-5, registro):** o manifesto do consenso nao se aplica (DEC-002). No loop, a evidencia ja grava `agente=` com o comando integral, que cita `cloudroom_agente.py`, provider e modelo; o adaptador escreve `thread=<id>` no stderr, que entra no relatorio da rodada. O bruto continua sendo o stdout do adaptador, igual a qualquer CLI. Nenhum link e montado: o Cloudroom nao documenta formato de URL de thread.
+- **DEC-006 (P-6, visibilidade e limpeza):** titulo por `--titulo`; sem ele, `loop T-NNN` quando o prompt traz um ID de tarefa (o do `loop.sh` sempre traz); senao a primeira linha do prompt, ate 80 caracteres. Uma thread por tentativa, entao uma rodada de loop abre de 1 a `--tentativas` threads. Arquivar e opt-in por `--arquivar`, depois da ultima leitura: o padrao e deixar a thread para o usuario conferir, que e o motivo do recurso.
+- **DEC-007 (P-7, Local e Cloud):** o adaptador nao detecta onde roda; chama `room-cli` e acrescenta `--shared-sandbox`. Exercitado so em thread Cloud. Em thread Local o comportamento de `--shared-sandbox` nao foi conferido, e `--machine cloud` fica recusado porque cai no problema da DEC-003 (sandbox propria a partir do GitHub). `references/cloudroom.md` diz isso nos limites. Rejeitada: detectar Local pelo ambiente e ramificar (logica sem bancada, que nenhum portao prova).
+- **DEC-008 (P-8, evidencia):** `room-cli` falso em `evals/mock_room_cli.py`, posto no PATH pela bateria e pelos portoes, sem gastar modelo, com cenarios `ok`, `longo`, `falha`, `lento`, `pergunta` e `escreve`. Bancada real em T-103: uma rodada de `loop.sh` com o adaptador e modelo barato escolhido pelo usuario, evidencia `tipo=revisao-manual` com o id da thread filha. O falso e uma copia do que a CLI respondeu em 2026-10-21; se a CLI mudar, ele mente, e so a bancada real pega isso (ponto cego declarado).
+
+## Tarefas
+
+- T-100: adaptador `scripts/cloudroom_agente.py`
+- T-101: bateria, etapa no verificador e loop de ponta a ponta
+- T-102: documentacao e bump
+- T-103: perfil em `MEMORY.md` e bancada real (agente de chat)
+
+## Perguntas Abertas
+
+- P-A: em qual versao entra? A spec 0007 (modulo github) tambem mira a 2.14.0. Os portoes cobram "2.14.0 ou acima"; a ordem entre as duas e do usuario.
+- P-B: qual provider e modelo na bancada real de T-103? Custo e modelo sao do usuario.
+- P-C: `--intervalo` padrao de 10 s e chute de projeto, nao medicao. Cada consulta e uma chamada de CLI, nao de modelo; se o usuario preferir outro valor, e so trocar o padrao.
+- P-D: a rodada de consenso sobre P-2 e P-3 pedida no planejamento depende do modo de execucao e de dois perfis confirmados pelo usuario (o Codex read-only nao roda neste container; Armadilha em `docs/MEMORY.md`).
+
+## Evidencia De Conclusao
+
+- Verificacao: (A preencher.)
+- Resultado: (A preencher.)
+# Spec 0006 - Automacao do consenso: independencia por construcao
+
+**Status:** Em andamento
+**Criada em:** 2026-09-03
+**Esforco:** G, porque toca tres coisas ao mesmo tempo: execucao de agente, escrita em arquivo de memoria, e os campos que a 2.2.0 criou justamente para denunciar consenso fraco. Virou `Definida` em 2026-09-04, com as dez perguntas respondidas (DEC-001 a DEC-010). Passou a `Em andamento` no mesmo dia, com o plano de T-075 a T-083 aprovado e T-075 fechada pelo loop.
+
+## Problema E Resultado Esperado
+
+Esta spec estava pre-registrada em dois lugares, os dois dizendo a mesma coisa: a spec 0005 a listou em "Fora Do Escopo" com a nota "depende desta spec estar fechada, e merece a propria", e a DEC-008 da spec 0004 a tirou da 2.3.0 dizendo que ela "mexe em `CONSENSUS.md` e nos campos declarativos da 2.2.0, nao no ciclo de execucao". A 0005 fechou em 2026-09-03, entao a dependencia caiu.
+
+- Problema 1: **a independencia do consenso e autodeclarada, e a propria skill diz isso em voz alta.** A 2.2.0 criou `Metodo`, `Exposicao previa a outras posicoes` e `Rodada`, e registrou junto que o validador "checa presenca e valor permitido, **nunca veracidade**: nenhum script prova que um modelo nao leu a posicao do outro. O ganho e rastreabilidade, nao garantia." Automatizar muda a natureza da coisa: se a ferramenta roda N agentes isolados entre si, a independencia deixa de ser afirmacao e vira propriedade do processo.
+
+- Problema 2: **a rodada na mao custa caro o bastante para nao acontecer.** Medido neste repositorio em 2026-09-03, na revalidacao do achado `0005-A1`: foi preciso escrever um arquivo de prompt, escolher o perfil, montar a chamada com sandbox `read-only`, esperar, ler a saida e transcrever a posicao. Deu certo e pegou um erro factual real, mas nada disso ficou como procedimento reproduzivel, e o custo de repetir e o mesmo da primeira vez. Segunda opiniao cara e segunda opiniao que so acontece quando alguem lembra.
+
+- Problema 3: **quem transcreve a critica e o modelo criticado.** Naquela mesma rodada, quem escreveu a secao `Revalidacao` foi o Claude, resumindo a critica do Codex ao trabalho do Claude. A entrada declara a proveniencia e o resumo foi conferido no codigo antes de aceito, mas o acoplamento e exatamente do tipo que o consenso existe para evitar: a fidelidade da critica depende da boa fe de quem ela critica.
+
+- Problema 4: **ja existe um caminho de invocar agente no projeto, e o consenso nao usa.** O `loop.sh` resolveu o conceito de comando de agente neutro (`--agente`), com os perfis por intencao vivendo em `docs/MEMORY.md` e resolvidos pelo agente de chat, nunca pelo script. Consenso automatizado que invente o proprio jeito de chamar agente cria duas implementacoes da mesma coisa no mesmo repositorio, e elas divergem com o tempo.
+  - **Correcao de 2026-09-03, apontada pelo Codex na rodada 1 e conferida no codigo antes de aceita:** a primeira redacao deste problema superestimava o reuso. O que se reaproveita e o conceito, nao o script. O `loop.sh` de hoje pressupoe tarefa, mutacao de arquivo, portao e tentativas, e em `loop.sh:145` ele decide se o agente fez alguma coisa com `find -type f -newer` no projeto. Um agente de parecer nao escreve nada, entao cairia no `exit 4` da DEC-014 em toda rodada. Reusar o script como esta nao funciona.
+
+- Resultado esperado 1: posicoes independentes **por construcao**, e nao por declaracao, com os campos da 2.2.0 passando a descrever um fato do processo em vez de uma promessa do modelo.
+- Resultado esperado 2: segunda opiniao barata o suficiente para ser o padrao em decisao de risco, e nao um esforco especial.
+- Resultado esperado 3: proveniencia registrada por quem executou, nao por quem foi revisado.
+- Resultado esperado 4: um caminho de invocacao de agente no projeto, reaproveitando o que o modulo de loop ja provou em bancada.
+
+## Escopo
+
+### Incluido
+
+- Executar a mesma pergunta em N agentes, isolados entre si, com o isolamento sendo propriedade da execucao e nao pedido no prompt.
+- Reuso do que o modulo de loop ja tem: `--agente` neutro, perfis em `docs/MEMORY.md`, exit codes por caminho.
+- Material de saida por agente, em forma que vire entrada de `CONSENSUS.md` sem o resumo passar por quem foi criticado.
+- Checks correspondentes em `validate_structure.py`, na medida em que sejam verificaveis por forma.
+
+### Fora Do Escopo
+
+- **Sintetizar o consenso final, declarar convergencia ou decidir por maioria.** Coletar posicoes e uma operacao mecanica; dizer que elas concordam e julgamento. A regra de desempate do bloco core ja diz que, sem convergencia, quem decide e o usuario.
+- Mudar os campos declarativos da 2.2.0 ou a forma do achado. Se a automacao mostrar que a forma precisa mudar, isso vira spec propria, e hoje existe exatamente um achado registrado.
+- Teto de custo global do projeto. Fica o teto local desta operacao, se P-5 pedir.
+- Alterar o **projeto usado como evidencia da spec 0005**, que segue somente-leitura por 0005/DEC-001. Isto nao restringe o produto: o entregavel e um script distribuido pela skill, e ele **vai** rodar em projeto de usuario por desenho, igual ao `loop.sh`. A redacao anterior desta linha era "alterar qualquer projeto que nao seja este repositorio", que o Grok apontou na rodada 1 como confusao entre projeto-evidencia e projeto-alvo, deixando o escopo ilegivel. Corrigido em 2026-09-03; nao e mudanca de escopo, e a mesma restricao dita sem ambiguidade.
+
+## Criterios De Aceite
+
+Escritos ate onde as perguntas abertas permitem. Os que dependem de resposta estao marcados.
+
+Verificaveis por comando:
+
+- Rodar a operacao com N agentes produz N artefatos de posicao, um por agente, e nenhum deles contem o texto das posicoes dos outros.
+- Agente que falha (cota, configuracao, indisponibilidade) nao derruba a rodada inteira nem produz posicao vazia passando por posicao real: o artefato daquele agente registra a falha.
+- A operacao nao inventa posicao de agente que nao rodou. Nenhum artefato sem execucao por tras.
+- Projeto que nunca usa a automacao nao ganha nenhuma cobranca nova no validador.
+- `verify_repository.py` em exit 0, e nenhum travessao (U+2014) em arquivo novo ou alterado.
+- A minuta que a operacao escreve em `CONSENSUS.md` passa em `validate_structure.py --strict` sem aviso, declara `Metodo`, `Exposicao previa a outras posicoes` e `Rodada` coerentes com o que a execucao de fato fez, e traz o marcador `**Origem:**` (DEC-001, DEC-002, DEC-007).
+- O isolamento declarado e o isolamento verificavel sao o mesmo: da para conferir, sem confiar no relato do agente, que ele nao teve acesso as posicoes contemporaneas (DEC-003).
+- Entrada com `**Origem:**` malformada (participante sem secao, agente falho sem secao propria, sem ponte para o manifesto) gera AVISO; entrada sem `**Origem:**` nao ganha nenhum diagnostico novo (DEC-007).
+- Cada rodada deixa um manifesto ao lado do bruto com comando integral, diretorio, exit code e hashes de insumo e saida; a entrada em `CONSENSUS.md` traz so a ponte curta para ele (DEC-008).
+- Rodada interrompida deixa `CONSENSUS.md` byte a byte como estava, o bruto e o manifesto ja gravados no repositorio fora da arvore de execucao, e a retomada so acontece por comando explicito (DEC-009).
+- Bruto que casa padrao de segredo nao entra no repositorio: a rodada para antes de gravar, guarda o material fora do repositorio, informa o caminho e sai com codigo proprio; nada e redigido e nada e escrito em `CONSENSUS.md` (DEC-010).
+
+Julgados na mao, sem runner hoje:
+
+- Se a posicao produzida por agente isolado tem qualidade comparavel a da rodada feita na mao em 2026-09-03. E o unico ponto de comparacao real que existe hoje, e ele e n=1.
+
+## Decisoes
+
+Herdadas, sem nova discussao, e listadas porque restringem o desenho desta spec:
+
+- 0004/DEC-001: o que a automacao escreve na memoria do projeto so pode ser o que um comando comprova. Coletar posicao de agente e fato com execucao por tras; afirmar que as posicoes convergem nao e.
+- 0004/DEC-016: escolha de modelo, esforco e modo continua sendo do usuario, com os perfis em `docs/MEMORY.md`. A automacao recebe o comando do agente e obedece, sem catalogo de modelo dentro da skill.
+- 0004/DEC-019: o agente do loop **nao** escreve em `CONSENSUS.md`, e a razao foi especifica: uma rodada de loop tem um agente so, e consenso de um modelo so declarando a propria independencia e a fraude que os campos da 2.2.0 existem para denunciar. Esta spec precisa dizer se a razao se aplica quando ha N agentes (ver P-2), em vez de herdar a proibicao sem olhar.
+- 0005/DEC-001: o projeto do usuario usado como evidencia da 0005 continua somente-leitura e nao e alvo desta spec.
+
+Desta spec, todas ratificadas pelo usuario em 2026-09-03 a partir da rodada 1 cega registrada em `docs/CONSENSUS.md`. A rodada teve tres posicoes independentes (Claude selado antes das demais rodarem, Codex e Grok), e a forca de cada decisao esta declarada porque nem todas nasceram iguais:
+
+- **DEC-001 (P-1, unanime nas tres posicoes):** a operacao preserva o **artefato bruto de cada agente** e gera uma **minuta deterministica** da entrada, com as posicoes reproduzidas sem resumo e os campos de julgamento em branco. Bruto e minuta nao sao alternativas: os tres modelos recusaram essa exclusao separadamente. A linha de corte e a mesma nos tres: a operacao para onde comeca o julgamento, e o teste pratico e se uma pessoa consegue conferir o campo olhando o artefato bruto ao lado. Consequencia aceita: a entrada nao nasce concluida, e entrada com consenso final vazio pode ser lida como acordo por omissao, o que se mitiga nascendo com `Status: aberto` e `Proximo passo` com dono humano.
+
+- **DEC-002 (P-2, unanime no resultado, com o fundamento corrigido contra a posicao do Claude):** a operacao **pode escrever em `CONSENSUS.md`**, mas so o orquestrador mecanico escreve, e so o recorte que a execucao comprova: pergunta, posicoes literais, falhas, comandos, `Metodo`, `Exposicao previa` e `Rodada`. Os **agentes continuam proibidos**. O fundamento **nao e haver N agentes**, e sim separar os agentes opinantes de um **escritor deterministico**: Codex e Grok chegaram a essa correcao sozinhos, e o Claude, que havia proposto a justificativa pela cardinalidade, foi vencido. O Grok precisou o ponto: a DEC-019 nomeia o **agente**, entao aplica-la ao script nao seria heranca e sim estende-la a um sujeito que ela nunca nomeou. Consequencia aceita: passam a existir duas politicas de escrita no projeto (o loop nunca escreve la, este script escreve um recorte), e isso precisa estar dito no prompt de cada um.
+
+- **DEC-003 (P-3, unanime, com as tres opcoes da pergunta rejeitadas):** o que se isola sao as **posicoes contemporaneas**, nao o repositorio. Leitura do repositorio permanece. E `CONSENSUS.md` nao e um degrau unico: em debate rodada 1 ele fica fora do material do agente; em revalidacao de achado a entrada sob revisao entra **de proposito**, porque e o objeto da pergunta. A escada `(a) < (b) < (c)` da pergunta estava errada, e a premissa empirica dela tambem: a rodada de 2026-09-03 rodou com sandbox `read-only` **e o repositorio visivel**, e foi lendo o codigo que o Codex achou o erro factual. Consequencia aceita: sandbox somente-leitura impede escrita e nao leitura, entao o isolamento real depende de material separado por agente, e nao de pedir cegueira no prompt.
+
+- **DEC-004 (P-4, maioria de 2 a 1, com o Claude vencido):** a operacao cobre **debate e achado**, como dois pacotes sobre um primitivo unico de invocar agentes isolados e coletar artefatos. O Claude defendeu so debate, argumentando que existe um unico achado registrado e que ele proprio o escreveu, entao automatizar aquela forma seria automatizar um palpite n=1. Codex e Grok responderam o mesmo, separadamente: o caro e o isolamento e a invocacao, nao o template, e cortar o achado faz a spec nao resolver o problema que a motivou. Consequencia aceita: o esforco G cresce, com dois mapeamentos, dois prompts e evals proprios, e existe risco real de a primeira versao sair pela metade. Se o corte for inevitavel, a ordem e primitivo mais debate primeiro, e o pacote de achado na sequencia imediata, nunca adiado para outra spec.
+
+- **DEC-005 (P-5, maioria de 2 a 1, com o Claude vencido e fato verificado do lado da maioria):** N e os comandos dos agentes entram **na chamada**, no mesmo contrato que o loop ja usa. A lista em `docs/MEMORY.md` e o padrao **deste usuario**, resolvido pelo agente de chat, e nunca configuracao lida por script nem catalogo dentro da skill. **`N=1` e valido**, porque debate quer `N>=2` e revalidacao de achado tem exatamente um revisor. O Claude propos guardar a lista em `MEMORY.md` como configuracao; conferido no codigo que isso contraria a pratica: o `loop.sh` recebe `--agente` e obedece, sem ler `MEMORY.md` em momento nenhum. Consequencia aceita: `MEMORY.md` desatualizado dispara o revisor errado, e nao ha teto global de custo, entao o usuario pode passar quatro agentes e queimar plano.
+
+- **DEC-006 (P-6, maioria de 2 a 1, com a dissidencia registrada porque o argumento dela sobrevive):** a automacao cobre os **dois modos**, com a rodada 1 cega como padrao, e o modo escolhido **determina** o valor de `Exposicao previa` em vez de o usuario digitar. A operacao nunca deduz sozinha o numero da rodada nem quais posicoes anteriores fornecer. O Grok discordou e defendeu so a rodada 1 cega na primeira versao, com um argumento que continua valendo depois da derrota: rodada 2 exige o pacote **inteiro** das posicoes anteriores, e no instante em que o orquestrador resume, o Problema 3 volta por dentro da propria automacao. Consequencia aceita: quem implementar a rodada 2 tem de passar as posicoes anteriores na integra, e um resumo ali e regressao, nao otimizacao.
+
+- **DEC-007 (P-7, forma da entrada; 3 de 3 no que fazer, calibragem escolhida pelo usuario em 2026-09-04 entre Codex e Grok):** a forma da entrada de `CONSENSUS.md` **entra no escopo**: secao repetivel por participante com id arbitrario, nas duas formas (debate e achado), secao propria para agente que falhou, e checks novos valendo **so** para entrada automatizada, por marcador opt-in `**Origem:**`. Os diagnosticos novos sao **AVISO** (posicao do Grok, por simetria com o resto de consenso), nao ERRO como queria o Codex. Fato que barateou a decisao: o validador nunca exigiu heading de posicao nomeado; o congelamento em Codex, Claude e Gemini estava no template. Consequencia aceita: entrada automatizada malformada passa em modo normal e so trava em `--strict`, igual ao resto do arquivo.
+
+- **DEC-008 (P-8, proveniencia; 3 de 3 por entrar, calibragem escolhida pelo usuario em 2026-09-04):** a proveniencia **entra no escopo**, com sidecar guardando bruto e manifesto fora do `CONSENSUS.md` e uma **ponte curta** dentro da entrada (posicao do Grok): o comando integral, diretorio e hashes de insumo e saida ficam **so no manifesto**; a entrada aponta para ele. O Codex queria isso tudo dentro da entrada, lendo a DEC-002 ao pe da letra; perdeu pela rotacao e pela leitura humana. O bruto **nao** pode ficar em `.gitignore`, senao o teste da DEC-001 morre na sessao seguinte. Consequencia aceita: conferir um campo exige abrir dois arquivos.
+
+- **DEC-009 (P-9, quando a minuta e escrita; 3 de 3 no desenho, duas calibragens escolhidas pelo usuario em 2026-09-04):** criterio operacional do Grok, **publicado e anterior, nao publicado e contemporaneo**; lock exclusivo por projeto na abertura; bruto e manifesto gravados assim que cada agente encerra, onde os agentes da rodada corrente nao alcancam; minuta escrita uma vez so, no fim, por substituicao atomica do arquivo inteiro; interrupcao deixa `CONSENSUS.md` byte a byte como estava. Calibragens: **retomada apos interrupcao sempre exige palavra humana** (Claude e Grok; o Codex queria retomada automatica com insumos identicos), e **o bruto mora in-repo desde o inicio, fora da arvore de execucao** (Grok; Codex e Claude queriam fora do repositorio ate o fecho). Consequencia aceita: rodada interrompida deixa material pago no repositorio antes de qualquer minuta, e alguem precisa mandar retomar.
+
+- **DEC-010 (P-10, segredo no bruto; sem rodada, escolhida pelo usuario em 2026-09-04 entre tres opcoes esbocadas):** antes de gravar qualquer bruto no repositorio, a operacao **varre padroes de segredo** (chave de API, token, senha em URL, chave privada). Achou algo: a rodada **para**, guarda o bruto **fora** do repositorio, informa o caminho e pede palavra humana; **nunca redige**, porque redacao automatica destroi a evidencia que a DEC-001 protege, e nunca grava. Alternativas rejeitadas: bruto fora do git por padrao com promocao manual (mataria o teste da DEC-001 no dia a dia) e aceitar o risco com aviso na documentacao (transfere o problema para quem nao leu). Consequencias aceitas: falso positivo para uma rodada legitima ate alguem olhar; falso negativo continua possivel, porque padrao nao cobre todo segredo, e isso fica dito na documentacao da operacao.
+
+## Tarefas
+
+- T-053: responder as perguntas abertas para a spec poder virar `Definida`
+- T-074: decidir o que fazer com segredo no artefato bruto (P-10)
+- T-075: primitivo `consenso.py debate`, N agentes isolados em paralelo, bruto e manifesto em `docs/consensus/` (bump 2.11.0)
+- T-076: lock e minuta de debate atomica com julgamento em branco
+- T-077: varredura de segredo antes de gravar
+- T-078: marcador `**Origem:**` e checks AVISO no validador, com fixture
+- T-079: pacote de achado, revalidacao dentro da entrada existente
+- T-080: rodada 2 com as posicoes anteriores na integra
+- T-081: retomada por comando explicito
+- T-082: `references/consenso.md`, secao no `SKILL.md`, template e README
+- T-083: bancada real com dois agentes baratos, comparada com a rodada de 2026-09-03
+
+## Perguntas Abertas
+
+P-1 a P-6 foram respondidas pela rodada 1 cega de 2026-09-03 e ratificadas pelo usuario no mesmo dia (DEC-001 a DEC-006). P-7, P-8 e P-9 passaram por rodada 1 cega em 2026-09-03 com 3 de 3 no que fazer, e as calibragens que sobraram foram escolhidas pelo usuario em 2026-09-04, sempre pela posicao do Grok (DEC-007 a DEC-009). As rodadas estao em `docs/archive/CONSENSUS-2026.md`, entradas "2026-09-03 - P-7 e P-8" e "2026-09-03 - P-9", com as tres posicoes na integra.
+
+P-10 (segredo no bruto), que nenhuma rodada respondeu, foi decidida pelo usuario em 2026-09-04 entre tres opcoes esbocadas em T-074 e virou DEC-010. Nenhuma pergunta aberta.
+
+## Evidencia De Conclusao
+
+- Verificacao: `python3 docs/skills/ai-project-structure/evals/portao_t083.py` (residuo mecanico da bancada real) e `python3 docs/skills/ai-project-structure/evals/verify_repository.py`, em 2026-10-21, depois de T-075 a T-083 concluidas em `docs/TASKS.md` com evidencia; mais a revisao manual das duas posicoes da rodada real `docs/consensus/2026-10-21-114042-debate/` contra a rodada feita na mao em 2026-09-03, registrada na evidencia de T-083 e em `docs/SESSION.md`.
+- Resultado: `Portao T-083: 4/4`, exit 0 (run concluido com dois participantes com posicao, comandos distintos, bruto com sha256 batendo e ao menos um comando executado por participante; entrada em `docs/CONSENSUS.md` com ponte para o manifesto e raiz limpa em `--strict`; perfis de consenso em `docs/MEMORY.md`); `verify_repository.py` 78/78, com a bateria `evals/test_consenso.py` em 95/95 cobrindo debate, rodada 2, achado, retomada e segredo. O unico criterio julgado na mao, qualidade comparavel a da rodada manual: sim. As duas posicoes leram o codigo (6 e 15 comandos executados), citaram funcoes e linhas, couberam no formato e convergiram sem se ver; a automacao preservou bruto, manifesto com hashes e tempo (1m49s mais retomada em 0,1s), que a rodada manual nao tinha. A rodada exercitou tambem o caminho da DEC-010 (parada por segredo, falso positivo no log, material aceito a mao, `retomar`). Mudar o `Status` para `Concluida` e decisao do usuario: proposto em 2026-10-21.
+#!/usr/bin/env python3
+"""Orquestra uma rodada mecanica de pareceres independentes.
+
+Cada participante trabalha numa copia temporaria do projeto, fora dele, sem
+`docs/consensus/`. O bruto e o manifesto entram no sidecar in-repo assim que
+cada agente termina. Havendo posicao, a minuta entra no fim de CONSENSUS.md
+por substituicao atomica, com julgamento em branco. `retomar` continua uma rodada nao
+concluida por comando explicito, sem repetir o que ja foi pago.
+
+Somente biblioteca padrao (Python 3.8+).
+"""
+
+import argparse
+import concurrent.futures
+import datetime as dt
+import hashlib
+import json
+import os
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import threading
+import unicodedata
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")
+
+EXCLUIDOS_DA_COPIA = ["docs/consensus/", ".consenso-lock", "__pycache__/"]
+IDS_RESERVADOS = {".", ".."}
+TRAVESSAO = "\u2014"
+LOCK_NOME = ".consenso-lock"
+
+# Padroes minimos da T-077 / DEC-010. Palavra solta sem valor nao casa.
+_RE_AWS = re.compile(r"AKIA[A-Z0-9]{16}")
+_RE_PEM = re.compile(r"-----BEGIN[^\n]{0,80}PRIVATE KEY-----")
+_RE_ROTULO = re.compile(
+    r"(?i)(?:api_key|apikey|\btoken\b|\bsecret\b|\bpassword\b)\s*[=:]\s*\S{16,}"
+)
+# Prefixos exigem inicio de palavra e comprimento minimo: `sk-` solto casava
+# `task-force`, `risk-based` e `desk-top` (falso positivo visto na revisao de T-077).
+_RE_GHP = re.compile(r"\bghp_[A-Za-z0-9]{16,}")
+_RE_SK = re.compile(r"\bsk-[A-Za-z0-9_-]{16,}")
+_RE_XOX = re.compile(r"\bxox[A-Za-z]-[A-Za-z0-9-]{8,}")
+_RE_URL = re.compile(r"://[^/\s:]+:[^/\s@]+@")
+PADROES_SEGREDO = (_RE_AWS, _RE_PEM, _RE_ROTULO, _RE_GHP, _RE_SK, _RE_XOX, _RE_URL)
+
+# Estado da rodada corrente, para o handler de sinal enxergar os processos.
+_interrompendo = threading.Event()
+_processos_lock = threading.Lock()
+_processos_vivos = []
+
+
+def tem_segredo(texto):
+    """True se o texto casa algum padrao minimo de segredo da T-077."""
+    if texto is None:
+        return False
+    if isinstance(texto, bytes):
+        texto = texto.decode("utf-8", "replace")
+    if not texto:
+        return False
+    return any(padrao.search(texto) for padrao in PADROES_SEGREDO)
+
+
+def reter_bruto_fora(stdout, stderr):
+    """Guarda stdout e stderr fora do projeto. Nunca redige. Devolve o caminho."""
+    destino = Path(tempfile.mkdtemp(prefix="consenso-retido-"))
+    if not isinstance(stdout, bytes):
+        stdout = stdout.encode("utf-8")
+    if not isinstance(stderr, bytes):
+        stderr = stderr.encode("utf-8")
+    (destino / "stdout.txt").write_bytes(stdout)
+    (destino / "stderr.txt").write_bytes(stderr)
+    return destino
+
+
+def comando_de_retomada(projeto, run_id):
+    return 'consenso.py retomar --projeto "%s" %s' % (projeto, run_id)
+
+
+def avisar_retido(retido, projeto, run_id, identificador):
+    print("Material retido por padrao de segredo: %s" % retido, file=sys.stderr)
+    print("Conferir o material nesse diretorio.", file=sys.stderr)
+    print("Para aceitar como esta, mova o diretorio para docs/consensus/%s/%s/."
+          % (run_id, identificador), file=sys.stderr)
+    print("Para descartar, apague. Depois: %s" % comando_de_retomada(projeto, run_id),
+          file=sys.stderr)
+
+
+def agora():
+    return dt.datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+def soma(caminho):
+    return hashlib.sha256(Path(caminho).read_bytes()).hexdigest()
+
+
+def soma_texto(texto):
+    return hashlib.sha256(texto.encode("utf-8")).hexdigest()
+
+
+def escrever_json(caminho, dados):
+    """Grava o manifesto por substituicao atomica no mesmo diretorio."""
+    escrever_bytes_atomico(caminho, json.dumps(dados, ensure_ascii=False, indent=2) + "\n")
+
+
+def escrever_bytes_atomico(caminho, dados):
+    """Temporario no mesmo diretorio, fsync e os.replace. Limpa o temporario."""
+    caminho = Path(caminho)
+    if isinstance(dados, str):
+        dados = dados.encode("utf-8")
+    temporario = caminho.parent / (".%s.%s.tmp" % (caminho.name, os.getpid()))
+    try:
+        with temporario.open("wb") as arquivo:
+            arquivo.write(dados)
+            arquivo.flush()
+            os.fsync(arquivo.fileno())
+        os.replace(str(temporario), str(caminho))
+    finally:
+        if temporario.exists():
+            temporario.unlink()
+
+
+def ignorar_copia(projeto):
+    projeto = Path(projeto).resolve()
+
+    def ignorar(atual, nomes):
+        removidos = {nome for nome in nomes if nome in {LOCK_NOME, "__pycache__"}}
+        try:
+            rel = Path(atual).resolve().relative_to(projeto)
+        except ValueError:
+            return removidos
+        if rel.as_posix() == "docs" and "consensus" in nomes:
+            removidos.add("consensus")
+        return removidos
+
+    return ignorar
+
+
+def reter_registros(copia):
+    """Esconde as entradas anteriores; os modelos cercados acima ficam."""
+    caminho = Path(copia) / "docs" / "CONSENSUS.md"
+    try:
+        texto = caminho.read_text(encoding="utf-8")
+    except OSError:
+        return
+    marcador = "## Registros"
+    inicio = texto.find(marcador)
+    if inicio < 0:
+        return
+    nota = (
+        "## Registros\n\n"
+        "> As entradas anteriores foram retidas de proposito por esta operacao.\n"
+    )
+    caminho.write_text(texto[:inicio] + nota, encoding="utf-8")
+
+
+def prompt_do_participante(pergunta, participante, copia, rodada_n=1, anteriores=()):
+    """Rodada 1 e cega. Da rodada 2 em diante o prompt leva as posicoes anteriores inteiras,
+    depois da pergunta, cada uma exatamente como veio: resumo ali seria regressao (DEC-006)."""
+    base = (
+        "Participante: %s\n"
+        "Copia isolada do projeto: %s\n"
+        "Esta e uma copia somente-leitura do projeto: leia o que precisar. "
+        "Nao edite nada fora da sua resposta.\n"
+        "Responda em portugues, sem travessao. A resposta inteira no stdout "
+        "sera reproduzida sem resumo. Nenhuma posicao contemporanea %sesta "
+        "disponivel por construcao.\n\n"
+    ) % (participante, copia, "" if rodada_n == 1 else "desta rodada ")
+    if rodada_n == 1:
+        return base + "Pergunta:\n\n%s" % pergunta
+    partes = [
+        base,
+        "Rodada %d. As posicoes anteriores estao no fim deste prompt, na integra, "
+        "exatamente como foram dadas; nada foi resumido. As entradas publicadas estao em "
+        "docs/CONSENSUS.md da copia. Responda a pergunta levando-as em conta e diga o que "
+        "mudou em relacao a elas.\n\n" % rodada_n,
+        "Pergunta:\n\n%s\n\nPosicoes anteriores (na integra):\n" % pergunta,
+    ]
+    for rotulo, caminho, texto in anteriores:
+        partes.append("\n----- Anterior: %s (%s) -----\n" % (rotulo, caminho))
+        partes.append(texto)
+        partes.append("\n" if not texto.endswith("\n") else "")
+        partes.append("----- Fim de %s -----\n" % rotulo)
+    return "".join(partes)
+
+
+def executa(comando, prompt, copia):
+    inicio = agora()
+    try:
+        processo = subprocess.Popen(
+            comando + [prompt],
+            cwd=str(copia),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except OSError as erro:
+        return inicio, agora(), 127, b"", str(erro).encode("utf-8", "replace")
+    with _processos_lock:
+        _processos_vivos.append(processo)
+    if _interrompendo.is_set():
+        try:
+            processo.terminate()
+        except OSError:
+            pass
+    stdout, stderr = processo.communicate()
+    with _processos_lock:
+        if processo in _processos_vivos:
+            _processos_vivos.remove(processo)
+    return inicio, agora(), processo.returncode, stdout, stderr
+
+
+def ao_sinal(signum, _frame):
+    _interrompendo.set()
+    with _processos_lock:
+        alvos = list(_processos_vivos)
+    for processo in alvos:
+        try:
+            processo.terminate()
+        except OSError:
+            pass
+    # SIGINT: nao deixa o KeyboardInterrupt default furar o finally.
+    if signum == signal.SIGINT:
+        return
+
+
+def sidecar_ignorado(projeto):
+    """True quando o git trata docs/consensus/ como ignorado (DEC-008)."""
+    if not (projeto / ".git").exists():
+        return False
+    processo = subprocess.run(
+        ["git", "-C", str(projeto), "check-ignore", "-q", "docs/consensus/"],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return processo.returncode == 0
+
+
+def id_inseguro(identificador):
+    if not identificador or identificador in IDS_RESERVADOS:
+        return True
+    return "/" in identificador or "\\" in identificador or os.sep in identificador
+
+
+def rodadas_nao_concluidas(projeto):
+    """Run-ids em docs/consensus/ cujo manifesto nao esta `concluida`, mais antigos primeiro."""
+    base = Path(projeto) / "docs" / "consensus"
+    saida = []
+    if not base.is_dir():
+        return saida
+    for pasta in sorted(base.iterdir()):
+        try:
+            dados = json.loads((pasta / "manifesto.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(dados, dict) and dados.get("status") != "concluida":
+            saida.append(pasta.name)
+    return saida
+
+
+def adquirir_lock(projeto, run_id=None):
+    lock_dir = Path(projeto) / LOCK_NOME
+    try:
+        os.mkdir(str(lock_dir))
+    except FileExistsError:
+        print("[ERRO] outra rodada ja esta em andamento neste projeto: lock em %s."
+              % lock_dir, file=sys.stderr)
+        print("Se uma rodada anterior terminou de forma inesperada e voce confirmou que",
+              file=sys.stderr)
+        print("nao ha rodada ativa, limpe o lock orfao com: rmdir \"%s\"" % lock_dir,
+              file=sys.stderr)
+        # Retomada e palavra humana: a mensagem so mostra o comando, nunca o executa.
+        for pendente in ([run_id] if run_id else rodadas_nao_concluidas(projeto)[-3:]):
+            print("Para continuar a rodada %s depois disso: %s"
+sed: can't read scripts/loop.sh: No such file or directory
+
+exec
+/bin/bash -lc "rg --files | rg '("'^|/)loop'"\\.sh"'$|0006-automacao|0008-adaptador'"' && rg -n -C 4 'DEC-003|DEC-009|find .*newer|tempo-maximo|agente' docs/specs/0006-automacao-do-consenso.md docs/skills/ai-project-structure/scripts" in /tmp/consenso-r66rm85b/projeto
+ succeeded in 0ms:
+docs/specs/0006-automacao-do-consenso.md
+docs/specs/0008-adaptador-cloudroom.md
+docs/skills/ai-project-structure/scripts/loop.sh
+docs/specs/0006-automacao-do-consenso.md-1-# Spec 0006 - Automacao do consenso: independencia por construcao
+docs/specs/0006-automacao-do-consenso.md-2-
+docs/specs/0006-automacao-do-consenso.md-3-**Status:** Em andamento
+docs/specs/0006-automacao-do-consenso.md-4-**Criada em:** 2026-09-03
+docs/specs/0006-automacao-do-consenso.md:5:**Esforco:** G, porque toca tres coisas ao mesmo tempo: execucao de agente, escrita em arquivo de memoria, e os campos que a 2.2.0 criou justamente para denunciar consenso fraco. Virou `Definida` em 2026-09-04, com as dez perguntas respondidas (DEC-001 a DEC-010). Passou a `Em andamento` no mesmo dia, com o plano de T-075 a T-083 aprovado e T-075 fechada pelo loop.
+docs/specs/0006-automacao-do-consenso.md-6-
+docs/specs/0006-automacao-do-consenso.md-7-## Problema E Resultado Esperado
+docs/specs/0006-automacao-do-consenso.md-8-
+docs/specs/0006-automacao-do-consenso.md-9-Esta spec estava pre-registrada em dois lugares, os dois dizendo a mesma coisa: a spec 0005 a listou em "Fora Do Escopo" com a nota "depende desta spec estar fechada, e merece a propria", e a DEC-008 da spec 0004 a tirou da 2.3.0 dizendo que ela "mexe em `CONSENSUS.md` e nos campos declarativos da 2.2.0, nao no ciclo de execucao". A 0005 fechou em 2026-09-03, entao a dependencia caiu.
+docs/specs/0006-automacao-do-consenso.md-10-
+docs/specs/0006-automacao-do-consenso.md:11:- Problema 1: **a independencia do consenso e autodeclarada, e a propria skill diz isso em voz alta.** A 2.2.0 criou `Metodo`, `Exposicao previa a outras posicoes` e `Rodada`, e registrou junto que o validador "checa presenca e valor permitido, **nunca veracidade**: nenhum script prova que um modelo nao leu a posicao do outro. O ganho e rastreabilidade, nao garantia." Automatizar muda a natureza da coisa: se a ferramenta roda N agentes isolados entre si, a independencia deixa de ser afirmacao e vira propriedade do processo.
+docs/specs/0006-automacao-do-consenso.md-12-
+docs/specs/0006-automacao-do-consenso.md-13-- Problema 2: **a rodada na mao custa caro o bastante para nao acontecer.** Medido neste repositorio em 2026-09-03, na revalidacao do achado `0005-A1`: foi preciso escrever um arquivo de prompt, escolher o perfil, montar a chamada com sandbox `read-only`, esperar, ler a saida e transcrever a posicao. Deu certo e pegou um erro factual real, mas nada disso ficou como procedimento reproduzivel, e o custo de repetir e o mesmo da primeira vez. Segunda opiniao cara e segunda opiniao que so acontece quando alguem lembra.
+docs/specs/0006-automacao-do-consenso.md-14-
+docs/specs/0006-automacao-do-consenso.md-15-- Problema 3: **quem transcreve a critica e o modelo criticado.** Naquela mesma rodada, quem escreveu a secao `Revalidacao` foi o Claude, resumindo a critica do Codex ao trabalho do Claude. A entrada declara a proveniencia e o resumo foi conferido no codigo antes de aceito, mas o acoplamento e exatamente do tipo que o consenso existe para evitar: a fidelidade da critica depende da boa fe de quem ela critica.
+docs/specs/0006-automacao-do-consenso.md-16-
+docs/specs/0006-automacao-do-consenso.md:17:- Problema 4: **ja existe um caminho de invocar agente no projeto, e o consenso nao usa.** O `loop.sh` resolveu o conceito de comando de agente neutro (`--agente`), com os perfis por intencao vivendo em `docs/MEMORY.md` e resolvidos pelo agente de chat, nunca pelo script. Consenso automatizado que invente o proprio jeito de chamar agente cria duas implementacoes da mesma coisa no mesmo repositorio, e elas divergem com o tempo.
+docs/specs/0006-automacao-do-consenso.md:18:  - **Correcao de 2026-09-03, apontada pelo Codex na rodada 1 e conferida no codigo antes de aceita:** a primeira redacao deste problema superestimava o reuso. O que se reaproveita e o conceito, nao o script. O `loop.sh` de hoje pressupoe tarefa, mutacao de arquivo, portao e tentativas, e em `loop.sh:145` ele decide se o agente fez alguma coisa com `find -type f -newer` no projeto. Um agente de parecer nao escreve nada, entao cairia no `exit 4` da DEC-014 em toda rodada. Reusar o script como esta nao funciona.
+docs/specs/0006-automacao-do-consenso.md-19-
+docs/specs/0006-automacao-do-consenso.md-20-- Resultado esperado 1: posicoes independentes **por construcao**, e nao por declaracao, com os campos da 2.2.0 passando a descrever um fato do processo em vez de uma promessa do modelo.
+docs/specs/0006-automacao-do-consenso.md-21-- Resultado esperado 2: segunda opiniao barata o suficiente para ser o padrao em decisao de risco, e nao um esforco especial.
+docs/specs/0006-automacao-do-consenso.md-22-- Resultado esperado 3: proveniencia registrada por quem executou, nao por quem foi revisado.
+docs/specs/0006-automacao-do-consenso.md:23:- Resultado esperado 4: um caminho de invocacao de agente no projeto, reaproveitando o que o modulo de loop ja provou em bancada.
+docs/specs/0006-automacao-do-consenso.md-24-
+docs/specs/0006-automacao-do-consenso.md-25-## Escopo
+docs/specs/0006-automacao-do-consenso.md-26-
+docs/specs/0006-automacao-do-consenso.md-27-### Incluido
+docs/specs/0006-automacao-do-consenso.md-28-
+docs/specs/0006-automacao-do-consenso.md:29:- Executar a mesma pergunta em N agentes, isolados entre si, com o isolamento sendo propriedade da execucao e nao pedido no prompt.
+docs/specs/0006-automacao-do-consenso.md:30:- Reuso do que o modulo de loop ja tem: `--agente` neutro, perfis em `docs/MEMORY.md`, exit codes por caminho.
+docs/specs/0006-automacao-do-consenso.md:31:- Material de saida por agente, em forma que vire entrada de `CONSENSUS.md` sem o resumo passar por quem foi criticado.
+docs/specs/0006-automacao-do-consenso.md-32-- Checks correspondentes em `validate_structure.py`, na medida em que sejam verificaveis por forma.
+docs/specs/0006-automacao-do-consenso.md-33-
+docs/specs/0006-automacao-do-consenso.md-34-### Fora Do Escopo
+docs/specs/0006-automacao-do-consenso.md-35-
+--
+docs/specs/0006-automacao-do-consenso.md-43-Escritos ate onde as perguntas abertas permitem. Os que dependem de resposta estao marcados.
+docs/specs/0006-automacao-do-consenso.md-44-
+docs/specs/0006-automacao-do-consenso.md-45-Verificaveis por comando:
+docs/specs/0006-automacao-do-consenso.md-46-
+docs/specs/0006-automacao-do-consenso.md:47:- Rodar a operacao com N agentes produz N artefatos de posicao, um por agente, e nenhum deles contem o texto das posicoes dos outros.
+docs/specs/0006-automacao-do-consenso.md:48:- Agente que falha (cota, configuracao, indisponibilidade) nao derruba a rodada inteira nem produz posicao vazia passando por posicao real: o artefato daquele agente registra a falha.
+docs/specs/0006-automacao-do-consenso.md:49:- A operacao nao inventa posicao de agente que nao rodou. Nenhum artefato sem execucao por tras.
+docs/specs/0006-automacao-do-consenso.md-50-- Projeto que nunca usa a automacao nao ganha nenhuma cobranca nova no validador.
+docs/specs/0006-automacao-do-consenso.md-51-- `verify_repository.py` em exit 0, e nenhum travessao (U+2014) em arquivo novo ou alterado.
+docs/specs/0006-automacao-do-consenso.md-52-- A minuta que a operacao escreve em `CONSENSUS.md` passa em `validate_structure.py --strict` sem aviso, declara `Metodo`, `Exposicao previa a outras posicoes` e `Rodada` coerentes com o que a execucao de fato fez, e traz o marcador `**Origem:**` (DEC-001, DEC-002, DEC-007).
+docs/specs/0006-automacao-do-consenso.md:53:- O isolamento declarado e o isolamento verificavel sao o mesmo: da para conferir, sem confiar no relato do agente, que ele nao teve acesso as posicoes contemporaneas (DEC-003).
+docs/specs/0006-automacao-do-consenso.md:54:- Entrada com `**Origem:**` malformada (participante sem secao, agente falho sem secao propria, sem ponte para o manifesto) gera AVISO; entrada sem `**Origem:**` nao ganha nenhum diagnostico novo (DEC-007).
+docs/specs/0006-automacao-do-consenso.md-55-- Cada rodada deixa um manifesto ao lado do bruto com comando integral, diretorio, exit code e hashes de insumo e saida; a entrada em `CONSENSUS.md` traz so a ponte curta para ele (DEC-008).
+docs/specs/0006-automacao-do-consenso.md:56:- Rodada interrompida deixa `CONSENSUS.md` byte a byte como estava, o bruto e o manifesto ja gravados no repositorio fora da arvore de execucao, e a retomada so acontece por comando explicito (DEC-009).
+docs/specs/0006-automacao-do-consenso.md-57-- Bruto que casa padrao de segredo nao entra no repositorio: a rodada para antes de gravar, guarda o material fora do repositorio, informa o caminho e sai com codigo proprio; nada e redigido e nada e escrito em `CONSENSUS.md` (DEC-010).
+docs/specs/0006-automacao-do-consenso.md-58-
+docs/specs/0006-automacao-do-consenso.md-59-Julgados na mao, sem runner hoje:
+docs/specs/0006-automacao-do-consenso.md-60-
+docs/specs/0006-automacao-do-consenso.md:61:- Se a posicao produzida por agente isolado tem qualidade comparavel a da rodada feita na mao em 2026-09-03. E o unico ponto de comparacao real que existe hoje, e ele e n=1.
+docs/specs/0006-automacao-do-consenso.md-62-
+docs/specs/0006-automacao-do-consenso.md-63-## Decisoes
+docs/specs/0006-automacao-do-consenso.md-64-
+docs/specs/0006-automacao-do-consenso.md-65-Herdadas, sem nova discussao, e listadas porque restringem o desenho desta spec:
+docs/specs/0006-automacao-do-consenso.md-66-
+docs/specs/0006-automacao-do-consenso.md:67:- 0004/DEC-001: o que a automacao escreve na memoria do projeto so pode ser o que um comando comprova. Coletar posicao de agente e fato com execucao por tras; afirmar que as posicoes convergem nao e.
+docs/specs/0006-automacao-do-consenso.md:68:- 0004/DEC-016: escolha de modelo, esforco e modo continua sendo do usuario, com os perfis em `docs/MEMORY.md`. A automacao recebe o comando do agente e obedece, sem catalogo de modelo dentro da skill.
+docs/specs/0006-automacao-do-consenso.md:69:- 0004/DEC-019: o agente do loop **nao** escreve em `CONSENSUS.md`, e a razao foi especifica: uma rodada de loop tem um agente so, e consenso de um modelo so declarando a propria independencia e a fraude que os campos da 2.2.0 existem para denunciar. Esta spec precisa dizer se a razao se aplica quando ha N agentes (ver P-2), em vez de herdar a proibicao sem olhar.
+docs/specs/0006-automacao-do-consenso.md-70-- 0005/DEC-001: o projeto do usuario usado como evidencia da 0005 continua somente-leitura e nao e alvo desta spec.
+docs/specs/0006-automacao-do-consenso.md-71-
+docs/specs/0006-automacao-do-consenso.md-72-Desta spec, todas ratificadas pelo usuario em 2026-09-03 a partir da rodada 1 cega registrada em `docs/CONSENSUS.md`. A rodada teve tres posicoes independentes (Claude selado antes das demais rodarem, Codex e Grok), e a forca de cada decisao esta declarada porque nem todas nasceram iguais:
+docs/specs/0006-automacao-do-consenso.md-73-
+docs/specs/0006-automacao-do-consenso.md:74:- **DEC-001 (P-1, unanime nas tres posicoes):** a operacao preserva o **artefato bruto de cada agente** e gera uma **minuta deterministica** da entrada, com as posicoes reproduzidas sem resumo e os campos de julgamento em branco. Bruto e minuta nao sao alternativas: os tres modelos recusaram essa exclusao separadamente. A linha de corte e a mesma nos tres: a operacao para onde comeca o julgamento, e o teste pratico e se uma pessoa consegue conferir o campo olhando o artefato bruto ao lado. Consequencia aceita: a entrada nao nasce concluida, e entrada com consenso final vazio pode ser lida como acordo por omissao, o que se mitiga nascendo com `Status: aberto` e `Proximo passo` com dono humano.
+docs/specs/0006-automacao-do-consenso.md-75-
+docs/specs/0006-automacao-do-consenso.md:76:- **DEC-002 (P-2, unanime no resultado, com o fundamento corrigido contra a posicao do Claude):** a operacao **pode escrever em `CONSENSUS.md`**, mas so o orquestrador mecanico escreve, e so o recorte que a execucao comprova: pergunta, posicoes literais, falhas, comandos, `Metodo`, `Exposicao previa` e `Rodada`. Os **agentes continuam proibidos**. O fundamento **nao e haver N agentes**, e sim separar os agentes opinantes de um **escritor deterministico**: Codex e Grok chegaram a essa correcao sozinhos, e o Claude, que havia proposto a justificativa pela cardinalidade, foi vencido. O Grok precisou o ponto: a DEC-019 nomeia o **agente**, entao aplica-la ao script nao seria heranca e sim estende-la a um sujeito que ela nunca nomeou. Consequencia aceita: passam a existir duas politicas de escrita no projeto (o loop nunca escreve la, este script escreve um recorte), e isso precisa estar dito no prompt de cada um.
+docs/specs/0006-automacao-do-consenso.md-77-
+docs/specs/0006-automacao-do-consenso.md:78:- **DEC-003 (P-3, unanime, com as tres opcoes da pergunta rejeitadas):** o que se isola sao as **posicoes contemporaneas**, nao o repositorio. Leitura do repositorio permanece. E `CONSENSUS.md` nao e um degrau unico: em debate rodada 1 ele fica fora do material do agente; em revalidacao de achado a entrada sob revisao entra **de proposito**, porque e o objeto da pergunta. A escada `(a) < (b) < (c)` da pergunta estava errada, e a premissa empirica dela tambem: a rodada de 2026-09-03 rodou com sandbox `read-only` **e o repositorio visivel**, e foi lendo o codigo que o Codex achou o erro factual. Consequencia aceita: sandbox somente-leitura impede escrita e nao leitura, entao o isolamento real depende de material separado por agente, e nao de pedir cegueira no prompt.
+docs/specs/0006-automacao-do-consenso.md-79-
+docs/specs/0006-automacao-do-consenso.md:80:- **DEC-004 (P-4, maioria de 2 a 1, com o Claude vencido):** a operacao cobre **debate e achado**, como dois pacotes sobre um primitivo unico de invocar agentes isolados e coletar artefatos. O Claude defendeu so debate, argumentando que existe um unico achado registrado e que ele proprio o escreveu, entao automatizar aquela forma seria automatizar um palpite n=1. Codex e Grok responderam o mesmo, separadamente: o caro e o isolamento e a invocacao, nao o template, e cortar o achado faz a spec nao resolver o problema que a motivou. Consequencia aceita: o esforco G cresce, com dois mapeamentos, dois prompts e evals proprios, e existe risco real de a primeira versao sair pela metade. Se o corte for inevitavel, a ordem e primitivo mais debate primeiro, e o pacote de achado na sequencia imediata, nunca adiado para outra spec.
+docs/specs/0006-automacao-do-consenso.md-81-
+docs/specs/0006-automacao-do-consenso.md:82:- **DEC-005 (P-5, maioria de 2 a 1, com o Claude vencido e fato verificado do lado da maioria):** N e os comandos dos agentes entram **na chamada**, no mesmo contrato que o loop ja usa. A lista em `docs/MEMORY.md` e o padrao **deste usuario**, resolvido pelo agente de chat, e nunca configuracao lida por script nem catalogo dentro da skill. **`N=1` e valido**, porque debate quer `N>=2` e revalidacao de achado tem exatamente um revisor. O Claude propos guardar a lista em `MEMORY.md` como configuracao; conferido no codigo que isso contraria a pratica: o `loop.sh` recebe `--agente` e obedece, sem ler `MEMORY.md` em momento nenhum. Consequencia aceita: `MEMORY.md` desatualizado dispara o revisor errado, e nao ha teto global de custo, entao o usuario pode passar quatro agentes e queimar plano.
+docs/specs/0006-automacao-do-consenso.md-83-
+docs/specs/0006-automacao-do-consenso.md-84-- **DEC-006 (P-6, maioria de 2 a 1, com a dissidencia registrada porque o argumento dela sobrevive):** a automacao cobre os **dois modos**, com a rodada 1 cega como padrao, e o modo escolhido **determina** o valor de `Exposicao previa` em vez de o usuario digitar. A operacao nunca deduz sozinha o numero da rodada nem quais posicoes anteriores fornecer. O Grok discordou e defendeu so a rodada 1 cega na primeira versao, com um argumento que continua valendo depois da derrota: rodada 2 exige o pacote **inteiro** das posicoes anteriores, e no instante em que o orquestrador resume, o Problema 3 volta por dentro da propria automacao. Consequencia aceita: quem implementar a rodada 2 tem de passar as posicoes anteriores na integra, e um resumo ali e regressao, nao otimizacao.
+docs/specs/0006-automacao-do-consenso.md-85-
+docs/specs/0006-automacao-do-consenso.md:86:- **DEC-007 (P-7, forma da entrada; 3 de 3 no que fazer, calibragem escolhida pelo usuario em 2026-09-04 entre Codex e Grok):** a forma da entrada de `CONSENSUS.md` **entra no escopo**: secao repetivel por participante com id arbitrario, nas duas formas (debate e achado), secao propria para agente que falhou, e checks novos valendo **so** para entrada automatizada, por marcador opt-in `**Origem:**`. Os diagnosticos novos sao **AVISO** (posicao do Grok, por simetria com o resto de consenso), nao ERRO como queria o Codex. Fato que barateou a decisao: o validador nunca exigiu heading de posicao nomeado; o congelamento em Codex, Claude e Gemini estava no template. Consequencia aceita: entrada automatizada malformada passa em modo normal e so trava em `--strict`, igual ao resto do arquivo.
+docs/specs/0006-automacao-do-consenso.md-87-
+docs/specs/0006-automacao-do-consenso.md-88-- **DEC-008 (P-8, proveniencia; 3 de 3 por entrar, calibragem escolhida pelo usuario em 2026-09-04):** a proveniencia **entra no escopo**, com sidecar guardando bruto e manifesto fora do `CONSENSUS.md` e uma **ponte curta** dentro da entrada (posicao do Grok): o comando integral, diretorio e hashes de insumo e saida ficam **so no manifesto**; a entrada aponta para ele. O Codex queria isso tudo dentro da entrada, lendo a DEC-002 ao pe da letra; perdeu pela rotacao e pela leitura humana. O bruto **nao** pode ficar em `.gitignore`, senao o teste da DEC-001 morre na sessao seguinte. Consequencia aceita: conferir um campo exige abrir dois arquivos.
+docs/specs/0006-automacao-do-consenso.md-89-
+docs/specs/0006-automacao-do-consenso.md:90:- **DEC-009 (P-9, quando a minuta e escrita; 3 de 3 no desenho, duas calibragens escolhidas pelo usuario em 2026-09-04):** criterio operacional do Grok, **publicado e anterior, nao publicado e contemporaneo**; lock exclusivo por projeto na abertura; bruto e manifesto gravados assim que cada agente encerra, onde os agentes da rodada corrente nao alcancam; minuta escrita uma vez so, no fim, por substituicao atomica do arquivo inteiro; interrupcao deixa `CONSENSUS.md` byte a byte como estava. Calibragens: **retomada apos interrupcao sempre exige palavra humana** (Claude e Grok; o Codex queria retomada automatica com insumos identicos), e **o bruto mora in-repo desde o inicio, fora da arvore de execucao** (Grok; Codex e Claude queriam fora do repositorio ate o fecho). Consequencia aceita: rodada interrompida deixa material pago no repositorio antes de qualquer minuta, e alguem precisa mandar retomar.
+docs/specs/0006-automacao-do-consenso.md-91-
+docs/specs/0006-automacao-do-consenso.md-92-- **DEC-010 (P-10, segredo no bruto; sem rodada, escolhida pelo usuario em 2026-09-04 entre tres opcoes esbocadas):** antes de gravar qualquer bruto no repositorio, a operacao **varre padroes de segredo** (chave de API, token, senha em URL, chave privada). Achou algo: a rodada **para**, guarda o bruto **fora** do repositorio, informa o caminho e pede palavra humana; **nunca redige**, porque redacao automatica destroi a evidencia que a DEC-001 protege, e nunca grava. Alternativas rejeitadas: bruto fora do git por padrao com promocao manual (mataria o teste da DEC-001 no dia a dia) e aceitar o risco com aviso na documentacao (transfere o problema para quem nao leu). Consequencias aceitas: falso positivo para uma rodada legitima ate alguem olhar; falso negativo continua possivel, porque padrao nao cobre todo segredo, e isso fica dito na documentacao da operacao.
+docs/specs/0006-automacao-do-consenso.md-93-
+docs/specs/0006-automacao-do-consenso.md-94-## Tarefas
+docs/specs/0006-automacao-do-consenso.md-95-
+docs/specs/0006-automacao-do-consenso.md-96-- T-053: responder as perguntas abertas para a spec poder virar `Definida`
+docs/specs/0006-automacao-do-consenso.md-97-- T-074: decidir o que fazer com segredo no artefato bruto (P-10)
+docs/specs/0006-automacao-do-consenso.md:98:- T-075: primitivo `consenso.py debate`, N agentes isolados em paralelo, bruto e manifesto em `docs/consensus/` (bump 2.11.0)
+docs/specs/0006-automacao-do-consenso.md-99-- T-076: lock e minuta de debate atomica com julgamento em branco
+docs/specs/0006-automacao-do-consenso.md-100-- T-077: varredura de segredo antes de gravar
+docs/specs/0006-automacao-do-consenso.md-101-- T-078: marcador `**Origem:**` e checks AVISO no validador, com fixture
+docs/specs/0006-automacao-do-consenso.md-102-- T-079: pacote de achado, revalidacao dentro da entrada existente
+docs/specs/0006-automacao-do-consenso.md-103-- T-080: rodada 2 com as posicoes anteriores na integra
+docs/specs/0006-automacao-do-consenso.md-104-- T-081: retomada por comando explicito
+docs/specs/0006-automacao-do-consenso.md-105-- T-082: `references/consenso.md`, secao no `SKILL.md`, template e README
+docs/specs/0006-automacao-do-consenso.md:106:- T-083: bancada real com dois agentes baratos, comparada com a rodada de 2026-09-03
+docs/specs/0006-automacao-do-consenso.md-107-
+docs/specs/0006-automacao-do-consenso.md-108-## Perguntas Abertas
+docs/specs/0006-automacao-do-consenso.md-109-
+docs/specs/0006-automacao-do-consenso.md:110:P-1 a P-6 foram respondidas pela rodada 1 cega de 2026-09-03 e ratificadas pelo usuario no mesmo dia (DEC-001 a DEC-006). P-7, P-8 e P-9 passaram por rodada 1 cega em 2026-09-03 com 3 de 3 no que fazer, e as calibragens que sobraram foram escolhidas pelo usuario em 2026-09-04, sempre pela posicao do Grok (DEC-007 a DEC-009). As rodadas estao em `docs/archive/CONSENSUS-2026.md`, entradas "2026-09-03 - P-7 e P-8" e "2026-09-03 - P-9", com as tres posicoes na integra.
+docs/specs/0006-automacao-do-consenso.md-111-
+docs/specs/0006-automacao-do-consenso.md-112-P-10 (segredo no bruto), que nenhuma rodada respondeu, foi decidida pelo usuario em 2026-09-04 entre tres opcoes esbocadas em T-074 e virou DEC-010. Nenhuma pergunta aberta.
+docs/specs/0006-automacao-do-consenso.md-113-
+docs/specs/0006-automacao-do-consenso.md-114-## Evidencia De Conclusao
+--
+docs/skills/ai-project-structure/scripts/loop_task.py-7-e o validador oficial da estrutura.
+docs/skills/ai-project-structure/scripts/loop_task.py-8-
+docs/skills/ai-project-structure/scripts/loop_task.py-9-Uso:
+docs/skills/ai-project-structure/scripts/loop_task.py-10-    loop_task.py check     <projeto> <T-NNN>
+docs/skills/ai-project-structure/scripts/loop_task.py:11:    loop_task.py fechar    <projeto> <T-NNN> --saida <arquivo> [--codigo N] [--agente CMD]
+docs/skills/ai-project-structure/scripts/loop_task.py-12-    loop_task.py bloquear  <projeto> <T-NNN> --pergunta <arquivo>
+docs/skills/ai-project-structure/scripts/loop_task.py-13-
+docs/skills/ai-project-structure/scripts/loop_task.py-14-`check` imprime o comando declarado em `(verifica:)` e sai 0 quando a tarefa
+docs/skills/ai-project-structure/scripts/loop_task.py-15-e elegivel. `fechar` move para "## Concluidas" com a sub-linha de evidencia.
+--
+docs/skills/ai-project-structure/scripts/loop_task.py-240-            "este helper recusa escrever evidencia de comando que falhou."
+docs/skills/ai-project-structure/scripts/loop_task.py-241-        )
+docs/skills/ai-project-structure/scripts/loop_task.py-242-    saida = Path(args.saida).read_text(encoding="utf-8", errors="replace") if args.saida else ""
+docs/skills/ai-project-structure/scripts/loop_task.py-243-    hoje = date.today().isoformat()
+docs/skills/ai-project-structure/scripts/loop_task.py:244:    # `agente` e fato conhecido com certeza: foi o loop que invocou aquele
+docs/skills/ai-project-structure/scripts/loop_task.py-245-    # comando. Registrar nao e alegacao sobre qualidade, e rastreabilidade de
+docs/skills/ai-project-structure/scripts/loop_task.py-246-    # quem produziu o trabalho.
+docs/skills/ai-project-structure/scripts/loop_task.py:247:    agente = f"agente={V.squeeze(args.agente)}; " if args.agente else ""
+docs/skills/ai-project-structure/scripts/loop_task.py-248-    novas = [
+docs/skills/ai-project-structure/scripts/loop_task.py-249-        f"- {hoje} {linha}",
+docs/skills/ai-project-structure/scripts/loop_task.py-250-        *linhas[inicio + 1:fim],
+docs/skills/ai-project-structure/scripts/loop_task.py:251:        f"  - Evidencia: tipo=comando; {agente}procedimento={comando}; "
+docs/skills/ai-project-structure/scripts/loop_task.py-252-        f"resultado={resumir_saida(saida, args.codigo)}",
+docs/skills/ai-project-structure/scripts/loop_task.py-253-    ]
+docs/skills/ai-project-structure/scripts/loop_task.py-254-    restante = linhas[:inicio] + linhas[fim:]
+docs/skills/ai-project-structure/scripts/loop_task.py-255-    texto_restante = "\n".join(restante)
+--
+docs/skills/ai-project-structure/scripts/loop_task.py-305-    p.add_argument("projeto")
+docs/skills/ai-project-structure/scripts/loop_task.py-306-    p.add_argument("tarefa")
+docs/skills/ai-project-structure/scripts/loop_task.py-307-    p.add_argument("--saida", help="Arquivo com a saida do comando.")
+docs/skills/ai-project-structure/scripts/loop_task.py-308-    p.add_argument("--codigo", type=int, default=0, help="Exit code do comando.")
+docs/skills/ai-project-structure/scripts/loop_task.py:309:    p.add_argument("--agente", help="Comando do agente que fez o trabalho, para rastreabilidade.")
+docs/skills/ai-project-structure/scripts/loop_task.py:310:    p.add_argument("--linha-esperada", help="Linha da tarefa capturada antes de chamar o agente.")
+docs/skills/ai-project-structure/scripts/loop_task.py-311-    p.set_defaults(func=cmd_fechar)
+docs/skills/ai-project-structure/scripts/loop_task.py-312-
+docs/skills/ai-project-structure/scripts/loop_task.py-313-    p = sub.add_parser("bloquear", help="Move para Aguardando Usuario com a pergunta.")
+docs/skills/ai-project-structure/scripts/loop_task.py-314-    p.add_argument("projeto")
+docs/skills/ai-project-structure/scripts/loop_task.py-315-    p.add_argument("tarefa")
+docs/skills/ai-project-structure/scripts/loop_task.py:316:    p.add_argument("--pergunta", required=True, help="Arquivo com a pergunta do agente.")
+docs/skills/ai-project-structure/scripts/loop_task.py-317-    p.set_defaults(func=cmd_bloquear)
+docs/skills/ai-project-structure/scripts/loop_task.py-318-
+docs/skills/ai-project-structure/scripts/loop_task.py-319-    args = parser.parse_args(argv)
+docs/skills/ai-project-structure/scripts/loop_task.py-320-    digitos = re.sub(r"\D", "", args.tarefa)
+--
+docs/skills/ai-project-structure/scripts/consenso.py-2-"""Orquestra uma rodada mecanica de pareceres independentes.
+docs/skills/ai-project-structure/scripts/consenso.py-3-
+docs/skills/ai-project-structure/scripts/consenso.py-4-Cada participante trabalha numa copia temporaria do projeto, fora dele, sem
+docs/skills/ai-project-structure/scripts/consenso.py-5-`docs/consensus/`. O bruto e o manifesto entram no sidecar in-repo assim que
+docs/skills/ai-project-structure/scripts/consenso.py:6:cada agente termina. Havendo posicao, a minuta entra no fim de CONSENSUS.md
+docs/skills/ai-project-structure/scripts/consenso.py-7-por substituicao atomica, com julgamento em branco. `retomar` continua uma rodada nao
+docs/skills/ai-project-structure/scripts/consenso.py-8-concluida por comando explicito, sem repetir o que ja foi pago.
+docs/skills/ai-project-structure/scripts/consenso.py-9-
+docs/skills/ai-project-structure/scripts/consenso.py-10-Somente biblioteca padrao (Python 3.8+).
+--
+docs/skills/ai-project-structure/scripts/consenso.py-454-    """Primitivo comum a debate e achado: uma copia isolada por participante, execucao
+docs/skills/ai-project-structure/scripts/consenso.py-455-    em paralelo, bruto e manifesto gravados assim que cada um encerra, varredura de
+docs/skills/ai-project-structure/scripts/consenso.py-456-    segredo antes de gravar. `reter` esconde as entradas anteriores de CONSENSUS.md na
+docs/skills/ai-project-structure/scripts/consenso.py-457-    copia (debate); achado a deixa inteira, porque a entrada sob revisao e o objeto
+docs/skills/ai-project-structure/scripts/consenso.py:458:    (DEC-003). Devolve {id: stdout} de quem terminou sem reter por segredo."""
+docs/skills/ai-project-structure/scripts/consenso.py-459-    stdout_por_id = {}
+docs/skills/ai-project-structure/scripts/consenso.py-460-    temporarios = []
+docs/skills/ai-project-structure/scripts/consenso.py-461-    trabalhos = []
+docs/skills/ai-project-structure/scripts/consenso.py-462-    try:
+--
+docs/skills/ai-project-structure/scripts/consenso.py-570-
+docs/skills/ai-project-structure/scripts/consenso.py-571-def validar_participantes(participantes, modo, minimo):
+docs/skills/ai-project-structure/scripts/consenso.py-572-    """Devolve a lista de (id, comando) ou imprime o erro e devolve None."""
+docs/skills/ai-project-structure/scripts/consenso.py-573-    if len(participantes) < minimo:
+docs/skills/ai-project-structure/scripts/consenso.py:574:        print("[ERRO] %s exige pelo menos %s --agente." % (modo, "um" if minimo == 1 else "dois"),
+docs/skills/ai-project-structure/scripts/consenso.py-575-              file=sys.stderr)
+docs/skills/ai-project-structure/scripts/consenso.py-576-        return None
+docs/skills/ai-project-structure/scripts/consenso.py-577-    ids = [par[0] for par in participantes]
+docs/skills/ai-project-structure/scripts/consenso.py-578-    if len(set(ids)) != len(ids) or any(id_inseguro(i) for i in ids):
+--
+docs/skills/ai-project-structure/scripts/consenso.py-625-
+docs/skills/ai-project-structure/scripts/consenso.py-626-def run_debate(args):
+docs/skills/ai-project-structure/scripts/consenso.py-627-    projeto = Path(args.projeto).resolve()
+docs/skills/ai-project-structure/scripts/consenso.py-628-    pergunta_arquivo = Path(args.pergunta).resolve()
+docs/skills/ai-project-structure/scripts/consenso.py:629:    participantes = args.agente or []
+docs/skills/ai-project-structure/scripts/consenso.py-630-    if not projeto.is_dir():
+docs/skills/ai-project-structure/scripts/consenso.py-631-        print("[ERRO] projeto nao encontrado: %s" % projeto, file=sys.stderr)
+docs/skills/ai-project-structure/scripts/consenso.py-632-        return 1
+docs/skills/ai-project-structure/scripts/consenso.py-633-    if not pergunta_arquivo.is_file():
+--
+docs/skills/ai-project-structure/scripts/consenso.py-668-              file=sys.stderr)
+docs/skills/ai-project-structure/scripts/consenso.py-669-        return 1
+docs/skills/ai-project-structure/scripts/consenso.py-670-    pergunta = pergunta_arquivo.read_text(encoding="utf-8")
+docs/skills/ai-project-structure/scripts/consenso.py-671-    if tem_segredo(pergunta) or any(a[4] for a in anteriores):
+docs/skills/ai-project-structure/scripts/consenso.py:672:        print("[ERRO] a pergunta ou um --anterior contem padrao de segredo; nenhum agente foi chamado.",
+docs/skills/ai-project-structure/scripts/consenso.py-673-              file=sys.stderr)
+docs/skills/ai-project-structure/scripts/consenso.py-674-        print("Conferir os arquivos. Nada foi gravado em docs/consensus/.", file=sys.stderr)
+docs/skills/ai-project-structure/scripts/consenso.py-675-        return 6
+docs/skills/ai-project-structure/scripts/consenso.py-676-    return com_lock_e_sinais(
+--
+docs/skills/ai-project-structure/scripts/consenso.py-690-    manifesto["anteriores"] = [
+docs/skills/ai-project-structure/scripts/consenso.py-691-        dict({"rotulo": rotulo} if rotulo != Path(caminho).name else {},
+docs/skills/ai-project-structure/scripts/consenso.py-692-             caminho=caminho, sha256=soma_anterior)
+docs/skills/ai-project-structure/scripts/consenso.py-693-        for rotulo, caminho, _, soma_anterior in anteriores]
+docs/skills/ai-project-structure/scripts/consenso.py:694:    # O que a retomada precisa para continuar sem ninguem repetir argumentos (DEC-009).
+docs/skills/ai-project-structure/scripts/consenso.py-695-    manifesto.update(titulo=args.titulo, dono=args.dono, pendente=pendente,
+docs/skills/ai-project-structure/scripts/consenso.py:696:                     agentes=[{"id": i, "comando": c} for i, c in trabalhos_cmd])
+docs/skills/ai-project-structure/scripts/consenso.py-697-    (rodada / "pergunta.txt").write_bytes(pergunta_arquivo.read_bytes())
+docs/skills/ai-project-structure/scripts/consenso.py-698-    escrever_json(rodada / "manifesto.json", manifesto)
+docs/skills/ai-project-structure/scripts/consenso.py-699-
+docs/skills/ai-project-structure/scripts/consenso.py-700-    stdout_por_id = rodar_participantes(
+--
+docs/skills/ai-project-structure/scripts/consenso.py-945-    pendente = linha_unica(args.pendente)
+docs/skills/ai-project-structure/scripts/consenso.py-946-    if rodada_n > RODADAS_SEM_PENDENCIA and not pendente:
+docs/skills/ai-project-structure/scripts/consenso.py-947-        return erro("rodada %d exige --pendente: o texto de '**Pendente da rodada anterior:**' "
+docs/skills/ai-project-structure/scripts/consenso.py-948-                    "e humano, o script nao inventa." % rodada_n)
+docs/skills/ai-project-structure/scripts/consenso.py:949:    trabalhos_cmd = validar_participantes(args.agente or [], "achado", 1)
+docs/skills/ai-project-structure/scripts/consenso.py-950-    if trabalhos_cmd is None:
+docs/skills/ai-project-structure/scripts/consenso.py-951-        return 1
+docs/skills/ai-project-structure/scripts/consenso.py-952-    pergunta_arquivo = None
+docs/skills/ai-project-structure/scripts/consenso.py-953-    if args.pergunta:
+--
+docs/skills/ai-project-structure/scripts/consenso.py-971-    inicio, fim = localizar_entrada(texto, args.entrada)[0]
+docs/skills/ai-project-structure/scripts/consenso.py-972-    entrada = texto[inicio:fim]
+docs/skills/ai-project-structure/scripts/consenso.py-973-    pergunta = pergunta_arquivo.read_text(encoding="utf-8") if pergunta_arquivo else ""
+docs/skills/ai-project-structure/scripts/consenso.py-974-    if tem_segredo(entrada) or tem_segredo(pergunta):
+docs/skills/ai-project-structure/scripts/consenso.py:975:        print("[ERRO] a entrada ou a pergunta contem padrao de segredo; nenhum agente foi chamado.",
+docs/skills/ai-project-structure/scripts/consenso.py-976-              file=sys.stderr)
+docs/skills/ai-project-structure/scripts/consenso.py-977-        print("Nada foi gravado em docs/consensus/.", file=sys.stderr)
+docs/skills/ai-project-structure/scripts/consenso.py-978-        return 6
+docs/skills/ai-project-structure/scripts/consenso.py-979-    return com_lock_e_sinais(
+docs/skills/ai-project-structure/scripts/consenso.py-980-        projeto, lambda: _rodar_achado(args, projeto, caminho, rodada_n, dono, pendente, entrada,
+docs/skills/ai-project-structure/scripts/consenso.py:981:                                       pergunta, pergunta_arquivo, args.agente, trabalhos_cmd))
+docs/skills/ai-project-structure/scripts/consenso.py-982-
+docs/skills/ai-project-structure/scripts/consenso.py-983-
+docs/skills/ai-project-structure/scripts/consenso.py-984-def _rodar_achado(args, projeto, caminho, rodada_n, dono, pendente, entrada, pergunta,
+docs/skills/ai-project-structure/scripts/consenso.py-985-                  pergunta_arquivo, participantes, trabalhos_cmd):
+--
+docs/skills/ai-project-structure/scripts/consenso.py-990-    manifesto = novo_manifesto("achado", rodada_n, run_id, projeto, pergunta_arquivo)
+docs/skills/ai-project-structure/scripts/consenso.py-991-    manifesto["entrada"] = args.entrada
+docs/skills/ai-project-structure/scripts/consenso.py-992-    manifesto["sha256_entrada"] = soma_texto(entrada)
+docs/skills/ai-project-structure/scripts/consenso.py-993-    manifesto.update(dono=dono, pendente=pendente,
+docs/skills/ai-project-structure/scripts/consenso.py:994:                     agentes=[{"id": i, "comando": c} for i, c in trabalhos_cmd])
+docs/skills/ai-project-structure/scripts/consenso.py-995-    (rodada / "entrada.txt").write_text(entrada, encoding="utf-8")
+docs/skills/ai-project-structure/scripts/consenso.py-996-    if pergunta_arquivo:
+docs/skills/ai-project-structure/scripts/consenso.py-997-        (rodada / "pergunta.txt").write_bytes(pergunta_arquivo.read_bytes())
+docs/skills/ai-project-structure/scripts/consenso.py-998-    escrever_json(rodada / "manifesto.json", manifesto)
+--
+docs/skills/ai-project-structure/scripts/consenso.py-1093-        return erro("manifesto ilegivel em docs/consensus/%s: %s" % (run_id, motivo))
+docs/skills/ai-project-structure/scripts/consenso.py-1094-    if manifesto.get("status") == "concluida":
+docs/skills/ai-project-structure/scripts/consenso.py-1095-        return erro("a rodada %s ja esta concluida; nada a retomar." % run_id)
+docs/skills/ai-project-structure/scripts/consenso.py-1096-    modo = manifesto.get("modo")
+docs/skills/ai-project-structure/scripts/consenso.py:1097:    agentes = manifesto.get("agentes")
+docs/skills/ai-project-structure/scripts/consenso.py:1098:    if modo not in ("debate", "achado") or not agentes:
+docs/skills/ai-project-structure/scripts/consenso.py:1099:        return erro("o manifesto de %s nao guarda os parametros da rodada (agentes, comandos); "
+docs/skills/ai-project-structure/scripts/consenso.py-1100-                    "rodada de versao anterior nao se retoma. Rode de novo." % run_id)
+docs/skills/ai-project-structure/scripts/consenso.py:1101:    trabalhos = [(a["id"], a["comando"]) for a in agentes]
+docs/skills/ai-project-structure/scripts/consenso.py-1102-    try:
+docs/skills/ai-project-structure/scripts/consenso.py-1103-        rodada_n = int(manifesto["rodada"])
+docs/skills/ai-project-structure/scripts/consenso.py-1104-    except (KeyError, TypeError, ValueError):
+docs/skills/ai-project-structure/scripts/consenso.py-1105-        return erro("o manifesto de %s nao tem a rodada." % run_id)
+--
+docs/skills/ai-project-structure/scripts/consenso.py-1157-            identificador, copia, titulo, rodada_n, entrada, pergunta)
+docs/skills/ai-project-structure/scripts/consenso.py-1158-        reter = False
+docs/skills/ai-project-structure/scripts/consenso.py-1159-    if segredo:
+docs/skills/ai-project-structure/scripts/consenso.py-1160-        print("[ERRO] a pergunta, a entrada ou um anterior da rodada contem padrao de segredo; "
+docs/skills/ai-project-structure/scripts/consenso.py:1161:              "nenhum agente foi chamado.", file=sys.stderr)
+docs/skills/ai-project-structure/scripts/consenso.py-1162-        return 6
+docs/skills/ai-project-structure/scripts/consenso.py-1163-
+docs/skills/ai-project-structure/scripts/consenso.py-1164-    # Quem tem <id>/stdout.txt fica como esta: o bruto ja foi pago. Sem registro no manifesto o
+docs/skills/ai-project-structure/scripts/consenso.py-1165-    # arquivo pode estar pela metade (queda entre a escrita e o registro), entao roda de novo.
+--
+docs/skills/ai-project-structure/scripts/consenso.py-1209-    subcomandos = parser.add_subparsers(dest="subcomando", required=True)
+docs/skills/ai-project-structure/scripts/consenso.py-1210-    debate = subcomandos.add_parser("debate", help="Roda pareceres independentes.")
+docs/skills/ai-project-structure/scripts/consenso.py-1211-    debate.add_argument("--projeto", default=".")
+docs/skills/ai-project-structure/scripts/consenso.py-1212-    debate.add_argument("--pergunta", required=True)
+docs/skills/ai-project-structure/scripts/consenso.py:1213:    debate.add_argument("--agente", action="append", nargs=2, metavar=("ID", "COMANDO"))
+docs/skills/ai-project-structure/scripts/consenso.py-1214-    debate.add_argument("--titulo", default="Debate")
+docs/skills/ai-project-structure/scripts/consenso.py-1215-    debate.add_argument("--dono", default="usuario")
+docs/skills/ai-project-structure/scripts/consenso.py-1216-    debate.add_argument("--rodada", default="1", help="Numero da rodada; o script nunca deduz.")
+docs/skills/ai-project-structure/scripts/consenso.py-1217-    debate.add_argument("--anterior", action="append", metavar="CAMINHO",
+--
+docs/skills/ai-project-structure/scripts/consenso.py-1222-        "achado", help="Revalida a disposicao de um achado, dentro da entrada existente.")
+docs/skills/ai-project-structure/scripts/consenso.py-1223-    achado.add_argument("--projeto", default=".")
+docs/skills/ai-project-structure/scripts/consenso.py-1224-    achado.add_argument("--entrada", help="Titulo da entrada em CONSENSUS.md, sem o '## '.")
+docs/skills/ai-project-structure/scripts/consenso.py-1225-    achado.add_argument("--rodada", help="Numero da rodada (1 ou mais); o script nunca deduz.")
+docs/skills/ai-project-structure/scripts/consenso.py:1226:    achado.add_argument("--agente", action="append", nargs=2, metavar=("ID", "COMANDO"))
+docs/skills/ai-project-structure/scripts/consenso.py-1227-    achado.add_argument("--pergunta", help="Arquivo opcional com uma pergunta adicional.")
+docs/skills/ai-project-structure/scripts/consenso.py-1228-    achado.add_argument("--dono", default="usuario")
+docs/skills/ai-project-structure/scripts/consenso.py-1229-    achado.add_argument("--pendente", help="Obrigatorio da rodada 4 em diante; texto humano.")
+docs/skills/ai-project-structure/scripts/consenso.py-1230-    retomar = subcomandos.add_parser(
+--
+docs/skills/ai-project-structure/scripts/validate_structure.py-1-#!/usr/bin/env python3
+docs/skills/ai-project-structure/scripts/validate_structure.py:2:"""Valida a estrutura Markdown multiagente criada pela skill ai-project-structure.
+docs/skills/ai-project-structure/scripts/validate_structure.py-3-
+docs/skills/ai-project-structure/scripts/validate_structure.py-4-Uso:
+docs/skills/ai-project-structure/scripts/validate_structure.py-5-    python3 validate_structure.py [CAMINHO_DO_PROJETO] [--strict]
+docs/skills/ai-project-structure/scripts/validate_structure.py-6-
+--
+docs/skills/ai-project-structure/scripts/validate_structure.py-1227-
+docs/skills/ai-project-structure/scripts/validate_structure.py-1228-
+docs/skills/ai-project-structure/scripts/validate_structure.py-1229-def main(argv=None):
+docs/skills/ai-project-structure/scripts/validate_structure.py-1230-    parser = argparse.ArgumentParser(
+docs/skills/ai-project-structure/scripts/validate_structure.py:1231:        description="Valida a estrutura Markdown multiagente (ai-project-structure)."
+docs/skills/ai-project-structure/scripts/validate_structure.py-1232-    )
+docs/skills/ai-project-structure/scripts/validate_structure.py-1233-    parser.add_argument(
+docs/skills/ai-project-structure/scripts/validate_structure.py-1234-        "caminho", nargs="?", default=".", help="Raiz do projeto (default: .)"
+docs/skills/ai-project-structure/scripts/validate_structure.py-1235-    )
+--
+docs/skills/ai-project-structure/scripts/loop.sh-5-# Este script so orquestra. Toda edicao de docs/TASKS.md passa por
+docs/skills/ai-project-structure/scripts/loop.sh-6-# loop_task.py, que reusa o parser do validador: um parser so no projeto.
+docs/skills/ai-project-structure/scripts/loop.sh-7-#
+docs/skills/ai-project-structure/scripts/loop.sh-8-# Uso:
+docs/skills/ai-project-structure/scripts/loop.sh:9:#   loop.sh --tarefa T-042 --agente "claude -p"
+docs/skills/ai-project-structure/scripts/loop.sh:10:#   loop.sh --tarefa T-042 --agente "codex exec" --tentativas 5
+docs/skills/ai-project-structure/scripts/loop.sh:11:#   loop.sh --tarefa T-042 --agente "gemini -p" --projeto /caminho/do/projeto
+docs/skills/ai-project-structure/scripts/loop.sh-12-#
+docs/skills/ai-project-structure/scripts/loop.sh-13-# Opcoes:
+docs/skills/ai-project-structure/scripts/loop.sh-14-#   --tarefa T-NNN      obrigatorio. A tarefa a trabalhar.
+docs/skills/ai-project-structure/scripts/loop.sh:15:#   --agente "CMD"      obrigatorio. Comando headless da sua ferramenta. O
+docs/skills/ai-project-structure/scripts/loop.sh-16-#                       prompt entra como ultimo argumento. Argumentos com
+docs/skills/ai-project-structure/scripts/loop.sh-17-#                       espaco dentro de aspas nao sao suportados.
+docs/skills/ai-project-structure/scripts/loop.sh-18-#   --tentativas N      padrao 3.
+docs/skills/ai-project-structure/scripts/loop.sh:19:#   --tempo-maximo S    segundos por tentativa; padrao 3600. Ao estourar, o
+docs/skills/ai-project-structure/scripts/loop.sh:20:#                       agente (e o que ele deixou vivo) recebe SIGTERM e o
+docs/skills/ai-project-structure/scripts/loop.sh:21:#                       portao decide, como em qualquer agente que sai com
+docs/skills/ai-project-structure/scripts/loop.sh-22-#                       codigo diferente de zero.
+docs/skills/ai-project-structure/scripts/loop.sh-23-#   --projeto DIR       padrao: diretorio atual.
+docs/skills/ai-project-structure/scripts/loop.sh:24:#   --seco              nao chama o agente; util para testar o ciclo.
+docs/skills/ai-project-structure/scripts/loop.sh-25-#
+docs/skills/ai-project-structure/scripts/loop.sh-26-# Exit codes:
+docs/skills/ai-project-structure/scripts/loop.sh-27-#   0  portao passou e a tarefa foi fechada com evidencia
+docs/skills/ai-project-structure/scripts/loop.sh-28-#   1  erro de uso, ou tarefa nao elegivel (sem `(verifica:)`, ja concluida, inexistente)
+docs/skills/ai-project-structure/scripts/loop.sh-29-#   2  portao falhou em todas as tentativas; nada foi movido, nada foi escrito
+docs/skills/ai-project-structure/scripts/loop.sh:30:#   3  o agente sinalizou falta de contexto; a tarefa foi para "Aguardando Usuario"
+docs/skills/ai-project-structure/scripts/loop.sh:31:#   4  o agente falhou (ou estourou --tempo-maximo) e nao mexeu em nada;
+docs/skills/ai-project-structure/scripts/loop.sh-32-#      provavelmente esta mal configurado
+docs/skills/ai-project-structure/scripts/loop.sh-33-#   5  ja existe outra rodada ativa neste projeto
+docs/skills/ai-project-structure/scripts/loop.sh-34-#
+docs/skills/ai-project-structure/scripts/loop.sh-35-# O que este script NUNCA faz: escolher a tarefa sozinho, fechar tarefa sem
+--
+docs/skills/ai-project-structure/scripts/loop.sh-48-
+docs/skills/ai-project-structure/scripts/loop.sh-49-while [ $# -gt 0 ]; do
+docs/skills/ai-project-structure/scripts/loop.sh-50-  case "$1" in
+docs/skills/ai-project-structure/scripts/loop.sh-51-    --tarefa)     TAREFA="${2:-}"; shift 2 ;;
+docs/skills/ai-project-structure/scripts/loop.sh:52:    --agente)     AGENTE="${2:-}"; shift 2 ;;
+docs/skills/ai-project-structure/scripts/loop.sh-53-    --tentativas) TENTATIVAS="${2:-}"; shift 2 ;;
+docs/skills/ai-project-structure/scripts/loop.sh:54:    --tempo-maximo) TEMPO_MAXIMO="${2:-}"; shift 2 ;;
+docs/skills/ai-project-structure/scripts/loop.sh-55-    --projeto)    PROJETO="${2:-}"; shift 2 ;;
+docs/skills/ai-project-structure/scripts/loop.sh-56-    --seco)       SECO=1; shift ;;
+docs/skills/ai-project-structure/scripts/loop.sh-57-    -h|--help)    uso; exit 0 ;;
+docs/skills/ai-project-structure/scripts/loop.sh-58-    *) echo "Argumento desconhecido: $1" >&2; exit 1 ;;
+--
+docs/skills/ai-project-structure/scripts/loop.sh-61-
+docs/skills/ai-project-structure/scripts/loop.sh-62-erro() { echo "[ERRO] $*" >&2; exit 1; }
+docs/skills/ai-project-structure/scripts/loop.sh-63-
+docs/skills/ai-project-structure/scripts/loop.sh-64-[ -n "$TAREFA" ] || erro "--tarefa e obrigatorio (ex: --tarefa T-042)."
+docs/skills/ai-project-structure/scripts/loop.sh:65:[ "$SECO" -eq 1 ] || [ -n "$AGENTE" ] || erro "--agente e obrigatorio (ex: --agente \"claude -p\")."
+docs/skills/ai-project-structure/scripts/loop.sh-66-[ -d "$PROJETO" ] || erro "projeto nao encontrado: $PROJETO"
+docs/skills/ai-project-structure/scripts/loop.sh-67-[ -f "$PROJETO/docs/TASKS.md" ] || erro "$PROJETO nao parece usar a estrutura: docs/TASKS.md ausente."
+docs/skills/ai-project-structure/scripts/loop.sh-68-case "$TENTATIVAS" in
+docs/skills/ai-project-structure/scripts/loop.sh-69-  ''|*[!0-9]*) erro "--tentativas precisa ser um inteiro positivo." ;;
+docs/skills/ai-project-structure/scripts/loop.sh-70-  0) erro "--tentativas precisa ser maior que zero." ;;
+docs/skills/ai-project-structure/scripts/loop.sh-71-esac
+docs/skills/ai-project-structure/scripts/loop.sh-72-
+docs/skills/ai-project-structure/scripts/loop.sh-73-case "$TEMPO_MAXIMO" in
+docs/skills/ai-project-structure/scripts/loop.sh:74:  ''|*[!0-9]*) erro "--tempo-maximo precisa ser um inteiro positivo, em segundos." ;;
+docs/skills/ai-project-structure/scripts/loop.sh:75:  0) erro "--tempo-maximo precisa ser maior que zero." ;;
+docs/skills/ai-project-structure/scripts/loop.sh-76-esac
+docs/skills/ai-project-structure/scripts/loop.sh-77-
+docs/skills/ai-project-structure/scripts/loop.sh-78-PROJETO="$(cd "$PROJETO" && pwd)"
+docs/skills/ai-project-structure/scripts/loop.sh-79-LOCK_DIR="$PROJETO/$ARQUIVO_LOCK"
+--
+docs/skills/ai-project-structure/scripts/loop.sh-93-
+docs/skills/ai-project-structure/scripts/loop.sh-94-TMP=""
+docs/skills/ai-project-structure/scripts/loop.sh-95-AGENTE_PID=""
+docs/skills/ai-project-structure/scripts/loop.sh-96-
+docs/skills/ai-project-structure/scripts/loop.sh:97:# Encerra o grupo do agente, e nao so o processo dele: um filho que sobra
+docs/skills/ai-project-structure/scripts/loop.sh:98:# (um `sleep`, uma CLI presa em reconexao) segura o stdout da rodada. O agente
+docs/skills/ai-project-structure/scripts/loop.sh-99-# roda em grupo proprio (set -m, ver abaixo), entao -PID alcanca todos. Se o
+docs/skills/ai-project-structure/scripts/loop.sh-100-# sistema nao der grupo (Git Bash), cai para o PID sozinho.
+docs/skills/ai-project-structure/scripts/loop.sh:101:encerrar_agente() {
+docs/skills/ai-project-structure/scripts/loop.sh-102-  kill -TERM -- "-$AGENTE_PID" 2>/dev/null || kill -TERM "$AGENTE_PID" 2>/dev/null || true
+docs/skills/ai-project-structure/scripts/loop.sh-103-}
+docs/skills/ai-project-structure/scripts/loop.sh-104-
+docs/skills/ai-project-structure/scripts/loop.sh-105-# O lock nasce vazio. rmdir evita apagar conteudo que nao foi criado pelo
+docs/skills/ai-project-structure/scripts/loop.sh-106-# loop, caso outra coisa tenha sido posta nele durante a rodada. Ctrl-C e
+docs/skills/ai-project-structure/scripts/loop.sh:107:# SIGTERM no loop viram exit para o trap EXIT rodar e nao deixar agente orfao,
+docs/skills/ai-project-structure/scripts/loop.sh:108:# ja que o agente nao esta mais no grupo do terminal.
+docs/skills/ai-project-structure/scripts/loop.sh:109:trap 'if [ -n "$AGENTE_PID" ]; then encerrar_agente; fi; if [ -n "$TMP" ]; then rm -rf "$TMP"; fi; rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
+docs/skills/ai-project-structure/scripts/loop.sh-110-trap 'exit 130' INT
+docs/skills/ai-project-structure/scripts/loop.sh-111-trap 'exit 143' TERM
+docs/skills/ai-project-structure/scripts/loop.sh-112-TMP="$(mktemp -d)"
+docs/skills/ai-project-structure/scripts/loop.sh-113-
+docs/skills/ai-project-structure/scripts/loop.sh-114-if [ "$SECO" -eq 0 ]; then
+docs/skills/ai-project-structure/scripts/loop.sh-115-  read -r -a AGENTE_ARGS <<< "$AGENTE"
+docs/skills/ai-project-structure/scripts/loop.sh-116-  command -v "${AGENTE_ARGS[0]}" >/dev/null 2>&1 \
+docs/skills/ai-project-structure/scripts/loop.sh:117:    || erro "agente nao encontrado no PATH: ${AGENTE_ARGS[0]}"
+docs/skills/ai-project-structure/scripts/loop.sh-118-fi
+docs/skills/ai-project-structure/scripts/loop.sh-119-
+docs/skills/ai-project-structure/scripts/loop.sh:120:# Elegibilidade primeiro: sem portao declarado, nem chamamos o agente.
+docs/skills/ai-project-structure/scripts/loop.sh-121-COMANDO="$(python3 "$HELPER" check "$PROJETO" "$TAREFA")" || exit 1
+docs/skills/ai-project-structure/scripts/loop.sh:122:# A linha inteira, e nao apenas o comando, e o contrato da rodada. O agente
+docs/skills/ai-project-structure/scripts/loop.sh-123-# pode editar TASKS.md; nesse caso o portao que acabamos de executar nao prova
+docs/skills/ai-project-structure/scripts/loop.sh-124-# a tarefa que ficou escrita depois da edicao.
+docs/skills/ai-project-structure/scripts/loop.sh-125-LINHA_TAREFA="$(python3 "$HELPER" linha "$PROJETO" "$TAREFA")" || exit 1
+docs/skills/ai-project-structure/scripts/loop.sh-126-echo "Tarefa:  $TAREFA"
+--
+docs/skills/ai-project-structure/scripts/loop.sh-158-docs/CONSENSUS.md nem nada em docs/specs/. Sao a memoria e as regras do
+docs/skills/ai-project-structure/scripts/loop.sh-159-projeto, e quem escreve neles e a pessoa, depois de ler o relatorio da rodada.
+docs/skills/ai-project-structure/scripts/loop.sh-160-Editar AGENTS.md e o pior caso: e onde estao as regras que voce esta seguindo
+docs/skills/ai-project-structure/scripts/loop.sh-161-agora. E CONSENSUS.md e proibido em especial: uma entrada la declara metodo,
+docs/skills/ai-project-structure/scripts/loop.sh:162:exposicao previa a outras posicoes e rodada, e voce e um agente so. Consenso
+docs/skills/ai-project-structure/scripts/loop.sh-163-escrito por um modelo apenas e exatamente o que esses campos existem para
+docs/skills/ai-project-structure/scripts/loop.sh-164-denunciar.
+docs/skills/ai-project-structure/scripts/loop.sh-165-
+docs/skills/ai-project-structure/scripts/loop.sh-166-Se faltar contexto obrigatorio para decidir alguma coisa, NAO invente e NAO
+--
+docs/skills/ai-project-structure/scripts/loop.sh-174-informacao e decisao de quem pediu a tarefa, nunca sua."
+docs/skills/ai-project-structure/scripts/loop.sh-175-
+docs/skills/ai-project-structure/scripts/loop.sh-176-  PROMPT="$PROMPT
+docs/skills/ai-project-structure/scripts/loop.sh-177-
+docs/skills/ai-project-structure/scripts/loop.sh:178:A propagacao de bloco gerenciado para o AGENTS.md da raiz e trabalho do agente de chat depois desta rodada. Nao pare para perguntar sobre essa propagacao."
+docs/skills/ai-project-structure/scripts/loop.sh-179-
+docs/skills/ai-project-structure/scripts/loop.sh-180-  if [ -n "$FALHA_ANTERIOR" ]; then
+docs/skills/ai-project-structure/scripts/loop.sh-181-    PROMPT="$PROMPT
+docs/skills/ai-project-structure/scripts/loop.sh-182-
+--
+docs/skills/ai-project-structure/scripts/loop.sh-186-$FALHA_ANTERIOR"
+docs/skills/ai-project-structure/scripts/loop.sh-187-  fi
+docs/skills/ai-project-structure/scripts/loop.sh-188-
+docs/skills/ai-project-structure/scripts/loop.sh-189-  if [ "$SECO" -eq 1 ]; then
+docs/skills/ai-project-structure/scripts/loop.sh:190:    echo "(modo seco: agente nao chamado)"
+docs/skills/ai-project-structure/scripts/loop.sh-191-  else
+docs/skills/ai-project-structure/scripts/loop.sh-192-    MARCA="$TMP/marca-$n"; : > "$MARCA"
+docs/skills/ai-project-structure/scripts/loop.sh-193-    AGENTE_CODIGO=0; ESTOUROU=0
+docs/skills/ai-project-structure/scripts/loop.sh-194-    # Em segundo plano e em grupo proprio (set -m), para o tempo poder ser
+--
+docs/skills/ai-project-structure/scripts/loop.sh-202-    while kill -0 "$AGENTE_PID" 2>/dev/null; do
+docs/skills/ai-project-structure/scripts/loop.sh-203-      if [ "$SECONDS" -ge "$LIMITE" ]; then
+docs/skills/ai-project-structure/scripts/loop.sh-204-        ESTOUROU=1
+docs/skills/ai-project-structure/scripts/loop.sh-205-        echo
+docs/skills/ai-project-structure/scripts/loop.sh:206:        echo "[AVISO] o agente passou do tempo maximo de $TEMPO_MAXIMO s (--tempo-maximo); enviando SIGTERM."
+docs/skills/ai-project-structure/scripts/loop.sh:207:        encerrar_agente
+docs/skills/ai-project-structure/scripts/loop.sh-208-        # Quem ignora SIGTERM leva SIGKILL depois de 5 s.
+docs/skills/ai-project-structure/scripts/loop.sh-209-        GRACA=$(( SECONDS + 5 ))
+docs/skills/ai-project-structure/scripts/loop.sh-210-        while kill -0 "$AGENTE_PID" 2>/dev/null && [ "$SECONDS" -lt "$GRACA" ]; do
+docs/skills/ai-project-structure/scripts/loop.sh-211-          sleep 0.2 2>/dev/null || sleep 1
+--
+docs/skills/ai-project-structure/scripts/loop.sh-224-    if [ "$ESTOUROU" -eq 1 ] && [ "$AGENTE_CODIGO" -eq 0 ]; then AGENTE_CODIGO=143; fi
+docs/skills/ai-project-structure/scripts/loop.sh-225-    # Agente que falhou E nao mexeu em nada nunca rodou de verdade. Insistir
+docs/skills/ai-project-structure/scripts/loop.sh-226-    # so queima tentativa e portao; o problema esta no comando, nao na tarefa.
+docs/skills/ai-project-structure/scripts/loop.sh-227-    if [ "$AGENTE_CODIGO" -ne 0 ]; then
+docs/skills/ai-project-structure/scripts/loop.sh:228:      MEXEU="$(find "$PROJETO" -type f -newer "$MARCA" -not -path '*/.git/*' -print -quit 2>/dev/null)"
+docs/skills/ai-project-structure/scripts/loop.sh-229-      if [ -z "$MEXEU" ]; then
+docs/skills/ai-project-structure/scripts/loop.sh-230-        echo
+docs/skills/ai-project-structure/scripts/loop.sh:231:        echo "[ERRO] o agente saiu com codigo $AGENTE_CODIGO e nao alterou nenhum arquivo." >&2
+docs/skills/ai-project-structure/scripts/loop.sh-232-        if [ "$ESTOUROU" -eq 1 ]; then
+docs/skills/ai-project-structure/scripts/loop.sh-233-          echo "Ele foi encerrado por SIGTERM ao estourar o tempo maximo de $TEMPO_MAXIMO s." >&2
+docs/skills/ai-project-structure/scripts/loop.sh:234:          echo "Se a ferramenta precisa de mais tempo, aumente --tempo-maximo." >&2
+docs/skills/ai-project-structure/scripts/loop.sh-235-        fi
+docs/skills/ai-project-structure/scripts/loop.sh-236-        echo "A causa esta na saida dele, acima. As duas mais comuns sao o comando" >&2
+docs/skills/ai-project-structure/scripts/loop.sh:237:        echo "de --agente estar incompleto para uso nao supervisionado (ver a tabela" >&2
+docs/skills/ai-project-structure/scripts/loop.sh-238-        echo "por ferramenta em references/loop.md) e a ferramenta ter recusado por" >&2
+docs/skills/ai-project-structure/scripts/loop.sh-239-        echo "conta propria, por cota, credencial ou limite de uso." >&2
+docs/skills/ai-project-structure/scripts/loop.sh-240-        echo "Parando antes de queimar as outras tentativas." >&2
+docs/skills/ai-project-structure/scripts/loop.sh-241-        exit 4
+docs/skills/ai-project-structure/scripts/loop.sh-242-      fi
+docs/skills/ai-project-structure/scripts/loop.sh:243:      echo "[AVISO] o agente saiu com codigo $AGENTE_CODIGO, mas alterou arquivos; o portao decide."
+docs/skills/ai-project-structure/scripts/loop.sh-244-    fi
+docs/skills/ai-project-structure/scripts/loop.sh-245-  fi
+docs/skills/ai-project-structure/scripts/loop.sh-246-
+docs/skills/ai-project-structure/scripts/loop.sh-247-  if [ -f "$SINAL" ]; then
+docs/skills/ai-project-structure/scripts/loop.sh-248-    echo
+docs/skills/ai-project-structure/scripts/loop.sh:249:    echo "O agente sinalizou falta de contexto. Registrando a pergunta e parando."
+docs/skills/ai-project-structure/scripts/loop.sh-250-    python3 "$HELPER" bloquear "$PROJETO" "$TAREFA" --pergunta "$SINAL" || exit 1
+docs/skills/ai-project-structure/scripts/loop.sh-251-    rm -f "$SINAL"
+docs/skills/ai-project-structure/scripts/loop.sh-252-    exit 3
+docs/skills/ai-project-structure/scripts/loop.sh-253-  fi
+--
+docs/skills/ai-project-structure/scripts/loop.sh-262-
+docs/skills/ai-project-structure/scripts/loop.sh-263-  if [ "$CODIGO" -eq 0 ]; then
+docs/skills/ai-project-structure/scripts/loop.sh-264-    FECHAR_ARGS=(--saida "$TMP/saida.txt" --codigo 0 --linha-esperada "$LINHA_TAREFA")
+docs/skills/ai-project-structure/scripts/loop.sh-265-    if [ "$SECO" -eq 0 ]; then
+docs/skills/ai-project-structure/scripts/loop.sh:266:      FECHAR_ARGS+=(--agente "$AGENTE")
+docs/skills/ai-project-structure/scripts/loop.sh-267-    fi
+docs/skills/ai-project-structure/scripts/loop.sh-268-    python3 "$HELPER" fechar "$PROJETO" "$TAREFA" "${FECHAR_ARGS[@]}" || exit 1
+docs/skills/ai-project-structure/scripts/loop.sh-269-    echo
+docs/skills/ai-project-structure/scripts/loop.sh-270-    echo "Portao verde na tentativa $n. Tarefa fechada com evidencia de comando."
+
+exec
+/bin/bash -lc "sed -n '240,560p' docs/skills/ai-project-structure/scripts/consenso.py && sed -n '88,250p' docs/skills/ai-project-structure/scripts/loop.sh && sed -n '88,98p' docs/specs/0006-automacao-do-consenso.md" in /tmp/consenso-r66rm85b/projeto
+ succeeded in 0ms:
+        check=False,
+    )
+    return processo.returncode == 0
+
+
+def id_inseguro(identificador):
+    if not identificador or identificador in IDS_RESERVADOS:
+        return True
+    return "/" in identificador or "\\" in identificador or os.sep in identificador
+
+
+def rodadas_nao_concluidas(projeto):
+    """Run-ids em docs/consensus/ cujo manifesto nao esta `concluida`, mais antigos primeiro."""
+    base = Path(projeto) / "docs" / "consensus"
+    saida = []
+    if not base.is_dir():
+        return saida
+    for pasta in sorted(base.iterdir()):
+        try:
+            dados = json.loads((pasta / "manifesto.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(dados, dict) and dados.get("status") != "concluida":
+            saida.append(pasta.name)
+    return saida
+
+
+def adquirir_lock(projeto, run_id=None):
+    lock_dir = Path(projeto) / LOCK_NOME
+    try:
+        os.mkdir(str(lock_dir))
+    except FileExistsError:
+        print("[ERRO] outra rodada ja esta em andamento neste projeto: lock em %s."
+              % lock_dir, file=sys.stderr)
+        print("Se uma rodada anterior terminou de forma inesperada e voce confirmou que",
+              file=sys.stderr)
+        print("nao ha rodada ativa, limpe o lock orfao com: rmdir \"%s\"" % lock_dir,
+              file=sys.stderr)
+        # Retomada e palavra humana: a mensagem so mostra o comando, nunca o executa.
+        for pendente in ([run_id] if run_id else rodadas_nao_concluidas(projeto)[-3:]):
+            print("Para continuar a rodada %s depois disso: %s"
+                  % (pendente, comando_de_retomada(projeto, pendente)), file=sys.stderr)
+        return None
+    except OSError as erro:
+        print("[ERRO] nao foi possivel criar o lock da rodada em %s: %s"
+              % (lock_dir, erro), file=sys.stderr)
+        return None
+    return lock_dir
+
+
+def soltar_lock(lock_dir):
+    if lock_dir is None:
+        return
+    try:
+        os.rmdir(str(lock_dir))
+    except OSError:
+        pass
+
+
+def citar(texto):
+    """Toda linha vira citacao Markdown; U+2014 vira hifen. Devolve (bloco, n)."""
+    if texto is None:
+        texto = ""
+    n = texto.count(TRAVESSAO)
+    texto = texto.replace(TRAVESSAO, "-")
+    linhas = texto.splitlines()
+    if not linhas:
+        return "> \n", n
+    return "\n".join("> " + linha for linha in linhas) + "\n", n
+
+
+def montar_minuta(titulo, dono, run_id, pergunta, participantes, data, rodada_n=1, pendente=""):
+    ids = [p["id"] for p in participantes]
+    falhos = [p["id"] for p in participantes if p.get("resultado") != "posicao"]
+    falhas_txt = ", ".join(falhos) if falhos else "nenhuma"
+    manifesto_rel = "docs/consensus/%s/manifesto.json" % run_id
+    partes = [
+        "## %s - %s" % (data, titulo),
+        "",
+        "**Status:** aberto",
+        "",
+        "**Proximo passo:** %s le as posicoes e preenche as secoes de julgamento" % dono,
+        "",
+        "**Metodo:** pareceres-independentes",
+        "",
+        "**Exposicao previa a outras posicoes:** %s" % ("nao" if rodada_n == 1 else "sim"),
+        "",
+        "**Rodada:** %d de %d" % (rodada_n, rodada_n),
+        "",
+    ]
+    if pendente:
+        partes.extend(["**Pendente da rodada anterior:** %s" % pendente, ""])
+    partes += [
+        "**Origem:** automacao",
+        "",
+        "**Manifesto:** %s" % manifesto_rel,
+        "",
+        "**Participantes:** %s" % ", ".join(ids),
+        "",
+        "**Falhas:** %s" % falhas_txt,
+        "",
+        "### Contexto",
+        "",
+        "- Modo: debate",
+        "- Rodada: %d de %d" % (rodada_n, rodada_n),
+        "- N: %s" % len(ids),
+        "- Data: %s" % data,
+        "- Manifesto: %s" % manifesto_rel,
+        "",
+        "### Pergunta Ou Decisao",
+        "",
+        citar(pergunta)[0].rstrip("\n"),
+        "",
+    ]
+    for p in participantes:
+        if p.get("resultado") == "posicao":
+            partes.extend(secao_de_posicao("Posicao De", p["id"], p.get("_stdout_texto", "")) + [""])
+        else:
+            partes.extend(secao_de_falha(run_id, p) + [""])
+    for secao in (
+        "Pontos De Acordo",
+        "Riscos E Tradeoffs",
+        "Consenso Final",
+        "Decisao Para Registrar Em DECISIONS.md",
+    ):
+        partes.extend(["### %s" % secao, "", "- (A preencher.)", ""])
+    return "\n".join(partes).rstrip() + "\n"
+
+
+def gravar_minuta(projeto, minuta):
+    """Acrescenta a minuta no fim, sem alterar o prefixo. Devolve hashes e o texto."""
+    caminho = Path(projeto) / "docs" / "CONSENSUS.md"
+    antes = caminho.read_text(encoding="utf-8")
+    sha_antes = soma_texto(antes)
+    adendo = ""
+    if antes and not antes.endswith("\n"):
+        adendo += "\n"
+    adendo += "\n" + minuta.lstrip("\n")
+    depois = antes + adendo
+    escrever_bytes_atomico(caminho, depois.encode("utf-8"))
+    return sha_antes, soma(caminho), "docs/CONSENSUS.md"
+
+
+
+
+def abrir_rodada(projeto, sufixo):
+    """Cria docs/consensus/<instante>-<sufixo>, com -2, -3 se a pasta ja existe.
+
+    Duas rodadas no mesmo segundo (achado em sequencia) nao podem se atropelar.
+    Devolve (run_id, caminho) ou None se nao deu para criar."""
+    base = Path(projeto) / "docs" / "consensus"
+    run_id = "%s-%s" % (dt.datetime.now().strftime("%Y-%m-%d-%H%M%S"), sufixo)
+    try:
+        base.mkdir(parents=True, exist_ok=True)
+    except OSError as erro:
+        print("[ERRO] nao foi possivel criar sidecar: %s" % erro, file=sys.stderr)
+        return None
+    candidato, n = run_id, 1
+    while True:
+        try:
+            (base / candidato).mkdir()
+            return candidato, base / candidato
+        except FileExistsError:
+            n += 1
+            candidato = "%s-%d" % (run_id, n)
+        except OSError as erro:
+            print("[ERRO] nao foi possivel criar sidecar: %s" % erro, file=sys.stderr)
+            return None
+
+
+def novo_manifesto(modo, rodada_n, run_id, projeto, pergunta_arquivo):
+    return {
+        "versao": 1,
+        "run_id": run_id,
+        "modo": modo,
+        "rodada": rodada_n,
+        "projeto": str(projeto),
+        "inicio": agora(),
+        "fim": None,
+        "status": "em-andamento",
+        "pergunta": ({"arquivo": str(pergunta_arquivo), "sha256": soma(pergunta_arquivo)}
+                     if pergunta_arquivo else None),
+        "excluidos_da_copia": list(EXCLUIDOS_DA_COPIA),
+        "participantes": [],
+        "minuta": None,
+    }
+
+
+def com_lock_e_sinais(projeto, funcao, run_id=None):
+    """Lock exclusivo por projeto e tratamento de SIGINT/SIGTERM em volta de `funcao`."""
+    lock_dir = adquirir_lock(projeto, run_id)
+    if lock_dir is None:
+        return 5
+    anteriores = {
+        signal.SIGINT: signal.getsignal(signal.SIGINT),
+        signal.SIGTERM: signal.getsignal(signal.SIGTERM),
+    }
+    _interrompendo.clear()
+    with _processos_lock:
+        _processos_vivos.clear()
+    try:
+        signal.signal(signal.SIGINT, ao_sinal)
+        signal.signal(signal.SIGTERM, ao_sinal)
+        return funcao()
+    finally:
+        for sig, handler in anteriores.items():
+            try:
+                signal.signal(sig, handler)
+            except (OSError, ValueError):
+                pass
+        soltar_lock(lock_dir)
+
+
+def rodar_participantes(projeto, rodada, run_id, manifesto, trabalhos_cmd, prompt_de, reter):
+    """Primitivo comum a debate e achado: uma copia isolada por participante, execucao
+    em paralelo, bruto e manifesto gravados assim que cada um encerra, varredura de
+    segredo antes de gravar. `reter` esconde as entradas anteriores de CONSENSUS.md na
+    copia (debate); achado a deixa inteira, porque a entrada sob revisao e o objeto
+    (DEC-003). Devolve {id: stdout} de quem terminou sem reter por segredo."""
+    stdout_por_id = {}
+    temporarios = []
+    trabalhos = []
+    try:
+        for identificador, comando in trabalhos_cmd:
+            if _interrompendo.is_set():
+                break
+            raiz_temporaria = Path(tempfile.mkdtemp(prefix="consenso-"))
+            temporarios.append(raiz_temporaria)
+            copia = raiz_temporaria / "projeto"
+            shutil.copytree(str(projeto), str(copia), ignore=ignorar_copia(projeto))
+            if reter:
+                reter_registros(copia)
+            trabalhos.append((identificador, comando, str(copia), prompt_de(identificador, str(copia))))
+
+        if trabalhos and not _interrompendo.is_set():
+            with concurrent.futures.ThreadPoolExecutor(max_workers=len(trabalhos)) as executor:
+                futuros = {
+                    executor.submit(executa, comando, prompt, copia): (
+                        identificador, comando, copia, prompt)
+                    for identificador, comando, copia, prompt in trabalhos
+                }
+                for futuro in concurrent.futures.as_completed(futuros):
+                    identificador, comando, copia, prompt = futuros[futuro]
+                    inicio, fim, codigo, stdout, stderr = futuro.result()
+                    if _interrompendo.is_set() and codigo != 0:
+                        # Morto pelo nosso sinal: nao ha bruto a guardar. Sem registro e sem
+                        # stdout.txt, a retomada chama este participante de novo.
+                        continue
+                    destino = rodada / identificador
+                    destino.mkdir(exist_ok=True)
+                    prompt_path = destino / "prompt.txt"
+                    prompt_path.write_text(prompt, encoding="utf-8")
+                    if tem_segredo(stdout) or tem_segredo(stderr):
+                        retido = reter_bruto_fora(stdout, stderr)
+                        avisar_retido(retido, projeto, run_id, identificador)
+                        registro = {
+                            "id": identificador,
+                            "comando": comando,
+                            "diretorio": copia,
+                            "inicio": inicio,
+                            "fim": fim,
+                            "exit": codigo,
+                            "prompt": "%s/prompt.txt" % identificador,
+                            "sha256_prompt": soma(prompt_path),
+                            "resultado": "retido-por-segredo",
+                            "retido_em": str(retido),
+                        }
+                        manifesto["participantes"].append(registro)
+                        escrever_json(rodada / "manifesto.json", manifesto)
+                        continue
+                    stdout_path = destino / "stdout.txt"
+                    stderr_path = destino / "stderr.txt"
+                    stdout_path.write_bytes(stdout)
+                    stderr_path.write_bytes(stderr)
+                    stdout_texto = stdout.decode("utf-8", "replace")
+                    stdout_por_id[identificador] = stdout_texto
+                    registro = {
+                        "id": identificador,
+                        "comando": comando,
+                        "diretorio": copia,
+                        "inicio": inicio,
+                        "fim": fim,
+                        "exit": codigo,
+                        "prompt": "%s/prompt.txt" % identificador,
+                        "sha256_prompt": soma(prompt_path),
+                        "stdout": "%s/stdout.txt" % identificador,
+                        "sha256_stdout": soma(stdout_path),
+                        "stderr": "%s/stderr.txt" % identificador,
+                        "resultado": "posicao" if codigo == 0 else "falha",
+                        "travessoes_substituidos": stdout_texto.count(TRAVESSAO),
+                    }
+                    manifesto["participantes"].append(registro)
+                    escrever_json(rodada / "manifesto.json", manifesto)
+    finally:
+        for temporario in temporarios:
+            shutil.rmtree(str(temporario), ignore_errors=True)
+    return stdout_por_id
+
+
+def marcar_interrompida(manifesto, rodada, run_id):
+    manifesto["status"] = "interrompida"
+    escrever_json(rodada / "manifesto.json", manifesto)
+    print("Rodada interrompida: %s" % run_id, file=sys.stderr)
+    print("Para continuar sem repetir o que ja foi pago: %s"
+          % comando_de_retomada(manifesto["projeto"], run_id), file=sys.stderr)
+    return 1
+
+
+def fechar_sem_minuta(manifesto, rodada, run_id, participantes):
+    """Estados que terminam sem escrever em CONSENSUS.md: interrompida (1), parada por
+    segredo (6) e sem nenhuma posicao (2). Devolve o exit, ou None se ha o que escrever."""
+    ordem = {identificador: indice for indice, (identificador, _) in enumerate(participantes)}
+    manifesto["participantes"].sort(key=lambda p: ordem.get(p["id"], 999))
+    manifesto["fim"] = agora()
+    if _interrompendo.is_set():
+        return marcar_interrompida(manifesto, rodada, run_id)
+    if any(p.get("resultado") == "retido-por-segredo" for p in manifesto["participantes"]):
+        manifesto["status"] = "parada-segredo"
+        escrever_json(rodada / "manifesto.json", manifesto)
+        print("Rodada parada por segredo: %s" % run_id, file=sys.stderr)
+        print("Depois de conferir o material retido: %s"
+    echo "nao ha rodada ativa, limpe o lock orfao com: rmdir \"$LOCK_DIR\"" >&2
+    exit 5
+  fi
+  erro "nao foi possivel criar o lock da rodada em $LOCK_DIR."
+fi
+
+TMP=""
+AGENTE_PID=""
+
+# Encerra o grupo do agente, e nao so o processo dele: um filho que sobra
+# (um `sleep`, uma CLI presa em reconexao) segura o stdout da rodada. O agente
+# roda em grupo proprio (set -m, ver abaixo), entao -PID alcanca todos. Se o
+# sistema nao der grupo (Git Bash), cai para o PID sozinho.
+encerrar_agente() {
+  kill -TERM -- "-$AGENTE_PID" 2>/dev/null || kill -TERM "$AGENTE_PID" 2>/dev/null || true
+}
+
+# O lock nasce vazio. rmdir evita apagar conteudo que nao foi criado pelo
+# loop, caso outra coisa tenha sido posta nele durante a rodada. Ctrl-C e
+# SIGTERM no loop viram exit para o trap EXIT rodar e nao deixar agente orfao,
+# ja que o agente nao esta mais no grupo do terminal.
+trap 'if [ -n "$AGENTE_PID" ]; then encerrar_agente; fi; if [ -n "$TMP" ]; then rm -rf "$TMP"; fi; rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+TMP="$(mktemp -d)"
+
+if [ "$SECO" -eq 0 ]; then
+  read -r -a AGENTE_ARGS <<< "$AGENTE"
+  command -v "${AGENTE_ARGS[0]}" >/dev/null 2>&1 \
+    || erro "agente nao encontrado no PATH: ${AGENTE_ARGS[0]}"
+fi
+
+# Elegibilidade primeiro: sem portao declarado, nem chamamos o agente.
+COMANDO="$(python3 "$HELPER" check "$PROJETO" "$TAREFA")" || exit 1
+# A linha inteira, e nao apenas o comando, e o contrato da rodada. O agente
+# pode editar TASKS.md; nesse caso o portao que acabamos de executar nao prova
+# a tarefa que ficou escrita depois da edicao.
+LINHA_TAREFA="$(python3 "$HELPER" linha "$PROJETO" "$TAREFA")" || exit 1
+echo "Tarefa:  $TAREFA"
+echo "Projeto: $PROJETO"
+echo "Portao:  $COMANDO"
+echo "Limite:  $TENTATIVAS tentativa(s), $TEMPO_MAXIMO s cada"
+
+SINAL="$PROJETO/$ARQUIVO_PERGUNTA"
+if [ -f "$SINAL" ]; then
+  echo "[AVISO] $ARQUIVO_PERGUNTA de uma rodada anterior encontrado; removendo."
+  rm -f "$SINAL"
+fi
+
+FALHA_ANTERIOR=""
+
+for (( n=1; n<=TENTATIVAS; n++ )); do
+  echo
+  echo "=== Tentativa $n de $TENTATIVAS ==="
+
+  PROMPT="Voce esta trabalhando no projeto em $PROJETO, que usa a estrutura
+ai-project-structure. Leia AGENTS.md antes de mexer em qualquer arquivo e
+respeite o bloco de loop que esta la.
+
+Sua tarefa e a $TAREFA, descrita em docs/TASKS.md. Trabalhe apenas nela.
+
+O portao desta tarefa e o comando abaixo, que sera executado depois que voce
+terminar. Ele decide se o trabalho vale:
+
+    $COMANDO
+
+Nao mova a tarefa em docs/TASKS.md e nao escreva evidencia: quem faz isso e o
+loop, depois de rodar o portao.
+
+Nao edite AGENTS.md, docs/SESSION.md, docs/MEMORY.md, docs/DECISIONS.md,
+docs/CONSENSUS.md nem nada em docs/specs/. Sao a memoria e as regras do
+projeto, e quem escreve neles e a pessoa, depois de ler o relatorio da rodada.
+Editar AGENTS.md e o pior caso: e onde estao as regras que voce esta seguindo
+agora. E CONSENSUS.md e proibido em especial: uma entrada la declara metodo,
+exposicao previa a outras posicoes e rodada, e voce e um agente so. Consenso
+escrito por um modelo apenas e exatamente o que esses campos existem para
+denunciar.
+
+Se faltar contexto obrigatorio para decidir alguma coisa, NAO invente e NAO
+escolha por inferencia plausivel. Escreva a pergunta, em uma frase, no arquivo
+$PROJETO/$ARQUIVO_PERGUNTA e pare imediatamente.
+
+NAO APAGUE O QUE FALHA. O portao mede o que sobrou, entao remover o teste, a
+secao, o link ou a frase que falha sempre deixa ele verde. Se a saida obvia
+para passar no portao for apagar conteudo ou cobertura, isso e falta de
+contexto: escreva a pergunta em $PROJETO/$ARQUIVO_PERGUNTA e pare. Perder
+informacao e decisao de quem pediu a tarefa, nunca sua."
+
+  PROMPT="$PROMPT
+
+A propagacao de bloco gerenciado para o AGENTS.md da raiz e trabalho do agente de chat depois desta rodada. Nao pare para perguntar sobre essa propagacao."
+
+  if [ -n "$FALHA_ANTERIOR" ]; then
+    PROMPT="$PROMPT
+
+A tentativa anterior falhou no portao. Esta e a saida real do comando; use-a
+para corrigir em vez de tentar de novo do zero:
+
+$FALHA_ANTERIOR"
+  fi
+
+  if [ "$SECO" -eq 1 ]; then
+    echo "(modo seco: agente nao chamado)"
+  else
+    MARCA="$TMP/marca-$n"; : > "$MARCA"
+    AGENTE_CODIGO=0; ESTOUROU=0
+    # Em segundo plano e em grupo proprio (set -m), para o tempo poder ser
+    # vigiado e o SIGTERM alcancar tambem os filhos. Bash puro: timeout(1) e
+    # setsid nao existem no macOS.
+    set -m
+    ( cd "$PROJETO" && "${AGENTE_ARGS[@]}" "$PROMPT" </dev/null ) &
+    AGENTE_PID=$!
+    set +m
+    LIMITE=$(( SECONDS + TEMPO_MAXIMO ))
+    while kill -0 "$AGENTE_PID" 2>/dev/null; do
+      if [ "$SECONDS" -ge "$LIMITE" ]; then
+        ESTOUROU=1
+        echo
+        echo "[AVISO] o agente passou do tempo maximo de $TEMPO_MAXIMO s (--tempo-maximo); enviando SIGTERM."
+        encerrar_agente
+        # Quem ignora SIGTERM leva SIGKILL depois de 5 s.
+        GRACA=$(( SECONDS + 5 ))
+        while kill -0 "$AGENTE_PID" 2>/dev/null && [ "$SECONDS" -lt "$GRACA" ]; do
+          sleep 0.2 2>/dev/null || sleep 1
+        done
+        if kill -0 "$AGENTE_PID" 2>/dev/null; then
+          kill -KILL -- "-$AGENTE_PID" 2>/dev/null || kill -KILL "$AGENTE_PID" 2>/dev/null || true
+        fi
+        break
+      fi
+      sleep 0.2 2>/dev/null || sleep 1
+    done
+    wait "$AGENTE_PID" 2>/dev/null || AGENTE_CODIGO=$?
+    AGENTE_PID=""
+    # Agente que terminou o trabalho e travou pode sair 0 depois do SIGTERM
+    # (trap); mesmo assim o estouro conta como saida anormal.
+    if [ "$ESTOUROU" -eq 1 ] && [ "$AGENTE_CODIGO" -eq 0 ]; then AGENTE_CODIGO=143; fi
+    # Agente que falhou E nao mexeu em nada nunca rodou de verdade. Insistir
+    # so queima tentativa e portao; o problema esta no comando, nao na tarefa.
+    if [ "$AGENTE_CODIGO" -ne 0 ]; then
+      MEXEU="$(find "$PROJETO" -type f -newer "$MARCA" -not -path '*/.git/*' -print -quit 2>/dev/null)"
+      if [ -z "$MEXEU" ]; then
+        echo
+        echo "[ERRO] o agente saiu com codigo $AGENTE_CODIGO e nao alterou nenhum arquivo." >&2
+        if [ "$ESTOUROU" -eq 1 ]; then
+          echo "Ele foi encerrado por SIGTERM ao estourar o tempo maximo de $TEMPO_MAXIMO s." >&2
+          echo "Se a ferramenta precisa de mais tempo, aumente --tempo-maximo." >&2
+        fi
+        echo "A causa esta na saida dele, acima. As duas mais comuns sao o comando" >&2
+        echo "de --agente estar incompleto para uso nao supervisionado (ver a tabela" >&2
+        echo "por ferramenta em references/loop.md) e a ferramenta ter recusado por" >&2
+        echo "conta propria, por cota, credencial ou limite de uso." >&2
+        echo "Parando antes de queimar as outras tentativas." >&2
+        exit 4
+      fi
+      echo "[AVISO] o agente saiu com codigo $AGENTE_CODIGO, mas alterou arquivos; o portao decide."
+    fi
+  fi
+
+  if [ -f "$SINAL" ]; then
+    echo
+    echo "O agente sinalizou falta de contexto. Registrando a pergunta e parando."
+    python3 "$HELPER" bloquear "$PROJETO" "$TAREFA" --pergunta "$SINAL" || exit 1
+- **DEC-008 (P-8, proveniencia; 3 de 3 por entrar, calibragem escolhida pelo usuario em 2026-09-04):** a proveniencia **entra no escopo**, com sidecar guardando bruto e manifesto fora do `CONSENSUS.md` e uma **ponte curta** dentro da entrada (posicao do Grok): o comando integral, diretorio e hashes de insumo e saida ficam **so no manifesto**; a entrada aponta para ele. O Codex queria isso tudo dentro da entrada, lendo a DEC-002 ao pe da letra; perdeu pela rotacao e pela leitura humana. O bruto **nao** pode ficar em `.gitignore`, senao o teste da DEC-001 morre na sessao seguinte. Consequencia aceita: conferir um campo exige abrir dois arquivos.
+
+- **DEC-009 (P-9, quando a minuta e escrita; 3 de 3 no desenho, duas calibragens escolhidas pelo usuario em 2026-09-04):** criterio operacional do Grok, **publicado e anterior, nao publicado e contemporaneo**; lock exclusivo por projeto na abertura; bruto e manifesto gravados assim que cada agente encerra, onde os agentes da rodada corrente nao alcancam; minuta escrita uma vez so, no fim, por substituicao atomica do arquivo inteiro; interrupcao deixa `CONSENSUS.md` byte a byte como estava. Calibragens: **retomada apos interrupcao sempre exige palavra humana** (Claude e Grok; o Codex queria retomada automatica com insumos identicos), e **o bruto mora in-repo desde o inicio, fora da arvore de execucao** (Grok; Codex e Claude queriam fora do repositorio ate o fecho). Consequencia aceita: rodada interrompida deixa material pago no repositorio antes de qualquer minuta, e alguem precisa mandar retomar.
+
+- **DEC-010 (P-10, segredo no bruto; sem rodada, escolhida pelo usuario em 2026-09-04 entre tres opcoes esbocadas):** antes de gravar qualquer bruto no repositorio, a operacao **varre padroes de segredo** (chave de API, token, senha em URL, chave privada). Achou algo: a rodada **para**, guarda o bruto **fora** do repositorio, informa o caminho e pede palavra humana; **nunca redige**, porque redacao automatica destroi a evidencia que a DEC-001 protege, e nunca grava. Alternativas rejeitadas: bruto fora do git por padrao com promocao manual (mataria o teste da DEC-001 no dia a dia) e aceitar o risco com aviso na documentacao (transfere o problema para quem nao leu). Consequencias aceitas: falso positivo para uma rodada legitima ate alguem olhar; falso negativo continua possivel, porque padrao nao cobre todo segredo, e isso fica dito na documentacao da operacao.
+
+## Tarefas
+
+- T-053: responder as perguntas abertas para a spec poder virar `Definida`
+- T-074: decidir o que fazer com segredo no artefato bruto (P-10)
+- T-075: primitivo `consenso.py debate`, N agentes isolados em paralelo, bruto e manifesto em `docs/consensus/` (bump 2.11.0)
+
+codex
+## P-2: `--shared-sandbox` não preserva o isolamento da DEC-003
+
+Discordo da DEC-002 como conclusão sobre o modo compartilhado. A evidência sustenta que o filho não começa na pasta de trabalho corrente do processo que o chamou: começa na pasta da thread pai. Portanto, passar o caminho da cópia no prompt, ou fazer `cd` antes de chamar `room-cli`, não prende o filho nessa cópia.
+
+Isso quebra o isolamento de `consenso.py`. O script cria uma cópia por participante, remove `docs/consensus/` e, no debate, retém os registros anteriores de `docs/CONSENSUS.md`. Mas o adaptador chamado como agente receberia um prompt que aponta para uma cópia e abriria o filho no espaço compartilhado da thread pai. O caminho no prompt não impede o filho de ler outros arquivos disponíveis nesse espaço. Como `consenso.py` grava cada bruto assim que o participante termina, um participante posterior também poderia alcançar a posição anterior se ela estiver nesse espaço. Isso contraria tanto a DEC-003 da 0006 quanto o critério de aceite que exige isolamento verificável sem confiar no relato do agente.
+
+O que sobra verificável com a proposta atual é uma afirmação de escopo: o adaptador não será usado nos perfis de debate e achado, e a documentação explicará o motivo. Isso não demonstra isolamento; evita alegá-lo. A alternativa verificável já existe no código: deixar `consenso.py` chamar os agentes diretamente, preservando a cópia separada por participante, a retenção dos registros no debate e a gravação dos brutos fora das cópias de execução. Para voltar a considerar Cloudroom no consenso, seria necessário um modo de execução que comprovadamente desse a cada filho um espaço distinto, com captura da resposta integral e sem acesso às posições contemporâneas. Os fatos fornecidos não mostram que a CLI ofereça isso.
+
+## P-3: sandbox própria não serve aos três pacotes automatizados
+
+Concordo com a DEC-003 em excluir o modo sem `--shared-sandbox` dos pacotes automatizados, mas ajustaria a explicação: pelo comportamento medido, ele não é apenas inconveniente. O adaptador não consegue obter a resposta pelo `thread output`; recebe somente a nota de que as respostas chegam como mensagens quando os turnos terminam. Logo, não consegue cumprir o contrato de CLI do wrapper, que precisa devolver a resposta pelo stdout e um exit code.
+
+Para o consenso, há também um problema de isolamento e proveniência. A cópia privada leva o conteúdo existente, incluindo `docs/CONSENSUS.md` e `docs/consensus/`. Ela não fornece a cópia específica por participante, preparada por `consenso.py` segundo o debate ou o achado. Além disso, sem a resposta no processo, `consenso.py` não pode gravar o bruto e o manifesto quando o participante termina, como exige a DEC-009 da 0006.
+
+Para o loop, o filho trabalha numa cópia em outra branch. O `loop.sh` verifica alterações com `find -newer` na árvore de `$PROJETO` e executa o portão ali. Alterações feitas apenas na cópia privada não satisfazem esse fluxo. A falta de resposta capturável também impede o adaptador de entregar ao loop a saída esperada.
+
+Assim, minha recomendação por pacote é:
+
+| Pacote | Modo recomendado |
+|---|---|
+| Debate | Nenhum modo Cloudroom medido. Manter os agentes diretos de `consenso.py`. |
+| Achado | Nenhum modo Cloudroom medido. Manter os agentes diretos de `consenso.py`. |
+| Loop | `--shared-sandbox`, condicionado a o espaço compartilhado corresponder ao projeto que o loop precisa alterar. |
+
+Há uma ressalva importante à DEC-004 da spec 0008: o `loop.sh` aceita `--projeto DIR` e roda o comando do agente após `cd "$PROJETO"`, mas o `room-cli` medido inicia o filho na pasta da thread pai, independentemente do diretório do chamador. Portanto, não está demonstrado que o filho sempre alterará o `$PROJETO` indicado. A bancada descrita em T-103 pode validar o caso em que o projeto coincide com a pasta compartilhada da thread; não sustenta, sozinha, uma alegação para qualquer `--projeto`. Eu restringiria a documentação a esse caso demonstrado, ou exigiria que o critério real prove que o filho altera o caminho indicado pelo loop e que o `find -newer` o detecta.
+
+Em resumo: manteria o adaptador restrito ao loop e fora do consenso, mas mudaria os fundamentos registrados. Para o consenso, `--shared-sandbox` falha no isolamento por participante; sem compartilhamento, falha na coleta mecânica da resposta e no acesso à cópia preparada para cada participante. Para o loop, o compartilhamento é o único modo plausível entre os dois, mas sua compatibilidade com `--projeto` precisa ser delimitada ao que a bancada real comprovar.
+tokens used
+40,420

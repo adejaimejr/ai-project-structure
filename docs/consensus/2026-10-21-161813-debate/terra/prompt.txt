@@ -1,0 +1,20 @@
+Participante: terra
+Copia isolada do projeto: /tmp/consenso-tmly9kyu/projeto
+Esta e uma copia somente-leitura do projeto: leia o que precisar. Nao edite nada fora da sua resposta.
+Responda em portugues, sem travessao. A resposta inteira no stdout sera reproduzida sem resumo. Nenhuma posicao contemporanea esta disponivel por construcao.
+
+Pergunta:
+
+Spec 0008 (docs/specs/0008-adaptador-cloudroom.md, em Rascunho), perguntas P-2 e P-3.
+
+Contexto: a skill quer que `loop.sh` e `consenso.py` possam usar um subagente do Cloudroom (`room-cli thread spawn`) como agente, por um wrapper `scripts/cloudroom_agente.py` que se comporta como CLI headless, sem mudar os dois scripts. A spec propoe (DEC-002 e DEC-003) que o wrapper sirva so ao loop e que o consenso fique fora.
+
+Fatos medidos com a CLI real (cloudroom 0.1.67, 2026-10-21), que voce nao consegue reproduzir daqui e deve tomar como dados:
+- `room-cli thread spawn` aceita so `--provider --model --reasoning-level --service-tier --title --shared-sandbox|--top-level --prompt|--prompt-file` e recusa qualquer outra opcao; nao ha opcao de diretorio.
+- Com `--shared-sandbox`, o filho rodou na pasta da thread pai: pedido para imprimir `pwd`, respondeu `/code/ai-project-structure`, independentemente de onde o pai estava.
+- Sem `--shared-sandbox`, o filho ganha sandbox propria com copia do codigo (commits e nao commitados) em outra branch; nao aparece em `thread list`, e `thread output` devolve so a nota "Its replies arrive as messages when its turns end".
+
+P-2: com `--shared-sandbox`, da para manter o isolamento por copia por participante da DEC-003 da spec 0006 (docs/specs/0006-automacao-do-consenso.md)? Se nao, o que sobra e verificavel?
+P-3: o modo sem `--shared-sandbox` serve ao consenso, atrapalha, ou e inviavel? Em qual modo cada pacote (debate, achado, loop) deve rodar, ou nenhum?
+
+Leia o codigo antes de opinar: `docs/skills/ai-project-structure/scripts/consenso.py` (copia, prompt, gravacao do bruto), `scripts/loop.sh` (como chama o agente, `find -newer`, `--tempo-maximo`) e as DEC-003 e DEC-009 da spec 0006. Concorde ou discorde de DEC-002 e DEC-003 da spec 0008 com motivo, aponte o que estiver errado ou faltando, e proponha alternativa verificavel se houver. Responda em portugues, sem o caractere travessao.

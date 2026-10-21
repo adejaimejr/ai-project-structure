@@ -20,6 +20,23 @@ Registro de decisoes importantes do projeto.
 - 
 ```
 
+## 2026-10-21 - O adaptador Cloudroom nao entra no consenso enquanto o Cloudroom nao isolar um filho por pasta
+
+### Decisao
+
+- `scripts/cloudroom_agente.py` (spec 0008) serve so como `--agente` do `loop.sh`, e so quando o `--projeto` e a pasta da thread do Cloudroom. Nenhum perfil de consenso aponta para ele; `consenso.py` continua chamando as CLIs direto, cada uma na propria copia (spec 0006, DEC-003).
+- Reabrir exige spec propria e um recurso novo do Cloudroom: pasta isolada por filho, sem acesso ao projeto pai, com a resposta legivel por programa.
+
+### Motivo
+
+- Medido na CLI real em 2026-10-21: com `--shared-sandbox` o filho roda na pasta da thread pai e o `spawn` nao tem opcao de diretorio, entao a copia por participante sobreviveria so como pedido no prompt, e o filho alcancaria o bruto do outro participante. Sem `--shared-sandbox` a resposta nao e legivel por `thread output`.
+- Rodada 1 cega com Codex `gpt-6-luna` e `gpt-5.6-terra` (`docs/CONSENSUS.md`, entrada "Spec 0008, P-2 e P-3"): os dois concordaram, sem se ver, e ratificacao do usuario no mesmo dia.
+
+### Impacto
+
+- Consenso segue invisivel na barra do Cloudroom; o loop ganha visibilidade.
+- `references/consenso.md` e `references/cloudroom.md` dizem isso (T-102), e o portao de T-102 cobra.
+
 ## 2026-10-20 - Camada GitHub do repositorio: raiz com `.github/`, ingles por padrao, tag e release a cada bump
 
 ### Decisao

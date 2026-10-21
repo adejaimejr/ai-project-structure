@@ -4,7 +4,106 @@ Debates antigos de `docs/CONSENSUS.md`, rotacionados em 2026-09-02 e de novo em 
 
 Cobre os dois debates de 2026-04-25, a revisao da spec 0003 de 2026-09-02, e do dia 2026-09-03 o achado `0005-A1` e a rodada das seis perguntas da spec 0006, todos `resolvido`, mais as rodadas de P-7/P-8 e P-9 da spec 0006, que continuam `aberto` (calibragem com o usuario, T-053) e foram rotacionadas por tamanho. Os de 2026-04-25 sao anteriores a versao 2.2.0 e nao trazem os campos declarativos de metodo, exposicao previa e rodada; o de 2026-09-02 e a primeira entrada do repositorio que os traz.
 
-<!-- REVAL-5, resolvida sem defeito, rotacionada em 2026-09-03 por tamanho do CONSENSUS.md. REVAL-1 a REVAL-4, todas resolvido, rotacionadas em 2026-10-21 pelo mesmo motivo, antes de T-083; REVAL-6 e REVAL-7 continuam la. -->
+<!-- REVAL-5, resolvida sem defeito, rotacionada em 2026-09-03 por tamanho do CONSENSUS.md. REVAL-1 a REVAL-4, todas resolvido, rotacionadas em 2026-10-21 pelo mesmo motivo, antes de T-083. REVAL-6 e REVAL-7, resolvido, rotacionadas em 2026-10-21 (segunda vez), depois da rodada da spec 0008. -->
+
+## 2026-09-03 - REVAL-6: templates entregues ficaram atras do bloco core, e um deles ensina o anti-padrao
+
+**Achado:** REVAL-6
+
+**Status:** resolvido
+
+**Resolvido em:** 2026-09-03, `CONVENCOES-DATA-INVALIDA` sobe para AVISO por T-059 (T-070); consertos de texto em T-063.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 6. Grok 4.6 (mesmo perfil de REVAL-1) atacou todos os arquivos de `assets/`, montando projeto minimal e completo com specs e simulando o dia seguinte. Claude fez o mesmo antes de ler o Grok (`s6-claude-dia-seguinte.txt`) e conferiu os achados novos no template.
+
+### O Que Foi Encontrado
+
+- **Irmaos de T-055**: `QUALITY.md` (checklists), `PROMPTS.md`, `ONBOARDING.md` e `README.md` nao mencionam evidencia de fechamento, Aguardando Usuario, campos de independencia nem achado. O prompt "Solicitar Consenso Entre Modelos" pede posicao sem `Metodo`, `Exposicao previa` e `Rodada`: quem o segue produz entrada que falha em `--strict`. O modelo de sessao corta a nota "qualquer agente serve se tiver contexto suficiente" que o core pede.
+- **Sobras do meta-projeto**: `assets/docs/ARCHITECTURE.md` lista `docs/skills/` como modulo do projeto-alvo; `GLOSSARY.md` define skill como "ensinar o Codex".
+- **Core manda ler `docs/ARCHITECTURE.md`** e o nivel minimal, recomendado, nao o cria.
+- **Placeholder `AAAA-MM-DD` esquecido** no marcador de adocao e so INFO, `--strict` passa, e a cobranca de evidencia fica desligada no projeto inteiro.
+- **O unico exemplo de evidencia** no template e `tipo=comando; procedimento=pytest -q` numa estrutura cuja unica tarefa real e de conteudo, que o core manda fechar com `revisao-manual` ou `conferencia`.
+- Copia literal do Modelo De Debate (com os valores em uniao `aberto | resolvido | arquivado`) e do modelo de linha concluida (com `(spec: 0001-login-social)`) falha em `--strict`; o segundo e ERRO por spec inexistente. Baixa: modelo e forma, nao valor, mas o exemplo de spec e uma armadilha real.
+- Dia 0, 1 e 2 com os templates preenchidos passam em `--strict`; `partials/` nunca e copiado, e nenhuma instrucao leva a copiar a pasta.
+
+### Disposicao
+
+- Texto: atualizar QUALITY, PROMPTS, ONBOARDING, README e SESSION dos assets para a 2.2.0/2.4.0; limpar ARCHITECTURE e GLOSSARY; trocar o exemplo de evidencia por um de `revisao-manual` ao lado do de comando; tirar `(spec: 0001-login-social)` do modelo de linha; core ganhar "quando existir" em ARCHITECTURE.md. Nada disso muda contrato.
+- Decisao do usuario (T-059): `CONVENCOES-DATA-INVALIDA` sobe para AVISO (e `--strict` passa a travar scaffold que pulou o 5b) ou fica INFO.
+
+### Revalidacao
+
+- Claude Fable conferiu cada linha citada nos assets e reproduziu o placeholder e o dia seguinte. Nada nao confirmado.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: `verify_repository.py` confere que os templates de `TASKS.md` e `CONSENSUS.md` carregam as convencoes atuais, por substring, e nada mais dos assets.
+- Mecanismo do ponto cego: a paridade e verificada so nos arquivos que mudaram na 2.2.0 e na 2.4.0; os outros templates nunca entraram no portao, e o dogfood da raiz reescreveu os proprios `QUALITY.md` e `PROMPTS.md` sem propagar para o asset.
+- Conserto de portao proposto: `verificar_convencoes` cobrir todos os templates que citam regra do core, com a lista de termos por arquivo.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Nenhuma ate a calibragem do INFO.
+
+## 2026-09-03 - REVAL-7: a distribuicao funciona, mas o README ensinava instalacao quebrada e o instalador levava bytecode
+
+**Achado:** REVAL-7
+
+**Status:** resolvido
+
+**Resolvido em:** 2026-09-03, T-067 respondida pelo usuario (aviso e confirmacao quando o destino diverge); decisao em `docs/DECISIONS.md`, conserto em T-073.
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Escapou de verificacao:** sim
+
+### Contexto
+
+- Superficie 7. Codex rodou 312 mil tokens e morreu na cota do plano ("You've hit your usage limit") antes do relatorio; a superficie foi refeita com a mesma familia por outra assinatura, GPT-5.6 via `cursor-agent -p --mode ask --force --model gpt-5.6-sol-high`. Claude exercitou o `install.sh` de verdade em HOME falso antes de ler qualquer agente (`s7-claude-install.txt`) e conferiu as strings do binario do Codex 0.152.1.
+
+### O Que Foi Encontrado
+
+- **README da skill**: "Instalacao manual" copiava so `SKILL.md`, `assets` e `agents`, sem `scripts/` e `references/`; quem seguisse ficava sem validador, atualizacao, specs e loop. A lista de fixtures parava em tres (faltavam `achado-project` e `debate-project`). Corrigido hoje.
+- **`__pycache__` distribuido**: `scripts/__pycache__` (gravado pelo proprio verificador, ver REVAL-4) ia junto em `cp -R`, seis arquivos por instalacao. Corrigido hoje no `install.sh`.
+- **Idempotente, mas nao seguro**: rodar duas vezes da arvore identica; destino editado localmente (`SKILL.md`, `validate_structure.py`) e sobrescrito sem aviso; arquivo extra na raiz do destino sobrevive para sempre (so `assets/`, `agents/`, `scripts/` e `references/` sao apagados antes da copia).
+- **Falha parcial**: com `assets/` do destino sem permissao de escrita, o `SKILL.md` ja foi trocado quando o `rm -rf` falha, e o destino fica em 2.5.1 no frontmatter com `assets/` da versao anterior. Nao ha copia atomica nem rollback.
+- `--uninstall` em HOME vazio imprime "removido" para cada destino que nao existia; `--all` funcionava e nao estava no cabecalho (adicionado hoje).
+- `agents/openai.yaml`: o binario do Codex 0.152.1 contem `policy.allow_implicit_invocation` e o texto "When false, the skill is not injected into..."; a chave e lida. O comportamento real de invocacao implicita nao foi exercitado com uma sessao do Codex, por cota.
+- CHANGELOG da skill: a entrada 2.3.0 lista exit codes 0 a 3 e o exit 4 aparece so em item posterior; a 2.5.1 repete a versao em prosa. Nada descreve comportamento que o codigo nao tenha.
+- Achados so do GPT-5.6, conferidos: `install.sh --help` omite `--global` e `--help` (o cabecalho e a ajuda sao o mesmo texto); o comentario de `agents/openai.yaml` o chama de "parte do Agent Skills Open Standard" e o proprio Codex o descreve como "extended, product-specific config"; falha forcada no terceiro `cp` deixa `SKILL.md` e `assets/` novos com `scripts/` e `references/` velhos, e uma reinstalacao completa recupera. `codex help skills` nao existe na 0.152.1.
+
+### Disposicao
+
+- Aplicado hoje, sem bump: README, `install.sh` (`__pycache__` e `--all` no cabecalho), `evals.json`.
+- Decisao do usuario (T-067): avisar ou recusar quando o destino diverge da fonte; copiar para temporario e trocar com `mv` no fim; apagar arquivo extra na raiz do destino.
+
+### Revalidacao
+
+- GPT-5.6 (cursor), familia diferente de Claude, achou por conta propria os mesmos quatro itens centrais (transacionalidade, `__pycache__`, instalacao manual, versao em prosa) e mais tres pequenos, todos conferidos no codigo por Claude. Nada nao confirmado.
+
+### Por Que Nada Pegou Antes
+
+- O que passou verde: `verificar_install` compara os tres destinos entre si e com a fonte, ignorando `__pycache__` de proposito (`IGNORADOS`), entao o bytecode distribuido nunca apareceu no diff. O README nunca teve check.
+- Mecanismo do ponto cego: o portao ignora exatamente o artefato que estava vazando, e testa so o caminho feliz do `install.sh` (destino novo, sem falha, sem edicao local).
+- Conserto de portao proposto: `verificar_install` conferir que o destino nao contem `__pycache__` (feito indiretamente hoje, pelo check na fonte) e exercitar reinstalacao sobre destino sujo.
+
+### Decisao Para Registrar Em DECISIONS.md
+
+- Nenhuma.
 
 ## 2026-09-03 - REVAL-1: o contrato do bloco core promete o que o validador nao cobra
 

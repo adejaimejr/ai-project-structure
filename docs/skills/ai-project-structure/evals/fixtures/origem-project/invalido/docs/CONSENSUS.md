@@ -223,3 +223,93 @@
 ### Revalidacao De revisor
 
 > posicao de revisor.
+
+## 2026-09-03 - Automatizada com corrida em andamento
+
+**Status:** resolvido
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Origem:** automacao
+
+**Manifesto:** docs/consensus/run-c/manifesto.json
+
+**Participantes:** alfa
+
+**Falhas:** nenhuma
+
+### Contexto
+
+- Rodada automatizada de pareceres.
+
+### Posicao De alfa
+
+> posicao de alfa.
+
+### Pontos De Acordo
+
+- ISO 8601.
+
+## 2026-09-03 - Automatizada com manifesto ilegivel
+
+**Status:** resolvido
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Origem:** automacao
+
+**Manifesto:** docs/consensus/run-d/manifesto.json
+
+**Participantes:** alfa
+
+**Falhas:** nenhuma
+
+### Contexto
+
+- Rodada automatizada de pareceres.
+
+### Posicao De alfa
+
+> posicao de alfa.
+
+### Pontos De Acordo
+
+- ISO 8601.
+
+## 2026-09-03 - Automatizada com posicao sem stdout
+
+**Status:** resolvido
+
+**Metodo:** pareceres-independentes
+
+**Exposicao previa a outras posicoes:** nao
+
+**Rodada:** 1 de 1
+
+**Origem:** automacao
+
+**Manifesto:** docs/consensus/run-e/manifesto.json
+
+**Participantes:** alfa
+
+**Falhas:** nenhuma
+
+### Contexto
+
+- Rodada automatizada de pareceres.
+
+### Posicao De alfa
+
+> posicao de alfa.
+
+### Pontos De Acordo
+
+- ISO 8601.

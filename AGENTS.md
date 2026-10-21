@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- ai-project-structure:core:start v2.13.0 -->
+<!-- ai-project-structure:core:start v2.14.0 -->
 <!-- Bloco gerenciado pela skill ai-project-structure. Nao edite dentro dos
      marcadores: atualizacoes da skill podem substituir este bloco (sempre com
      confirmacao). Regras especificas deste projeto vao na secao
@@ -261,7 +261,7 @@ Antes de finalizar, confira:
 
 <!-- ai-project-structure:core:end -->
 
-<!-- ai-project-structure:specs:start v2.13.0 -->
+<!-- ai-project-structure:specs:start v2.14.0 -->
 ## Specs (Modulo Opcional Ativo)
 
 Crie uma spec em `docs/specs/` quando o trabalho for tamanho-feature:
@@ -284,7 +284,7 @@ Regras:
 O modelo de spec esta em `docs/specs/README.md`.
 <!-- ai-project-structure:specs:end -->
 
-<!-- ai-project-structure:loop:start v2.13.0 -->
+<!-- ai-project-structure:loop:start v2.14.0 -->
 ## Loop (Modulo Opcional Ativo)
 
 Este projeto pode executar uma tarefa sem supervisao, pelo `loop.sh` da skill. O ciclo e sempre o mesmo: pega **uma** tarefa que declarou `(verifica: <comando>)`, trabalha, roda o comando declarado e usa a saida da falha como contexto da tentativa seguinte. Ate 3 tentativas.
@@ -319,6 +319,20 @@ Quando a saida obvia for remover conteudo, informacao ou cobertura para o portao
 O fluxo completo e o uso estao em `references/loop.md` da skill `ai-project-structure`.
 <!-- ai-project-structure:loop:end -->
 
+<!-- ai-project-structure:github:start v2.14.0 -->
+## Camada GitHub (Modulo Opcional Ativo)
+
+Este projeto tem a camada GitHub gerada pela skill: `.github/`, arquivos de comunidade em `docs/`, `ci.yml` e `dependabot.yml`.
+
+- **Raiz minima, com excecao.** Alem dos arquivos de entrada dos agentes, a raiz aceita `README.md`, `LICENSE`, `.gitignore`, `.github/` e dotfiles de configuracao (como `.gitattributes`). Nenhum outro diretorio na raiz.
+- **Comunidade em `docs/`.** `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` e `PULL_REQUEST_TEMPLATE.md` vivem em `docs/`, nao na raiz.
+- **Idioma.** A camada GitHub (README, arquivos de comunidade, templates, workflows e corpo de release) segue o idioma escolhido na ativacao. Este arquivo e `docs/` seguem em pt-BR. A proibicao do travessao vale nos dois idiomas.
+- **Mudanca por pull request.** Mudanca em codigo vai para `main` por pull request com o `ci` verde. Nunca force push nem delecao em `main`.
+- **Tag e Release a cada bump.** Todo bump de versao termina em tag anotada `vX.Y.Z` no commit do bump (`git tag -a vX.Y.Z` e `git push origin vX.Y.Z`) e em uma Release no GitHub. Tag sem bump ou bump sem tag e erro.
+- **Configuracao pela CLI `gh`.** Descricao, topics, rulesets e labels do repositorio sao feitos pela CLI `gh`, nunca pela skill, e so com o sim do usuario. O checklist esta em `references/github.md` da skill `ai-project-structure`.
+- **`ci.yml` e gerado, nao inventado.** Ele roda o validador da estrutura, baixado da Release da skill com conferencia do `.sha256`, e o comando de "Testes E Validacao" de `docs/QUALITY.md`. Se a secao estiver vazia, o placeholder fica visivel; ninguem preenche comando por inferencia.
+<!-- ai-project-structure:github:end -->
+
 ## Regras Do Projeto
 
 - Raiz minima com duas excecoes, porque este repositorio e publicado no GitHub (`github.com/adejaimejr/ai-project-structure`): `README.md`, `README.pt-BR.md`, `LICENSE` e `.gitignore`; e configuracao com ponto (`.github/`, `.gitattributes`). Arquivos de comunidade (`CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `PULL_REQUEST_TEMPLATE.md`) vivem em `docs/`. Nenhum outro diretorio na raiz. O `README.md` e apresentacao para visitantes; regras de agente continuam apenas neste arquivo.
@@ -326,4 +340,4 @@ O fluxo completo e o uso estao em `references/loop.md` da skill `ai-project-stru
 - Commit: `tipo: assunto curto em pt-BR`, com tipo em `feat`, `fix`, `docs`, `test` ou `evals`; cite a tarefa como `(T-NNN)` quando houver. Bump da skill: `feat: skill X.Y.Z, <resumo> (T-NNN)`, ou `fix:` em patch.
 - Mudanca na skill (qualquer arquivo em `docs/skills/ai-project-structure/` fora de `evals/`) entra em `main` por pull request, com os dois portoes verdes no CI em Linux e macOS. Mudanca so em `docs/` da raiz pode ir direta em `main`. Nunca force push nem delecao em `main`.
 - Todo bump da skill termina em tag anotada `vX.Y.Z` no commit do bump (`git tag -a vX.Y.Z` e `git push origin vX.Y.Z`); o workflow de release empacota a skill e publica a Release a partir da secao do `CHANGELOG.md` da skill. Tag sem bump ou bump sem tag e erro.
-- Configuracao do repositorio (descricao, topics, ruleset de `main`, labels) e feita pela CLI `gh`, nunca pela skill; o checklist vive em `docs/CONTRIBUTING.md` ate a 2.14.0 trazer `references/github.md`.
+- Configuracao do repositorio (descricao, topics, ruleset de `main`, labels) e feita pela CLI `gh`, nunca pela skill; o checklist vive em `docs/skills/ai-project-structure/references/github.md`.

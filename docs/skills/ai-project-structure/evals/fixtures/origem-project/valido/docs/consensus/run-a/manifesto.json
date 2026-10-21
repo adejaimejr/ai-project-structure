@@ -1,1 +1,8 @@
-{}
+{
+ "versao": 1,
+ "run_id": "run-a",
+ "modo": "debate",
+ "rodada": 1,
+ "status": "concluida",
+ "participantes": []
+}

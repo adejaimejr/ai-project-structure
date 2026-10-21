@@ -1,0 +1,14 @@
+{
+ "versao": 1,
+ "run_id": "run-e",
+ "modo": "debate",
+ "rodada": 1,
+ "status": "concluida",
+ "participantes": [
+  {
+   "id": "alfa",
+   "resultado": "posicao",
+   "stdout": "alfa/stdout.txt"
+  }
+ ]
+}

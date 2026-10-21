@@ -84,6 +84,20 @@
       "files": [
         "fixtures/debate-project"
       ]
+    },
+    {
+      "id": 13,
+      "prompt": "Ativa o modulo github neste projeto, em portugues. Quero a camada GitHub completa, com codigo de conduta, mas sem o .gitattributes.",
+      "expected_output": "Rodando com o diretorio de trabalho em evals/fixtures/github-project/valido (ou copia dele), que ja usa a estrutura e ja tem o bloco github no AGENTS.md. A skill segue 'Ativar O Modulo GitHub' e references/github.md. Como o pedido ja respondeu lingua (pt-BR), CODE_OF_CONDUCT.md (sim) e .gitattributes (nao), ela nao repete essas perguntas. Confere que o bloco github ja existe em AGENTS.md e nao o duplica. Copia de assets/github/pt-BR/ os arquivos que faltam (docs/CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, PULL_REQUEST_TEMPLATE.md, .github/ISSUE_TEMPLATE/bug.yml, feature.yml, config.yml, .github/dependabot.yml e .github/workflows/ci.yml) e NAO cria .gitattributes. Arquivo que ja existe no projeto e pulado, nunca mesclado, e aparece numa lista de pulados no relatorio. No ci.yml, troca {{SKILL_VERSION}} pela versao da skill (campo version do SKILL.md) e {{QUALITY_COMMAND}} pelo comando da secao 'Testes E Validacao' de docs/QUALITY.md depois de mostrar ao usuario; se a secao nao tiver comando real, deixa o placeholder visivel e avisa, sem inventar comando. Nao copia assets/partials/ para o projeto. NAO roda gh, git push, nem cria tag, Release, ruleset ou label: lembra que a configuracao do repositorio e o checklist de references/github.md, feito pelo usuario ou pelo agente de chat com o sim dele, e cita o limite do .sha256 (integridade, nao autenticidade). Roda validate_structure.py --strict no projeto e reporta 0 erros e 0 avisos. Nenhum travessao nos arquivos criados.",
+      "files": [
+        "fixtures/github-project"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Cria a estrutura multiagente aqui em um projeto novo chamado 'loja-camisetas', que e uma loja online de camisetas. Estrutura minimal, sem specs, e quero ativar a camada GitHub em ingles.",
+      "expected_output": "Em diretorio vazio, num scaffold novo. A skill segue a entrevista do SKILL.md e NAO repete as perguntas ja respondidas: nome (loja-camisetas), objetivo (loja online de camisetas), estrutura (minimal), specs (nao) e pergunta 5 (modulo github: sim, em ingles, lingua en). Cria o nucleo (AGENTS.md, CLAUDE.md, GEMINI.md, docs/ com PROJECT_CONTEXT, SESSION, MEMORY, CONSENSUS, TASKS, DECISIONS, QUALITY, CHANGELOG e archive/README.md), sem docs/specs/. Por ser pedido de modulo github, copia de assets/github/en/ a lista completa: docs/CONTRIBUTING.md, SECURITY.md, PULL_REQUEST_TEMPLATE.md, .github/ISSUE_TEMPLATE/bug.yml, feature.yml, config.yml, .github/dependabot.yml e .github/workflows/ci.yml; pergunta item a item docs/CODE_OF_CONDUCT.md (default sim) e .gitattributes (default nao) antes de copiar esses dois, sem decidir por conta propria. Insere o bloco github em AGENTS.md entre ai-project-structure:core:end e '## Regras Do Projeto', com o conteudo de assets/partials/AGENTS-github-block.md. Como QUALITY.md de um projeto novo nao tem comando real em 'Testes E Validacao', o ci.yml fica com {{QUALITY_COMMAND}} visivel e o relatorio avisa que o CI vai falhar ate o comando ser preenchido, sem inventar comando; {{SKILL_VERSION}} vira a versao da skill. Nao inicializa repositorio git e NAO roda gh nem cria tag, Release ou ruleset: aponta references/github.md para a configuracao do repositorio. Em outro caso, com a pergunta 5 sem resposta (ou 'Avançar'), o modulo github NAO e ativado: nenhum arquivo em .github/, nenhum arquivo de comunidade e nenhum marcador github em AGENTS.md. validate_structure.py no destino sai com 0 erros.",
+      "files": []
     }
   ]
 }

@@ -85,8 +85,13 @@ LOOP_RE = re.compile(
     r"<!--\s*ai-project-structure:loop:start.*?ai-project-structure:loop:end\s*-->",
     re.DOTALL,
 )
+GITHUB_RE = re.compile(
+    r"<!--\s*ai-project-structure:github:start.*?ai-project-structure:github:end\s*-->",
+    re.DOTALL,
+)
 VERSION_RE = re.compile(
-    r"ai-project-structure:(?:core|specs|loop):start\s+v(\d+\.\d+\.\d+)")
+    r"ai-project-structure:(?:core|specs|loop|github):start\s+v(\d+\.\d+\.\d+)")
+
 
 # Oracle por fixture. Exit code sozinho nao prova nada, e essa foi a licao do
 # achado `0005-A1`: um par cujos dois lados saem 0 fica verde sem exercitar
@@ -187,6 +192,24 @@ FIXTURES = {
             "2026-09-03 - Achado automatizado sem revalidacao",
             "AVISO|CONSENSO-ORIGEM-MANIFESTO-QUEBRADO|docs/CONSENSUS.md|"
             "2026-09-03 - Achado automatizado com um dos manifestos que nao resolve",
+            "AVISO|CONSENSO-ORIGEM-CORRIDA-INCOMPLETA|docs/CONSENSUS.md|"
+            "2026-09-03 - Automatizada com corrida em andamento",
+            "AVISO|CONSENSO-ORIGEM-CORRIDA-INCOMPLETA|docs/CONSENSUS.md|"
+            "2026-09-03 - Automatizada com manifesto ilegivel",
+            "AVISO|CONSENSO-ORIGEM-CORRIDA-INCOMPLETA|docs/CONSENSUS.md|"
+            "2026-09-03 - Automatizada com posicao sem stdout",
+        ],
+    },
+    # Bloco `github` (spec 0007): a invalida junta, de proposito, o despareado e a
+    # versao diferente da do core, os dois codigos novos na mesma fixture.
+    "github-project/valido": {"strict": True, "exit": 0, "diagnosticos": []},
+    "github-project/invalido": {
+        "strict": True,
+        "exit": 1,
+        "diagnosticos": [
+            "ERRO|MARCADOR-DESPAREADO|AGENTS.md|github",
+            "ERRO|GITHUB-MARCADOR-INVALIDO|AGENTS.md|github",
+            "AVISO|GITHUB-VERSAO-DIVERGENTE|AGENTS.md|github",
         ],
     },
     # Fixtures de cobertura: uma por area do validador, inclusive casos que
@@ -614,6 +637,16 @@ def verificar_blocos(res, verbose=False):
         res.check(loop_raiz.strip() == loop_partial,
                   "bloco loop identico ao partial da skill")
 
+    # Idem para o bloco github: o partial existe sempre; a paridade so vale quando a raiz o ativa.
+    github_partial = read(ASSETS / "partials" / "AGENTS-github-block.md").strip()
+    res.check(bool(GITHUB_RE.search(github_partial)), "partial do bloco github com marcadores pareados")
+    github_raiz = bloco(raiz, GITHUB_RE)
+    if github_raiz is None:
+        res.check(True, "bloco github nao ativado na raiz", "esperado enquanto T-109 nao rodar")
+    else:
+        res.check(github_raiz.strip() == github_partial,
+                  "bloco github identico ao partial da skill")
+
 
 def verificar_versao(res, verbose=False):
     frontmatter = read(SKILL / "SKILL.md")
@@ -625,7 +658,8 @@ def verificar_versao(res, verbose=False):
     marcadores = set()
     for path in (ROOT / "AGENTS.md", ASSETS / "AGENTS.md",
                  ASSETS / "partials" / "AGENTS-specs-block.md",
-                 ASSETS / "partials" / "AGENTS-loop-block.md"):
+                 ASSETS / "partials" / "AGENTS-loop-block.md",
+                 ASSETS / "partials" / "AGENTS-github-block.md"):
         marcadores.update(VERSION_RE.findall(read(path)))
     res.check(
         marcadores == {versao},

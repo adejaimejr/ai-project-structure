@@ -1,6 +1,6 @@
 # Spec 0007 - Modulo opcional `github` (skill 2.14.0)
 
-**Status:** Rascunho
+**Status:** Em andamento
 **Criada em:** 2026-10-21
 **Esforco:** M. Toca validador, verificador, `SKILL.md`, assets, referencia, evals e fixture, mas tudo no molde ja existente dos modulos specs e loop; nenhum mecanismo novo.
 
@@ -58,7 +58,12 @@ Entrevista e documentacao:
 - `references/github.md` existe e e citado no `SKILL.md`, no `README.md` da skill e no `CHANGELOG.md` da skill.
 - Este repositorio, apos ativar o modulo em si mesmo, continua com `verify_repository.py` verde e `validate_structure.py . --strict` em 0 erros e 0 avisos.
 
-Criterios que dependem das Perguntas Abertas ficam em aberto ate a resposta: default da pergunta 5 (P-1), fonte do validador no `ci.yml` gerado (P-2), obrigatoriedade de `CODE_OF_CONDUCT.md` e `.gitattributes` (P-3), comportamento com `.github/` pre-existente (P-4).
+Criterios das respostas (DEC-004 a DEC-007):
+
+- Pergunta 5 com default "Nao"; sub-opcao de lingua so no sim.
+- `ci.yml` gerado com passo que baixa zip e `.sha256` da Release fixada, roda `sha256sum -c` e `validate_structure.py . --strict`, e passo separado com o comando de `QUALITY.md`.
+- `CODE_OF_CONDUCT.md` (default sim) e `.gitattributes` (default nao) perguntados item a item; o resto entra sempre.
+- Arquivo existente e pulado e listado no relatorio, nunca mesclado.
 
 ## Decisoes
 
@@ -68,21 +73,29 @@ Desta spec, decididas pelo usuario em 2026-10-20 ao escrever T-099:
 
 - DEC-001: `release.yml` nao e asset do modulo. Motivo: ele empacota a skill deste repositorio; projeto comum nao tem pacote para publicar, e um workflow de release generico sem artefato seria cerimonia. O fluxo bump, tag, release vai em `references/github.md` como checklist, nao como YAML.
 - DEC-002: o bloco gerenciado e em pt-BR; so os arquivos copiados para o projeto tem versao em ingles. Motivo: `AGENTS.md` e a memoria em `docs/` seguem em pt-BR por decisao de 2026-10-20; o bloco e regra de agente, nao camada GitHub.
-- DEC-003: o `ci.yml` gerado roda o comando de "Testes E Validacao" de `QUALITY.md`, e so ele. Motivo: e o mesmo portao que o loop usa para ativar (0003/DEC-005 e 0004); o CI nao inventa uma segunda definicao de "passou".
+- DEC-003: o `ci.yml` gerado roda o comando de "Testes E Validacao" de `QUALITY.md`, e so ele. Motivo: e o mesmo portao que o loop usa para ativar (0003/DEC-005 e 0004); o CI nao inventa uma segunda definicao de "passou". Complementada pela DEC-005: o validador da estrutura entra como passo proprio, porque confere a estrutura Markdown, nao o produto.
+
+Respostas as Perguntas Abertas, aceitas pelo usuario em 2026-10-21 no chat ("P-1 a P-4 como voce recomendou"):
+
+- DEC-004 (P-1): a pergunta 5 da entrevista tem default "Nao, da para ativar depois", como as perguntas 3 e 4, sem pergunta extra sobre repositorio publico. Rejeitada: sugerir "Sim, em ingles" para repositorio publico (exigiria detectar ou perguntar visibilidade, e o modulo continua ativavel depois). Sub-opcao de lingua (en ou pt-BR) so aparece quando a resposta e sim.
+- DEC-005 (P-2): o `ci.yml` gerado tem um passo que baixa o zip da Release `vX.Y.Z` da skill (a versao que ativou o modulo, fixada no arquivo) e o `.sha256` da mesma Release, confere com `sha256sum -c` e roda `validate_structure.py . --strict`; o passo seguinte roda o comando de "Testes E Validacao". Limite declarado em `references/github.md`: o `.sha256` vem da mesma Release, entao prova integridade do download, nao autenticidade. Rejeitadas: clone raso pela tag (traz o repositorio inteiro para usar um script) e nao validar a estrutura no CI (deixa o portao da estrutura so na maquina de quem lembra de rodar).
+- DEC-006 (P-3): `CODE_OF_CONDUCT.md` e `.gitattributes` sao opcionais e perguntados item a item na ativacao: o codigo de conduta com default sim (e o que leva o perfil de comunidade do GitHub a 100) e o `.gitattributes` com default nao (`eol=lf` muda o checkout em Windows). Os demais arquivos da lista entram sempre.
+- DEC-007 (P-4): em projeto que ja tem algum arquivo da lista (em `.github/` ou em `docs/`), a ativacao pula o que existe, nunca mescla, e lista no relatorio o que pulou. Rejeitadas: mesclar (mexer num `ci.yml` alheio e sobrescrever sem confirmacao) e perguntar por item (a resposta util e quase sempre "mantem o meu", e a lista do que pulou ja deixa a pessoa decidir depois).
 
 ## Tarefas
 
 - T-099: escrever esta spec em `Rascunho` (status e andamento vivem so em `docs/TASKS.md`).
-- As tarefas de execucao serao criadas em `docs/TASKS.md`, com `(spec: 0007-modulo-github)`, quando a spec passar a `Definida`, depois das respostas as Perguntas Abertas.
+- T-105: responder P-1 a P-4 e planejar as tarefas.
+- T-106: assets do modulo (`assets/github/en/`, `assets/github/pt-BR/`) e partial do bloco.
+- T-107: validador e verificador (marcador `github`, codigos `GITHUB-*`, fixture, paridade e versao).
+- T-108: entrevista, `references/github.md`, README da skill, prosa da raiz minima e evals 13 e 14.
+- T-109: bump 2.14.0, dogfood nesta raiz e publicacao (PR, tag, Release).
+- T-104 (validador, consenso da T-083) entra no mesmo bump, sem ser desta spec.
 
 ## Perguntas Abertas
 
-Sem responder por inferencia (regra "Nunca Inferir"); cada uma vira `DEC-NNN` quando o usuario responder.
-
-- P-1: Qual o default da pergunta 5 da entrevista? Opcoes: "Nao (recomendado), da para ativar depois" como as perguntas 3 e 4; ou "Sim, em ingles" quando o projeto for publico. Pergunta extra embutida: perguntar se o repositorio e publico antes de sugerir?
-- P-2: Como o `ci.yml` gerado obtem o validador no runner? Opcoes: clone raso do repositorio da skill pela tag `vX.Y.Z` (`git clone --depth 1 --branch vX.Y.Z`); download do zip da Release de T-097 com conferencia do `.sha256`; ou nao obter nada e rodar so o comando de `QUALITY.md`, deixando o validador para o projeto que o instalar por conta propria (por exemplo com `install.sh --project`). Impacto: a primeira e a segunda prendem o CI do projeto a uma versao da skill; a terceira nao valida a estrutura no CI.
-- P-3: `CODE_OF_CONDUCT.md` e `.gitattributes` sao obrigatorios na ativacao ou opcionais por item? Impacto: health de comunidade do GitHub chega a 100% so com codigo de conduta; `.gitattributes` com `eol=lf` muda o checkout em Windows.
-- P-4: Projeto que ja tem `.github/` (workflows, templates): a ativacao pula o que existe, mescla, ou pergunta por item? A regra geral do `SKILL.md` e nunca sobrescrever sem confirmacao, mas "mesclar" um `ci.yml` existente e diferente de pular.
+- ~~P-1 a P-4~~ Respondidas em 2026-10-21: DEC-004 a DEC-007.
+- P-5: nenhuma aberta hoje. Se a execucao achar ambiguidade, ela entra aqui antes de qualquer inferencia.
 
 ## Evidencia De Conclusao
 

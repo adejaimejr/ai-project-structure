@@ -64,7 +64,7 @@ def main():
 
         r = montar(tmp, "origem")
         (r / "docs" / "consensus" / "run-x").mkdir(parents=True)
-        (r / "docs" / "consensus" / "run-x" / "manifesto.json").write_text("{}\n", encoding="utf-8")
+        (r / "docs" / "consensus" / "run-x" / "manifesto.json").write_text('{"status": "concluida", "participantes": []}\n', encoding="utf-8")
         c = r / "docs" / "CONSENSUS.md"
         texto = ler(c)
         texto += entrada(TITULOS["E1"])

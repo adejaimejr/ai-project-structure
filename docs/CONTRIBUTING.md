@@ -63,7 +63,7 @@ The release workflow publishes the GitHub Release from that CHANGELOG section. A
 
 ## Repository settings checklist
 
-Repository settings are done with the `gh` CLI, never by the skill. This checklist lives here until skill 2.14.0 ships `references/github.md`.
+Repository settings are done with the `gh` CLI, never by the skill. The full checklist lives in `docs/skills/ai-project-structure/references/github.md`; the list below is the short version.
 
 - Description and topics.
 - Ruleset for `main`: block force push and deletion, require the `ci` check.

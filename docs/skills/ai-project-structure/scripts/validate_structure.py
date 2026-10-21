@@ -12,6 +12,7 @@ Somente biblioteca padrao (Python 3.8+).
 """
 
 import argparse
+import json
 import re
 import sys
 import unicodedata
@@ -54,7 +55,7 @@ CONSENSUS_ESCAPOU = {"sim", "nao"}
 ACHADO_SECAO_ESCAPE = "Por Que Nada Pegou Antes"
 
 MARKER_RE = re.compile(
-    r"<!--\s*ai-project-structure:(core|specs|loop):(start|end)(?:\s+v(\S+))?\s*-->"
+    r"<!--\s*ai-project-structure:(core|specs|loop|github):(start|end)(?:\s+v(\S+))?\s*-->"
 )
 TASK_ID_RE = re.compile(r"\bT-(\d+)\b")
 # ID proprio da tarefa: o que abre a linha, depois da data quando ela e concluida.
@@ -101,6 +102,8 @@ CODIGOS = {
     "MARCADOR-VERSAO-INVALIDA",
     "MARCADOR-ORDEM-INVALIDA",
     "MARCADOR-LOOP-INVALIDO",
+    "GITHUB-MARCADOR-INVALIDO",
+    "GITHUB-VERSAO-DIVERGENTE",
     "NUCLEO-VAZIO",
     "ARQUIVO-UTF8-INVALIDO",
     # SESSION.md
@@ -117,6 +120,7 @@ CODIGOS = {
     # CONSENSUS.md, entrada automatizada (marcador **Origem:**)
     "CONSENSO-ORIGEM-SEM-MANIFESTO",
     "CONSENSO-ORIGEM-MANIFESTO-QUEBRADO",
+    "CONSENSO-ORIGEM-CORRIDA-INCOMPLETA",
     "CONSENSO-PARTICIPANTE-SEM-SECAO",
     "CONSENSO-FALHA-SEM-SECAO",
     # CONSENSUS.md, achado
@@ -409,6 +413,25 @@ def check_markers(root, report):
                 "Bloco 'loop' sem marcadores pareados e versao valida no start.",
                 block,
             )
+        if block == "github" and (not pareado or versao_invalida):
+            report.erro(
+                "AGENTS.md",
+                "GITHUB-MARCADOR-INVALIDO",
+                "Bloco 'github' sem marcadores pareados e versao valida no start.",
+                block,
+            )
+    core = found.get("core")
+    github = found.get("github")
+    if core and github and len(core["start"]) == 1 and len(github["start"]) == 1:
+        v_core, v_github = core["start"][0][0], github["start"][0][0]
+        if v_core and v_github and v_core != v_github:
+            report.aviso(
+                "AGENTS.md",
+                "GITHUB-VERSAO-DIVERGENTE",
+                f"Bloco 'github' em v{v_github}, bloco 'core' em v{v_core}. "
+                "Rode a skill ai-project-structure para atualizar.",
+                "github",
+            )
 
 
 def check_session(root, report):
@@ -569,12 +592,37 @@ def id_list(value):
     return [i for i in ids if i and normalize(i) != "nenhuma"]
 
 
+def corrida_incompleta(manifesto):
+    """Motivo pelo qual o manifesto nao prova corrida completa, ou None.
+
+    Stdout ausente so conta para participante com 'resultado: posicao': falha
+    registrada pode ter stdout vazio ou nenhum."""
+    try:
+        dados = json.loads(manifesto.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return "manifesto ilegivel"
+    if not isinstance(dados, dict):
+        return "manifesto ilegivel"
+    if dados.get("status") != "concluida":
+        return f"status '{dados.get('status')}' diferente de 'concluida'"
+    participantes = dados.get("participantes")
+    for p in participantes if isinstance(participantes, list) else []:
+        if not isinstance(p, dict) or p.get("resultado") != "posicao":
+            continue
+        stdout = p.get("stdout")
+        if not isinstance(stdout, str) or not (manifesto.parent / stdout).is_file():
+            return f"participante '{p.get('id')}' registrou posicao sem o arquivo de stdout"
+    return None
+
+
 def check_consensus_origem(root, title, body, report):
     """Forma da entrada automatizada (spec 0006), cobrada so de quem declara '**Origem:**'.
 
     Entrada manual nao ganha nada, mesmo com secoes '### Posicao De' soltas:
     sem o campo, esta funcao sai sem escrever nada (DEC-007). Confere presenca
-    de ponte e de secao, nunca o conteudo da posicao nem do manifesto."""
+    de ponte e de secao, nunca o conteudo da posicao. Do manifesto que a entrada
+    cita le so a proveniencia (status e stdout de quem registrou posicao); so le,
+    nunca retoma, limpa nem repara, e corrida que nenhuma entrada cita nao e lida."""
     rel = "docs/CONSENSUS.md"
     if field_value(body, "Origem") is None:
         return
@@ -595,6 +643,15 @@ def check_consensus_origem(root, title, body, report):
                 rel, "CONSENSO-ORIGEM-MANIFESTO-QUEBRADO",
                 f"Entrada '{title}' aponta '**Manifesto:** {manifesto}', que nao "
                 "resolve a partir da raiz do projeto.",
+                title,
+            )
+            continue
+        motivo = corrida_incompleta(alvo)
+        if motivo:
+            report.aviso(
+                rel, "CONSENSO-ORIGEM-CORRIDA-INCOMPLETA",
+                f"Entrada '{title}' aponta '**Manifesto:** {manifesto}', cuja "
+                f"corrida esta incompleta: {motivo}.",
                 title,
             )
     headings = {normalize(h) for h in ATX_HEADING_RE.findall(body)}
